@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="lt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ąžuolynas International Students Film Festival</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js"></script>
+</head>
+<body>
+
+  <header>
+    <div class="container nav-bar">
+      <a href="#" class="logo-wrap">
+        <img src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media" alt="Ąžuolynas Film Fest" class="logo-img">
+        <span class="logo-text">Ąžuolynas Fest</span>
+      </a>
+      <ul class="nav-links">
+        <li><a href="#about" data-i18n="navAbout">Apie festivalį</a></li>
+        <li><a href="#terms" data-i18n="navTerms">Taisyklės</a></li>
+        <li><a href="#categories" data-i18n="navCategories">Kategorijos</a></li>
+        <li><a href="#submit" data-i18n="navSubmit">Dalyvio anketa</a></li>
+      </ul>
+      <div style="display:flex; align-items:center; gap:10px;">
+        <button id="langToggleBtn" class="lang-switch-btn">EN</button>
+        <a href="admin.html" class="action-btn-sm" style="text-decoration:none;">Admin</a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="container">
+        <div class="badge-tag" data-i18n="heroBadge">Tarptautinis Mokinių Filmų Festivalis</div>
+        <h1 class="hero-title">Ąžuolynas International Students Film Festival</h1>
+        <p class="hero-topic">
+          <span data-i18n="topicPrefix">Tema:</span> 
+          «<strong data-i18n="topicVal">Neįprastas žvilgsnis į įprastus dalykus</strong>»
+        </p>
+        <div class="hero-meta">
+          <div class="meta-pill">
+            <span class="meta-pill-label" data-i18n="metaDatesLabel">Paraiškų priėmimas</span>
+            <span class="meta-pill-val" data-i18n="metaDatesVal">Vasario 14 d. – Balandžio 17 d.</span>
+          </div>
+          <div class="meta-pill">
+            <span class="meta-pill-label" data-i18n="metaEventLabel">Renginio transliacija</span>
+            <span class="meta-pill-val" data-i18n="metaEventVal">Gegužės 27 d., 15:00 (YouTube)</span>
+          </div>
+          <div class="meta-pill">
+            <span class="meta-pill-label" data-i18n="metaTargetLabel">Dalyviai</span>
+            <span class="meta-pill-val" data-i18n="metaTargetVal">Mokiniai iš viso pasaulio</span>
+          </div>
+        </div>
+        <div class="cta-group">
+          <a href="#submit" class="btn-primary" data-i18n="heroSubmitBtn">Pateikti savo filmą</a>
+          <a href="#terms" class="btn-secondary" data-i18n="heroTermsBtn">Sąlygos ir Reikalavimai</a>
+        </div>
+      </div>
+    </section>
+
+    <section id="terms" class="section">
+      <div class="container">
+        <div class="section-header">
+          <h2 class="section-title" data-i18n="termsTitle">Dalyvavimo Sąlygos</h2>
+          <p class="section-sub" data-i18n="termsSub">Privalomi reikalavimai visiems pateikiamiems filmams</p>
+        </div>
+        <div class="grid-2">
+          <div class="card">
+            <ul class="rules-list">
+              <li>
+                <span class="rule-icon">✓</span>
+                <span data-i18n="rule1">Jūsų filmas turi būti nufilmuotas planšete arba išmaniuoju telefonu;</span>
+              </li>
+              <li>
+                <span class="rule-icon">✓</span>
+                <span data-i18n="rule2">Filmo trukmė negali viršyti 3 minučių (įskaitant titrus);</span>
+              </li>
+              <li>
+                <span class="rule-icon">✓</span>
+                <span data-i18n="rule3">Vienas dalyvis gali pateikti tik vieną filmą;</span>
+              </li>
+            </ul>
+          </div>
+          <div class="card">
+            <ul class="rules-list">
+              <li>
+                <span class="rule-icon">✓</span>
+                <span data-i18n="rule4">Filmai, sukurti su suaugusiųjų pagalba, nebus vertinami ir svarstomi;</span>
+              </li>
+              <li>
+                <span class="rule-icon">✓</span>
+                <span data-i18n="rule5">Filme privalomai turi būti angliški subtitrai (English subtitles);</span>
+              </li>
+              <li>
+                <span class="rule-icon">✓</span>
+                <span data-i18n="rule6">Kiekvienas dalyvis gaus tiesioginę transliacijos nuorodą į el. paštą.</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="categories" class="section">
+      <div class="container">
+        <div class="section-header">
+          <h2 class="section-title" data-i18n="catTitle">Amžiaus Kategorijos & Apdovanojimai</h2>
+          <p class="section-sub" data-i18n="catSub">Varžomasi dviejose amžiaus grupėse dėl pagrindinių prizų</p>
+        </div>
+        <div class="grid-2">
+          <div class="card category-card">
+            <div class="category-badge" data-i18n="cat1Title">I Kategorija</div>
+            <h3 style="color:#fff; margin-bottom: 8px;" data-i18n="cat1Age">Nuo 10 iki 13 metų amžiaus</h3>
+            <p style="color:var(--text-muted); font-size: 0.9rem;" data-i18n="cat1Desc">Skirta jauniesiems režisieriams, atrandantiems kino kalbą.</p>
+          </div>
+          <div class="card category-card">
+            <div class="category-badge" data-i18n="cat2Title">II Kategorija</div>
+            <h3 style="color:#fff; margin-bottom: 8px;" data-i18n="cat2Age">Nuo 14 iki 18 metų amžiaus</h3>
+            <p style="color:var(--text-muted); font-size: 0.9rem;" data-i18n="cat2Desc">Skirta vyresniųjų klasių moksleiviams ir jaunimo kino kūrėjams.</p>
+          </div>
+        </div>
+        <div class="awards-box">
+          <div class="awards-title" data-i18n="awardsHeading">Oficialūs Apdovanojimai Kiekvienoje Kategorijoje</div>
+          <div class="awards-pills">
+            <span class="award-pill" data-i18n="award1">🥇 1-oji Vieta</span>
+            <span class="award-pill" data-i18n="award2">🥈 2-oji Vieta</span>
+            <span class="award-pill" data-i18n="award3">🥉 3-ioji Vieta</span>
+            <span class="award-pill" data-i18n="awardAudience">🏆 Žiūrovų Simpatijų Prizas (Audience Choice)</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="submit" class="section">
+      <div class="container">
+        <div class="section-header">
+          <h2 class="section-title" data-i18n="formHeading">Registracijos Forma</h2>
+          <p class="section-sub" data-i18n="formSub">Pateikite savo filmą Ąžuolyno filmų festivaliui (iki balandžio 17 d.)</p>
+        </div>
+
+        <div class="form-wrapper">
+          <form id="submissionForm">
+            <div class="form-row">
+              <div class="form-group">
+                <label for="participantName" data-i18n="fieldName">Vardas ir Pavardė *</label>
+                <input type="text" id="participantName" class="form-input" required>
+              </div>
+              <div class="form-group">
+                <label for="participantEmail" data-i18n="fieldEmail">El. paštas *</label>
+                <input type="email" id="participantEmail" class="form-input" required>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="participantAge" data-i18n="fieldAge">Amžius (10-18 m.) *</label>
+                <input type="number" id="participantAge" min="10" max="18" class="form-input" required>
+              </div>
+              <div class="form-group">
+                <label for="participantCategory" data-i18n="fieldCategory">Kategorija *</label>
+                <select id="participantCategory" class="form-select" required>
+                  <option value="" disabled selected data-i18n="selectCat">Pasirinkite kategoriją</option>
+                  <option value="Category I (10-13)">I Kategorija (10-13 m.)</option>
+                  <option value="Category II (14-18)">II Kategorija (14-18 m.)</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="countryCity" data-i18n="fieldLocation">Šalis ir Miestas *</label>
+                <input type="text" id="countryCity" class="form-input" placeholder="Lietuva, Vilnius" required>
+              </div>
+              <div class="form-group">
+                <label for="institution" data-i18n="fieldSchool">Mokykla / Studija / Būrelis</label>
+                <input type="text" id="institution" class="form-input">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="filmTitle" data-i18n="fieldFilmTitle">Filmo Pavadinimas *</label>
+              <input type="text" id="filmTitle" class="form-input" required>
+            </div>
+
+            <div class="form-group">
+              <label for="deviceModel" data-i18n="fieldDevice">Kameros / Įrenginio modelis (telefonas ar planšetė) *</label>
+              <input type="text" id="deviceModel" class="form-input" placeholder="pvz. iPhone 13, iPad Air, Samsung Galaxy S21" required>
+            </div>
+
+            <div class="form-group">
+              <label for="synopsis" data-i18n="fieldSynopsis">Trumpas filmo aprašymas / Idėja *</label>
+              <textarea id="synopsis" class="form-textarea" required></textarea>
+            </div>
+
+            <div class="form-group">
+              <label data-i18n="fieldUpload">Filmo vaizdo įrašas (MP4 / MOV / WEBM, iki 3 minučių) *</label>
+              <div class="upload-zone" id="uploadDropzone">
+                <div class="upload-icon">🎬</div>
+                <div style="font-weight: 600;" data-i18n="uploadPrompt">Spustelėkite arba įtempkite video failą</div>
+                <div style="color:var(--text-dim); font-size:0.8rem; margin-top:4px;" data-i18n="uploadNote">Failas bus automatiškai patikrintas: ne ilgiau nei 180 s (3 min.)</div>
+                <input type="file" id="videoFileInput" accept="video/mp4,video/quicktime,video/webm" required>
+              </div>
+              <div id="uploadFeedback" class="upload-feedback"></div>
+              <div class="progress-container" id="progressContainer">
+                <div class="progress-bar">
+                  <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <div class="progress-status" id="progressStatus">0%</div>
+              </div>
+            </div>
+
+            <div class="checkbox-group">
+              <label class="checkbox-item">
+                <input type="checkbox" required>
+                <span data-i18n="check1">Patvirtinu, kad filmas nufilmuotas išmaniuoju telefonu arba planšete.</span>
+              </label>
+              <label class="checkbox-item">
+                <input type="checkbox" required>
+                <span data-i18n="check2">Patvirtinu, kad filmo trukmė neviršija 3 minučių.</span>
+              </label>
+              <label class="checkbox-item">
+                <input type="checkbox" required>
+                <span data-i18n="check3">Patvirtinu, kad filmas sukurtas be suaugusiųjų pagalbos.</span>
+              </label>
+              <label class="checkbox-item">
+                <input type="checkbox" required>
+                <span data-i18n="check4">Patvirtinu, kad filmas turi angliškus subtitrus (English subtitles).</span>
+              </label>
+              <label class="checkbox-item">
+                <input type="checkbox" required>
+                <span data-i18n="check5">Sutinku su festivalio taisyklėmis ir duomenų tvarkymu.</span>
+              </label>
+            </div>
+
+            <button type="submit" id="submitBtn" class="btn-primary" style="width:100%; justify-content:center;" data-i18n="btnSubmitForm">
+              Pateikti Paraišką
+            </button>
+          </form>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container footer-content">
+      <img src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media" alt="Logo" style="height: 50px;">
+      <p style="font-weight:700; color:#fff;">Ąžuolynas International Students Film Festival</p>
+      <p class="footer-contact">
+        <span data-i18n="contactUs">Klausimams ir susisiekimui:</span> 
+        <a href="mailto:azuolynasfilmfest@gmail.com">azuolynasfilmfest@gmail.com</a>
+      </p>
+      <p style="color:var(--text-dim); font-size:0.8rem;">May 27th, 15:00 (EEST) | YouTube Platform</p>
+    </div>
+  </footer>
+
+  <script src="config.js"></script>
+  <script src="email-templates.js"></script>
+  <script>
+    const i18n = {
+      lt: {
+        navAbout: "Apie festivalį",
+        navTerms: "Taisyklės",
+        navCategories: "Kategorijos",
+        navSubmit: "Dalyvio anketa",
+        heroBadge: "Tarptautinis Mokinių Filmų Festivalis",
+        topicPrefix: "Tema:",
+        topicVal: "Neįprastas žvilgsnis į įprastus dalykus",
+        metaDatesLabel: "Paraiškų priėmimas",
+        metaDatesVal: "Vasario 14 d. – Balandžio 17 d.",
+        metaEventLabel: "Renginio transliacija",
+        metaEventVal: "Gegužės 27 d., 15:00 (YouTube)",
+        metaTargetLabel: "Dalyviai",
+        metaTargetVal: "Mokiniai iš viso pasaulio",
+        heroSubmitBtn: "Pateikti savo filmą",
+        heroTermsBtn: "Sąlygos ir Reikalavimai",
+        termsTitle: "Dalyvavimo Sąlygos",
+        termsSub: "Privalomi reikalavimai visiems pateikiamiems filmams",
+        rule1: "Jūsų filmas turi būti nufilmuotas planšete arba išmaniuoju telefonu;",
+        rule2: "Filmo trukmė negali viršyti 3 minučių (įskaitant titrus);",
+        rule3: "Vienas dalyvis gali pateikti tik vieną filmą;",
+        rule4: "Filmai, sukurti su suaugusiųjų pagalba, nebus vertinami ir svarstomi;",
+        rule5: "Filme privalomai turi būti angliški subtitrai (English subtitles);",
+        rule6: "Kiekvienas dalyvis gaus tiesioginę transliacijos nuorodą į el. paštą.",
+        catTitle: "Amžiaus Kategorijos & Apdovanojimai",
+        catSub: "Varžomasi dviejose amžiaus grupėse dėl pagrindinių prizų",
+        cat1Title: "I Kategorija",
+        cat1Age: "Nuo 10 iki 13 metų amžiaus",
+        cat1Desc: "Skirta jauniesiems režisieriams, atrandantiems kino kalbą.",
+        cat2Title: "II Kategorija",
+        cat2Age: "Nuo 14 iki 18 metų amžiaus",
+        cat2Desc: "Skirta vyresniųjų klasių moksleiviams ir jaunimo kino kūrėjams.",
+        awardsHeading: "Oficialūs Apdovanojimai Kiekvienoje Kategorijoje",
+        award1: "🥇 1-oji Vieta",
+        award2: "🥈 2-oji Vieta",
+        award3: "🥉 3-ioji Vieta",
+        awardAudience: "🏆 Žiūrovų Simpatijų Prizas (Audience Choice)",
+        formHeading: "Registracijos Forma",
+        formSub: "Pateikite savo filmą Ąžuolyno filmų festivaliui (iki balandžio 17 d.)",
+        fieldName: "Vardas ir Pavardė *",
+        fieldEmail: "El. paštas *",
+        fieldAge: "Amžius (10-18 m.) *",
+        fieldCategory: "Kategorija *",
+        selectCat: "Pasirinkite kategoriją",
+        fieldLocation: "Šalis ir Miestas *",
+        fieldSchool: "Mokykla / Studija / Būrelis",
+        fieldFilmTitle: "Filmo Pavadinimas *",
+        fieldDevice: "Kameros / Įrenginio modelis (telefonas ar planšetė) *",
+        fieldSynopsis: "Trumpas filmo aprašymas / Idėja *",
+        fieldUpload: "Filmo vaizdo įrašas (MP4 / MOV / WEBM, iki 3 minučių) *",
+        uploadPrompt: "Spustelėkite arba įtempkite video failą",
+        uploadNote: "Failas bus automatiškai patikrintas: ne ilgiau nei 180 s (3 min.)",
+        check1: "Patvirtinu, kad filmas nufilmuotas išmaniuoju telefonu arba planšete.",
+        check2: "Patvirtinu, kad filmo trukmė neviršija 3 minučių.",
+        check3: "Patvirtinu, kad filmas sukurtas be suaugusiųjų pagalbos.",
+        check4: "Patvirtinu, kad filmas turi angliškus subtitrus (English subtitles).",
+        check5: "Sutinku su festivalio taisyklėmis ir duomenų tvarkymu.",
+        btnSubmitForm: "Pateikti Paraišką",
+        contactUs: "Klausimams ir susisiekimui:",
+        durationError: "Klaida: vaizdo įrašo trukmė viršija 3 minutes (180 s)!",
+        durationOk: "Trukmė tinkama: ",
+        uploading: "Įkeliama... ",
+        submitSuccess: "Paraiška sėkmingai pateikta! Patvirtinimo laiškas išsiųstas.",
+        submitError: "Įvyko klaida siunčiant duomenis. Bandykite dar kartą."
+      },
+      en: {
+        navAbout: "About Festival",
+        navTerms: "Rules",
+        navCategories: "Categories",
+        navSubmit: "Submission Form",
+        heroBadge: "International Students Film Festival",
+        topicPrefix: "Topic:",
+        topicVal: "An unusual view at ordinary things",
+        metaDatesLabel: "Submissions Accepted",
+        metaDatesVal: "February 14th – April 17th",
+        metaEventLabel: "Online Live Stream",
+        metaEventVal: "May 27th, 15:00 Lithuanian Time",
+        metaTargetLabel: "Open To",
+        metaTargetVal: "Students around the world",
+        heroSubmitBtn: "Submit Your Film",
+        heroTermsBtn: "Terms & Guidelines",
+        termsTitle: "Terms of Participation",
+        termsSub: "Mandatory conditions for all submissions",
+        rule1: "Your film must be filmed on a tablet or smartphone;",
+        rule2: "The duration of the film cannot exceed 3 minutes;",
+        rule3: "From one participant only one film;",
+        rule4: "Film made with the help of adults will not be considered;",
+        rule5: "Your film must have English subtitles;",
+        rule6: "Every participant will get a live YouTube broadcast link.",
+        catTitle: "Categories & Awards",
+        catSub: "Two official competition age groups",
+        cat1Title: "Category I",
+        cat1Age: "From 10 to 13 years old",
+        cat1Desc: "For young storytellers taking their first steps in filmmaking.",
+        cat2Title: "Category II",
+        cat2Age: "From 14 to 18 years old",
+        cat2Desc: "For high school creators exploring visual perspectives.",
+        awardsHeading: "Official Awards in Each Category",
+        award1: "🥇 1st Place",
+        award2: "🥈 2nd Place",
+        award3: "🥉 3rd Place",
+        awardAudience: "🏆 Audience Choice Award",
+        formHeading: "Registration Form",
+        formSub: "Submit your entry to Ąžuolynas Film Festival (Until April 17th)",
+        fieldName: "Full Name *",
+        fieldEmail: "Email Address *",
+        fieldAge: "Age (10-18) *",
+        fieldCategory: "Category *",
+        selectCat: "Select category",
+        fieldLocation: "Country & City *",
+        fieldSchool: "School / Studio / Club",
+        fieldFilmTitle: "Film Title *",
+        fieldDevice: "Filming Device (Phone or Tablet model) *",
+        fieldSynopsis: "Short Synopsis / Idea *",
+        fieldUpload: "Film Video File (MP4 / MOV / WEBM, up to 3 mins) *",
+        uploadPrompt: "Click or drag & drop video file here",
+        uploadNote: "Automatically checked: cannot exceed 180 seconds",
+        check1: "I confirm the film was filmed on a smartphone or tablet.",
+        check2: "I confirm the total duration does not exceed 3 minutes.",
+        check3: "I confirm the film was made without adult assistance.",
+        check4: "I confirm the film has English subtitles.",
+        check5: "I agree to the festival terms and data processing.",
+        btnSubmitForm: "Submit Film Entry",
+        contactUs: "Questions & inquiries:",
+        durationError: "Error: Video duration exceeds 3 minutes (180 s) limit!",
+        durationOk: "Duration verified: ",
+        uploading: "Uploading... ",
+        submitSuccess: "Submission received successfully! Confirmation email sent.",
+        submitError: "An error occurred while uploading. Please try again."
+      }
+    };
+
+    let currentLang = "lt";
+    let verifiedVideoFile = null;
+    let videoDurationSeconds = 0;
+
+    const langBtn = document.getElementById("langToggleBtn");
+    langBtn.addEventListener("click", () => {
+      currentLang = currentLang === "lt" ? "en" : "lt";
+      langBtn.textContent = currentLang === "lt" ? "EN" : "LT";
+      document.documentElement.lang = currentLang;
+      document.querySelectorAll("[data-i18n]").forEach(el => {
+        const key = el.getAttribute("data-i18n");
+        if (i18n[currentLang][key]) {
+          el.textContent = i18n[currentLang][key];
+        }
+      });
+    });
+
+    const ageInput = document.getElementById("participantAge");
+    const catSelect = document.getElementById("participantCategory");
+    ageInput.addEventListener("input", (e) => {
+      const val = parseInt(e.target.value, 10);
+      if (val >= 10 && val <= 13) {
+        catSelect.value = "Category I (10-13)";
+      } else if (val >= 14 && val <= 18) {
+        catSelect.value = "Category II (14-18)";
+      }
+    });
+
+    const videoInput = document.getElementById("videoFileInput");
+    const uploadFeedback = document.getElementById("uploadFeedback");
+
+    videoInput.addEventListener("change", (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const videoElement = document.createElement("video");
+      videoElement.preload = "metadata";
+      videoElement.src = URL.createObjectURL(file);
+
+      videoElement.onloadedmetadata = () => {
+        window.URL.revokeObjectURL(videoElement.src);
+        videoDurationSeconds = Math.round(videoElement.duration);
+
+        if (videoDurationSeconds > 180) {
+          verifiedVideoFile = null;
+          uploadFeedback.className = "upload-feedback error";
+          uploadFeedback.textContent = `${i18n[currentLang].durationError} (${videoDurationSeconds}s)`;
+          videoInput.value = "";
+        } else {
+          verifiedVideoFile = file;
+          uploadFeedback.className = "upload-feedback success";
+          uploadFeedback.textContent = `${i18n[currentLang].durationOk} ${videoDurationSeconds}s - ${file.name}`;
+        }
+      };
+    });
+
+    const form = document.getElementById("submissionForm");
+    const submitBtn = document.getElementById("submitBtn");
+    const progressContainer = document.getElementById("progressContainer");
+    const progressFill = document.getElementById("progressFill");
+    const progressStatus = document.getElementById("progressStatus");
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      if (!verifiedVideoFile) {
+        alert(i18n[currentLang].durationError);
+        return;
+      }
+
+      submitBtn.disabled = true;
+      progressContainer.style.display = "block";
+
+      const name = document.getElementById("participantName").value.trim();
+      const email = document.getElementById("participantEmail").value.trim();
+      const age = document.getElementById("participantAge").value;
+      const category = document.getElementById("participantCategory").value;
+      const location = document.getElementById("countryCity").value.trim();
+      const institution = document.getElementById("institution").value.trim();
+      const filmTitle = document.getElementById("filmTitle").value.trim();
+      const deviceModel = document.getElementById("deviceModel").value.trim();
+      const synopsis = document.getElementById("synopsis").value.trim();
+
+      try {
+        const fileExt = verifiedVideoFile.name.split('.').pop();
+        const cleanName = name.replace(/[^a-zA-Z0-9]/g, "_");
+        const storagePath = `submissions/${Date.now()}_${cleanName}.${fileExt}`;
+        const storageRef = storage.ref(storagePath);
+
+        const uploadTask = storageRef.put(verifiedVideoFile);
+
+        uploadTask.on(
+          "state_changed",
+          (snapshot) => {
+            const pct = Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100);
+            progressFill.style.width = `${pct}%`;
+            progressStatus.textContent = `${i18n[currentLang].uploading} ${pct}%`;
+          },
+          (error) => {
+            console.error(error);
+            alert(i18n[currentLang].submitError);
+            submitBtn.disabled = false;
+          },
+          async () => {
+            const videoUrl = await uploadTask.snapshot.ref.getDownloadURL();
+
+            const submissionDoc = {
+              name,
+              email,
+              age: Number(age),
+              category,
+              location,
+              institution,
+              filmTitle,
+              deviceModel,
+              synopsis,
+              videoUrl,
+              videoDurationSeconds,
+              storagePath,
+              status: "submitted",
+              submissionLang: currentLang,
+              submittedAt: firebase.firestore.FieldValue.serverTimestamp()
+            };
+
+            await db.collection("submissions").add(submissionDoc);
+
+            const emailHtml = generateEmailHtml(currentLang, "submissionReceived", {
+              name,
+              filmTitle,
+              category
+            });
+
+            await db.collection("mail").add({
+              to: [email],
+              message: {
+                subject: emailTexts[currentLang].submissionReceived.sub,
+                html: emailHtml
+              }
+            });
+
+            alert(i18n[currentLang].submitSuccess);
+            form.reset();
+            verifiedVideoFile = null;
+            uploadFeedback.textContent = "";
+            progressContainer.style.display = "none";
+            progressFill.style.width = "0%";
+            submitBtn.disabled = false;
+          }
+        );
+      } catch (err) {
+        console.error(err);
+        alert(i18n[currentLang].submitError);
+        submitBtn.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>
