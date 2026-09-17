@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ąžuolynas International Students Film Festival</title>
+  <link rel="stylesheet" href="../style.css">
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js"></script>
+</head>
+<body>
+
+  <header>
+    <div class="container nav-bar">
+      <a href="index.html" class="logo-wrap">
+        <img src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media" alt="Ąžuolynas Film Fest" class="logo-img">
+        <span class="logo-text">Ąžuolynas Fest</span>
+      </a>
+      <ul class="nav-links">
+        <li><a href="#about">About</a></li>
+        <li><a href="#terms">Terms</a></li>
+        <li><a href="#categories">Categories</a></li>
+        <li><a href="#submit">Submit</a></li>
+      </ul>
+      <div style="display:flex; align-items:center; gap:12px;">
+        <div class="lang-switch">
+          <a href="../lt/index.html" class="lang-btn">LT</a>
+          <a href="../en/index.html" class="lang-btn active">EN</a>
+        </div>
+        <a href="../admin.html" class="btn-secondary" style="padding:7px 16px; font-size:0.82rem;">Admin</a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero" id="about">
+      <div class="container">
+        <div class="laurel-tag">🌿 International Students Film Festival 🌿</div>
+        <h1 class="hero-title">Ąžuolynas Film Festival</h1>
+        <div class="hero-topic-wrap">
+          <span class="hero-topic-label">Festival Topic:</span>
+          <span class="hero-topic">“An unusual view at ordinary things”</span>
+        </div>
+
+        <div class="meta-grid">
+          <div class="meta-card">
+            <div class="meta-card-label">Submissions Accepted</div>
+            <div class="meta-card-val">February 14th – April 17th</div>
+          </div>
+          <div class="meta-card">
+            <div class="meta-card-label">Online Premiere</div>
+            <div class="meta-card-val">May 27th, 15:00 Lithuanian Time</div>
+          </div>
+          <div class="meta-card">
+            <div class="meta-card-label">Eligibility</div>
+            <div class="meta-card-val">Students Worldwide</div>
+          </div>
+        </div>
+
+        <div class="cta-group">
+          <a href="#submit" class="btn-gold">Submit Your Film 🎬</a>
+          <a href="#terms" class="btn-secondary">Terms & Guidelines</a>
+        </div>
+      </div>
+    </section>
+
+    <section id="terms" class="section">
+      <div class="container">
+        <div class="section-header">
+          <div class="section-subtitle">Festival Regulations</div>
+          <h2 class="section-title">Terms of Participation</h2>
+        </div>
+        <div class="grid-2">
+          <div class="card-feature">
+            <ul class="rules-list">
+              <li>
+                <span class="rule-icon">✓</span>
+                <span>Your film must be filmed strictly on a tablet or smartphone.</span>
+              </li>
+              <li>
+                <span class="rule-icon">✓</span>
+                <span>The duration cannot exceed <strong>3 minutes</strong> (180 s including credits).</span>
+              </li>
+              <li>
+                <span class="rule-icon">✓</span>
+                <span>From one participant: <strong>only one film entry</strong>.</span>
+              </li>
+            </ul>
+          </div>
+          <div class="card-feature">
+            <ul class="rules-list">
+              <li>
+                <span class="rule-icon">✓</span>
+                <span>Films made with adult assistance will not be considered.</span>
+              </li>
+              <li>
+                <span class="rule-icon">✓</span>
+                <span>Your film must have <strong>English subtitles</strong>.</span>
+              </li>
+              <li>
+                <span class="rule-icon">✓</span>
+                <span>Every registered participant will receive a private YouTube streaming link.</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="categories" class="section">
+      <div class="container">
+        <div class="section-header">
+          <div class="section-subtitle">Competition</div>
+          <h2 class="section-title">Categories & Awards</h2>
+        </div>
+        <div class="grid-2">
+          <div class="card-feature category-card">
+            <div class="category-badge">Category I</div>
+            <h3 style="color:#fff; margin-bottom:8px;">From 10 to 13 years old</h3>
+            <p style="color:var(--text-muted); font-size:0.92rem;">For budding visual artists beginning their cinematic storytelling journey.</p>
+          </div>
+          <div class="card-feature category-card">
+            <div class="category-badge">Category II</div>
+            <h3 style="color:#fff; margin-bottom:8px;">From 14 to 18 years old</h3>
+            <p style="color:var(--text-muted); font-size:0.92rem;">For youth directors exploring bold perspectives and nuanced compositions.</p>
+          </div>
+        </div>
+        <div class="awards-banner">
+          <h3 style="color:var(--gold); font-size:1.2rem; font-family:'Cinzel', serif;">Honours in Each Category</h3>
+          <div class="awards-pills">
+            <span class="award-pill">🥇 1st Place</span>
+            <span class="award-pill">🥈 2nd Place</span>
+            <span class="award-pill">🥉 3rd Place</span>
+            <span class="award-pill">🏆 Audience Choice Award</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="submit" class="section">
+      <div class="container">
+        <div class="section-header">
+          <div class="section-subtitle">Entry Form</div>
+          <h2 class="section-title">Submit Your Work</h2>
+        </div>
+
+        <div class="form-wrapper">
+          <form id="submissionForm">
+            <div class="form-row">
+              <div class="form-group">
+                <label for="participantName">Full Name *</label>
+                <input type="text" id="participantName" class="form-input" placeholder="e.g. John Doe" required>
+              </div>
+              <div class="form-group">
+                <label for="participantEmail">Email Address *</label>
+                <input type="email" id="participantEmail" class="form-input" placeholder="john@example.com" required>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="participantAge">Age (10–18 years old) *</label>
+                <input type="number" id="participantAge" min="10" max="18" class="form-input" required>
+              </div>
+              <div class="form-group">
+                <label for="participantCategory">Category *</label>
+                <select id="participantCategory" class="form-select" required>
+                  <option value="" disabled selected>Select age group</option>
+                  <option value="Category I (10-13)">Category I (10-13 yrs)</option>
+                  <option value="Category II (14-18)">Category II (14-18 yrs)</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="countryCity">Country & City *</label>
+                <input type="text" id="countryCity" class="form-input" placeholder="e.g. Spain, Barcelona" required>
+              </div>
+              <div class="form-group">
+                <label for="institution">School / Film Studio / Club</label>
+                <input type="text" id="institution" class="form-input" placeholder="School name (optional)">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="filmTitle">Film Title *</label>
+              <input type="text" id="filmTitle" class="form-input" placeholder="Original title of your film" required>
+            </div>
+
+            <div class="form-group">
+              <label for="deviceModel">Filming Device (Phone or Tablet model) *</label>
+              <input type="text" id="deviceModel" class="form-input" placeholder="e.g. iPhone 13, iPad Pro, Google Pixel 7" required>
+            </div>
+
+            <div class="form-group">
+              <label for="synopsis">Short Synopsis / Concept *</label>
+              <textarea id="synopsis" class="form-textarea" placeholder="How does your film connect to 'An unusual view at ordinary things'?" required></textarea>
+            </div>
+
+            <div class="form-group">
+              <label>Film Video File (MP4 / MOV / WEBM, up to 3 mins) *</label>
+              <div class="upload-zone" id="uploadZone">
+                <div class="upload-icon">🎞️</div>
+                <p style="font-weight:700; color:#fff;">Click or drag & drop video file here</p>
+                <p style="color:var(--text-muted); font-size:0.8rem; margin-top:4px;">The system automatically verifies length (max 180 seconds)</p>
+                <input type="file" id="videoFileInput" accept="video/mp4,video/quicktime,video/webm" required>
+              </div>
+              <div id="uploadFeedback" class="upload-feedback"></div>
+              
+              <div class="progress-container" id="progressContainer">
+                <div class="progress-bar">
+                  <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <div id="progressStatus" style="font-size:0.82rem; color:var(--text-muted); margin-top:6px; text-align:right;">0%</div>
+              </div>
+            </div>
+
+            <div class="checkbox-group">
+              <label class="checkbox-item">
+                <input type="checkbox" required>
+                <span>I confirm that the film was shot entirely on a phone or tablet.</span>
+              </label>
+              <label class="checkbox-item">
+                <input type="checkbox" required>
+                <span>I confirm that the total duration does not exceed 3 minutes.</span>
+              </label>
+              <label class="checkbox-item">
+                <input type="checkbox" required>
+                <span>I confirm that the film was made without adult assistance.</span>
+              </label>
+              <label class="checkbox-item">
+                <input type="checkbox" required>
+                <span>I confirm that the film includes English subtitles.</span>
+              </label>
+            </div>
+
+            <button type="submit" id="submitBtn" class="btn-gold" style="width:100%; justify-content:center;">
+              Submit Entry To Festival
+            </button>
+          </form>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container">
+      <img src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media" alt="Logo" style="height:55px; margin-bottom:12px;">
+      <h4 style="font-family:'Cinzel', serif; color:#fff; letter-spacing:1px;">Ąžuolynas International Students Film Festival</h4>
+      <p class="footer-contact">
+        Contact: <a href="mailto:azuolynasfilmfestival@gmail.com">azuolynasfilmfestival@gmail.com</a>
+      </p>
+      <p style="color:var(--text-dim); font-size:0.8rem; margin-top:8px;">May 27th, 15:00 (Lithuanian Time) • Live on YouTube</p>
+    </div>
+  </footer>
+
+  <script src="../config.js"></script>
+  <script src="../email-templates.js"></script>
+  <script>
+    let verifiedVideoFile = null;
+    let videoDurationSeconds = 0;
+
+    const ageInput = document.getElementById("participantAge");
+    const catSelect = document.getElementById("participantCategory");
+    ageInput.addEventListener("input", (e) => {
+      const val = parseInt(e.target.value, 10);
+      if (val >= 10 && val <= 13) {
+        catSelect.value = "Category I (10-13)";
+      } else if (val >= 14 && val <= 18) {
+        catSelect.value = "Category II (14-18)";
+      }
+    });
+
+    const fileInput = document.getElementById("videoFileInput");
+    const feedback = document.getElementById("uploadFeedback");
+
+    fileInput.addEventListener("change", (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const videoElement = document.createElement("video");
+      videoElement.preload = "metadata";
+      videoElement.src = URL.createObjectURL(file);
+
+      videoElement.onloadedmetadata = () => {
+        window.URL.revokeObjectURL(videoElement.src);
+        videoDurationSeconds = Math.round(videoElement.duration);
+
+        if (videoDurationSeconds > 180) {
+          verifiedVideoFile = null;
+          fileInput.value = "";
+          feedback.className = "upload-feedback error";
+          feedback.textContent = `Error: Duration is ${videoDurationSeconds} s. Maximum allowed is 180 s (3 mins)!`;
+        } else {
+          verifiedVideoFile = file;
+          feedback.className = "upload-feedback success";
+          feedback.textContent = `Verified: ${videoDurationSeconds} s (${file.name})`;
+        }
+      };
+    });
+
+    const form = document.getElementById("submissionForm");
+    const submitBtn = document.getElementById("submitBtn");
+    const progressContainer = document.getElementById("progressContainer");
+    const progressFill = document.getElementById("progressFill");
+    const progressStatus = document.getElementById("progressStatus");
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      if (!verifiedVideoFile) {
+        alert("Please attach a valid video file under 3 minutes.");
+        return;
+      }
+
+      submitBtn.disabled = true;
+      progressContainer.style.display = "block";
+
+      const name = document.getElementById("participantName").value.trim();
+      const email = document.getElementById("participantEmail").value.trim();
+      const age = Number(document.getElementById("participantAge").value);
+      const category = document.getElementById("participantCategory").value;
+      const location = document.getElementById("countryCity").value.trim();
+      const institution = document.getElementById("institution").value.trim();
+      const filmTitle = document.getElementById("filmTitle").value.trim();
+      const deviceModel = document.getElementById("deviceModel").value.trim();
+      const synopsis = document.getElementById("synopsis").value.trim();
+
+      try {
+        const ext = verifiedVideoFile.name.split(".").pop();
+        const safeName = name.replace(/[^a-zA-Z0-9]/g, "_");
+        const storagePath = `submissions/${Date.now()}_${safeName}.${ext}`;
+        const storageRef = storage.ref(storagePath);
+        const uploadTask = storageRef.put(verifiedVideoFile);
+
+        uploadTask.on("state_changed",
+          (snap) => {
+            const pct = Math.round((snap.bytesTransferred / snap.totalBytes) * 100);
+            progressFill.style.width = pct + "%";
+            progressStatus.textContent = `Uploading... ${pct}%`;
+          },
+          (err) => {
+            console.error(err);
+            alert("Upload failed: " + err.message);
+            submitBtn.disabled = false;
+          },
+          async () => {
+            const videoUrl = await uploadTask.snapshot.ref.getDownloadURL();
+
+            await db.collection("submissions").add({
+              name,
+              email,
+              age,
+              category,
+              location,
+              institution,
+              filmTitle,
+              deviceModel,
+              synopsis,
+              videoUrl,
+              videoDurationSeconds,
+              storagePath,
+              status: "submitted",
+              submissionLang: "en",
+              submittedAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+
+            const emailHtml = generateEmailHtml("en", "submissionReceived", {
+              name,
+              filmTitle,
+              category
+            });
+
+            await db.collection("mail").add({
+              to: [email],
+              message: {
+                subject: emailTexts.en.submissionReceived.sub,
+                html: emailHtml
+              }
+            });
+
+            alert("Thank you! Your entry has been received and a confirmation email was dispatched.");
+            form.reset();
+            verifiedVideoFile = null;
+            feedback.textContent = "";
+            progressContainer.style.display = "none";
+            progressFill.style.width = "0%";
+            submitBtn.disabled = false;
+          }
+        );
+      } catch (error) {
+        console.error(error);
+        alert("An error occurred during submission. Please try again.");
+        submitBtn.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>
