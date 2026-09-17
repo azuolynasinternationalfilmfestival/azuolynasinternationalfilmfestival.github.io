@@ -74,12 +74,12 @@
       </a>
       <ul class="nav-links">
         <li><a href="#about">Apie festivalį</a></li>
-        <li><a href="#results">Rezultatai</a></li>
-        <li><a href="#competition">Balsavimas</a></li>
-        <li><a href="#screening">Peržiūra</a></li>
+        <li id="navLinkResults" style="display:none;"><a href="#results">Rezultatai</a></li>
+        <li id="navLinkVoting" style="display:none;"><a href="#competition">Balsavimas</a></li>
+        <li id="navLinkScreening"><a href="#screening">Peržiūra</a></li>
         <li><a href="#terms">Taisyklės</a></li>
         <li><a href="#categories">Kategorijos</a></li>
-        <li><a href="#submit">Registracija</a></li>
+        <li id="navLinkSubmit"><a href="#submit">Registracija</a></li>
       </ul>
       <div class="lang-switch">
         <a href="../lt/index.html" class="lang-btn active">LT</a>
@@ -114,13 +114,14 @@
         </div>
 
         <div class="cta-flex">
-          <a href="#submit" class="btn-solid">Pateikti savo filmą</a>
-          <a href="#competition" class="btn-outline">Balsuoti už filmus</a>
+          <a href="#submit" id="heroSubmitBtn" class="btn-solid">Pateikti savo filmą</a>
+          <a href="#competition" id="heroVoteBtn" class="btn-outline" style="display:none;">Balsuoti už filmus</a>
+          <a href="#screening" id="heroScreeningBtn" class="btn-outline">Festivalio peržiūra</a>
         </div>
       </div>
     </section>
 
-    <section id="results" class="section-block">
+    <section id="results" class="section-block" style="display:none;">
       <div class="container">
         <div class="section-head">
           <div class="section-tag">Laureatai</div>
@@ -130,7 +131,7 @@
       </div>
     </section>
 
-    <section id="competition" class="section-block">
+    <section id="competition" class="section-block" style="display:none;">
       <div class="container">
         <div class="section-head">
           <div class="section-tag">Dalyviai ir Balsavimas</div>
@@ -386,6 +387,37 @@
       const d = doc.exists ? doc.data() : DEFAULT_CONTENT;
       const data = d.lt || DEFAULT_CONTENT.lt;
 
+      const showVoting = d.showVoting === true;
+      const showResults = d.showResults === true;
+      const showScreening = d.showScreening !== false;
+      const showSubmit = d.showSubmit !== false;
+
+      const secVoting = document.getElementById("competition");
+      const navVoting = document.getElementById("navLinkVoting");
+      const heroVote = document.getElementById("heroVoteBtn");
+      if (secVoting) secVoting.style.display = showVoting ? "block" : "none";
+      if (navVoting) navVoting.style.display = showVoting ? "block" : "none";
+      if (heroVote) heroVote.style.display = showVoting ? "inline-flex" : "none";
+
+      const secResults = document.getElementById("results");
+      const navResults = document.getElementById("navLinkResults");
+      if (secResults) secResults.style.display = showResults ? "block" : "none";
+      if (navResults) navResults.style.display = showResults ? "block" : "none";
+
+      const secScreening = document.getElementById("screening");
+      const navScreening = document.getElementById("navLinkScreening");
+      const heroScreening = document.getElementById("heroScreeningBtn");
+      if (secScreening) secScreening.style.display = showScreening ? "block" : "none";
+      if (navScreening) navScreening.style.display = showScreening ? "block" : "none";
+      if (heroScreening) heroScreening.style.display = showScreening ? "inline-flex" : "none";
+
+      const secSubmit = document.getElementById("submit");
+      const navSubmit = document.getElementById("navLinkSubmit");
+      const heroSubmit = document.getElementById("heroSubmitBtn");
+      if (secSubmit) secSubmit.style.display = showSubmit ? "block" : "none";
+      if (navSubmit) navSubmit.style.display = showSubmit ? "block" : "none";
+      if (heroSubmit) heroSubmit.style.display = showSubmit ? "inline-flex" : "none";
+
       document.getElementById("dynHeroBadge").textContent = data.heroBadge || DEFAULT_CONTENT.lt.heroBadge;
       document.getElementById("dynTopic").textContent = `„${data.topic || DEFAULT_CONTENT.lt.topic}“`;
       document.getElementById("dynDates").textContent = data.datesSubmissions || DEFAULT_CONTENT.lt.datesSubmissions;
@@ -456,9 +488,9 @@
     function renderFilmsGallery() {
       const container = document.getElementById("filmsGalleryContainer");
       if (!container) return;
-      const eligible = filmsCache.filter((f) => ["accepted", "semifinal", "final", "winner"].includes(f.status));
+      const eligible = filmsCache.filter((f) => f.inVoting === true);
       if (eligible.length === 0) {
-        container.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: var(--text-muted); padding: 20px;">Konkursiniai filmai ruošiami peržiūrai.</div>';
+        container.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: var(--text-muted); padding: 20px;">Šiuo metu nėra filmų, dalyvaujančių balsavime.</div>';
         return;
       }
 
@@ -674,6 +706,7 @@
               videoDurationSeconds,
               storagePath,
               votesCount: 0,
+              inVoting: false,
               status: "submitted",
               submissionLang: "lt",
               submittedAt: firebase.firestore.FieldValue.serverTimestamp()
