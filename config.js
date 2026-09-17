@@ -12,4 +12,10 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
 const storage = firebase.storage();
+
+const AUTHORIZED_ADMIN_EMAILS = [
+  "azuolynasfilmfestival@gmail.com",
+  "azuolynasfilmfest@gmail.com"
+];
+
 const FESTIVAL_LOGO_URL = "https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media";
