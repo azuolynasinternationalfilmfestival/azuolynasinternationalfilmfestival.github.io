@@ -24,12 +24,9 @@
         <li><a href="#categories">Categories</a></li>
         <li><a href="#submit">Submit</a></li>
       </ul>
-      <div style="display:flex; align-items:center; gap:12px;">
-        <div class="lang-switch">
-          <a href="../lt/index.html" class="lang-btn">LT</a>
-          <a href="../en/index.html" class="lang-btn active">EN</a>
-        </div>
-        <a href="../admin.html" class="btn-secondary" style="padding:7px 16px; font-size:0.82rem;">Admin</a>
+      <div class="lang-switch">
+        <a href="../lt/index.html" class="lang-btn">LT</a>
+        <a href="../en/index.html" class="lang-btn active">EN</a>
       </div>
     </div>
   </header>
@@ -37,31 +34,31 @@
   <main>
     <section class="hero" id="about">
       <div class="container">
-        <div class="laurel-tag">🌿 International Students Film Festival 🌿</div>
+        <div class="laurel-tag" id="dynHeroBadge">International Students Film Festival</div>
         <h1 class="hero-title">Ąžuolynas Film Festival</h1>
-        <div class="hero-topic-wrap">
-          <span class="hero-topic-label">Festival Topic:</span>
-          <span class="hero-topic">“An unusual view at ordinary things”</span>
+        <div class="hero-topic-box">
+          <span class="hero-topic-prefix">Festival Topic:</span>
+          <span class="hero-topic-text" id="dynTopic">“An unusual view at ordinary things”</span>
         </div>
 
         <div class="meta-grid">
           <div class="meta-card">
             <div class="meta-card-label">Submissions Accepted</div>
-            <div class="meta-card-val">February 14th – April 17th</div>
+            <div class="meta-card-val" id="dynDates">February 14th – April 17th</div>
           </div>
           <div class="meta-card">
             <div class="meta-card-label">Online Premiere</div>
-            <div class="meta-card-val">May 27th, 15:00 Lithuanian Time</div>
+            <div class="meta-card-val" id="dynEvent">May 27th, 15:00 Lithuanian Time</div>
           </div>
           <div class="meta-card">
             <div class="meta-card-label">Eligibility</div>
-            <div class="meta-card-val">Students Worldwide</div>
+            <div class="meta-card-val" id="dynTarget">Students Worldwide</div>
           </div>
         </div>
 
         <div class="cta-group">
           <a href="#submit" class="btn-gold">Submit Your Film 🎬</a>
-          <a href="#terms" class="btn-secondary">Terms & Guidelines</a>
+          <a href="#terms" class="btn-outline">Terms & Guidelines</a>
         </div>
       </div>
     </section>
@@ -69,39 +66,39 @@
     <section id="terms" class="section">
       <div class="container">
         <div class="section-header">
-          <div class="section-subtitle">Festival Regulations</div>
+          <div class="section-tagline">Guidelines</div>
           <h2 class="section-title">Terms of Participation</h2>
         </div>
         <div class="grid-2">
-          <div class="card-feature">
+          <div class="card-luxury">
             <ul class="rules-list">
               <li>
-                <span class="rule-icon">✓</span>
-                <span>Your film must be filmed strictly on a tablet or smartphone.</span>
+                <span class="rule-num">1</span>
+                <span id="dynRule1">Your film must be filmed strictly on a tablet or smartphone.</span>
               </li>
               <li>
-                <span class="rule-icon">✓</span>
-                <span>The duration cannot exceed <strong>3 minutes</strong> (180 s including credits).</span>
+                <span class="rule-num">2</span>
+                <span id="dynRule2">The duration cannot exceed 3 minutes (180 s including credits).</span>
               </li>
               <li>
-                <span class="rule-icon">✓</span>
-                <span>From one participant: <strong>only one film entry</strong>.</span>
+                <span class="rule-num">3</span>
+                <span id="dynRule3">From one participant: only one film entry.</span>
               </li>
             </ul>
           </div>
-          <div class="card-feature">
+          <div class="card-luxury">
             <ul class="rules-list">
               <li>
-                <span class="rule-icon">✓</span>
-                <span>Films made with adult assistance will not be considered.</span>
+                <span class="rule-num">4</span>
+                <span id="dynRule4">Films made with adult assistance will not be considered.</span>
               </li>
               <li>
-                <span class="rule-icon">✓</span>
-                <span>Your film must have <strong>English subtitles</strong>.</span>
+                <span class="rule-num">5</span>
+                <span id="dynRule5">Your film must have English subtitles.</span>
               </li>
               <li>
-                <span class="rule-icon">✓</span>
-                <span>Every registered participant will receive a private YouTube streaming link.</span>
+                <span class="rule-num">6</span>
+                <span id="dynRule6">Every registered participant will receive a YouTube live stream link.</span>
               </li>
             </ul>
           </div>
@@ -112,23 +109,23 @@
     <section id="categories" class="section">
       <div class="container">
         <div class="section-header">
-          <div class="section-subtitle">Competition</div>
+          <div class="section-tagline">Competition</div>
           <h2 class="section-title">Categories & Awards</h2>
         </div>
         <div class="grid-2">
-          <div class="card-feature category-card">
-            <div class="category-badge">Category I</div>
-            <h3 style="color:#fff; margin-bottom:8px;">From 10 to 13 years old</h3>
-            <p style="color:var(--text-muted); font-size:0.92rem;">For budding visual artists beginning their cinematic storytelling journey.</p>
+          <div class="card-luxury category-card">
+            <div class="category-num">Category I</div>
+            <h3 style="color:#fff; font-size:1.15rem; margin-bottom:8px;" id="dynCat1Age">From 10 to 13 years old</h3>
+            <p style="color:var(--text-muted); font-size:0.94rem;" id="dynCat1Desc">For budding visual artists beginning their cinematic storytelling journey.</p>
           </div>
-          <div class="card-feature category-card">
-            <div class="category-badge">Category II</div>
-            <h3 style="color:#fff; margin-bottom:8px;">From 14 to 18 years old</h3>
-            <p style="color:var(--text-muted); font-size:0.92rem;">For youth directors exploring bold perspectives and nuanced compositions.</p>
+          <div class="card-luxury category-card">
+            <div class="category-num">Category II</div>
+            <h3 style="color:#fff; font-size:1.15rem; margin-bottom:8px;" id="dynCat2Age">From 14 to 18 years old</h3>
+            <p style="color:var(--text-muted); font-size:0.94rem;" id="dynCat2Desc">For youth directors exploring bold perspectives and nuanced compositions.</p>
           </div>
         </div>
         <div class="awards-banner">
-          <h3 style="color:var(--gold); font-size:1.2rem; font-family:'Cinzel', serif;">Honours in Each Category</h3>
+          <h3 style="color:var(--gold); font-size:1.35rem; font-family:'Cormorant Garamond', serif;">Honours in Each Category</h3>
           <div class="awards-pills">
             <span class="award-pill">🥇 1st Place</span>
             <span class="award-pill">🥈 2nd Place</span>
@@ -142,7 +139,7 @@
     <section id="submit" class="section">
       <div class="container">
         <div class="section-header">
-          <div class="section-subtitle">Entry Form</div>
+          <div class="section-tagline">Entry Form</div>
           <h2 class="section-title">Submit Your Work</h2>
         </div>
 
@@ -151,7 +148,7 @@
             <div class="form-row">
               <div class="form-group">
                 <label for="participantName">Full Name *</label>
-                <input type="text" id="participantName" class="form-input" placeholder="e.g. John Doe" required>
+                <input type="text" id="participantName" class="form-input" placeholder="John Doe" required>
               </div>
               <div class="form-group">
                 <label for="participantEmail">Email Address *</label>
@@ -177,11 +174,11 @@
             <div class="form-row">
               <div class="form-group">
                 <label for="countryCity">Country & City *</label>
-                <input type="text" id="countryCity" class="form-input" placeholder="e.g. Spain, Barcelona" required>
+                <input type="text" id="countryCity" class="form-input" placeholder="e.g. London, UK" required>
               </div>
               <div class="form-group">
                 <label for="institution">School / Film Studio / Club</label>
-                <input type="text" id="institution" class="form-input" placeholder="School name (optional)">
+                <input type="text" id="institution" class="form-input" placeholder="Institution name">
               </div>
             </div>
 
@@ -192,12 +189,12 @@
 
             <div class="form-group">
               <label for="deviceModel">Filming Device (Phone or Tablet model) *</label>
-              <input type="text" id="deviceModel" class="form-input" placeholder="e.g. iPhone 13, iPad Pro, Google Pixel 7" required>
+              <input type="text" id="deviceModel" class="form-input" placeholder="e.g. iPhone 13, iPad Pro" required>
             </div>
 
             <div class="form-group">
               <label for="synopsis">Short Synopsis / Concept *</label>
-              <textarea id="synopsis" class="form-textarea" placeholder="How does your film connect to 'An unusual view at ordinary things'?" required></textarea>
+              <textarea id="synopsis" class="form-textarea" placeholder="How does your film connect to the theme?" required></textarea>
             </div>
 
             <div class="form-group">
@@ -205,7 +202,7 @@
               <div class="upload-zone" id="uploadZone">
                 <div class="upload-icon">🎞️</div>
                 <p style="font-weight:700; color:#fff;">Click or drag & drop video file here</p>
-                <p style="color:var(--text-muted); font-size:0.8rem; margin-top:4px;">The system automatically verifies length (max 180 seconds)</p>
+                <p style="color:var(--text-muted); font-size:0.82rem; margin-top:4px;">The system automatically verifies duration (max 180s)</p>
                 <input type="file" id="videoFileInput" accept="video/mp4,video/quicktime,video/webm" required>
               </div>
               <div id="uploadFeedback" class="upload-feedback"></div>
@@ -249,17 +246,36 @@
   <footer>
     <div class="container">
       <img src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media" alt="Logo" style="height:55px; margin-bottom:12px;">
-      <h4 style="font-family:'Cinzel', serif; color:#fff; letter-spacing:1px;">Ąžuolynas International Students Film Festival</h4>
+      <h4 style="font-family:'Cormorant Garamond', serif; font-size:1.3rem; color:#fff; letter-spacing:1px;">Ąžuolynas International Students Film Festival</h4>
       <p class="footer-contact">
         Contact: <a href="mailto:azuolynasfilmfestival@gmail.com">azuolynasfilmfestival@gmail.com</a>
       </p>
-      <p style="color:var(--text-dim); font-size:0.8rem; margin-top:8px;">May 27th, 15:00 (Lithuanian Time) • Live on YouTube</p>
+      <p style="color:var(--text-faint); font-size:0.82rem; margin-top:8px;">May 27th, 15:00 (Lithuanian Time) • Live on YouTube</p>
     </div>
   </footer>
 
   <script src="../config.js"></script>
   <script src="../email-templates.js"></script>
   <script>
+    db.collection("settings").doc("festival").onSnapshot((doc) => {
+      const data = doc.exists && doc.data().en ? doc.data().en : DEFAULT_CONTENT.en;
+      document.getElementById("dynHeroBadge").textContent = data.heroBadge || DEFAULT_CONTENT.en.heroBadge;
+      document.getElementById("dynTopic").textContent = `“${data.topic || DEFAULT_CONTENT.en.topic}”`;
+      document.getElementById("dynDates").textContent = data.datesSubmissions || DEFAULT_CONTENT.en.datesSubmissions;
+      document.getElementById("dynEvent").textContent = data.dateEvent || DEFAULT_CONTENT.en.dateEvent;
+      document.getElementById("dynTarget").textContent = data.targetAudience || DEFAULT_CONTENT.en.targetAudience;
+      if (data.rule1) document.getElementById("dynRule1").textContent = data.rule1;
+      if (data.rule2) document.getElementById("dynRule2").textContent = data.rule2;
+      if (data.rule3) document.getElementById("dynRule3").textContent = data.rule3;
+      if (data.rule4) document.getElementById("dynRule4").textContent = data.rule4;
+      if (data.rule5) document.getElementById("dynRule5").textContent = data.rule5;
+      if (data.rule6) document.getElementById("dynRule6").textContent = data.rule6;
+      if (data.cat1Age) document.getElementById("dynCat1Age").textContent = data.cat1Age;
+      if (data.cat1Desc) document.getElementById("dynCat1Desc").textContent = data.cat1Desc;
+      if (data.cat2Age) document.getElementById("dynCat2Age").textContent = data.cat2Age;
+      if (data.cat2Desc) document.getElementById("dynCat2Desc").textContent = data.cat2Desc;
+    });
+
     let verifiedVideoFile = null;
     let videoDurationSeconds = 0;
 
@@ -267,11 +283,8 @@
     const catSelect = document.getElementById("participantCategory");
     ageInput.addEventListener("input", (e) => {
       const val = parseInt(e.target.value, 10);
-      if (val >= 10 && val <= 13) {
-        catSelect.value = "Category I (10-13)";
-      } else if (val >= 14 && val <= 18) {
-        catSelect.value = "Category II (14-18)";
-      }
+      if (val >= 10 && val <= 13) catSelect.value = "Category I (10-13)";
+      else if (val >= 14 && val <= 18) catSelect.value = "Category II (14-18)";
     });
 
     const fileInput = document.getElementById("videoFileInput");
@@ -293,11 +306,11 @@
           verifiedVideoFile = null;
           fileInput.value = "";
           feedback.className = "upload-feedback error";
-          feedback.textContent = `Error: Duration is ${videoDurationSeconds} s. Maximum allowed is 180 s (3 mins)!`;
+          feedback.textContent = `Error: Duration is ${videoDurationSeconds} s. Allowed limit is 180 s (3 mins)!`;
         } else {
           verifiedVideoFile = file;
           feedback.className = "upload-feedback success";
-          feedback.textContent = `Verified: ${videoDurationSeconds} s (${file.name})`;
+          feedback.textContent = `Duration verified: ${videoDurationSeconds} s (${file.name})`;
         }
       };
     });
@@ -311,7 +324,7 @@
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
       if (!verifiedVideoFile) {
-        alert("Please attach a valid video file under 3 minutes.");
+        alert("Please attach a valid video under 3 minutes.");
         return;
       }
 
@@ -381,7 +394,7 @@
               }
             });
 
-            alert("Thank you! Your entry has been received and a confirmation email was dispatched.");
+            alert("Thank you! Your entry has been submitted successfully.");
             form.reset();
             verifiedVideoFile = null;
             feedback.textContent = "";
@@ -392,7 +405,7 @@
         );
       } catch (error) {
         console.error(error);
-        alert("An error occurred during submission. Please try again.");
+        alert("An error occurred during submission.");
         submitBtn.disabled = false;
       }
     });
