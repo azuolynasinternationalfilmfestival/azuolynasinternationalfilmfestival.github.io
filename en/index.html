@@ -1,10 +1,63 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <script id="Cookiebot" src="https://consent.cookiebot.com/uc.js" data-cbid="06c15308-ea25-4737-9b50-13705638aa99" data-blockingmode="auto" type="text/javascript"></script>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Ąžuolynas International Students Film Festival</title>
+  <link rel="preconnect" href="https://firebasestorage.googleapis.com">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Ąžuolynas International Students Film Festival | Official Submissions</title>
+  <meta name="description" content="Official submission platform for Ąžuolynas International Students Film Festival. Topic: 'An unusual view at ordinary things'. Open to students worldwide.">
+  <meta name="robots" content="index, follow, max-image-preview:large, max-video-preview:-1">
+  <link rel="canonical" href="https://azuolynasfilmfest.lt/en/index.html">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Ąžuolynas International Students Film Festival">
+  <meta property="og:title" content="Ąžuolynas International Students Film Festival | Official Submissions">
+  <meta property="og:description" content="Submit your smartphone/tablet short film under 3 minutes. Topic: 'An unusual view at ordinary things'. Streaming live May 27th on YouTube.">
+  <meta property="og:url" content="https://azuolynasfilmfest.lt/en/index.html">
+  <meta property="og:image" content="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:locale" content="en_US">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Ąžuolynas International Students Film Festival">
+  <meta name="twitter:description" content="International Students Film Festival. Submissions open February 14th to April 17th.">
+  <meta name="twitter:image" content="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media">
+  <link rel="icon" type="image/webp" href="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media">
   <link rel="stylesheet" href="../style.css">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Festival",
+    "name": "Ąžuolynas International Students Film Festival",
+    "description": "An international film festival celebrating student creators worldwide. Theme: An unusual view at ordinary things.",
+    "startDate": "2026-05-27T15:00:00+03:00",
+    "endDate": "2026-05-27T18:00:00+03:00",
+    "eventAttendanceMode": "https://schema.org/OnlineEventAttendanceMode",
+    "eventStatus": "https://schema.org/EventScheduled",
+    "location": {
+      "@type": "VirtualLocation",
+      "url": "https://www.youtube.com"
+    },
+    "image": "https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media",
+    "organizer": {
+      "@type": "Organization",
+      "name": "Ąžuolynas Film Festival Committee",
+      "email": "azuolynasfilmfestival@gmail.com",
+      "url": "https://azuolynasfilmfest.lt"
+    },
+    "award": [
+      "1st Place Category I (10-13 yrs)",
+      "2nd Place Category I (10-13 yrs)",
+      "3rd Place Category I (10-13 yrs)",
+      "1st Place Category II (14-18 yrs)",
+      "2nd Place Category II (14-18 yrs)",
+      "3rd Place Category II (14-18 yrs)",
+      "Audience Choice Award"
+    ]
+  }
+  </script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
@@ -34,31 +87,31 @@
   <main>
     <section class="hero" id="about">
       <div class="container">
-        <div class="laurel-tag" id="dynHeroBadge">International Students Film Festival</div>
+        <div class="laurel-badge" id="dynHeroBadge">International Students Film Festival</div>
         <h1 class="hero-title">Ąžuolynas Film Festival</h1>
         <div class="hero-topic-box">
-          <span class="hero-topic-prefix">Festival Topic:</span>
-          <span class="hero-topic-text" id="dynTopic">“An unusual view at ordinary things”</span>
+          <span class="hero-topic-label">Festival Topic:</span>
+          <span class="hero-topic-value" id="dynTopic">“An unusual view at ordinary things”</span>
         </div>
 
         <div class="meta-grid">
           <div class="meta-card">
             <div class="meta-card-label">Submissions Accepted</div>
-            <div class="meta-card-val" id="dynDates">February 14th – April 17th</div>
+            <div class="meta-card-value" id="dynDates">February 14th – April 17th</div>
           </div>
           <div class="meta-card">
             <div class="meta-card-label">Online Premiere</div>
-            <div class="meta-card-val" id="dynEvent">May 27th, 15:00 Lithuanian Time</div>
+            <div class="meta-card-value" id="dynEvent">May 27th, 15:00 Lithuanian Time</div>
           </div>
           <div class="meta-card">
             <div class="meta-card-label">Eligibility</div>
-            <div class="meta-card-val" id="dynTarget">Students Worldwide</div>
+            <div class="meta-card-value" id="dynTarget">Students Worldwide</div>
           </div>
         </div>
 
         <div class="cta-group">
           <a href="#submit" class="btn-gold">Submit Your Film 🎬</a>
-          <a href="#terms" class="btn-outline">Terms & Guidelines</a>
+          <a href="#terms" class="btn-secondary">Terms & Guidelines</a>
         </div>
       </div>
     </section>
@@ -73,15 +126,15 @@
           <div class="card-luxury">
             <ul class="rules-list">
               <li>
-                <span class="rule-num">1</span>
+                <span class="rule-number">1</span>
                 <span id="dynRule1">Your film must be filmed strictly on a tablet or smartphone.</span>
               </li>
               <li>
-                <span class="rule-num">2</span>
+                <span class="rule-number">2</span>
                 <span id="dynRule2">The duration cannot exceed 3 minutes (180 s including credits).</span>
               </li>
               <li>
-                <span class="rule-num">3</span>
+                <span class="rule-number">3</span>
                 <span id="dynRule3">From one participant: only one film entry.</span>
               </li>
             </ul>
@@ -89,15 +142,15 @@
           <div class="card-luxury">
             <ul class="rules-list">
               <li>
-                <span class="rule-num">4</span>
+                <span class="rule-number">4</span>
                 <span id="dynRule4">Films made with adult assistance will not be considered.</span>
               </li>
               <li>
-                <span class="rule-num">5</span>
+                <span class="rule-number">5</span>
                 <span id="dynRule5">Your film must have English subtitles.</span>
               </li>
               <li>
-                <span class="rule-num">6</span>
+                <span class="rule-number">6</span>
                 <span id="dynRule6">Every registered participant will receive a YouTube live stream link.</span>
               </li>
             </ul>
@@ -115,17 +168,17 @@
         <div class="grid-2">
           <div class="card-luxury category-card">
             <div class="category-num">Category I</div>
-            <h3 style="color:#fff; font-size:1.15rem; margin-bottom:8px;" id="dynCat1Age">From 10 to 13 years old</h3>
-            <p style="color:var(--text-muted); font-size:0.94rem;" id="dynCat1Desc">For budding visual artists beginning their cinematic storytelling journey.</p>
+            <h3 style="color:#fff; font-size:1.18rem; margin-bottom:8px;" id="dynCat1Age">From 10 to 13 years old</h3>
+            <p style="color:var(--text-muted); font-size:0.95rem;" id="dynCat1Desc">For budding visual artists beginning their cinematic storytelling journey.</p>
           </div>
           <div class="card-luxury category-card">
             <div class="category-num">Category II</div>
-            <h3 style="color:#fff; font-size:1.15rem; margin-bottom:8px;" id="dynCat2Age">From 14 to 18 years old</h3>
-            <p style="color:var(--text-muted); font-size:0.94rem;" id="dynCat2Desc">For youth directors exploring bold perspectives and nuanced compositions.</p>
+            <h3 style="color:#fff; font-size:1.18rem; margin-bottom:8px;" id="dynCat2Age">From 14 to 18 years old</h3>
+            <p style="color:var(--text-muted); font-size:0.95rem;" id="dynCat2Desc">For youth directors exploring bold perspectives and nuanced compositions.</p>
           </div>
         </div>
         <div class="awards-banner">
-          <h3 style="color:var(--gold); font-size:1.35rem; font-family:'Cormorant Garamond', serif;">Honours in Each Category</h3>
+          <h3 style="color:var(--gold-bright); font-size:1.35rem; font-family:'Cormorant Garamond', serif;">Honours in Each Category</h3>
           <div class="awards-pills">
             <span class="award-pill">🥇 1st Place</span>
             <span class="award-pill">🥈 2nd Place</span>
@@ -174,7 +227,7 @@
             <div class="form-row">
               <div class="form-group">
                 <label for="countryCity">Country & City *</label>
-                <input type="text" id="countryCity" class="form-input" placeholder="e.g. London, UK" required>
+                <input type="text" id="countryCity" class="form-input" placeholder="London, UK" required>
               </div>
               <div class="form-group">
                 <label for="institution">School / Film Studio / Club</label>
@@ -246,7 +299,7 @@
   <footer>
     <div class="container">
       <img src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media" alt="Logo" style="height:55px; margin-bottom:12px;">
-      <h4 style="font-family:'Cormorant Garamond', serif; font-size:1.3rem; color:#fff; letter-spacing:1px;">Ąžuolynas International Students Film Festival</h4>
+      <h4 style="font-family:'Cormorant Garamond', serif; font-size:1.35rem; color:#fff; letter-spacing:1px;">Ąžuolynas International Students Film Festival</h4>
       <p class="footer-contact">
         Contact: <a href="mailto:azuolynasfilmfestival@gmail.com">azuolynasfilmfestival@gmail.com</a>
       </p>
