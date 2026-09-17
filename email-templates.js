@@ -1,21 +1,21 @@
 const emailWrapperStart = `
-<div style="background-color: #0c1010; padding: 40px 15px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
-  <div style="max-width: 600px; margin: 0 auto; background-color: #141919; padding: 40px 32px; border-radius: 12px; border-top: 4px solid #d4af37; border-left: 1px solid #1f2727; border-right: 1px solid #1f2727; border-bottom: 1px solid #1f2727; box-shadow: 0 16px 40px rgba(0,0,0,0.6);">
+<div style="background-color: #060808; padding: 40px 15px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+  <div style="max-width: 600px; margin: 0 auto; background-color: #101414; padding: 40px 32px; border-radius: 14px; border-top: 4px solid #dfba69; border-left: 1px solid #1c2424; border-right: 1px solid #1c2424; border-bottom: 1px solid #1c2424; box-shadow: 0 20px 50px rgba(0,0,0,0.7);">
     <div style="text-align: center; margin-bottom: 30px;">
       <img src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media" alt="Ąžuolynas Film Fest" style="max-height: 80px; width: auto; display: inline-block;">
-      <h2 style="color: #e5c378; margin: 18px 0 4px 0; font-size: 19px; letter-spacing: 1.5px; text-transform: uppercase; font-weight: 700;">Ąžuolynas Film Festival</h2>
-      <p style="color: #8c9e9b; margin: 0; font-size: 13px; letter-spacing: 0.5px;">An unusual view at ordinary things</p>
+      <h2 style="color: #eed592; margin: 18px 0 4px 0; font-size: 19px; letter-spacing: 1.5px; text-transform: uppercase; font-weight: 700;">Ąžuolynas Film Festival</h2>
+      <p style="color: #7b8e8b; margin: 0; font-size: 13px; letter-spacing: 0.5px;">An unusual view at ordinary things</p>
     </div>
 `;
 
-const emailBoxStyle = `border: 1px solid #232c2c; padding: 22px; margin: 24px 0; border-radius: 8px; background-color: #181f1f;`;
+const emailBoxStyle = `border: 1px solid #202b2a; padding: 22px; margin: 24px 0; border-radius: 8px; background-color: #141b1b;`;
 
 const emailWrapperEnd = `
-    <hr style="border: none; border-top: 1px solid #232d2d; margin: 36px 0 24px 0;">
+    <hr style="border: none; border-top: 1px solid #1c2625; margin: 36px 0 24px 0;">
     <div style="text-align: center;">
       <p style="font-size: 13px; color: #879b98; margin: 0 0 6px 0; line-height: 1.6;">
         <b>ĄŽUOLYNAS INTERNATIONAL STUDENTS FILM FESTIVAL</b><br>
-        Email: <a href="mailto:azuolynasfilmfestival@gmail.com" style="color: #d4af37; text-decoration: none;">azuolynasfilmfestival@gmail.com</a>
+        Email: <a href="mailto:azuolynasfilmfestival@gmail.com" style="color: #dfba69; text-decoration: none;">azuolynasfilmfestival@gmail.com</a>
       </p>
       <p style="font-size: 12px; color: #526360; margin: 0;">May 27th, 15:00 (Lithuanian Time) • Live on YouTube</p>
     </div>
@@ -140,12 +140,12 @@ function generateEmailHtml(lang, templateKey, data) {
     detailsContent += `<p style="margin: 0 0 8px 0; font-size: 14px; color: #dcdede;"><b>${lang === "lt" ? "Kategorija:" : "Category:"}</b> ${data.category}</p>`;
   }
   if (data.customMessage) {
-    detailsContent += `<p style="margin: 12px 0 0 0; font-size: 14px; color: #e5c378; line-height: 1.6; border-left: 2px solid #d4af37; padding-left: 12px;">${data.customMessage}</p>`;
+    detailsContent += `<p style="margin: 12px 0 0 0; font-size: 14px; color: #eed592; line-height: 1.6; border-left: 2px solid #dfba69; padding-left: 12px;">${data.customMessage}</p>`;
   }
   if (data.streamLink) {
     detailsContent += `
       <div style="text-align: center; margin-top: 22px;">
-        <a href="${data.streamLink}" target="_blank" style="background: linear-space; background-color: #d4af37; color: #0c1010; text-decoration: none; padding: 12px 28px; border-radius: 6px; font-weight: 700; font-size: 14px; display: inline-block; letter-spacing: 0.5px;">
+        <a href="${data.streamLink}" target="_blank" style="background-color: #dfba69; color: #060808; text-decoration: none; padding: 12px 28px; border-radius: 6px; font-weight: 700; font-size: 14px; display: inline-block; letter-spacing: 0.5px;">
           ${lang === "lt" ? "Atidaryti YouTube Transliaciją" : "Watch on YouTube"}
         </a>
       </div>
@@ -158,7 +158,7 @@ function generateEmailHtml(lang, templateKey, data) {
       <p style="font-size: 15px; color: #afbfbc; line-height: 1.65; margin: 0 0 15px 0;">${t.body}</p>
       
       <div style="${emailBoxStyle}">
-        <p style="margin: 0 0 14px 0; font-weight: 700; color: #e5c378; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">${t.detailsTitle}</p>
+        <p style="margin: 0 0 14px 0; font-weight: 700; color: #eed592; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">${t.detailsTitle}</p>
         ${detailsContent}
       </div>
 
