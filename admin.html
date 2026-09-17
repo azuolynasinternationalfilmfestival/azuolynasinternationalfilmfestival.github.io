@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="lt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Valdymas | Ąžuolynas Film Fest</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js"></script>
+</head>
+<body class="admin-body-bg">
+
+  <div id="loginSection" style="display:flex; align-items:center; justify-content:center; flex:1; padding:20px;">
+    <div style="background:var(--bg-card); backdrop-filter:blur(20px); border:1px solid var(--border-subtle); padding:42px 36px; border-radius:var(--radius-lg); width:100%; max-width:420px; text-align:center; box-shadow:0 20px 60px rgba(0,0,0,0.8);">
+      <img src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media" alt="Logo" style="height:62px; margin-bottom:14px;">
+      <h2 style="font-family:'Cinzel', serif; font-size:1.45rem; color:#fff; margin-bottom:6px;">Festivalio Skydas</h2>
+      <p style="font-size:0.82rem; color:var(--text-muted); margin-bottom:26px;">Autorizuotas prisijungimas: azuolynasfilmfestival@gmail.com</p>
+
+      <form id="adminAuthForm">
+        <div class="form-group" style="text-align:left;">
+          <label for="loginEmail">El. paštas</label>
+          <input type="email" id="loginEmail" class="form-input" placeholder="azuolynasfilmfestival@gmail.com" required>
+        </div>
+        <div class="form-group" style="text-align:left;">
+          <label for="loginPassword">Slaptažodis</label>
+          <input type="password" id="loginPassword" class="form-input" placeholder="••••••••" required>
+        </div>
+        <div id="authErrMsg" style="color:var(--danger); font-size:0.85rem; margin-bottom:14px; display:none;"></div>
+        <button type="submit" class="btn-gold" style="width:100%; justify-content:center;">Prisijungti</button>
+      </form>
+    </div>
+  </div>
+
+  <div id="panelSection" style="display:none; flex-direction:column; flex:1;">
+    <div class="admin-header-nav">
+      <div style="display:flex; align-items:center; gap:14px;">
+        <img src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media" alt="Logo" style="height:36px;">
+        <span style="font-family:'Cinzel', serif; font-weight:700; color:var(--gold-light); font-size:1.1rem;">Ąžuolynas Film Fest</span>
+      </div>
+      <div style="display:flex; align-items:center; gap:16px;">
+        <span id="activeUserEmail" style="font-size:0.85rem; color:var(--text-muted); border:1px solid var(--border-card); padding:5px 12px; border-radius:var(--radius-full);"></span>
+        <button id="logoutBtn" class="btn-secondary" style="padding:6px 14px; font-size:0.82rem;">Atsijungti</button>
+      </div>
+    </div>
+
+    <div class="admin-content container">
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px; margin-bottom:28px;">
+        <div>
+          <h2 style="font-family:'Cinzel', serif; font-size:1.8rem; color:#fff;">Dalyvių Paraiškos</h2>
+          <p id="statsCounter" style="color:var(--text-muted); font-size:0.88rem;">Kraunami duomenys...</p>
+        </div>
+        <div style="display:flex; gap:10px;">
+          <a href="lt/index.html" class="btn-secondary" style="font-size:0.85rem; padding:8px 16px;">Svetainė (LT)</a>
+          <a href="en/index.html" class="btn-secondary" style="font-size:0.85rem; padding:8px 16px;">Svetainė (EN)</a>
+        </div>
+      </div>
+
+      <div style="display:flex; gap:14px; flex-wrap:wrap; margin-bottom:22px; align-items:center;">
+        <input type="text" id="filterSearch" class="form-input" style="max-width:320px;" placeholder="Paieška pagal autorių, filmą, el. paštą...">
+        <select id="filterCategory" class="form-select" style="width:auto;">
+          <option value="all">Visos kategorijos</option>
+          <option value="Category I (10-13)">I Kategorija (10-13)</option>
+          <option value="Category II (14-18)">II Kategorija (14-18)</option>
+        </select>
+        <select id="filterStatus" class="form-select" style="width:auto;">
+          <option value="all">Visi statusai</option>
+          <option value="submitted">Pateikta (Submitted)</option>
+          <option value="accepted">Priimta (Accepted)</option>
+          <option value="semifinal">Pusfinalis (Semi-Final)</option>
+          <option value="final">Finalas (Final)</option>
+          <option value="winner">Laureatas (Winner)</option>
+          <option value="rejected">Atmesta (Rejected)</option>
+        </select>
+      </div>
+
+      <div class="table-wrapper">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Data</th>
+              <th>Kūrėjas</th>
+              <th>Amžius / Kat.</th>
+              <th>Filmas</th>
+              <th>Trukmė</th>
+              <th>Įrenginys</th>
+              <th>Statusas</th>
+              <th>Valdymas</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div id="entryModal" class="modal-overlay">
+    <div class="modal-window">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; border-bottom:1px solid var(--border-card); padding-bottom:14px;">
+        <h3 id="mTitle" style="color:var(--gold-light); font-family:'Cinzel', serif; font-size:1.3rem;">Filmo peržiūra</h3>
+        <button onclick="closeEntryModal()" style="background:none; border:none; color:var(--text-muted); font-size:1.8rem; cursor:pointer;">&times;</button>
+      </div>
+
+      <video id="mVideo" style="width:100%; max-height:360px; background:#000; border-radius:var(--radius-md); margin-bottom:16px;" controls></video>
+
+      <div style="display:flex; justify-content:flex-end; margin-bottom:18px;">
+        <a id="mDownloadLink" href="" target="_blank" download class="btn-secondary" style="font-size:0.82rem; padding:6px 14px;">Atsisiųsti originalų failą</a>
+      </div>
+
+      <div style="background:var(--bg-surface); border:1px solid var(--border-card); border-radius:var(--radius-sm); padding:20px; margin-bottom:24px; font-size:0.9rem; line-height:1.6;">
+        <p><strong>Autorius:</strong> <span id="mAuthor"></span> (<span id="mEmail"></span>)</p>
+        <p><strong>Amžius / Įstaiga:</strong> <span id="mAgeInst"></span></p>
+        <p><strong>Vieta:</strong> <span id="mLocation"></span></p>
+        <p><strong>Kameros modelis:</strong> <span id="mDevice"></span></p>
+        <p><strong>Trukmė:</strong> <span id="mDuration"></span> s</p>
+        <p style="margin-top:12px; font-weight:700; color:var(--gold);">Sinopsis / Idėja:</p>
+        <p id="mSynopsis" style="color:var(--text-muted); font-style:italic; margin-top:4px;"></p>
+      </div>
+
+      <div style="background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:var(--radius-sm); padding:22px;">
+        <h4 style="color:#fff; font-size:1rem; margin-bottom:14px;">Atnaujinti Būseną ir Išsiųsti Pranešimą</h4>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label for="mNewStatus">Keisti statusą:</label>
+            <select id="mNewStatus" class="form-select">
+              <option value="submitted">Pateikta (Submitted)</option>
+              <option value="accepted">Priimta (Accepted)</option>
+              <option value="semifinal">Pusfinalis (Semi-Final)</option>
+              <option value="final">Finalas (Final)</option>
+              <option value="winner">Laureatas (Winner)</option>
+              <option value="rejected">Atmesta (Rejected)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="mEmailTemplate">Siunčiamas laiškas:</label>
+            <select id="mEmailTemplate" class="form-select">
+              <option value="none">Nesiųsti el. laiško</option>
+              <option value="accepted">Priėmimo patvirtinimas (Accepted)</option>
+              <option value="semiFinalist">Pusfinalio žinia (Semi-Final)</option>
+              <option value="finalist">Finalo žinia (Finalist)</option>
+              <option value="winner">Nugalėtojo diplomas / Laureatas (Winner)</option>
+              <option value="rejected">Neatrankos pranešimas (Rejected)</option>
+              <option value="eventReminder">Transliacijos priminimas (YouTube Link)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="mEmailLang">Laiško kalba:</label>
+            <select id="mEmailLang" class="form-select">
+              <option value="lt">Lietuvių (LT)</option>
+              <option value="en">English (EN)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="mStreamLink">YouTube / Renginio nuoroda (nebūtina):</label>
+            <input type="url" id="mStreamLink" class="form-input" placeholder="https://youtube.com/watch?v=...">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="mCustomText">Papildoma žinutė dalyviui (nebūtina):</label>
+          <textarea id="mCustomText" class="form-textarea" style="min-height:70px;" placeholder="Papildomas komentaras ar palinkėjimas laiške..."></textarea>
+        </div>
+
+        <div style="display:flex; justify-content:flex-end; gap:12px; margin-top:16px;">
+          <button class="btn-secondary" onclick="closeEntryModal()">Atšaukti</button>
+          <button id="mSaveBtn" class="btn-gold">Išsaugoti ir Vykdyti</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="config.js"></script>
+  <script src="email-templates.js"></script>
+  <script>
+    let submissionsList = [];
+    let currentEntry = null;
+
+    const loginSection = document.getElementById("loginSection");
+    const panelSection = document.getElementById("panelSection");
+    const adminAuthForm = document.getElementById("adminAuthForm");
+    const authErrMsg = document.getElementById("authErrMsg");
+    const activeUserEmail = document.getElementById("activeUserEmail");
+    const logoutBtn = document.getElementById("logoutBtn");
+
+    auth.onAuthStateChanged((user) => {
+      if (user && AUTHORIZED_ADMIN_EMAILS.includes(user.email.toLowerCase())) {
+        loginSection.style.display = "none";
+        panelSection.style.display = "flex";
+        activeUserEmail.textContent = user.email;
+        fetchSubmissions();
+      } else if (user) {
+        auth.signOut();
+        authErrMsg.style.display = "block";
+        authErrMsg.textContent = "Prieiga apribota: paskyra neturi administratoriaus teisių.";
+      } else {
+        loginSection.style.display = "flex";
+        panelSection.style.display = "none";
+      }
+    });
+
+    adminAuthForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      authErrMsg.style.display = "none";
+      const email = document.getElementById("loginEmail").value.trim();
+      const pass = document.getElementById("loginPassword").value;
+
+      try {
+        await auth.signInWithEmailAndPassword(email, pass);
+      } catch (err) {
+        authErrMsg.style.display = "block";
+        authErrMsg.textContent = "Klaida: " + err.message;
+      }
+    });
+
+    logoutBtn.addEventListener("click", () => auth.signOut());
+
+    function fetchSubmissions() {
+      db.collection("submissions")
+        .orderBy("submittedAt", "desc")
+        .onSnapshot((snap) => {
+          submissionsList = [];
+          snap.forEach((doc) => {
+            submissionsList.push({ id: doc.id, ...doc.data() });
+          });
+          renderTable();
+        }, (err) => {
+          console.error(err);
+        });
+    }
+
+    const tableBody = document.getElementById("tableBody");
+    const filterSearch = document.getElementById("filterSearch");
+    const filterCategory = document.getElementById("filterCategory");
+    const filterStatus = document.getElementById("filterStatus");
+    const statsCounter = document.getElementById("statsCounter");
+
+    function renderTable() {
+      const q = filterSearch.value.toLowerCase();
+      const cat = filterCategory.value;
+      const st = filterStatus.value;
+
+      const filtered = submissionsList.filter((item) => {
+        const matchSearch = 
+          (item.name && item.name.toLowerCase().includes(q)) ||
+          (item.filmTitle && item.filmTitle.toLowerCase().includes(q)) ||
+          (item.email && item.email.toLowerCase().includes(q));
+        const matchCat = cat === "all" || item.category === cat;
+        const matchStatus = st === "all" || item.status === st;
+        return matchSearch && matchCat && matchStatus;
+      });
+
+      statsCounter.textContent = `Rodoma paraiškų: ${filtered.length} (Iš viso sistemoje: ${submissionsList.length})`;
+      tableBody.innerHTML = "";
+
+      filtered.forEach((sub) => {
+        const tr = document.createElement("tr");
+
+        let dateStr = "-";
+        if (sub.submittedAt && sub.submittedAt.toDate) {
+          dateStr = sub.submittedAt.toDate().toLocaleDateString("lt-LT", { month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" });
+        }
+
+        const badgeCls = `status-${sub.status || 'submitted'}`;
+
+        tr.innerHTML = `
+          <td style="color:var(--text-dim); font-size:0.82rem;">${dateStr}</td>
+          <td><strong>${sub.name || ''}</strong><br><small style="color:var(--text-muted);">${sub.email || ''}</small></td>
+          <td>${sub.age || ''} m.<br><small style="color:var(--text-dim);">${sub.category || ''}</small></td>
+          <td><b style="color:#fff;">${sub.filmTitle || ''}</b></td>
+          <td>${sub.videoDurationSeconds ? sub.videoDurationSeconds + 's' : '-'}</td>
+          <td><small style="color:var(--text-muted);">${sub.deviceModel || '-'}</small></td>
+          <td><span class="status-badge ${badgeCls}">${sub.status || 'submitted'}</span></td>
+          <td>
+            <button class="btn-secondary" style="padding:6px 14px; font-size:0.8rem;" onclick="viewEntry('${sub.id}')">Peržiūrėti</button>
+          </td>
+        `;
+        tableBody.appendChild(tr);
+      });
+    }
+
+    filterSearch.addEventListener("input", renderTable);
+    filterCategory.addEventListener("change", renderTable);
+    filterStatus.addEventListener("change", renderTable);
+
+    const entryModal = document.getElementById("entryModal");
+    const mVideo = document.getElementById("mVideo");
+
+    window.viewEntry = function(id) {
+      currentEntry = submissionsList.find((x) => x.id === id);
+      if (!currentEntry) return;
+
+      document.getElementById("mTitle").textContent = currentEntry.filmTitle || "Filmas";
+      document.getElementById("mAuthor").textContent = currentEntry.name || "";
+      document.getElementById("mEmail").textContent = currentEntry.email || "";
+      document.getElementById("mAgeInst").textContent = `${currentEntry.age || ''} m. | ${currentEntry.institution || 'Nenurodyta'}`;
+      document.getElementById("mLocation").textContent = currentEntry.location || "";
+      document.getElementById("mDevice").textContent = currentEntry.deviceModel || "";
+      document.getElementById("mDuration").textContent = currentEntry.videoDurationSeconds || "";
+      document.getElementById("mSynopsis").textContent = currentEntry.synopsis || "";
+
+      mVideo.src = currentEntry.videoUrl || "";
+      document.getElementById("mDownloadLink").href = currentEntry.videoUrl || "#";
+
+      document.getElementById("mNewStatus").value = currentEntry.status || "submitted";
+      document.getElementById("mEmailLang").value = currentEntry.submissionLang || "lt";
+      document.getElementById("mEmailTemplate").value = "none";
+      document.getElementById("mCustomText").value = "";
+      document.getElementById("mStreamLink").value = "";
+
+      entryModal.style.display = "flex";
+    };
+
+    window.closeEntryModal = function() {
+      entryModal.style.display = "none";
+      mVideo.pause();
+      mVideo.src = "";
+      currentEntry = null;
+    };
+
+    const mSaveBtn = document.getElementById("mSaveBtn");
+    mSaveBtn.addEventListener("click", async () => {
+      if (!currentEntry) return;
+      mSaveBtn.disabled = true;
+
+      const newStatus = document.getElementById("mNewStatus").value;
+      const tpl = document.getElementById("mEmailTemplate").value;
+      const lang = document.getElementById("mEmailLang").value;
+      const customMsg = document.getElementById("mCustomText").value.trim();
+      const streamLink = document.getElementById("mStreamLink").value.trim();
+
+      try {
+        await db.collection("submissions").doc(currentEntry.id).update({
+          status: newStatus,
+          lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+        });
+
+        if (tpl !== "none") {
+          const emailHtml = generateEmailHtml(lang, tpl, {
+            name: currentEntry.name,
+            filmTitle: currentEntry.filmTitle,
+            category: currentEntry.category,
+            customMessage: customMsg,
+            streamLink: streamLink
+          });
+
+          await db.collection("mail").add({
+            to: [currentEntry.email],
+            message: {
+              subject: emailTexts[lang][tpl].sub,
+              html: emailHtml
+            }
+          });
+          alert("Statusas atnaujintas ir el. laiškas išsiųstas į 'mail' kolekciją!");
+        } else {
+          alert("Statusas atnaujintas.");
+        }
+
+        closeEntryModal();
+      } catch (err) {
+        console.error(err);
+        alert("Klaida saugant pakeitimus: " + err.message);
+      } finally {
+        mSaveBtn.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>
