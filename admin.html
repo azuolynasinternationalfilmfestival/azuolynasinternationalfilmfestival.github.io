@@ -11,63 +11,75 @@
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js"></script>
 </head>
-<body class="admin-body-bg">
+<body class="admin-viewport">
 
   <div id="loginSection" style="display:flex; align-items:center; justify-content:center; flex:1; padding:20px;">
-    <div style="background:var(--bg-glass); border:1px solid var(--border-subtle); padding:40px 28px; border-radius:var(--radius-md); width:100%; max-width:380px; text-align:center;">
-      <img src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media" alt="Logo" style="height:60px; margin-bottom:14px;">
-      <h2 style="font-family:'Cormorant Garamond', serif; font-size:1.6rem; color:#fff; margin-bottom:4px;">Valdymo Skydas</h2>
-      <p style="font-size:0.82rem; color:var(--text-muted); margin-bottom:24px;">Autorizuotas prisijungimas</p>
+    <div style="background:var(--bg-surface); border:1px solid var(--border-color); padding:40px 32px; border-radius:var(--site-radius); width:100%; max-width:380px; text-align:center;">
+      <img src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media" alt="Logo" style="height:56px; margin-bottom:14px;">
+      <h2 style="font-family:var(--font-cinema); font-size:1.45rem; color:#fff; margin-bottom:4px;">Valdymo Skydas</h2>
+      <p style="font-size:0.82rem; color:var(--text-muted); margin-bottom:24px;">Autorizuota prieiga</p>
 
       <form id="adminAuthForm">
-        <div class="form-group" style="text-align:left;">
+        <div class="input-cell" style="text-align:left;">
           <label for="loginEmail">Identifikatorius</label>
-          <input type="email" id="loginEmail" class="form-input" autocomplete="username" required>
+          <input type="email" id="loginEmail" class="field" autocomplete="username" required>
         </div>
-        <div class="form-group" style="text-align:left;">
+        <div class="input-cell" style="text-align:left;">
           <label for="loginPassword">Slaptažodis</label>
-          <input type="password" id="loginPassword" class="form-input" autocomplete="current-password" required>
+          <input type="password" id="loginPassword" class="field" autocomplete="current-password" required>
         </div>
-        <div id="authErrMsg" style="color:var(--danger); font-size:0.82rem; margin-bottom:12px; display:none;"></div>
-        <button type="submit" class="btn-primary" style="width:100%; justify-content:center;">Prisijungti</button>
+        <div id="authErrMsg" style="color:var(--status-red); font-size:0.8rem; margin-bottom:12px; display:none;"></div>
+        <button type="submit" class="btn-solid" style="width:100%;">Prisijungti</button>
       </form>
     </div>
   </div>
 
   <div id="panelSection" style="display:none; flex-direction:column; flex:1;">
-    <div class="admin-header-nav">
-      <div style="display:flex; align-items:center; gap:12px;">
+    <div class="admin-topbar">
+      <div class="admin-brand">
         <img src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media" alt="Logo" style="height:32px;">
-        <span style="font-family:'Cormorant Garamond', serif; font-weight:700; color:var(--teal-light); font-size:1.15rem;">Ąžuolynas Fest</span>
+        <span class="admin-brand-title">Ąžuolynas Fest Skydas</span>
       </div>
 
-      <div class="admin-tabs">
-        <button id="tabSubmissionsBtn" class="admin-tab-btn active" onclick="switchTab('submissions')">Paraiškos</button>
-        <button id="tabSettingsBtn" class="admin-tab-btn" onclick="switchTab('settings')">Svetainės Tekstai & Įrašas</button>
+      <div class="admin-nav-group">
+        <button id="tabSubmissionsBtn" class="admin-nav-item active" onclick="switchTab('submissions')">Paraiškos</button>
+        <button id="tabSettingsBtn" class="admin-nav-item" onclick="switchTab('settings')">Nustatymai & Vaizdo Įrašas</button>
       </div>
 
-      <div style="display:flex; align-items:center; gap:12px;">
-        <button id="logoutBtn" class="btn-secondary" style="padding:6px 14px; font-size:0.8rem; min-height:auto;">Atsijungti</button>
+      <div>
+        <button id="logoutBtn" class="btn-outline" style="height:34px; padding:0 14px; font-size:0.8rem;">Atsijungti</button>
       </div>
     </div>
 
-    <div class="admin-content container">
+    <div class="admin-main container">
       <div id="submissionsTab">
-        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:20px;">
-          <div>
-            <h2 style="font-family:'Cormorant Garamond', serif; font-size:1.8rem; color:#fff;">Dalyvių Paraiškos</h2>
-            <p id="statsCounter" style="color:var(--text-muted); font-size:0.84rem;">Kraunami duomenys...</p>
+        <div class="metrics-row">
+          <div class="metric-card">
+            <div class="metric-label">Viso paraiškų</div>
+            <div class="metric-num" id="statTotal">0</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">Priimti filmai</div>
+            <div class="metric-num" id="statAccepted">0</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">Pusfinalis / Finalas</div>
+            <div class="metric-num" id="statFinals">0</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">Laukiantys vertinimo</div>
+            <div class="metric-num" id="statPending">0</div>
           </div>
         </div>
 
-        <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:20px; align-items:center;">
-          <input type="text" id="filterSearch" class="form-input" style="max-width:280px;" placeholder="Paieška...">
-          <select id="filterCategory" class="form-select" style="width:auto;">
+        <div class="table-toolbar">
+          <input type="text" id="filterSearch" class="field" style="max-width:280px; height:38px;" placeholder="Ieškoti pagal autorių, filmą...">
+          <select id="filterCategory" class="field" style="width:auto; height:38px;">
             <option value="all">Visos kategorijos</option>
             <option value="Category I (10-13)">I Kategorija (10-13)</option>
             <option value="Category II (14-18)">II Kategorija (14-18)</option>
           </select>
-          <select id="filterStatus" class="form-select" style="width:auto;">
+          <select id="filterStatus" class="field" style="width:auto; height:38px;">
             <option value="all">Visi statusai</option>
             <option value="submitted">Pateikta</option>
             <option value="accepted">Priimta</option>
@@ -78,8 +90,8 @@
           </select>
         </div>
 
-        <div class="table-wrapper">
-          <table class="admin-table">
+        <div class="table-box">
+          <table class="clean-table">
             <thead>
               <tr>
                 <th>Data</th>
@@ -98,116 +110,108 @@
       </div>
 
       <div id="settingsTab" style="display:none;">
-        <div style="margin-bottom:24px;">
-          <h2 style="font-family:'Cormorant Garamond', serif; font-size:1.8rem; color:#fff;">Svetainės & Renginio Nustatymai</h2>
-          <p style="color:var(--text-muted); font-size:0.85rem;">Čia galite įkelti festivalio vaizdo įrašo nuorodą ir redaguoti tekstus.</p>
-        </div>
-
-        <div class="card-luxury" style="margin-bottom:24px; padding:24px;">
-          <h3 style="color:var(--emerald-accent); font-family:'Cormorant Garamond', serif; font-size:1.3rem; margin-bottom:12px;">Svetainėje Rodomas Renginio Vaizdo Įrašas</h3>
-          <div class="form-group">
+        <div class="content-card" style="margin-bottom:20px;">
+          <h3 style="color:var(--primary-emerald); font-family:var(--font-cinema); font-size:1.25rem; margin-bottom:8px;">Svetainėje Rodomas Vaizdo Įrašas</h3>
+          <div class="input-cell" style="margin-bottom:0;">
             <label for="cfgRecordingUrl">Vaizdo įrašo URL (Tiesioginė MP4 nuoroda arba YouTube nuoroda)</label>
-            <input type="text" id="cfgRecordingUrl" class="form-input" placeholder="pvz. https://www.youtube.com/watch?v=... arba https://.../video.mp4">
-            <small style="color:var(--text-faint); font-size:0.78rem;">Palikite tuščią, jei vaizdo įrašas dar neparengtas. Svetainėje bus rodomas laukimo pranešimas.</small>
+            <input type="text" id="cfgRecordingUrl" class="field" placeholder="https://www.youtube.com/watch?v=...">
           </div>
         </div>
 
-        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:20px;">
-          <div class="card-luxury" style="padding:22px;">
-            <h3 style="color:var(--teal-light); font-family:'Cormorant Garamond', serif; font-size:1.25rem; margin-bottom:14px;">Lietuviška versija (LT)</h3>
-            <div class="form-group">
+        <div class="two-col-grid">
+          <div class="content-card">
+            <h3 style="color:var(--text-white); font-family:var(--font-cinema); font-size:1.15rem; margin-bottom:12px;">Lietuviška versija (LT)</h3>
+            <div class="input-cell">
               <label>Festivalio tema</label>
-              <input type="text" id="cfgLtTopic" class="form-input">
+              <input type="text" id="cfgLtTopic" class="field">
             </div>
-            <div class="form-group">
+            <div class="input-cell">
               <label>Hero žyma</label>
-              <input type="text" id="cfgLtHeroBadge" class="form-input">
+              <input type="text" id="cfgLtHeroBadge" class="field">
             </div>
-            <div class="form-group">
-              <label>Paraiškų priėmimo datos</label>
-              <input type="text" id="cfgLtDates" class="form-input">
+            <div class="input-cell">
+              <label>Paraiškų datos</label>
+              <input type="text" id="cfgLtDates" class="field">
             </div>
-            <div class="form-group">
-              <label>Renginio data ir laikas</label>
-              <input type="text" id="cfgLtEvent" class="form-input">
+            <div class="input-cell">
+              <label>Renginio data ir vieta</label>
+              <input type="text" id="cfgLtEvent" class="field">
             </div>
-            <div class="form-group">
+            <div class="input-cell">
               <label>Dalyvių auditorija</label>
-              <input type="text" id="cfgLtTarget" class="form-input">
+              <input type="text" id="cfgLtTarget" class="field">
             </div>
-            <div class="form-group">
-              <label>Peržiūros laukimo tekstas (kai nėra įrašo)</label>
-              <input type="text" id="cfgLtRecordingPh" class="form-input">
+            <div class="input-cell">
+              <label>Laukimo pranešimas</label>
+              <input type="text" id="cfgLtRecordingPh" class="field">
             </div>
           </div>
 
-          <div class="card-luxury" style="padding:22px;">
-            <h3 style="color:var(--teal-light); font-family:'Cormorant Garamond', serif; font-size:1.25rem; margin-bottom:14px;">Angliška versija (EN)</h3>
-            <div class="form-group">
+          <div class="content-card">
+            <h3 style="color:var(--text-white); font-family:var(--font-cinema); font-size:1.15rem; margin-bottom:12px;">Angliška versija (EN)</h3>
+            <div class="input-cell">
               <label>Festival Topic</label>
-              <input type="text" id="cfgEnTopic" class="form-input">
+              <input type="text" id="cfgEnTopic" class="field">
             </div>
-            <div class="form-group">
+            <div class="input-cell">
               <label>Hero Badge</label>
-              <input type="text" id="cfgEnHeroBadge" class="form-input">
+              <input type="text" id="cfgEnHeroBadge" class="field">
             </div>
-            <div class="form-group">
+            <div class="input-cell">
               <label>Submissions Dates</label>
-              <input type="text" id="cfgEnDates" class="form-input">
+              <input type="text" id="cfgEnDates" class="field">
             </div>
-            <div class="form-group">
-              <label>Event Date & Time</label>
-              <input type="text" id="cfgEnEvent" class="form-input">
+            <div class="input-cell">
+              <label>Event Date & Location</label>
+              <input type="text" id="cfgEnEvent" class="field">
             </div>
-            <div class="form-group">
+            <div class="input-cell">
               <label>Target Audience</label>
-              <input type="text" id="cfgEnTarget" class="form-input">
+              <input type="text" id="cfgEnTarget" class="field">
             </div>
-            <div class="form-group">
-              <label>Screening Placeholder text (when no video)</label>
-              <input type="text" id="cfgEnRecordingPh" class="form-input">
+            <div class="input-cell">
+              <label>Screening Placeholder Text</label>
+              <input type="text" id="cfgEnRecordingPh" class="field">
             </div>
           </div>
         </div>
 
         <div style="margin-top:20px; display:flex; justify-content:flex-end;">
-          <button id="saveSettingsBtn" class="btn-primary" style="padding:12px 30px;">Išsaugoti Pakeitimus</button>
+          <button id="saveSettingsBtn" class="btn-solid">Išsaugoti Pakeitimus</button>
         </div>
       </div>
     </div>
   </div>
 
-  <div id="entryModal" class="modal-overlay">
-    <div class="modal-window">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; border-bottom:1px solid var(--border-subtle); padding-bottom:12px;">
-        <h3 id="mTitle" style="color:var(--teal-light); font-family:'Cormorant Garamond', serif; font-size:1.4rem;">Filmo peržiūra</h3>
-        <button onclick="closeEntryModal()" style="background:none; border:none; color:var(--text-muted); font-size:1.6rem; cursor:pointer;">&times;</button>
+  <div id="entryModal" class="modal-curtain">
+    <div class="modal-dialog">
+      <div class="modal-title-row">
+        <h3 id="mTitle" style="color:var(--text-white); font-family:var(--font-cinema); font-size:1.3rem;">Filmo peržiūra</h3>
+        <button class="modal-close" onclick="closeEntryModal()">&times;</button>
       </div>
 
-      <video id="mVideo" style="width:100%; max-height:340px; background:#000; border-radius:var(--radius-sm); margin-bottom:14px;" controls playsinline></video>
+      <video id="mVideo" class="modal-video-frame" controls playsinline></video>
 
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; flex-wrap:wrap; gap:8px;">
-        <button id="mDeleteBtn" class="btn-danger">Ištrinti paraišką</button>
-        <a id="mDownloadLink" href="" target="_blank" download class="btn-secondary" style="font-size:0.8rem; padding:6px 12px; min-height:auto;">Atsisiųsti video</a>
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; gap:8px;">
+        <button id="mDeleteBtn" class="btn-delete">Ištrinti paraišką</button>
+        <a id="mDownloadLink" href="" target="_blank" download class="btn-outline" style="height:34px; padding:0 14px; font-size:0.8rem;">Atsisiųsti video</a>
       </div>
 
-      <div style="background:var(--bg-surface); border:1px solid var(--border-subtle); border-radius:var(--radius-sm); padding:16px; margin-bottom:20px; font-size:0.88rem; line-height:1.6;">
+      <div class="modal-details">
         <p><strong>Autorius:</strong> <span id="mAuthor"></span> (<span id="mEmail"></span>)</p>
         <p><strong>Amžius / Įstaiga:</strong> <span id="mAgeInst"></span></p>
         <p><strong>Vieta:</strong> <span id="mLocation"></span></p>
         <p><strong>Kameros modelis:</strong> <span id="mDevice"></span></p>
         <p><strong>Trukmė:</strong> <span id="mDuration"></span> s</p>
-        <p style="margin-top:10px; font-weight:700; color:var(--emerald-accent);">Sinopsis / Idėja:</p>
-        <p id="mSynopsis" style="color:var(--text-muted); font-style:italic; margin-top:4px;"></p>
+        <p style="margin-top:8px; font-weight:700; color:var(--primary-emerald);">Sinopsis / Idėja:</p>
+        <p id="mSynopsis" style="color:var(--text-muted); font-style:italic; margin-top:2px;"></p>
       </div>
 
-      <div style="background:var(--bg-surface-elevated); border:1px solid var(--border-subtle); border-radius:var(--radius-sm); padding:18px;">
-        <h4 style="color:#fff; font-size:0.95rem; margin-bottom:12px;">Statuso Valdymas ir Laiško Siuntimas</h4>
-        
-        <div class="form-row">
-          <div class="form-group">
+      <div style="background:var(--bg-card); border:1px solid var(--border-color); border-radius:var(--site-radius); padding:16px;">
+        <div class="input-row">
+          <div class="input-cell">
             <label for="mNewStatus">Keisti statusą:</label>
-            <select id="mNewStatus" class="form-select">
+            <select id="mNewStatus" class="field">
               <option value="submitted">Pateikta (Submitted)</option>
               <option value="accepted">Priimta (Accepted)</option>
               <option value="semifinal">Pusfinalis (Semi-Final)</option>
@@ -216,42 +220,42 @@
               <option value="rejected">Atmesta (Rejected)</option>
             </select>
           </div>
-          <div class="form-group">
+          <div class="input-cell">
             <label for="mEmailTemplate">Siunčiamas laiškas:</label>
-            <select id="mEmailTemplate" class="form-select">
+            <select id="mEmailTemplate" class="field">
               <option value="none">Nesiųsti el. laiško</option>
-              <option value="accepted">Priėmimo patvirtinimas (Accepted)</option>
-              <option value="semiFinalist">Pusfinalio žinia (Semi-Final)</option>
-              <option value="finalist">Finalo žinia (Finalist)</option>
-              <option value="winner">Nugalėtojo diplomas (Winner)</option>
-              <option value="rejected">Neatrankos pranešimas (Rejected)</option>
+              <option value="accepted">Priėmimo patvirtinimas</option>
+              <option value="semiFinalist">Pusfinalio žinia</option>
+              <option value="finalist">Finalo žinia</option>
+              <option value="winner">Nugalėtojo diplomas</option>
+              <option value="rejected">Neatrankos pranešimas</option>
               <option value="eventReminder">Renginio įrašo priminimas</option>
             </select>
           </div>
         </div>
 
-        <div class="form-row">
-          <div class="form-group">
+        <div class="input-row">
+          <div class="input-cell">
             <label for="mEmailLang">Laiško kalba:</label>
-            <select id="mEmailLang" class="form-select">
+            <select id="mEmailLang" class="field">
               <option value="lt">Lietuvių (LT)</option>
               <option value="en">English (EN)</option>
             </select>
           </div>
-          <div class="form-group">
-            <label for="mStreamLink">Papildoma nuoroda laiške (nebūtina):</label>
-            <input type="url" id="mStreamLink" class="form-input" placeholder="https://azuolynasinternationalfilmfestival.github.io/site/">
+          <div class="input-cell">
+            <label for="mStreamLink">Nuoroda laiške (nebūtina):</label>
+            <input type="url" id="mStreamLink" class="field" placeholder="https://azuolynasinternationalfilmfestival.github.io/site/">
           </div>
         </div>
 
-        <div class="form-group">
+        <div class="input-cell">
           <label for="mCustomText">Papildoma žinutė laiške (nebūtina):</label>
-          <textarea id="mCustomText" class="form-textarea" style="min-height:60px;"></textarea>
+          <textarea id="mCustomText" class="field" style="min-height:50px;"></textarea>
         </div>
 
-        <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:14px;">
-          <button class="btn-secondary" style="min-height:auto; padding:8px 16px;" onclick="closeEntryModal()">Atšaukti</button>
-          <button id="mSaveBtn" class="btn-primary" style="min-height:auto; padding:8px 20px;">Išsaugoti</button>
+        <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:8px;">
+          <button class="btn-outline" style="height:38px; padding:0 16px;" onclick="closeEntryModal()">Atšaukti</button>
+          <button id="mSaveBtn" class="btn-solid" style="height:38px; padding:0 20px;">Išsaugoti</button>
         </div>
       </div>
     </div>
@@ -305,8 +309,8 @@
       const isSub = tab === "submissions";
       document.getElementById("submissionsTab").style.display = isSub ? "block" : "none";
       document.getElementById("settingsTab").style.display = isSub ? "none" : "block";
-      document.getElementById("tabSubmissionsBtn").className = `admin-tab-btn ${isSub ? 'active' : ''}`;
-      document.getElementById("tabSettingsBtn").className = `admin-tab-btn ${isSub ? '' : 'active'}`;
+      document.getElementById("tabSubmissionsBtn").className = `admin-nav-item ${isSub ? 'active' : ''}`;
+      document.getElementById("tabSettingsBtn").className = `admin-nav-item ${isSub ? '' : 'active'}`;
     }
 
     function fetchSettings() {
@@ -359,10 +363,10 @@
 
       try {
         await db.collection("settings").doc("festival").set(updated, { merge: true });
-        alert("Nustatymai ir vaizdo įrašo nuoroda sėkmingai atnaujinti!");
+        alert("Pakeitimai išsaugoti.");
       } catch (err) {
         console.error(err);
-        alert("Klaida išsaugant nustatymus: " + err.message);
+        alert("Klaida: " + err.message);
       } finally {
         btn.disabled = false;
       }
@@ -376,15 +380,22 @@
           snap.forEach((doc) => {
             submissionsList.push({ id: doc.id, ...doc.data() });
           });
+          updateMetrics();
           renderTable();
         }, (err) => console.error(err));
+    }
+
+    function updateMetrics() {
+      document.getElementById("statTotal").textContent = submissionsList.length;
+      document.getElementById("statAccepted").textContent = submissionsList.filter(s => s.status === "accepted").length;
+      document.getElementById("statFinals").textContent = submissionsList.filter(s => s.status === "semifinal" || s.status === "final" || s.status === "winner").length;
+      document.getElementById("statPending").textContent = submissionsList.filter(s => !s.status || s.status === "submitted").length;
     }
 
     const tableBody = document.getElementById("tableBody");
     const filterSearch = document.getElementById("filterSearch");
     const filterCategory = document.getElementById("filterCategory");
     const filterStatus = document.getElementById("filterStatus");
-    const statsCounter = document.getElementById("statsCounter");
 
     function renderTable() {
       const q = filterSearch.value.toLowerCase();
@@ -401,7 +412,6 @@
         return matchSearch && matchCat && matchStatus;
       });
 
-      statsCounter.textContent = `Rodoma paraiškų: ${filtered.length} (Iš viso: ${submissionsList.length})`;
       tableBody.innerHTML = "";
 
       filtered.forEach((sub) => {
@@ -412,20 +422,20 @@
           dateStr = sub.submittedAt.toDate().toLocaleDateString("lt-LT", { month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" });
         }
 
-        const badgeCls = `status-${sub.status || 'submitted'}`;
+        const badgeCls = `badge-${sub.status || 'submitted'}`;
 
         tr.innerHTML = `
-          <td style="color:var(--text-faint); font-size:0.8rem;">${dateStr}</td>
+          <td style="color:var(--text-subtle); font-size:0.78rem;">${dateStr}</td>
           <td><strong>${sub.name || ''}</strong><br><small style="color:var(--text-muted);">${sub.email || ''}</small></td>
-          <td>${sub.age || ''} m.<br><small style="color:var(--text-faint);">${sub.category || ''}</small></td>
+          <td>${sub.age || ''} m.<br><small style="color:var(--text-subtle);">${sub.category || ''}</small></td>
           <td><b style="color:#fff;">${sub.filmTitle || ''}</b></td>
           <td>${sub.videoDurationSeconds ? sub.videoDurationSeconds + 's' : '-'}</td>
           <td><small style="color:var(--text-muted);">${sub.deviceModel || '-'}</small></td>
-          <td><span class="status-badge ${badgeCls}">${sub.status || 'submitted'}</span></td>
+          <td><span class="badge ${badgeCls}">${sub.status || 'submitted'}</span></td>
           <td>
             <div style="display:flex; gap:6px;">
-              <button class="btn-secondary" style="padding:5px 10px; font-size:0.78rem; min-height:auto;" onclick="viewEntry('${sub.id}')">Peržiūrėti</button>
-              <button class="btn-danger" style="padding:5px 10px; font-size:0.78rem; min-height:auto;" onclick="deleteEntry('${sub.id}')">Ištrinti</button>
+              <button class="btn-outline" style="height:32px; padding:0 10px; font-size:0.75rem;" onclick="viewEntry('${sub.id}')">Peržiūrėti</button>
+              <button class="btn-delete" style="height:32px; padding:0 10px; font-size:0.75rem;" onclick="deleteEntry('${sub.id}')">Ištrinti</button>
             </div>
           </td>
         `;
@@ -476,7 +486,7 @@
       const entry = submissionsList.find(x => x.id === id);
       if (!entry) return;
 
-      const confirmed = confirm(`Ar tikrai norite visam laikui ištrinti paraišką „${entry.filmTitle}“ (${entry.name})?`);
+      const confirmed = confirm(`Ar tikrai norite ištrinti paraišką „${entry.filmTitle}“ (${entry.name})?`);
       if (!confirmed) return;
 
       try {
@@ -488,10 +498,10 @@
           }
         }
         await db.collection("submissions").doc(id).delete();
-        alert("Paraiška sėkmingai pašalinta.");
+        alert("Paraiška pašalinta.");
       } catch (err) {
         console.error(err);
-        alert("Klaida trinant: " + err.message);
+        alert("Klaida: " + err.message);
       }
     };
 
@@ -543,7 +553,7 @@
         closeEntryModal();
       } catch (err) {
         console.error(err);
-        alert("Klaida saugant pakeitimus: " + err.message);
+        alert("Klaida: " + err.message);
       } finally {
         mSaveBtn.disabled = false;
       }
