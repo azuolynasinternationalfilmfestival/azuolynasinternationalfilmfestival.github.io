@@ -74,6 +74,8 @@
       </a>
       <ul class="nav-links">
         <li><a href="#about">Apie festivalį</a></li>
+        <li><a href="#results">Rezultatai</a></li>
+        <li><a href="#competition">Balsavimas</a></li>
         <li><a href="#screening">Peržiūra</a></li>
         <li><a href="#terms">Taisyklės</a></li>
         <li><a href="#categories">Kategorijos</a></li>
@@ -113,8 +115,28 @@
 
         <div class="cta-flex">
           <a href="#submit" class="btn-solid">Pateikti savo filmą</a>
-          <a href="#screening" class="btn-outline">Festivalio peržiūra</a>
+          <a href="#competition" class="btn-outline">Balsuoti už filmus</a>
         </div>
+      </div>
+    </section>
+
+    <section id="results" class="section-block">
+      <div class="container">
+        <div class="section-head">
+          <div class="section-tag">Laureatai</div>
+          <h2 class="section-heading">Festivalio Rezultatai</h2>
+        </div>
+        <div id="winnersListContainer" class="results-grid"></div>
+      </div>
+    </section>
+
+    <section id="competition" class="section-block">
+      <div class="container">
+        <div class="section-head">
+          <div class="section-tag">Dalyviai ir Balsavimas</div>
+          <h2 class="section-heading">Konkursinė Programa</h2>
+        </div>
+        <div id="filmsGalleryContainer" class="films-grid"></div>
       </div>
     </section>
 
@@ -322,6 +344,26 @@
     </section>
   </main>
 
+  <div id="publicPreviewModal" class="modal-curtain">
+    <div class="modal-dialog">
+      <div class="modal-title-row">
+        <h3 id="publicModalTitle" style="color:var(--text-white); font-family:var(--font-cinema); font-size:clamp(1.15rem, 2.2vw, 1.45rem);">Filmo peržiūra</h3>
+        <button class="modal-close" onclick="closePublicModal()">&times;</button>
+      </div>
+      <video id="publicModalVideo" class="modal-video-frame" controls playsinline></video>
+      <div class="modal-details">
+        <p><strong>Režisierius:</strong> <span id="publicModalAuthor"></span></p>
+        <p><strong>Amžius ir kategorija:</strong> <span id="publicModalCategory"></span></p>
+        <p><strong>Miestas, šalis:</strong> <span id="publicModalLocation"></span></p>
+        <p><strong>Mokykla / Studija:</strong> <span id="publicModalInstitution"></span></p>
+        <p><strong>Kameros modelis:</strong> <span id="publicModalDevice"></span></p>
+        <p><strong>Trukmė:</strong> <span id="publicModalDuration"></span> s</p>
+        <p style="margin-top:8px; font-weight:700; color:var(--primary-emerald);">Sinopsis:</p>
+        <p id="publicModalSynopsis" style="color:var(--text-muted); font-style:italic; margin-top:2px;"></p>
+      </div>
+    </div>
+  </div>
+
   <footer>
     <div class="container">
       <img src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media" alt="Logo" class="footer-logo">
@@ -336,6 +378,10 @@
   <script src="../config.js"></script>
   <script src="../email-templates.js"></script>
   <script>
+    let filmsCache = [];
+
+    auth.signInAnonymously().catch((err) => console.error(err));
+
     db.collection("settings").doc("festival").onSnapshot((doc) => {
       const d = doc.exists ? doc.data() : DEFAULT_CONTENT;
       const data = d.lt || DEFAULT_CONTENT.lt;
@@ -373,6 +419,160 @@
         document.getElementById("dynRecordingPlaceholder").textContent = ph;
       }
     });
+
+    db.collection("submissions").onSnapshot((snapshot) => {
+      filmsCache = [];
+      snapshot.forEach((doc) => {
+        filmsCache.push({ id: doc.id, ...doc.data() });
+      });
+      renderWinnersSection();
+      renderFilmsGallery();
+    });
+
+    function renderWinnersSection() {
+      const container = document.getElementById("winnersListContainer");
+      if (!container) return;
+      const winners = filmsCache.filter((f) => f.isWinner === true);
+      if (winners.length === 0) {
+        container.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: var(--text-muted); padding: 20px;">Oficialūs festivalio laureatai netrukus bus paskelbti.</div>';
+        return;
+      }
+      container.innerHTML = winners.map((w) => `
+        <div class="winner-card">
+          <div class="winner-badge">${w.awardTitle || 'Laureatas'}</div>
+          <div class="winner-title">${w.filmTitle || ''}</div>
+          <div class="winner-meta">
+            <div><strong>${w.name || ''}</strong></div>
+            <div>${w.institution || w.location || ''}</div>
+            <div>${w.category || ''}</div>
+          </div>
+          <button class="btn-preview" onclick="openPublicModal('${w.id}')">
+            PERŽIŪRĖTI FILMĄ
+          </button>
+        </div>
+      `).join("");
+    }
+
+    function renderFilmsGallery() {
+      const container = document.getElementById("filmsGalleryContainer");
+      if (!container) return;
+      const eligible = filmsCache.filter((f) => ["accepted", "semifinal", "final", "winner"].includes(f.status));
+      if (eligible.length === 0) {
+        container.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: var(--text-muted); padding: 20px;">Konkursiniai filmai ruošiami peržiūrai.</div>';
+        return;
+      }
+
+      const totalVotes = eligible.reduce((acc, curr) => acc + (curr.votesCount || 0), 0);
+
+      container.innerHTML = eligible.map((film) => {
+        const votes = film.votesCount || 0;
+        const pct = totalVotes > 0 ? Math.round((votes / totalVotes) * 100) : 0;
+        const hasVoted = localStorage.getItem("voted_" + film.id) === "true";
+
+        return `
+          <div class="film-card">
+            <div>
+              <div class="film-card-thumb">
+                <video src="${film.videoUrl || ''}" preload="metadata" muted playsinline></video>
+              </div>
+              <div class="film-card-title">${film.filmTitle || ''}</div>
+              <div class="film-card-meta">
+                ${film.name || ''}<br>
+                ${film.category || ''} • ${film.location || ''}
+              </div>
+            </div>
+            <div>
+              <button class="btn-preview" onclick="openPublicModal('${film.id}')">
+                PERŽIŪRĖTI FILMĄ
+              </button>
+              <div class="vote-box">
+                <div class="vote-stats">
+                  <span>Publikos balsai</span>
+                  <span class="vote-num" id="voteCount_${film.id}">${votes} (${pct}%)</span>
+                </div>
+                <div class="vote-bar-bg">
+                  <div class="vote-bar-fill" id="voteFill_${film.id}" style="width: ${pct}%;"></div>
+                </div>
+                <button class="btn-vote" id="voteBtn_${film.id}" onclick="submitVote('${film.id}')" ${hasVoted ? "disabled" : ""}>
+                  ${hasVoted ? "Balsas užskaitytas" : "Balsuoti už filmą"}
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    async function submitVote(filmId) {
+      if (localStorage.getItem("voted_" + filmId) === "true") return;
+
+      const btn = document.getElementById("voteBtn_" + filmId);
+      if (btn) btn.disabled = true;
+
+      try {
+        const user = auth.currentUser || (await auth.signInAnonymously()).user;
+        const uid = user.uid;
+
+        const filmRef = db.collection("submissions").doc(filmId);
+        const voteAuditRef = db.collection("submissions").doc(filmId).collection("votes").doc(uid);
+
+        await db.runTransaction(async (transaction) => {
+          const voteDoc = await transaction.get(voteAuditRef);
+          if (voteDoc.exists) {
+            throw new Error("already-voted");
+          }
+          transaction.set(voteAuditRef, {
+            votedAt: firebase.firestore.FieldValue.serverTimestamp()
+          });
+          transaction.update(filmRef, {
+            votesCount: firebase.firestore.FieldValue.increment(1)
+          });
+        });
+
+        localStorage.setItem("voted_" + filmId, "true");
+        if (btn) btn.textContent = "Balsas užskaitytas";
+
+        const countElem = document.getElementById("voteCount_" + filmId);
+        if (countElem) {
+          countElem.classList.add("pulse");
+          setTimeout(() => countElem.classList.remove("pulse"), 500);
+        }
+      } catch (err) {
+        if (err.message === "already-voted") {
+          localStorage.setItem("voted_" + filmId, "true");
+          if (btn) btn.textContent = "Jau balsuota";
+        } else {
+          console.error(err);
+          if (btn) btn.disabled = false;
+        }
+      }
+    }
+
+    function openPublicModal(id) {
+      const film = filmsCache.find((f) => f.id === id);
+      if (!film) return;
+
+      document.getElementById("publicModalTitle").textContent = film.filmTitle || "";
+      document.getElementById("publicModalAuthor").textContent = film.name || "";
+      document.getElementById("publicModalCategory").textContent = `${film.age || ''} m. | ${film.category || ''}`;
+      document.getElementById("publicModalLocation").textContent = film.location || "";
+      document.getElementById("publicModalInstitution").textContent = film.institution || "-";
+      document.getElementById("publicModalDevice").textContent = film.deviceModel || "-";
+      document.getElementById("publicModalDuration").textContent = film.videoDurationSeconds || "-";
+      document.getElementById("publicModalSynopsis").textContent = film.synopsis || "-";
+
+      const video = document.getElementById("publicModalVideo");
+      video.src = film.videoUrl || "";
+      document.getElementById("publicPreviewModal").style.display = "flex";
+    }
+
+    function closePublicModal() {
+      const modal = document.getElementById("publicPreviewModal");
+      const video = document.getElementById("publicModalVideo");
+      modal.style.display = "none";
+      video.pause();
+      video.src = "";
+    }
 
     let verifiedVideoFile = null;
     let videoDurationSeconds = 0;
@@ -473,6 +673,7 @@
               videoUrl,
               videoDurationSeconds,
               storagePath,
+              votesCount: 0,
               status: "submitted",
               submissionLang: "lt",
               submittedAt: firebase.firestore.FieldValue.serverTimestamp()
