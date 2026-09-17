@@ -1,23 +1,23 @@
 const emailWrapperStart = `
-<div style="background-color: #060808; padding: 40px 15px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
-  <div style="max-width: 600px; margin: 0 auto; background-color: #101414; padding: 40px 32px; border-radius: 14px; border-top: 4px solid #dfba69; border-left: 1px solid #1c2424; border-right: 1px solid #1c2424; border-bottom: 1px solid #1c2424; box-shadow: 0 20px 50px rgba(0,0,0,0.7);">
-    <div style="text-align: center; margin-bottom: 30px;">
-      <img src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media" alt="Ąžuolynas Film Fest" style="max-height: 80px; width: auto; display: inline-block;">
-      <h2 style="color: #eed592; margin: 18px 0 4px 0; font-size: 19px; letter-spacing: 1.5px; text-transform: uppercase; font-weight: 700;">Ąžuolynas Film Festival</h2>
-      <p style="color: #7b8e8b; margin: 0; font-size: 13px; letter-spacing: 0.5px;">An unusual view at ordinary things</p>
+<div style="background-color: #061110; padding: 35px 15px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+  <div style="max-width: 580px; margin: 0 auto; background-color: #0a1716; padding: 35px 26px; border-radius: 12px; border-top: 4px solid #10B981; border-left: 1px solid rgba(16,185,129,0.15); border-right: 1px solid rgba(16,185,129,0.15); border-bottom: 1px solid rgba(16,185,129,0.15); box-shadow: 0 16px 40px rgba(0,0,0,0.6);">
+    <div style="text-align: center; margin-bottom: 26px;">
+      <img src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media" alt="Ąžuolynas Film Fest" style="max-height: 72px; width: auto; display: inline-block;">
+      <h2 style="color: #ECFDF5; margin: 16px 0 4px 0; font-size: 18px; letter-spacing: 1px; text-transform: uppercase; font-weight: 700;">Ąžuolynas Film Festival</h2>
+      <p style="color: #95b3ad; margin: 0; font-size: 13px;">An unusual view at ordinary things</p>
     </div>
 `;
 
-const emailBoxStyle = `border: 1px solid #202b2a; padding: 22px; margin: 24px 0; border-radius: 8px; background-color: #141b1b;`;
+const emailBoxStyle = `border: 1px solid rgba(16,185,129,0.2); padding: 20px; margin: 22px 0; border-radius: 8px; background-color: #0f2220;`;
 
 const emailWrapperEnd = `
-    <hr style="border: none; border-top: 1px solid #1c2625; margin: 36px 0 24px 0;">
+    <hr style="border: none; border-top: 1px solid rgba(16,185,129,0.15); margin: 30px 0 20px 0;">
     <div style="text-align: center;">
-      <p style="font-size: 13px; color: #879b98; margin: 0 0 6px 0; line-height: 1.6;">
+      <p style="font-size: 13px; color: #95b3ad; margin: 0 0 6px 0; line-height: 1.6;">
         <b>ĄŽUOLYNAS INTERNATIONAL STUDENTS FILM FESTIVAL</b><br>
-        Email: <a href="mailto:azuolynasfilmfestival@gmail.com" style="color: #dfba69; text-decoration: none;">azuolynasfilmfestival@gmail.com</a>
+        Email: <a href="mailto:azuolynasfilmfestival@gmail.com" style="color: #10B981; text-decoration: none;">azuolynasfilmfestival@gmail.com</a>
       </p>
-      <p style="font-size: 12px; color: #526360; margin: 0;">May 27th, 15:00 (Lithuanian Time) • Live on YouTube</p>
+      <p style="font-size: 12px; color: #5b7570; margin: 0;">Renginio įrašas svetainėje: May 27th, 15:00 (EEST)</p>
     </div>
   </div>
 </div>
@@ -30,100 +30,100 @@ const emailTexts = {
       heading: "Sveiki, {{name}}!",
       body: "Nuoširdžiai dėkojame! Jūsų filmas sėkmingai pasiekė Ąžuolyno tarptautinio mokinių filmų festivalio organizacinę komandą. Mūsų atrankos komisija peržiūrės filmą.",
       detailsTitle: "Pateiktos paraiškos suvestinė:",
-      note: "Oficialus festivalio renginys ir apdovanojimų ceremonija vyks gegužės 27 d. 15:00 val. YouTube platformoje."
+      note: "Festivalio peržiūros įrašas ir nugalėtojų paskelbimas bus patalpintas oficialioje festivalio svetainėje gegužės 27 d. 15:00 val."
     },
     accepted: {
       sub: "Ąžuolynas Film Fest | Sveikiname! Jūsų filmas priimtas",
       heading: "Puikios žinios, {{name}}!",
-      body: "Su džiaugsmu pranešame, kad jūsų filmas sėkmingai įveikė techninę atranką ir yra oficialiai priimtas į festivalio konkursinę programą!",
+      body: "Džiaugiamės galėdami pranešti, kad jūsų filmas atitiko visus reikalavimus ir yra oficialiai priimtas į festivalio konkursinę programą!",
       detailsTitle: "Priėmimo informacija:",
-      note: "Artėjant renginiui atsiųsime tiesioginę nuorodą į festivalio transliaciją."
+      note: "Gegužės 27 d. festivalio įrašas bus pasiekiamas oficialioje festivalio svetainėje."
     },
     semiFinalist: {
       sub: "Ąžuolynas Film Fest | Jūsų darbas pateko į PUSFINALĮ!",
       heading: "Sveikiname, {{name}}!",
-      body: "Komisija liko sužavėta jūsų kūrybiniu požiūriu. Džiaugiamės galėdami pranešti, kad jūsų filmas pateko tarp oficialių festivalio pusfinalininkų!",
+      body: "Komisija itin aukštai įvertino jūsų kūrybiškumą. Jūsų darbas oficialiai patenka tarp festivalio pusfinalininkų!",
       detailsTitle: "Rezultatai:",
-      note: "Pusfinalininkų darbai bus pristatomi gegužės 27 d. festivalio metu."
+      note: "Pusfinalio filmai bus pristatomi festivalio peržiūros įraše gegužės 27 d."
     },
     finalist: {
       sub: "Ąžuolynas Film Fest | Jūs esate FINALE!",
       heading: "Ypatingas pasiekimas, {{name}}!",
-      body: "Jūsų filmas oficialiai pateko į Ąžuolyno kino festivalio FINALĄ ir pretenduoja į 1, 2, 3 vietas bei Žiūrovų simpatijų prizą!",
+      body: "Jūsų filmas oficialiai pateko į Ąžuolyno kino festivalio FINALĄ ir pretenduoja į prizines vietas bei Žiūrovų simpatijų prizą!",
       detailsTitle: "Finalo informacija:",
-      note: "Nugalėtojai bus paskelbti tiesioginės YouTube transliacijos metu gegužės 27 d. 15:00."
+      note: "Nugalėtojai bus atskleisti oficialiame festivalio vaizdo įraše gegužės 27 d. 15:00."
     },
     winner: {
       sub: "Ąžuolynas Film Fest | SVEIKINAME TAPUS FESTIVALIO LAUREATU!",
       heading: "Nuoširdūs sveikinimai, {{name}}!",
-      body: "Komisijos sprendimu jūsų filmas pelnė apdovanojimą Ąžuolyno tarptautiniame mokinių filmų festivalyje! Dėkojame už jūsų talentą bei išskirtinę viziją.",
+      body: "Komisijos sprendimu jūsų filmas pelnė apdovanojimą Ąžuolyno tarptautiniame mokinių filmų festivalyje! Dėkojame už jūsų talentą.",
       detailsTitle: "Apdovanojimo informacija:",
       note: "Netrukus susisieksime asmeniškai dėl diplomo ir prizo perdavimo."
     },
     rejected: {
       sub: "Ąžuolynas Film Fest | Informacija apie jūsų paraišką",
       heading: "Sveiki, {{name}},",
-      body: "Dėkojame, kad atsiuntėte savo filmą. Nors šį kartą jūsų kūrinys nepateko į kitą festivalio etapą, labai vertiname jūsų kūrybą ir pastangas.",
+      body: "Dėkojame už jūsų dalyvavimą. Nors šį kartą jūsų darbas nepateko į kitą etapą, labai vertiname jūsų kūrybiškumą ir pastangas.",
       detailsTitle: "Atrankos rezultatas:",
-      note: "Nenustokite kurti ir perteikti savo pasaulio matymo! Lauksime jūsų dalyvaujant kitais metais."
+      note: "Kurkite toliau ir lauksime jūsų kitų metų festivalyje!"
     },
     eventReminder: {
-      sub: "Ąžuolynas Film Fest | Transliacija prasideda gegužės 27 d. 15:00!",
+      sub: "Ąžuolynas Film Fest | Festivalio įrašas jau prieinamas svetainėje!",
       heading: "Sveiki, {{name}}!",
-      body: "Primename, kad jau gegužės 27 d. 15:00 (Lietuvos laiku) startuoja oficiali Ąžuolyno filmų festivalio peržiūra ir laureatų paskelbimas.",
-      detailsTitle: "Prisijungimo duomenys:",
-      note: "Prisijunkite ir palaikykite jaunuosius kino kūrėjus iš viso pasaulio!"
+      body: "Informuojame, kad oficialus festivalio filmų ir nugalėtojų vaizdo įrašas jau patalpintas tiesiogiai festivalio svetainėje.",
+      detailsTitle: "Peržiūros informacija:",
+      note: "Spustelėkite žemiau esantį mygtuką ir peržiūrėkite festivalio įrašą."
     }
   },
   en: {
     submissionReceived: {
       sub: "Ąžuolynas Film Fest | Submission Received Successfully!",
       heading: "Hello, {{name}}!",
-      body: "Thank you for participating! We have safely received your film entry for the Ąžuolynas International Students Film Festival. Our jury has begun review procedures.",
+      body: "Thank you for participating! We have safely received your film entry for the Ąžuolynas International Students Film Festival.",
       detailsTitle: "Submission summary:",
-      note: "The official live festival screening and awards premiere will take place on May 27th at 15:00 (Lithuanian time) on YouTube."
+      note: "The festival screening recording and winners announcement will be published on our official website on May 27th at 15:00 (Lithuanian time)."
     },
     accepted: {
       sub: "Ąžuolynas Film Fest | Congratulations! Your Film is Accepted",
       heading: "Congratulations, {{name}}!",
-      body: "We are pleased to inform you that your work has met all festival guidelines and is officially accepted into the competition program!",
+      body: "We are pleased to inform you that your work has met all criteria and is officially accepted into the festival competition!",
       detailsTitle: "Acceptance details:",
-      note: "We will email you the official live broadcast access link prior to the event."
+      note: "The full event recording will premiere directly on our website on May 27th."
     },
     semiFinalist: {
       sub: "Ąžuolynas Film Fest | Your Film is a SEMI-FINALIST!",
       heading: "Exciting news, {{name}}!",
-      body: "Our jury was profoundly moved by your cinematic execution. We are thrilled to share that your film has officially reached the SEMI-FINALS!",
+      body: "Our jury was profoundly moved by your work. Your film has officially reached the SEMI-FINALS!",
       detailsTitle: "Status update:",
-      note: "Semi-final entries will be celebrated during the live showcase on May 27th."
+      note: "Semi-final entries will be featured in the official festival recording on May 27th."
     },
     finalist: {
       sub: "Ąžuolynas Film Fest | You have reached the FINALS!",
       heading: "Tremendous achievement, {{name}}!",
-      body: "Your film has officially advanced to the festival FINALS and is in direct contention for the top awards and Audience Choice prize!",
+      body: "Your film has officially advanced to the FINALS and is in direct contention for the festival awards!",
       detailsTitle: "Finalist info:",
-      note: "Award winners will be officially announced live on YouTube on May 27th at 15:00."
+      note: "Award winners will be unveiled in the official screening video on May 27th at 15:00."
     },
     winner: {
       sub: "Ąžuolynas Film Fest | CONGRATULATIONS FESTIVAL LAUREATE!",
       heading: "Bravo, {{name}}!",
-      body: "We are honoured to declare your film an official winner of the Ąžuolynas International Students Film Festival! Thank you for sharing your perspective with our global audience.",
+      body: "We are honoured to declare your film an official winner of the Ąžuolynas International Students Film Festival!",
       detailsTitle: "Award record:",
-      note: "Our team will reach out directly through this email thread regarding prizes and official diplomas."
+      note: "Our team will reach out directly regarding diplomas and awards."
     },
     rejected: {
       sub: "Ąžuolynas Film Fest | Update regarding your film entry",
       heading: "Hello, {{name}},",
-      body: "Thank you for submitting your work to our festival. While your entry did not make the final selection this season, we truly value your unique storytelling spirit.",
+      body: "Thank you for submitting your work. While your entry did not make the final selection this season, we truly value your storytelling spirit.",
       detailsTitle: "Review conclusion:",
-      note: "Never put down the camera. Continue creating and we look forward to reviewing your future films!"
+      note: "Keep creating and we look forward to seeing your films next year!"
     },
     eventReminder: {
-      sub: "Ąžuolynas Film Fest | YouTube Live Stream Link (May 27th)",
+      sub: "Ąžuolynas Film Fest | Festival Recording Now Available On Site!",
       heading: "Hello, {{name}}!",
-      body: "Our festival live screening begins on May 27th at 15:00 (Lithuanian time). Tune in to celebrate youth cinema across the globe!",
+      body: "The official festival recording and award ceremony is now published directly on our website.",
       detailsTitle: "Viewing details:",
-      note: "Click the access link below to launch the live stream."
+      note: "Click the link below to watch the event recording."
     }
   }
 };
@@ -131,38 +131,38 @@ const emailTexts = {
 function generateEmailHtml(lang, templateKey, data) {
   const t = emailTexts[lang][templateKey];
   const greeting = t.heading.replace("{{name}}", data.name || "Filmmaker");
+  const siteUrl = data.streamLink || "https://azuolynasinternationalfilmfestival.github.io/site/";
 
   let detailsContent = "";
   if (data.filmTitle) {
-    detailsContent += `<p style="margin: 0 0 8px 0; font-size: 14px; color: #dcdede;"><b>${lang === "lt" ? "Filmas:" : "Film Title:"}</b> ${data.filmTitle}</p>`;
+    detailsContent += `<p style="margin: 0 0 8px 0; font-size: 14px; color: #ECFDF5;"><b>${lang === "lt" ? "Filmas:" : "Film Title:"}</b> ${data.filmTitle}</p>`;
   }
   if (data.category) {
-    detailsContent += `<p style="margin: 0 0 8px 0; font-size: 14px; color: #dcdede;"><b>${lang === "lt" ? "Kategorija:" : "Category:"}</b> ${data.category}</p>`;
+    detailsContent += `<p style="margin: 0 0 8px 0; font-size: 14px; color: #ECFDF5;"><b>${lang === "lt" ? "Kategorija:" : "Category:"}</b> ${data.category}</p>`;
   }
   if (data.customMessage) {
-    detailsContent += `<p style="margin: 12px 0 0 0; font-size: 14px; color: #eed592; line-height: 1.6; border-left: 2px solid #dfba69; padding-left: 12px;">${data.customMessage}</p>`;
+    detailsContent += `<p style="margin: 12px 0 0 0; font-size: 14px; color: #6ee7b7; line-height: 1.6; border-left: 2px solid #10B981; padding-left: 10px;">${data.customMessage}</p>`;
   }
-  if (data.streamLink) {
-    detailsContent += `
-      <div style="text-align: center; margin-top: 22px;">
-        <a href="${data.streamLink}" target="_blank" style="background-color: #dfba69; color: #060808; text-decoration: none; padding: 12px 28px; border-radius: 6px; font-weight: 700; font-size: 14px; display: inline-block; letter-spacing: 0.5px;">
-          ${lang === "lt" ? "Atidaryti YouTube Transliaciją" : "Watch on YouTube"}
-        </a>
-      </div>
-    `;
-  }
+
+  detailsContent += `
+    <div style="text-align: center; margin-top: 20px;">
+      <a href="${siteUrl}" target="_blank" style="background-color: #115E59; color: #ECFDF5; border: 1px solid #10B981; text-decoration: none; padding: 11px 24px; border-radius: 6px; font-weight: 600; font-size: 14px; display: inline-block;">
+        ${lang === "lt" ? "Peržiūrėti Renginį Svetainėje" : "Watch Event on Website"}
+      </a>
+    </div>
+  `;
 
   return `
     ${emailWrapperStart}
-      <h3 style="color: #ffffff; margin: 0 0 16px 0; font-size: 20px; font-weight: 600;">${greeting}</h3>
-      <p style="font-size: 15px; color: #afbfbc; line-height: 1.65; margin: 0 0 15px 0;">${t.body}</p>
+      <h3 style="color: #ffffff; margin: 0 0 14px 0; font-size: 19px; font-weight: 600;">${greeting}</h3>
+      <p style="font-size: 14px; color: #95b3ad; line-height: 1.65; margin: 0 0 15px 0;">${t.body}</p>
       
       <div style="${emailBoxStyle}">
-        <p style="margin: 0 0 14px 0; font-weight: 700; color: #eed592; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">${t.detailsTitle}</p>
+        <p style="margin: 0 0 12px 0; font-weight: 700; color: #10B981; font-size: 11px; text-transform: uppercase; letter-spacing: 1px;">${t.detailsTitle}</p>
         ${detailsContent}
       </div>
 
-      <p style="font-size: 13px; color: #758a87; line-height: 1.6; margin: 16px 0 0 0;">${t.note}</p>
+      <p style="font-size: 13px; color: #5b7570; line-height: 1.6; margin: 16px 0 0 0;">${t.note}</p>
     ${emailWrapperEnd}
   `;
 }
