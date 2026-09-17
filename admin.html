@@ -2,7 +2,7 @@
 <html lang="lt">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Valdymo Skydas</title>
   <link rel="icon" type="image/webp" href="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media">
   <link rel="stylesheet" href="style.css">
@@ -13,59 +13,55 @@
 </head>
 <body class="admin-body-bg">
 
-  <div id="loginSection" style="display:flex; align-items:center; justify-content:center; flex:1; padding:24px;">
-    <div style="background:var(--bg-glass); backdrop-filter:blur(24px); border:1px solid var(--border-gold); padding:48px 42px; border-radius:var(--radius-lg); width:100%; max-width:400px; text-align:center; box-shadow:0 24px 70px rgba(0,0,0,0.85);">
-      <img src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media" alt="Logo" style="height:64px; margin-bottom:16px;">
-      <h2 style="font-family:'Cormorant Garamond', serif; font-size:1.6rem; color:#fff; margin-bottom:6px;">Festivalio Skydas</h2>
-      <p style="font-size:0.84rem; color:var(--text-muted); margin-bottom:28px;">Autorizuotas prisijungimas</p>
+  <div id="loginSection" style="display:flex; align-items:center; justify-content:center; flex:1; padding:20px;">
+    <div style="background:var(--bg-glass); border:1px solid var(--border-subtle); padding:40px 28px; border-radius:var(--radius-md); width:100%; max-width:380px; text-align:center;">
+      <img src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media" alt="Logo" style="height:60px; margin-bottom:14px;">
+      <h2 style="font-family:'Cormorant Garamond', serif; font-size:1.6rem; color:#fff; margin-bottom:4px;">Valdymo Skydas</h2>
+      <p style="font-size:0.82rem; color:var(--text-muted); margin-bottom:24px;">Autorizuotas prisijungimas</p>
 
       <form id="adminAuthForm">
         <div class="form-group" style="text-align:left;">
-          <label for="loginEmail">Paskyros identifikatorius</label>
+          <label for="loginEmail">Identifikatorius</label>
           <input type="email" id="loginEmail" class="form-input" autocomplete="username" required>
         </div>
         <div class="form-group" style="text-align:left;">
           <label for="loginPassword">Slaptažodis</label>
           <input type="password" id="loginPassword" class="form-input" autocomplete="current-password" required>
         </div>
-        <div id="authErrMsg" style="color:var(--danger); font-size:0.85rem; margin-bottom:14px; display:none;"></div>
-        <button type="submit" class="btn-gold" style="width:100%; justify-content:center;">Prisijungti</button>
+        <div id="authErrMsg" style="color:var(--danger); font-size:0.82rem; margin-bottom:12px; display:none;"></div>
+        <button type="submit" class="btn-primary" style="width:100%; justify-content:center;">Prisijungti</button>
       </form>
     </div>
   </div>
 
   <div id="panelSection" style="display:none; flex-direction:column; flex:1;">
     <div class="admin-header-nav">
-      <div style="display:flex; align-items:center; gap:16px;">
-        <img src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media" alt="Logo" style="height:36px;">
-        <span style="font-family:'Cormorant Garamond', serif; font-weight:700; color:var(--gold-bright); font-size:1.25rem;">Ąžuolynas Festivalis</span>
+      <div style="display:flex; align-items:center; gap:12px;">
+        <img src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media" alt="Logo" style="height:32px;">
+        <span style="font-family:'Cormorant Garamond', serif; font-weight:700; color:var(--teal-light); font-size:1.15rem;">Ąžuolynas Fest</span>
       </div>
 
       <div class="admin-tabs">
         <button id="tabSubmissionsBtn" class="admin-tab-btn active" onclick="switchTab('submissions')">Paraiškos</button>
-        <button id="tabSettingsBtn" class="admin-tab-btn" onclick="switchTab('settings')">Svetainės Redaktorius</button>
+        <button id="tabSettingsBtn" class="admin-tab-btn" onclick="switchTab('settings')">Svetainės Tekstai & Įrašas</button>
       </div>
 
-      <div style="display:flex; align-items:center; gap:16px;">
-        <span style="display:inline-flex; align-items:center; gap:6px; font-size:0.82rem; color:var(--gold-bright); border:1px solid var(--border-gold); padding:5px 14px; border-radius:var(--radius-full);">
-          <span style="width:7px; height:7px; background:var(--gold-bright); border-radius:50%; display:inline-block;"></span>
-          Autorizuota
-        </span>
-        <button id="logoutBtn" class="btn-secondary" style="padding:6px 14px; font-size:0.82rem;">Atsijungti</button>
+      <div style="display:flex; align-items:center; gap:12px;">
+        <button id="logoutBtn" class="btn-secondary" style="padding:6px 14px; font-size:0.8rem; min-height:auto;">Atsijungti</button>
       </div>
     </div>
 
     <div class="admin-content container">
       <div id="submissionsTab">
-        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px; margin-bottom:28px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:20px;">
           <div>
-            <h2 style="font-family:'Cormorant Garamond', serif; font-size:2rem; color:#fff;">Dalyvių Paraiškos</h2>
-            <p id="statsCounter" style="color:var(--text-muted); font-size:0.88rem;">Kraunami duomenys...</p>
+            <h2 style="font-family:'Cormorant Garamond', serif; font-size:1.8rem; color:#fff;">Dalyvių Paraiškos</h2>
+            <p id="statsCounter" style="color:var(--text-muted); font-size:0.84rem;">Kraunami duomenys...</p>
           </div>
         </div>
 
-        <div style="display:flex; gap:14px; flex-wrap:wrap; margin-bottom:22px; align-items:center;">
-          <input type="text" id="filterSearch" class="form-input" style="max-width:320px;" placeholder="Paieška pagal autorių, filmą, el. paštą...">
+        <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:20px; align-items:center;">
+          <input type="text" id="filterSearch" class="form-input" style="max-width:280px;" placeholder="Paieška...">
           <select id="filterCategory" class="form-select" style="width:auto;">
             <option value="all">Visos kategorijos</option>
             <option value="Category I (10-13)">I Kategorija (10-13)</option>
@@ -73,12 +69,12 @@
           </select>
           <select id="filterStatus" class="form-select" style="width:auto;">
             <option value="all">Visi statusai</option>
-            <option value="submitted">Pateikta (Submitted)</option>
-            <option value="accepted">Priimta (Accepted)</option>
-            <option value="semifinal">Pusfinalis (Semi-Final)</option>
-            <option value="final">Finalas (Final)</option>
-            <option value="winner">Laureatas (Winner)</option>
-            <option value="rejected">Atmesta (Rejected)</option>
+            <option value="submitted">Pateikta</option>
+            <option value="accepted">Priimta</option>
+            <option value="semifinal">Pusfinalis</option>
+            <option value="final">Finalas</option>
+            <option value="winner">Laureatas</option>
+            <option value="rejected">Atmesta</option>
           </select>
         </div>
 
@@ -102,20 +98,29 @@
       </div>
 
       <div id="settingsTab" style="display:none;">
-        <div style="margin-bottom:28px;">
-          <h2 style="font-family:'Cormorant Garamond', serif; font-size:2rem; color:#fff;">Svetainės Tekstų Valdymas</h2>
-          <p style="color:var(--text-muted); font-size:0.88rem;">Pakeitimai iškart įsigalioja lankytojams lietuviškoje ir angliškoje versijose.</p>
+        <div style="margin-bottom:24px;">
+          <h2 style="font-family:'Cormorant Garamond', serif; font-size:1.8rem; color:#fff;">Svetainės & Renginio Nustatymai</h2>
+          <p style="color:var(--text-muted); font-size:0.85rem;">Čia galite įkelti festivalio vaizdo įrašo nuorodą ir redaguoti tekstus.</p>
         </div>
 
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:26px;">
-          <div class="card-luxury" style="padding:28px;">
-            <h3 style="color:var(--gold-bright); font-family:'Cormorant Garamond', serif; font-size:1.4rem; margin-bottom:18px;">Lietuviška versija (LT)</h3>
+        <div class="card-luxury" style="margin-bottom:24px; padding:24px;">
+          <h3 style="color:var(--emerald-accent); font-family:'Cormorant Garamond', serif; font-size:1.3rem; margin-bottom:12px;">Svetainėje Rodomas Renginio Vaizdo Įrašas</h3>
+          <div class="form-group">
+            <label for="cfgRecordingUrl">Vaizdo įrašo URL (Tiesioginė MP4 nuoroda arba YouTube nuoroda)</label>
+            <input type="text" id="cfgRecordingUrl" class="form-input" placeholder="pvz. https://www.youtube.com/watch?v=... arba https://.../video.mp4">
+            <small style="color:var(--text-faint); font-size:0.78rem;">Palikite tuščią, jei vaizdo įrašas dar neparengtas. Svetainėje bus rodomas laukimo pranešimas.</small>
+          </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:20px;">
+          <div class="card-luxury" style="padding:22px;">
+            <h3 style="color:var(--teal-light); font-family:'Cormorant Garamond', serif; font-size:1.25rem; margin-bottom:14px;">Lietuviška versija (LT)</h3>
             <div class="form-group">
               <label>Festivalio tema</label>
               <input type="text" id="cfgLtTopic" class="form-input">
             </div>
             <div class="form-group">
-              <label>Hero žyma (viršuje)</label>
+              <label>Hero žyma</label>
               <input type="text" id="cfgLtHeroBadge" class="form-input">
             </div>
             <div class="form-group">
@@ -131,17 +136,13 @@
               <input type="text" id="cfgLtTarget" class="form-input">
             </div>
             <div class="form-group">
-              <label>I Kategorija (aprašas)</label>
-              <input type="text" id="cfgLtCat1Desc" class="form-input">
-            </div>
-            <div class="form-group">
-              <label>II Kategorija (aprašas)</label>
-              <input type="text" id="cfgLtCat2Desc" class="form-input">
+              <label>Peržiūros laukimo tekstas (kai nėra įrašo)</label>
+              <input type="text" id="cfgLtRecordingPh" class="form-input">
             </div>
           </div>
 
-          <div class="card-luxury" style="padding:28px;">
-            <h3 style="color:var(--gold-bright); font-family:'Cormorant Garamond', serif; font-size:1.4rem; margin-bottom:18px;">Angliška versija (EN)</h3>
+          <div class="card-luxury" style="padding:22px;">
+            <h3 style="color:var(--teal-light); font-family:'Cormorant Garamond', serif; font-size:1.25rem; margin-bottom:14px;">Angliška versija (EN)</h3>
             <div class="form-group">
               <label>Festival Topic</label>
               <input type="text" id="cfgEnTopic" class="form-input">
@@ -163,18 +164,14 @@
               <input type="text" id="cfgEnTarget" class="form-input">
             </div>
             <div class="form-group">
-              <label>Category I Description</label>
-              <input type="text" id="cfgEnCat1Desc" class="form-input">
-            </div>
-            <div class="form-group">
-              <label>Category II Description</label>
-              <input type="text" id="cfgEnCat2Desc" class="form-input">
+              <label>Screening Placeholder text (when no video)</label>
+              <input type="text" id="cfgEnRecordingPh" class="form-input">
             </div>
           </div>
         </div>
 
-        <div style="margin-top:24px; display:flex; justify-content:flex-end;">
-          <button id="saveSettingsBtn" class="btn-gold" style="padding:14px 36px;">Išsaugoti Pakeitimus</button>
+        <div style="margin-top:20px; display:flex; justify-content:flex-end;">
+          <button id="saveSettingsBtn" class="btn-primary" style="padding:12px 30px;">Išsaugoti Pakeitimus</button>
         </div>
       </div>
     </div>
@@ -182,30 +179,30 @@
 
   <div id="entryModal" class="modal-overlay">
     <div class="modal-window">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; border-bottom:1px solid var(--border-subtle); padding-bottom:14px;">
-        <h3 id="mTitle" style="color:var(--gold-bright); font-family:'Cormorant Garamond', serif; font-size:1.5rem;">Filmo peržiūra</h3>
-        <button onclick="closeEntryModal()" style="background:none; border:none; color:var(--text-muted); font-size:1.8rem; cursor:pointer;">&times;</button>
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; border-bottom:1px solid var(--border-subtle); padding-bottom:12px;">
+        <h3 id="mTitle" style="color:var(--teal-light); font-family:'Cormorant Garamond', serif; font-size:1.4rem;">Filmo peržiūra</h3>
+        <button onclick="closeEntryModal()" style="background:none; border:none; color:var(--text-muted); font-size:1.6rem; cursor:pointer;">&times;</button>
       </div>
 
-      <video id="mVideo" style="width:100%; max-height:360px; background:#000; border-radius:var(--radius-md); margin-bottom:16px;" controls></video>
+      <video id="mVideo" style="width:100%; max-height:340px; background:#000; border-radius:var(--radius-sm); margin-bottom:14px;" controls playsinline></video>
 
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:18px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; flex-wrap:wrap; gap:8px;">
         <button id="mDeleteBtn" class="btn-danger">Ištrinti paraišką</button>
-        <a id="mDownloadLink" href="" target="_blank" download class="btn-secondary" style="font-size:0.82rem; padding:6px 14px;">Atsisiųsti video failą</a>
+        <a id="mDownloadLink" href="" target="_blank" download class="btn-secondary" style="font-size:0.8rem; padding:6px 12px; min-height:auto;">Atsisiųsti video</a>
       </div>
 
-      <div style="background:var(--bg-surface); border:1px solid var(--border-subtle); border-radius:var(--radius-sm); padding:20px; margin-bottom:24px; font-size:0.92rem; line-height:1.6;">
+      <div style="background:var(--bg-surface); border:1px solid var(--border-subtle); border-radius:var(--radius-sm); padding:16px; margin-bottom:20px; font-size:0.88rem; line-height:1.6;">
         <p><strong>Autorius:</strong> <span id="mAuthor"></span> (<span id="mEmail"></span>)</p>
         <p><strong>Amžius / Įstaiga:</strong> <span id="mAgeInst"></span></p>
         <p><strong>Vieta:</strong> <span id="mLocation"></span></p>
         <p><strong>Kameros modelis:</strong> <span id="mDevice"></span></p>
         <p><strong>Trukmė:</strong> <span id="mDuration"></span> s</p>
-        <p style="margin-top:12px; font-weight:700; color:var(--gold-bright);">Sinopsis / Idėja:</p>
+        <p style="margin-top:10px; font-weight:700; color:var(--emerald-accent);">Sinopsis / Idėja:</p>
         <p id="mSynopsis" style="color:var(--text-muted); font-style:italic; margin-top:4px;"></p>
       </div>
 
-      <div style="background:var(--bg-surface-elevated); border:1px solid var(--border-gold); border-radius:var(--radius-sm); padding:22px;">
-        <h4 style="color:#fff; font-size:1rem; margin-bottom:14px;">Statuso Keitimas ir El. Laiško Siuntimas</h4>
+      <div style="background:var(--bg-surface-elevated); border:1px solid var(--border-subtle); border-radius:var(--radius-sm); padding:18px;">
+        <h4 style="color:#fff; font-size:0.95rem; margin-bottom:12px;">Statuso Valdymas ir Laiško Siuntimas</h4>
         
         <div class="form-row">
           <div class="form-group">
@@ -228,7 +225,7 @@
               <option value="finalist">Finalo žinia (Finalist)</option>
               <option value="winner">Nugalėtojo diplomas (Winner)</option>
               <option value="rejected">Neatrankos pranešimas (Rejected)</option>
-              <option value="eventReminder">Transliacijos priminimas (YouTube nuoroda)</option>
+              <option value="eventReminder">Renginio įrašo priminimas</option>
             </select>
           </div>
         </div>
@@ -242,19 +239,19 @@
             </select>
           </div>
           <div class="form-group">
-            <label for="mStreamLink">YouTube nuoroda (nebūtina):</label>
-            <input type="url" id="mStreamLink" class="form-input" placeholder="https://youtube.com/...">
+            <label for="mStreamLink">Papildoma nuoroda laiške (nebūtina):</label>
+            <input type="url" id="mStreamLink" class="form-input" placeholder="https://azuolynasinternationalfilmfestival.github.io/site/">
           </div>
         </div>
 
         <div class="form-group">
           <label for="mCustomText">Papildoma žinutė laiške (nebūtina):</label>
-          <textarea id="mCustomText" class="form-textarea" style="min-height:70px;"></textarea>
+          <textarea id="mCustomText" class="form-textarea" style="min-height:60px;"></textarea>
         </div>
 
-        <div style="display:flex; justify-content:flex-end; gap:12px; margin-top:16px;">
-          <button class="btn-secondary" onclick="closeEntryModal()">Atšaukti</button>
-          <button id="mSaveBtn" class="btn-gold">Išsaugoti ir Vykdyti</button>
+        <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:14px;">
+          <button class="btn-secondary" style="min-height:auto; padding:8px 16px;" onclick="closeEntryModal()">Atšaukti</button>
+          <button id="mSaveBtn" class="btn-primary" style="min-height:auto; padding:8px 20px;">Išsaugoti</button>
         </div>
       </div>
     </div>
@@ -318,21 +315,21 @@
         const lt = d.lt || DEFAULT_CONTENT.lt;
         const en = d.en || DEFAULT_CONTENT.en;
 
+        document.getElementById("cfgRecordingUrl").value = d.recordingVideoUrl || "";
+
         document.getElementById("cfgLtTopic").value = lt.topic || "";
         document.getElementById("cfgLtHeroBadge").value = lt.heroBadge || "";
         document.getElementById("cfgLtDates").value = lt.datesSubmissions || "";
         document.getElementById("cfgLtEvent").value = lt.dateEvent || "";
         document.getElementById("cfgLtTarget").value = lt.targetAudience || "";
-        document.getElementById("cfgLtCat1Desc").value = lt.cat1Desc || "";
-        document.getElementById("cfgLtCat2Desc").value = lt.cat2Desc || "";
+        document.getElementById("cfgLtRecordingPh").value = lt.recordingPlaceholder || "";
 
         document.getElementById("cfgEnTopic").value = en.topic || "";
         document.getElementById("cfgEnHeroBadge").value = en.heroBadge || "";
         document.getElementById("cfgEnDates").value = en.datesSubmissions || "";
         document.getElementById("cfgEnEvent").value = en.dateEvent || "";
         document.getElementById("cfgEnTarget").value = en.targetAudience || "";
-        document.getElementById("cfgEnCat1Desc").value = en.cat1Desc || "";
-        document.getElementById("cfgEnCat2Desc").value = en.cat2Desc || "";
+        document.getElementById("cfgEnRecordingPh").value = en.recordingPlaceholder || "";
       });
     }
 
@@ -341,14 +338,14 @@
       btn.disabled = true;
 
       const updated = {
+        recordingVideoUrl: document.getElementById("cfgRecordingUrl").value.trim(),
         lt: {
           topic: document.getElementById("cfgLtTopic").value.trim(),
           heroBadge: document.getElementById("cfgLtHeroBadge").value.trim(),
           datesSubmissions: document.getElementById("cfgLtDates").value.trim(),
           dateEvent: document.getElementById("cfgLtEvent").value.trim(),
           targetAudience: document.getElementById("cfgLtTarget").value.trim(),
-          cat1Desc: document.getElementById("cfgLtCat1Desc").value.trim(),
-          cat2Desc: document.getElementById("cfgLtCat2Desc").value.trim()
+          recordingPlaceholder: document.getElementById("cfgLtRecordingPh").value.trim()
         },
         en: {
           topic: document.getElementById("cfgEnTopic").value.trim(),
@@ -356,14 +353,13 @@
           datesSubmissions: document.getElementById("cfgEnDates").value.trim(),
           dateEvent: document.getElementById("cfgEnEvent").value.trim(),
           targetAudience: document.getElementById("cfgEnTarget").value.trim(),
-          cat1Desc: document.getElementById("cfgEnCat1Desc").value.trim(),
-          cat2Desc: document.getElementById("cfgEnCat2Desc").value.trim()
+          recordingPlaceholder: document.getElementById("cfgEnRecordingPh").value.trim()
         }
       };
 
       try {
         await db.collection("settings").doc("festival").set(updated, { merge: true });
-        alert("Svetainės tekstai sėkmingai atnaujinti!");
+        alert("Nustatymai ir vaizdo įrašo nuoroda sėkmingai atnaujinti!");
       } catch (err) {
         console.error(err);
         alert("Klaida išsaugant nustatymus: " + err.message);
@@ -405,7 +401,7 @@
         return matchSearch && matchCat && matchStatus;
       });
 
-      statsCounter.textContent = `Rodoma paraiškų: ${filtered.length} (Iš viso sistemoje: ${submissionsList.length})`;
+      statsCounter.textContent = `Rodoma paraiškų: ${filtered.length} (Iš viso: ${submissionsList.length})`;
       tableBody.innerHTML = "";
 
       filtered.forEach((sub) => {
@@ -419,7 +415,7 @@
         const badgeCls = `status-${sub.status || 'submitted'}`;
 
         tr.innerHTML = `
-          <td style="color:var(--text-faint); font-size:0.82rem;">${dateStr}</td>
+          <td style="color:var(--text-faint); font-size:0.8rem;">${dateStr}</td>
           <td><strong>${sub.name || ''}</strong><br><small style="color:var(--text-muted);">${sub.email || ''}</small></td>
           <td>${sub.age || ''} m.<br><small style="color:var(--text-faint);">${sub.category || ''}</small></td>
           <td><b style="color:#fff;">${sub.filmTitle || ''}</b></td>
@@ -427,9 +423,9 @@
           <td><small style="color:var(--text-muted);">${sub.deviceModel || '-'}</small></td>
           <td><span class="status-badge ${badgeCls}">${sub.status || 'submitted'}</span></td>
           <td>
-            <div style="display:flex; gap:8px;">
-              <button class="btn-secondary" style="padding:6px 12px; font-size:0.8rem;" onclick="viewEntry('${sub.id}')">Peržiūrėti</button>
-              <button class="btn-danger" style="padding:6px 12px; font-size:0.8rem;" onclick="deleteEntry('${sub.id}')">Ištrinti</button>
+            <div style="display:flex; gap:6px;">
+              <button class="btn-secondary" style="padding:5px 10px; font-size:0.78rem; min-height:auto;" onclick="viewEntry('${sub.id}')">Peržiūrėti</button>
+              <button class="btn-danger" style="padding:5px 10px; font-size:0.78rem; min-height:auto;" onclick="deleteEntry('${sub.id}')">Ištrinti</button>
             </div>
           </td>
         `;
@@ -495,7 +491,7 @@
         alert("Paraiška sėkmingai pašalinta.");
       } catch (err) {
         console.error(err);
-        alert("Klaida trinant paraišką: " + err.message);
+        alert("Klaida trinant: " + err.message);
       }
     };
 
