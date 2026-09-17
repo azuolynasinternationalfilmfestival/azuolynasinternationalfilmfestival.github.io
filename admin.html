@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Valdymo Skydas</title>
+  <link rel="icon" type="image/webp" href="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media">
   <link rel="stylesheet" href="style.css">
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
@@ -13,7 +14,7 @@
 <body class="admin-body-bg">
 
   <div id="loginSection" style="display:flex; align-items:center; justify-content:center; flex:1; padding:24px;">
-    <div style="background:var(--bg-glass); backdrop-filter:blur(24px); border:1px solid var(--border-gold); padding:46px 40px; border-radius:var(--radius-lg); width:100%; max-width:400px; text-align:center; box-shadow:0 24px 70px rgba(0,0,0,0.85);">
+    <div style="background:var(--bg-glass); backdrop-filter:blur(24px); border:1px solid var(--border-gold); padding:48px 42px; border-radius:var(--radius-lg); width:100%; max-width:400px; text-align:center; box-shadow:0 24px 70px rgba(0,0,0,0.85);">
       <img src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media" alt="Logo" style="height:64px; margin-bottom:16px;">
       <h2 style="font-family:'Cormorant Garamond', serif; font-size:1.6rem; color:#fff; margin-bottom:6px;">Festivalio Skydas</h2>
       <p style="font-size:0.84rem; color:var(--text-muted); margin-bottom:28px;">Autorizuotas prisijungimas</p>
@@ -46,11 +47,11 @@
       </div>
 
       <div style="display:flex; align-items:center; gap:16px;">
-        <span style="display:inline-flex; align-items:center; gap:6px; font-size:0.82rem; color:var(--gold); border:1px solid var(--border-gold); padding:5px 14px; border-radius:var(--radius-pill);">
-          <span style="width:7px; height:7px; background:var(--gold); border-radius:50%; display:inline-block;"></span>
+        <span style="display:inline-flex; align-items:center; gap:6px; font-size:0.82rem; color:var(--gold-bright); border:1px solid var(--border-gold); padding:5px 14px; border-radius:var(--radius-full);">
+          <span style="width:7px; height:7px; background:var(--gold-bright); border-radius:50%; display:inline-block;"></span>
           Autorizuota
         </span>
-        <button id="logoutBtn" class="btn-outline" style="padding:6px 14px; font-size:0.82rem;">Atsijungti</button>
+        <button id="logoutBtn" class="btn-secondary" style="padding:6px 14px; font-size:0.82rem;">Atsijungti</button>
       </div>
     </div>
 
@@ -92,7 +93,7 @@
                 <th>Trukmė</th>
                 <th>Įrenginys</th>
                 <th>Statusas</th>
-                <th>Valdymas</th>
+                <th>Veiksmai</th>
               </tr>
             </thead>
             <tbody id="tableBody"></tbody>
@@ -103,12 +104,12 @@
       <div id="settingsTab" style="display:none;">
         <div style="margin-bottom:28px;">
           <h2 style="font-family:'Cormorant Garamond', serif; font-size:2rem; color:#fff;">Svetainės Tekstų Valdymas</h2>
-          <p style="color:var(--text-muted); font-size:0.88rem;">Čia pakeisti tekstai iškart bus matomi visiems lankytojams lietuviškoje ir angliškoje versijose.</p>
+          <p style="color:var(--text-muted); font-size:0.88rem;">Pakeitimai iškart įsigalioja lankytojams lietuviškoje ir angliškoje versijose.</p>
         </div>
 
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:26px;">
           <div class="card-luxury" style="padding:28px;">
-            <h3 style="color:var(--gold); font-family:'Cormorant Garamond', serif; font-size:1.4rem; margin-bottom:18px;">Lietuviška versija (LT)</h3>
+            <h3 style="color:var(--gold-bright); font-family:'Cormorant Garamond', serif; font-size:1.4rem; margin-bottom:18px;">Lietuviška versija (LT)</h3>
             <div class="form-group">
               <label>Festivalio tema</label>
               <input type="text" id="cfgLtTopic" class="form-input">
@@ -140,7 +141,7 @@
           </div>
 
           <div class="card-luxury" style="padding:28px;">
-            <h3 style="color:var(--gold); font-family:'Cormorant Garamond', serif; font-size:1.4rem; margin-bottom:18px;">Angliška versija (EN)</h3>
+            <h3 style="color:var(--gold-bright); font-family:'Cormorant Garamond', serif; font-size:1.4rem; margin-bottom:18px;">Angliška versija (EN)</h3>
             <div class="form-group">
               <label>Festival Topic</label>
               <input type="text" id="cfgEnTopic" class="form-input">
@@ -188,8 +189,9 @@
 
       <video id="mVideo" style="width:100%; max-height:360px; background:#000; border-radius:var(--radius-md); margin-bottom:16px;" controls></video>
 
-      <div style="display:flex; justify-content:flex-end; margin-bottom:18px;">
-        <a id="mDownloadLink" href="" target="_blank" download class="btn-outline" style="font-size:0.82rem; padding:6px 14px;">Atsisiųsti originalų video</a>
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:18px;">
+        <button id="mDeleteBtn" class="btn-danger">Ištrinti paraišką</button>
+        <a id="mDownloadLink" href="" target="_blank" download class="btn-secondary" style="font-size:0.82rem; padding:6px 14px;">Atsisiųsti video failą</a>
       </div>
 
       <div style="background:var(--bg-surface); border:1px solid var(--border-subtle); border-radius:var(--radius-sm); padding:20px; margin-bottom:24px; font-size:0.92rem; line-height:1.6;">
@@ -198,7 +200,7 @@
         <p><strong>Vieta:</strong> <span id="mLocation"></span></p>
         <p><strong>Kameros modelis:</strong> <span id="mDevice"></span></p>
         <p><strong>Trukmė:</strong> <span id="mDuration"></span> s</p>
-        <p style="margin-top:12px; font-weight:700; color:var(--gold);">Sinopsis / Idėja:</p>
+        <p style="margin-top:12px; font-weight:700; color:var(--gold-bright);">Sinopsis / Idėja:</p>
         <p id="mSynopsis" style="color:var(--text-muted); font-style:italic; margin-top:4px;"></p>
       </div>
 
@@ -251,7 +253,7 @@
         </div>
 
         <div style="display:flex; justify-content:flex-end; gap:12px; margin-top:16px;">
-          <button class="btn-outline" onclick="closeEntryModal()">Atšaukti</button>
+          <button class="btn-secondary" onclick="closeEntryModal()">Atšaukti</button>
           <button id="mSaveBtn" class="btn-gold">Išsaugoti ir Vykdyti</button>
         </div>
       </div>
@@ -425,7 +427,10 @@
           <td><small style="color:var(--text-muted);">${sub.deviceModel || '-'}</small></td>
           <td><span class="status-badge ${badgeCls}">${sub.status || 'submitted'}</span></td>
           <td>
-            <button class="btn-outline" style="padding:6px 14px; font-size:0.8rem;" onclick="viewEntry('${sub.id}')">Peržiūrėti</button>
+            <div style="display:flex; gap:8px;">
+              <button class="btn-secondary" style="padding:6px 12px; font-size:0.8rem;" onclick="viewEntry('${sub.id}')">Peržiūrėti</button>
+              <button class="btn-danger" style="padding:6px 12px; font-size:0.8rem;" onclick="deleteEntry('${sub.id}')">Ištrinti</button>
+            </div>
           </td>
         `;
         tableBody.appendChild(tr);
@@ -470,6 +475,36 @@
       mVideo.src = "";
       currentEntry = null;
     };
+
+    window.deleteEntry = async function(id) {
+      const entry = submissionsList.find(x => x.id === id);
+      if (!entry) return;
+
+      const confirmed = confirm(`Ar tikrai norite visam laikui ištrinti paraišką „${entry.filmTitle}“ (${entry.name})?`);
+      if (!confirmed) return;
+
+      try {
+        if (entry.storagePath) {
+          try {
+            await storage.ref(entry.storagePath).delete();
+          } catch (e) {
+            console.warn(e);
+          }
+        }
+        await db.collection("submissions").doc(id).delete();
+        alert("Paraiška sėkmingai pašalinta.");
+      } catch (err) {
+        console.error(err);
+        alert("Klaida trinant paraišką: " + err.message);
+      }
+    };
+
+    document.getElementById("mDeleteBtn").addEventListener("click", async () => {
+      if (!currentEntry) return;
+      const targetId = currentEntry.id;
+      closeEntryModal();
+      await deleteEntry(targetId);
+    });
 
     const mSaveBtn = document.getElementById("mSaveBtn");
     mSaveBtn.addEventListener("click", async () => {
