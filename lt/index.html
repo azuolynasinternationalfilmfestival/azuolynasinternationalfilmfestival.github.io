@@ -1,10 +1,64 @@
 <!DOCTYPE html>
 <html lang="lt">
 <head>
+  <script id="Cookiebot" src="https://consent.cookiebot.com/uc.js" data-cbid="06c15308-ea25-4737-9b50-13705638aa99" data-blockingmode="auto" type="text/javascript"></script>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Ąžuolynas Tarptautinis Mokinių Filmų Festivalis</title>
+  <link rel="preconnect" href="https://firebasestorage.googleapis.com">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Ąžuolynas International Students Film Festival | Oficiali Paraiškų Platforma</title>
+  <meta name="description" content="Ąžuolyno tarptautinis mokinių filmų festivalis. Tema: „Neįprastas žvilgsnis į įprastus dalykus“. Paraiškos priimamos nuo vasario 14 d. iki balandžio 17 d.">
+  <meta name="robots" content="index, follow, max-image-preview:large, max-video-preview:-1">
+  <link rel="canonical" href="https://azuolynasfilmfest.lt/lt/index.html">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Ąžuolynas International Students Film Festival">
+  <meta property="og:title" content="Ąžuolynas International Students Film Festival | Oficiali Paraiškų Platforma">
+  <meta property="og:description" content="Kviečiame mokinius iš viso pasaulio pateikti iki 3 min. filmus tema „Neįprastas žvilgsnis į įprastus dalykus“. Renginys vyks gegužės 27 d. YouTube platformoje.">
+  <meta property="og:url" content="https://azuolynasfilmfest.lt/lt/index.html">
+  <meta property="og:image" content="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:locale" content="lt_LT">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Ąžuolynas International Students Film Festival">
+  <meta name="twitter:description" content="Tarptautinis mokinių filmų festivalis. Teikite autorinius darbus iki balandžio 17 d.">
+  <meta name="twitter:image" content="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media">
+  <link rel="icon" type="image/webp" href="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media">
   <link rel="stylesheet" href="../style.css">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Festival",
+    "name": "Ąžuolynas International Students Film Festival",
+    "alternateName": "Ąžuolyno Tarptautinis Mokinių Filmų Festivalis",
+    "description": "Tarptautinis mokinių filmų festivalis. Tema: Neįprastas žvilgsnis į įprastus dalykus. Filmai iki 3 min. trukmės, filmuoti telefonu ar planšete.",
+    "startDate": "2026-05-27T15:00:00+03:00",
+    "endDate": "2026-05-27T18:00:00+03:00",
+    "eventAttendanceMode": "https://schema.org/OnlineEventAttendanceMode",
+    "eventStatus": "https://schema.org/EventScheduled",
+    "location": {
+      "@type": "VirtualLocation",
+      "url": "https://www.youtube.com"
+    },
+    "image": "https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media",
+    "organizer": {
+      "@type": "Organization",
+      "name": "Ąžuolynas Film Festival Committee",
+      "email": "azuolynasfilmfestival@gmail.com",
+      "url": "https://azuolynasfilmfest.lt"
+    },
+    "award": [
+      "1st Place Category I (10-13 yrs)",
+      "2nd Place Category I (10-13 yrs)",
+      "3rd Place Category I (10-13 yrs)",
+      "1st Place Category II (14-18 yrs)",
+      "2nd Place Category II (14-18 yrs)",
+      "3rd Place Category II (14-18 yrs)",
+      "Audience Choice Award"
+    ]
+  }
+  </script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
@@ -34,31 +88,31 @@
   <main>
     <section class="hero" id="about">
       <div class="container">
-        <div class="laurel-tag" id="dynHeroBadge">Tarptautinis Mokinių Filmų Festivalis</div>
+        <div class="laurel-badge" id="dynHeroBadge">Tarptautinis Mokinių Filmų Festivalis</div>
         <h1 class="hero-title">Ąžuolynas Film Festival</h1>
         <div class="hero-topic-box">
-          <span class="hero-topic-prefix">Festivalio tema:</span>
-          <span class="hero-topic-text" id="dynTopic">„Neįprastas žvilgsnis į įprastus dalykus“</span>
+          <span class="hero-topic-label">Festivalio tema:</span>
+          <span class="hero-topic-value" id="dynTopic">„Neįprastas žvilgsnis į įprastus dalykus“</span>
         </div>
 
         <div class="meta-grid">
           <div class="meta-card">
             <div class="meta-card-label">Paraiškų priėmimas</div>
-            <div class="meta-card-val" id="dynDates">Vasario 14 d. – Balandžio 17 d.</div>
+            <div class="meta-card-value" id="dynDates">Vasario 14 d. – Balandžio 17 d.</div>
           </div>
           <div class="meta-card">
             <div class="meta-card-label">Renginio transliacija</div>
-            <div class="meta-card-val" id="dynEvent">Gegužės 27 d., 15:00 (YouTube)</div>
+            <div class="meta-card-value" id="dynEvent">Gegužės 27 d., 15:00 (YouTube)</div>
           </div>
           <div class="meta-card">
             <div class="meta-card-label">Dalyviai</div>
-            <div class="meta-card-val" id="dynTarget">Mokiniai iš viso pasaulio</div>
+            <div class="meta-card-value" id="dynTarget">Mokiniai iš viso pasaulio</div>
           </div>
         </div>
 
         <div class="cta-group">
           <a href="#submit" class="btn-gold">Pateikti savo filmą 🎬</a>
-          <a href="#terms" class="btn-outline">Dalyvavimo taisyklės</a>
+          <a href="#terms" class="btn-secondary">Dalyvavimo taisyklės</a>
         </div>
       </div>
     </section>
@@ -73,15 +127,15 @@
           <div class="card-luxury">
             <ul class="rules-list">
               <li>
-                <span class="rule-num">1</span>
+                <span class="rule-number">1</span>
                 <span id="dynRule1">Filmas privalo būti nufilmuotas išmaniuoju telefonu arba planšete.</span>
               </li>
               <li>
-                <span class="rule-num">2</span>
+                <span class="rule-number">2</span>
                 <span id="dynRule2">Maksimali filmo trukmė – iki 3 minučių (180 s įskaitant titrus).</span>
               </li>
               <li>
-                <span class="rule-num">3</span>
+                <span class="rule-number">3</span>
                 <span id="dynRule3">Vienas dalyvis gali pateikti tik vieną filmą.</span>
               </li>
             </ul>
@@ -89,15 +143,15 @@
           <div class="card-luxury">
             <ul class="rules-list">
               <li>
-                <span class="rule-num">4</span>
+                <span class="rule-number">4</span>
                 <span id="dynRule4">Filmai, sukurti su suaugusiųjų pagalba, nebus vertinami.</span>
               </li>
               <li>
-                <span class="rule-num">5</span>
+                <span class="rule-number">5</span>
                 <span id="dynRule5">Filmas privalo turėti angliškus subtitrus (English subtitles).</span>
               </li>
               <li>
-                <span class="rule-num">6</span>
+                <span class="rule-number">6</span>
                 <span id="dynRule6">Kiekvienas dalyvis gaus tiesioginę nuorodą į peržiūros transliaciją el. paštu.</span>
               </li>
             </ul>
@@ -115,17 +169,17 @@
         <div class="grid-2">
           <div class="card-luxury category-card">
             <div class="category-num">I Kategorija</div>
-            <h3 style="color:#fff; font-size:1.15rem; margin-bottom:8px;" id="dynCat1Age">Nuo 10 iki 13 metų amžiaus</h3>
-            <p style="color:var(--text-muted); font-size:0.94rem;" id="dynCat1Desc">Jaunųjų režisierių vizualiniai eksperimentai ir autoriniai žingsniai kine.</p>
+            <h3 style="color:#fff; font-size:1.18rem; margin-bottom:8px;" id="dynCat1Age">Nuo 10 iki 13 metų amžiaus</h3>
+            <p style="color:var(--text-muted); font-size:0.95rem;" id="dynCat1Desc">Jaunųjų režisierių vizualiniai eksperimentai ir autoriniai žingsniai kine.</p>
           </div>
           <div class="card-luxury category-card">
             <div class="category-num">II Kategorija</div>
-            <h3 style="color:#fff; font-size:1.15rem; margin-bottom:8px;" id="dynCat2Age">Nuo 14 iki 18 metų amžiaus</h3>
-            <p style="color:var(--text-muted); font-size:0.94rem;" id="dynCat2Desc">Vyresniųjų moksleivių kinematografinė kalba, gilesnė dramaturgija ir požiūrio kampas.</p>
+            <h3 style="color:#fff; font-size:1.18rem; margin-bottom:8px;" id="dynCat2Age">Nuo 14 iki 18 metų amžiaus</h3>
+            <p style="color:var(--text-muted); font-size:0.95rem;" id="dynCat2Desc">Vyresniųjų moksleivių kinematografinė kalba, gilesnė dramaturgija ir požiūrio kampas.</p>
           </div>
         </div>
         <div class="awards-banner">
-          <h3 style="color:var(--gold); font-size:1.35rem; font-family:'Cormorant Garamond', serif;">Oficialios nominacijos abiejose kategorijose</h3>
+          <h3 style="color:var(--gold-bright); font-size:1.35rem; font-family:'Cormorant Garamond', serif;">Oficialios nominacijos abiejose kategorijose</h3>
           <div class="awards-pills">
             <span class="award-pill">🥇 1-oji Vieta</span>
             <span class="award-pill">🥈 2-oji Vieta</span>
@@ -246,7 +300,7 @@
   <footer>
     <div class="container">
       <img src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media" alt="Logo" style="height:55px; margin-bottom:12px;">
-      <h4 style="font-family:'Cormorant Garamond', serif; font-size:1.3rem; color:#fff; letter-spacing:1px;">Ąžuolynas International Students Film Festival</h4>
+      <h4 style="font-family:'Cormorant Garamond', serif; font-size:1.35rem; color:#fff; letter-spacing:1px;">Ąžuolynas International Students Film Festival</h4>
       <p class="footer-contact">
         Klausimams ir susisiekimui: <a href="mailto:azuolynasfilmfestival@gmail.com">azuolynasfilmfestival@gmail.com</a>
       </p>
