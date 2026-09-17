@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+=<!DOCTYPE html>
 <html lang="lt">
 <head>
   <meta charset="UTF-8">
@@ -16,7 +16,7 @@
   <div id="loginSection" style="display:flex; align-items:center; justify-content:center; flex:1; padding:20px;">
     <div style="background:var(--bg-surface); border:1px solid var(--border-color); padding:40px 32px; border-radius:var(--site-radius); width:100%; max-width:380px; text-align:center;">
       <img src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media" alt="Logo" style="height:56px; margin-bottom:14px;">
-      <h2 style="font-family:var(--font-cinema); font-size:1.45rem; color:#fff; margin-bottom:4px;">Valdymo Skydas</h2>
+      <h2 style="font-family:var(--font-cinema); font-size:clamp(1.3rem, 2.5vw, 1.55rem); color:#fff; margin-bottom:4px;">Valdymo Skydas</h2>
       <p style="font-size:0.82rem; color:var(--text-muted); margin-bottom:24px;">Autorizuota prieiga</p>
 
       <form id="adminAuthForm">
@@ -72,7 +72,26 @@
           </div>
         </div>
 
-        <div class="table-toolbar">
+        <div class="admin-winner-panel">
+          <h3 style="color:var(--primary-emerald); font-family:var(--font-cinema); font-size:clamp(1.15rem, 2vw, 1.35rem); margin-bottom:14px;">Laimėtojų ir Nominacijų Valdymas</h3>
+          <div class="input-row">
+            <div class="input-cell">
+              <label for="adminSelectFilm">Pasirinkite filmą</label>
+              <select id="adminSelectFilm" class="field"></select>
+            </div>
+            <div class="input-cell">
+              <label for="adminAwardTitle">Nominacija / Laureato vieta</label>
+              <input type="text" id="adminAwardTitle" class="field" placeholder="pvz. 1-oji vieta (I Kat.) arba Žiūrovų simpatijų prizas">
+            </div>
+          </div>
+          <div style="display:flex; justify-content:flex-end; margin-bottom:20px;">
+            <button id="assignWinnerBtn" class="btn-solid" style="height:40px; padding:0 20px;">Paskelbti Laimėtoju</button>
+          </div>
+          <h4 style="color:var(--text-white); font-family:var(--font-cinema); font-size:clamp(0.98rem, 1.5vw, 1.15rem); margin-bottom:12px;">Paskelbti Festivalio Laureatai</h4>
+          <div id="adminWinnersList"></div>
+        </div>
+
+        <div class="table-toolbar" style="margin-top:28px;">
           <input type="text" id="filterSearch" class="field" style="max-width:280px; height:38px;" placeholder="Ieškoti pagal autorių, filmą...">
           <select id="filterCategory" class="field" style="width:auto; height:38px;">
             <option value="all">Visos kategorijos</option>
@@ -98,6 +117,7 @@
                 <th>Kūrėjas</th>
                 <th>Amžius / Kat.</th>
                 <th>Filmas</th>
+                <th>Balsai</th>
                 <th>Trukmė</th>
                 <th>Įrenginys</th>
                 <th>Statusas</th>
@@ -111,7 +131,7 @@
 
       <div id="settingsTab" style="display:none;">
         <div class="content-card" style="margin-bottom:20px;">
-          <h3 style="color:var(--primary-emerald); font-family:var(--font-cinema); font-size:1.25rem; margin-bottom:8px;">Svetainėje Rodomas Vaizdo Įrašas</h3>
+          <h3 style="color:var(--primary-emerald); font-family:var(--font-cinema); font-size:clamp(1.15rem, 2vw, 1.35rem); margin-bottom:8px;">Svetainėje Rodomas Vaizdo Įrašas</h3>
           <div class="input-cell" style="margin-bottom:0;">
             <label for="cfgRecordingUrl">Vaizdo įrašo URL (Tiesioginė MP4 nuoroda arba YouTube nuoroda)</label>
             <input type="text" id="cfgRecordingUrl" class="field" placeholder="https://www.youtube.com/watch?v=...">
@@ -120,7 +140,7 @@
 
         <div class="two-col-grid">
           <div class="content-card">
-            <h3 style="color:var(--text-white); font-family:var(--font-cinema); font-size:1.15rem; margin-bottom:12px;">Lietuviška versija (LT)</h3>
+            <h3 style="color:var(--text-white); font-family:var(--font-cinema); font-size:clamp(1.05rem, 1.8vw, 1.25rem); margin-bottom:12px;">Lietuviška versija (LT)</h3>
             <div class="input-cell">
               <label>Festivalio tema</label>
               <input type="text" id="cfgLtTopic" class="field">
@@ -148,7 +168,7 @@
           </div>
 
           <div class="content-card">
-            <h3 style="color:var(--text-white); font-family:var(--font-cinema); font-size:1.15rem; margin-bottom:12px;">Angliška versija (EN)</h3>
+            <h3 style="color:var(--text-white); font-family:var(--font-cinema); font-size:clamp(1.05rem, 1.8vw, 1.25rem); margin-bottom:12px;">Angliška versija (EN)</h3>
             <div class="input-cell">
               <label>Festival Topic</label>
               <input type="text" id="cfgEnTopic" class="field">
@@ -186,7 +206,7 @@
   <div id="entryModal" class="modal-curtain">
     <div class="modal-dialog">
       <div class="modal-title-row">
-        <h3 id="mTitle" style="color:var(--text-white); font-family:var(--font-cinema); font-size:1.3rem;">Filmo peržiūra</h3>
+        <h3 id="mTitle" style="color:var(--text-white); font-family:var(--font-cinema); font-size:clamp(1.2rem, 2vw, 1.45rem);">Filmo peržiūra</h3>
         <button class="modal-close" onclick="closeEntryModal()">&times;</button>
       </div>
 
@@ -203,6 +223,7 @@
         <p><strong>Vieta:</strong> <span id="mLocation"></span></p>
         <p><strong>Kameros modelis:</strong> <span id="mDevice"></span></p>
         <p><strong>Trukmė:</strong> <span id="mDuration"></span> s</p>
+        <p><strong>Publikos balsai:</strong> <span id="mVotes">0</span></p>
         <p style="margin-top:8px; font-weight:700; color:var(--primary-emerald);">Sinopsis / Idėja:</p>
         <p id="mSynopsis" style="color:var(--text-muted); font-style:italic; margin-top:2px;"></p>
       </div>
@@ -381,6 +402,7 @@
             submissionsList.push({ id: doc.id, ...doc.data() });
           });
           updateMetrics();
+          updateAdminWinnersUI();
           renderTable();
         }, (err) => console.error(err));
     }
@@ -391,6 +413,73 @@
       document.getElementById("statFinals").textContent = submissionsList.filter(s => s.status === "semifinal" || s.status === "final" || s.status === "winner").length;
       document.getElementById("statPending").textContent = submissionsList.filter(s => !s.status || s.status === "submitted").length;
     }
+
+    function updateAdminWinnersUI() {
+      const select = document.getElementById("adminSelectFilm");
+      const list = document.getElementById("adminWinnersList");
+      if (!select || !list) return;
+
+      select.innerHTML = '<option value="" disabled selected>Pasirinkite filmą iš sąrašo...</option>';
+      submissionsList.forEach((sub) => {
+        const opt = document.createElement("option");
+        opt.value = sub.id;
+        opt.textContent = `${sub.filmTitle} — ${sub.name} (${sub.category || ''})`;
+        select.appendChild(opt);
+      });
+
+      const winners = submissionsList.filter((s) => s.isWinner === true);
+      if (winners.length === 0) {
+        list.innerHTML = '<p style="color:var(--text-subtle); font-size:0.85rem;">Nėra paskelbtų laimėtojų.</p>';
+        return;
+      }
+
+      list.innerHTML = winners.map((w) => `
+        <div class="winner-item-row">
+          <div>
+            <strong style="color:var(--primary-emerald);">${w.awardTitle || 'Laureatas'}</strong>: 
+            <span style="color:#fff;">${w.filmTitle}</span> 
+            <small style="color:var(--text-muted);">(${w.name})</small>
+          </div>
+          <button class="btn-delete" style="height:32px; padding:0 12px; font-size:0.75rem;" onclick="revokeWinner('${w.id}')">Atšaukti</button>
+        </div>
+      `).join("");
+    }
+
+    document.getElementById("assignWinnerBtn").addEventListener("click", async () => {
+      const filmId = document.getElementById("adminSelectFilm").value;
+      const awardTitle = document.getElementById("adminAwardTitle").value.trim();
+
+      if (!filmId || !awardTitle) {
+        alert("Pasirinkite filmą ir įveskite nominaciją!");
+        return;
+      }
+
+      try {
+        await db.collection("submissions").doc(filmId).update({
+          isWinner: true,
+          awardTitle: awardTitle,
+          status: "winner"
+        });
+        document.getElementById("adminAwardTitle").value = "";
+        alert("Laimėtojas sėkmingai paskelbtas!");
+      } catch (err) {
+        console.error(err);
+        alert("Klaida: " + err.message);
+      }
+    });
+
+    window.revokeWinner = async function(filmId) {
+      try {
+        await db.collection("submissions").doc(filmId).update({
+          isWinner: false,
+          awardTitle: firebase.firestore.FieldValue.delete()
+        });
+        alert("Laimėtojo statusas atšauktas.");
+      } catch (err) {
+        console.error(err);
+        alert("Klaida: " + err.message);
+      }
+    };
 
     const tableBody = document.getElementById("tableBody");
     const filterSearch = document.getElementById("filterSearch");
@@ -429,6 +518,7 @@
           <td><strong>${sub.name || ''}</strong><br><small style="color:var(--text-muted);">${sub.email || ''}</small></td>
           <td>${sub.age || ''} m.<br><small style="color:var(--text-subtle);">${sub.category || ''}</small></td>
           <td><b style="color:#fff;">${sub.filmTitle || ''}</b></td>
+          <td><b style="color:var(--primary-emerald);">${sub.votesCount || 0}</b></td>
           <td>${sub.videoDurationSeconds ? sub.videoDurationSeconds + 's' : '-'}</td>
           <td><small style="color:var(--text-muted);">${sub.deviceModel || '-'}</small></td>
           <td><span class="badge ${badgeCls}">${sub.status || 'submitted'}</span></td>
@@ -461,6 +551,7 @@
       document.getElementById("mLocation").textContent = currentEntry.location || "";
       document.getElementById("mDevice").textContent = currentEntry.deviceModel || "";
       document.getElementById("mDuration").textContent = currentEntry.videoDurationSeconds || "";
+      document.getElementById("mVotes").textContent = currentEntry.votesCount || 0;
       document.getElementById("mSynopsis").textContent = currentEntry.synopsis || "";
 
       mVideo.src = currentEntry.videoUrl || "";
