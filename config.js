@@ -15,7 +15,8 @@ const storage = firebase.storage();
 
 const AUTHORIZED_ADMIN_EMAILS = [
   "azuolynasfilmfestival@gmail.com",
-  "azuolynasfilmfest@gmail.com"
+  "azuolynasfilmfest@gmail.com",
+  "dominikphotofficial.lt@gmail.com"
 ];
 
 const DEFAULT_CONTENT = {
