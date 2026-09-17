@@ -68,7 +68,7 @@
   <header>
     <div class="container nav-bar">
       <a href="index.html" class="logo-wrap">
-        <img src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media" alt="Ąžuolynas Film Fest" class="logo-img">
+        <img src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media" alt="Ąžuolynas Fest" class="logo-img">
         <span class="logo-text">Ąžuolynas Fest</span>
       </a>
       <ul class="nav-links">
@@ -88,89 +88,91 @@
   <main>
     <section class="hero" id="about">
       <div class="container">
-        <div class="laurel-badge" id="dynHeroBadge">International Students Film Festival</div>
+        <div class="hero-badge" id="dynHeroBadge">International Students Film Festival</div>
         <h1 class="hero-title">Ąžuolynas Film Festival</h1>
-        <div class="hero-topic-box">
+        <div class="hero-topic-card">
           <span class="hero-topic-label">Festival Topic:</span>
-          <span class="hero-topic-value" id="dynTopic">“An unusual view at ordinary things”</span>
+          <span class="hero-topic-val" id="dynTopic">“An unusual view at ordinary things”</span>
         </div>
 
-        <div class="meta-grid">
-          <div class="meta-card">
-            <div class="meta-card-label">Submissions Accepted</div>
-            <div class="meta-card-value" id="dynDates">February 14th – April 17th</div>
+        <div class="meta-row">
+          <div class="meta-box">
+            <div class="meta-box-label">Submissions Accepted</div>
+            <div class="meta-box-value" id="dynDates">February 14th – April 17th</div>
           </div>
-          <div class="meta-card">
-            <div class="meta-card-label">Event Recording</div>
-            <div class="meta-card-value" id="dynEvent">May 27th, 15:00 (On Site)</div>
+          <div class="meta-box">
+            <div class="meta-box-label">Event Recording</div>
+            <div class="meta-box-value" id="dynEvent">May 27th, 15:00 (On Site)</div>
           </div>
-          <div class="meta-card">
-            <div class="meta-card-label">Eligibility</div>
-            <div class="meta-card-value" id="dynTarget">Students Worldwide</div>
+          <div class="meta-box">
+            <div class="meta-box-label">Eligibility</div>
+            <div class="meta-box-value" id="dynTarget">Students Worldwide</div>
           </div>
         </div>
 
-        <div class="cta-group">
-          <a href="#submit" class="btn-primary">Submit Your Film</a>
-          <a href="#screening" class="btn-secondary">Watch Screening</a>
+        <div class="cta-flex">
+          <a href="#submit" class="btn-solid">Submit Your Film</a>
+          <a href="#screening" class="btn-outline">Watch Screening</a>
         </div>
       </div>
     </section>
 
-    <section id="screening" class="section">
+    <section id="screening" class="section-block">
       <div class="container">
-        <div class="section-header">
-          <div class="section-tagline">Event Video</div>
-          <h2 class="section-title">Festival Screening & Awards</h2>
+        <div class="section-head">
+          <div class="section-tag">Event Video</div>
+          <h2 class="section-heading">Festival Screening & Awards</h2>
         </div>
 
-        <div class="screening-card">
-          <div class="screening-player-wrap" id="screeningPlayerContainer">
-            <div class="screening-placeholder" id="screeningPlaceholder">
-              <p style="font-size:2rem; margin-bottom:8px;">🎬</p>
-              <p style="font-size:1.05rem; font-weight:600; color:#fff;" id="dynRecordingPlaceholder">The official festival recording will be published here on May 27th at 15:00.</p>
-              <p style="color:var(--text-muted); font-size:0.85rem; margin-top:6px;">All submitted works and jury results will be viewable right here.</p>
+        <div class="player-card">
+          <div class="player-screen" id="screeningPlayerContainer">
+            <div class="player-idle" id="screeningPlaceholder">
+              <div class="player-idle-icon">🎬</div>
+              <div class="player-idle-title" id="dynRecordingPlaceholder">The official festival recording will be published here on May 27th at 15:00.</div>
+              <div class="player-idle-sub">All submitted works and jury results will be viewable right here.</div>
             </div>
           </div>
         </div>
       </div>
     </section>
 
-    <section id="terms" class="section">
+    <section id="terms" class="section-block">
       <div class="container">
-        <div class="section-header">
-          <div class="section-tagline">Guidelines</div>
-          <h2 class="section-title">Terms of Participation</h2>
+        <div class="section-head">
+          <div class="section-tag">Guidelines</div>
+          <h2 class="section-heading">Terms of Participation</h2>
         </div>
-        <div class="grid-2">
-          <div class="card-luxury">
-            <ul class="rules-list">
+
+        <div class="two-col-grid">
+          <div class="content-card">
+            <ul class="rule-items">
               <li>
-                <span class="rule-number">1</span>
+                <span class="rule-idx">1</span>
                 <span id="dynRule1">Your film must be filmed strictly on a tablet or smartphone.</span>
               </li>
               <li>
-                <span class="rule-number">2</span>
+                <span class="rule-idx">2</span>
                 <span id="dynRule2">The duration cannot exceed 3 minutes (180 s including credits).</span>
               </li>
               <li>
-                <span class="rule-number">3</span>
+                <span class="rule-idx">3</span>
                 <span id="dynRule3">From one participant: only one film entry.</span>
               </li>
             </ul>
           </div>
-          <div class="card-luxury">
-            <ul class="rules-list">
+
+          <div class="content-card">
+            <ul class="rule-items">
               <li>
-                <span class="rule-number">4</span>
+                <span class="rule-idx">4</span>
                 <span id="dynRule4">Films made with adult assistance will not be considered.</span>
               </li>
               <li>
-                <span class="rule-number">5</span>
+                <span class="rule-idx">5</span>
                 <span id="dynRule5">Your film must have English subtitles.</span>
               </li>
               <li>
-                <span class="rule-number">6</span>
+                <span class="rule-idx">6</span>
                 <span id="dynRule6">The festival screening recording will be hosted directly on this website.</span>
               </li>
             </ul>
@@ -179,64 +181,67 @@
       </div>
     </section>
 
-    <section id="categories" class="section">
+    <section id="categories" class="section-block">
       <div class="container">
-        <div class="section-header">
-          <div class="section-tagline">Competition</div>
-          <h2 class="section-title">Categories & Awards</h2>
+        <div class="section-head">
+          <div class="section-tag">Competition</div>
+          <h2 class="section-heading">Categories & Awards</h2>
         </div>
-        <div class="grid-2">
-          <div class="card-luxury category-card">
-            <div class="category-num">Category I</div>
-            <h3 style="color:#fff; font-size:1.15rem; margin-bottom:8px;" id="dynCat1Age">From 10 to 13 years old</h3>
-            <p style="color:var(--text-muted); font-size:0.92rem;" id="dynCat1Desc">For budding visual artists beginning their cinematic storytelling journey.</p>
+
+        <div class="two-col-grid">
+          <div class="content-card cat-border">
+            <div class="cat-label">Category I</div>
+            <div class="cat-title" id="dynCat1Age">From 10 to 13 years old</div>
+            <div class="cat-desc" id="dynCat1Desc">For budding visual artists beginning their cinematic storytelling journey.</div>
           </div>
-          <div class="card-luxury category-card">
-            <div class="category-num">Category II</div>
-            <h3 style="color:#fff; font-size:1.15rem; margin-bottom:8px;" id="dynCat2Age">From 14 to 18 years old</h3>
-            <p style="color:var(--text-muted); font-size:0.92rem;" id="dynCat2Desc">For youth directors exploring bold perspectives and nuanced compositions.</p>
+
+          <div class="content-card cat-border">
+            <div class="cat-label">Category II</div>
+            <div class="cat-title" id="dynCat2Age">From 14 to 18 years old</div>
+            <div class="cat-desc" id="dynCat2Desc">For youth directors exploring bold perspectives and nuanced compositions.</div>
           </div>
         </div>
-        <div class="awards-banner">
-          <h3 style="color:var(--teal-light); font-size:1.25rem; font-family:'Cormorant Garamond', serif;">Honours in Each Category</h3>
-          <div class="awards-pills">
-            <span class="award-pill">🥇 1st Place</span>
-            <span class="award-pill">🥈 2nd Place</span>
-            <span class="award-pill">🥉 3rd Place</span>
-            <span class="award-pill">🏆 Audience Choice Award</span>
+
+        <div class="awards-panel">
+          <div class="awards-panel-title">Honours in Each Category</div>
+          <div class="awards-chips">
+            <span class="chip">🥇 1st Place</span>
+            <span class="chip">🥈 2nd Place</span>
+            <span class="chip">🥉 3rd Place</span>
+            <span class="chip">🏆 Audience Choice Award</span>
           </div>
         </div>
       </div>
     </section>
 
-    <section id="submit" class="section">
+    <section id="submit" class="section-block">
       <div class="container">
-        <div class="section-header">
-          <div class="section-tagline">Entry Form</div>
-          <h2 class="section-title">Submit Your Work</h2>
+        <div class="section-head">
+          <div class="section-tag">Entry Form</div>
+          <h2 class="section-heading">Submit Your Work</h2>
         </div>
 
-        <div class="form-wrapper">
+        <div class="form-sheet">
           <form id="submissionForm">
-            <div class="form-row">
-              <div class="form-group">
+            <div class="input-row">
+              <div class="input-cell">
                 <label for="participantName">Full Name *</label>
-                <input type="text" id="participantName" class="form-input" placeholder="John Doe" required>
+                <input type="text" id="participantName" class="field" placeholder="John Doe" required>
               </div>
-              <div class="form-group">
+              <div class="input-cell">
                 <label for="participantEmail">Email Address *</label>
-                <input type="email" id="participantEmail" class="form-input" placeholder="john@example.com" required>
+                <input type="email" id="participantEmail" class="field" placeholder="john@example.com" required>
               </div>
             </div>
 
-            <div class="form-row">
-              <div class="form-group">
+            <div class="input-row">
+              <div class="input-cell">
                 <label for="participantAge">Age (10–18 years old) *</label>
-                <input type="number" id="participantAge" min="10" max="18" class="form-input" required>
+                <input type="number" id="participantAge" min="10" max="18" class="field" required>
               </div>
-              <div class="form-group">
+              <div class="input-cell">
                 <label for="participantCategory">Category *</label>
-                <select id="participantCategory" class="form-select" required>
+                <select id="participantCategory" class="field" required>
                   <option value="" disabled selected>Select age group</option>
                   <option value="Category I (10-13)">Category I (10-13 yrs)</option>
                   <option value="Category II (14-18)">Category II (14-18 yrs)</option>
@@ -244,70 +249,70 @@
               </div>
             </div>
 
-            <div class="form-row">
-              <div class="form-group">
+            <div class="input-row">
+              <div class="input-cell">
                 <label for="countryCity">Country & City *</label>
-                <input type="text" id="countryCity" class="form-input" placeholder="London, UK" required>
+                <input type="text" id="countryCity" class="field" placeholder="London, UK" required>
               </div>
-              <div class="form-group">
+              <div class="input-cell">
                 <label for="institution">School / Film Studio / Club</label>
-                <input type="text" id="institution" class="form-input" placeholder="Institution name">
+                <input type="text" id="institution" class="field" placeholder="Institution name">
               </div>
             </div>
 
-            <div class="form-group">
+            <div class="input-cell">
               <label for="filmTitle">Film Title *</label>
-              <input type="text" id="filmTitle" class="form-input" placeholder="Original title of your film" required>
+              <input type="text" id="filmTitle" class="field" placeholder="Original title of your film" required>
             </div>
 
-            <div class="form-group">
+            <div class="input-cell">
               <label for="deviceModel">Filming Device (Phone or Tablet model) *</label>
-              <input type="text" id="deviceModel" class="form-input" placeholder="e.g. iPhone 13, iPad Pro" required>
+              <input type="text" id="deviceModel" class="field" placeholder="e.g. iPhone 13, iPad Pro" required>
             </div>
 
-            <div class="form-group">
+            <div class="input-cell">
               <label for="synopsis">Short Synopsis / Concept *</label>
-              <textarea id="synopsis" class="form-textarea" placeholder="How does your film connect to the theme?" required></textarea>
+              <textarea id="synopsis" class="field" placeholder="How does your film connect to the theme?" required></textarea>
             </div>
 
-            <div class="form-group">
+            <div class="input-cell">
               <label>Film Video File (MP4 / MOV / WEBM, up to 3 mins) *</label>
-              <div class="upload-zone" id="uploadZone">
-                <div class="upload-icon">🎞️</div>
-                <p style="font-weight:700; color:#fff;">Click or drag & drop video file here</p>
-                <p style="color:var(--text-muted); font-size:0.82rem; margin-top:4px;">The system automatically verifies duration (max 180s)</p>
+              <div class="drop-area" id="uploadZone">
+                <div class="drop-icon">🎬</div>
+                <div class="drop-title">Select or drag video file here</div>
+                <div class="drop-sub">Duration automatically checked (max 180s)</div>
                 <input type="file" id="videoFileInput" accept="video/mp4,video/quicktime,video/webm" required>
               </div>
-              <div id="uploadFeedback" class="upload-feedback"></div>
+              <div id="uploadFeedback" class="drop-alert"></div>
               
-              <div class="progress-container" id="progressContainer">
-                <div class="progress-bar">
-                  <div class="progress-fill" id="progressFill"></div>
+              <div class="bar-box" id="progressContainer">
+                <div class="bar-line">
+                  <div class="bar-fill" id="progressFill"></div>
                 </div>
-                <div id="progressStatus" style="font-size:0.82rem; color:var(--text-muted); margin-top:6px; text-align:right;">0%</div>
+                <div id="progressStatus" style="font-size:0.78rem; color:var(--text-muted); margin-top:4px; text-align:right;">0%</div>
               </div>
             </div>
 
-            <div class="checkbox-group">
-              <label class="checkbox-item">
+            <div class="consent-list">
+              <label class="consent-line">
                 <input type="checkbox" required>
                 <span>I confirm that the film was shot entirely on a phone or tablet.</span>
               </label>
-              <label class="checkbox-item">
+              <label class="consent-line">
                 <input type="checkbox" required>
                 <span>I confirm that the total duration does not exceed 3 minutes.</span>
               </label>
-              <label class="checkbox-item">
+              <label class="consent-line">
                 <input type="checkbox" required>
                 <span>I confirm that the film was made without adult assistance.</span>
               </label>
-              <label class="checkbox-item">
+              <label class="consent-line">
                 <input type="checkbox" required>
                 <span>I confirm that the film includes English subtitles.</span>
               </label>
             </div>
 
-            <button type="submit" id="submitBtn" class="btn-primary" style="width:100%; justify-content:center;">
+            <button type="submit" id="submitBtn" class="btn-solid" style="width:100%;">
               Submit Entry To Festival
             </button>
           </form>
@@ -318,12 +323,12 @@
 
   <footer>
     <div class="container">
-      <img src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media" alt="Logo" style="height:50px; margin-bottom:12px;">
-      <h4 style="font-family:'Cormorant Garamond', serif; font-size:1.3rem; color:#fff; letter-spacing:1px;">Ąžuolynas International Students Film Festival</h4>
-      <p class="footer-contact">
+      <img src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media" alt="Logo" class="footer-logo">
+      <div class="footer-name">Ąžuolynas International Students Film Festival</div>
+      <div class="footer-mail">
         Contact: <a href="mailto:azuolynasfilmfestival@gmail.com">azuolynasfilmfestival@gmail.com</a>
-      </p>
-      <p style="color:var(--text-faint); font-size:0.82rem; margin-top:8px;">May 27th, 15:00 (Lithuanian Time) • Recorded Event on Site</p>
+      </div>
+      <div class="footer-note">May 27th, 15:00 (Lithuanian Time) • Recorded Event on Site</div>
     </div>
   </footer>
 
@@ -397,11 +402,11 @@
         if (videoDurationSeconds > 180) {
           verifiedVideoFile = null;
           fileInput.value = "";
-          feedback.className = "upload-feedback error";
+          feedback.className = "drop-alert error";
           feedback.textContent = `Error: Duration is ${videoDurationSeconds} s. Allowed limit is 180 s (3 mins)!`;
         } else {
           verifiedVideoFile = file;
-          feedback.className = "upload-feedback success";
+          feedback.className = "drop-alert success";
           feedback.textContent = `Duration verified: ${videoDurationSeconds} s (${file.name})`;
         }
       };
