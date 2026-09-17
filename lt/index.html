@@ -24,12 +24,9 @@
         <li><a href="#categories">Kategorijos</a></li>
         <li><a href="#submit">Registracija</a></li>
       </ul>
-      <div style="display:flex; align-items:center; gap:12px;">
-        <div class="lang-switch">
-          <a href="../lt/index.html" class="lang-btn active">LT</a>
-          <a href="../en/index.html" class="lang-btn">EN</a>
-        </div>
-        <a href="../admin.html" class="btn-secondary" style="padding:7px 16px; font-size:0.82rem;">Admin</a>
+      <div class="lang-switch">
+        <a href="../lt/index.html" class="lang-btn active">LT</a>
+        <a href="../en/index.html" class="lang-btn">EN</a>
       </div>
     </div>
   </header>
@@ -37,31 +34,31 @@
   <main>
     <section class="hero" id="about">
       <div class="container">
-        <div class="laurel-tag">🌿 Tarptautinis Mokinių Kino Festivalis 🌿</div>
+        <div class="laurel-tag" id="dynHeroBadge">Tarptautinis Mokinių Filmų Festivalis</div>
         <h1 class="hero-title">Ąžuolynas Film Festival</h1>
-        <div class="hero-topic-wrap">
-          <span class="hero-topic-label">Festivalio tema:</span>
-          <span class="hero-topic">„Neįprastas žvilgsnis į įprastus dalykus“</span>
+        <div class="hero-topic-box">
+          <span class="hero-topic-prefix">Festivalio tema:</span>
+          <span class="hero-topic-text" id="dynTopic">„Neįprastas žvilgsnis į įprastus dalykus“</span>
         </div>
 
         <div class="meta-grid">
           <div class="meta-card">
             <div class="meta-card-label">Paraiškų priėmimas</div>
-            <div class="meta-card-val">Vasario 14 d. – Balandžio 17 d.</div>
+            <div class="meta-card-val" id="dynDates">Vasario 14 d. – Balandžio 17 d.</div>
           </div>
           <div class="meta-card">
             <div class="meta-card-label">Renginio transliacija</div>
-            <div class="meta-card-val">Gegužės 27 d., 15:00 (YouTube)</div>
+            <div class="meta-card-val" id="dynEvent">Gegužės 27 d., 15:00 (YouTube)</div>
           </div>
           <div class="meta-card">
             <div class="meta-card-label">Dalyviai</div>
-            <div class="meta-card-val">Mokiniai iš viso pasaulio</div>
+            <div class="meta-card-val" id="dynTarget">Mokiniai iš viso pasaulio</div>
           </div>
         </div>
 
         <div class="cta-group">
           <a href="#submit" class="btn-gold">Pateikti savo filmą 🎬</a>
-          <a href="#terms" class="btn-secondary">Dalyvavimo taisyklės</a>
+          <a href="#terms" class="btn-outline">Dalyvavimo taisyklės</a>
         </div>
       </div>
     </section>
@@ -69,39 +66,39 @@
     <section id="terms" class="section">
       <div class="container">
         <div class="section-header">
-          <div class="section-subtitle">Griežti kriterijai</div>
+          <div class="section-tagline">Festivalio reglamentas</div>
           <h2 class="section-title">Dalyvavimo Sąlygos</h2>
         </div>
         <div class="grid-2">
-          <div class="card-feature">
+          <div class="card-luxury">
             <ul class="rules-list">
               <li>
-                <span class="rule-icon">✓</span>
-                <span>Filmas privalo būti nufilmuotas išmaniuoju telefonu arba planšete.</span>
+                <span class="rule-num">1</span>
+                <span id="dynRule1">Filmas privalo būti nufilmuotas išmaniuoju telefonu arba planšete.</span>
               </li>
               <li>
-                <span class="rule-icon">✓</span>
-                <span>Maksimali filmo trukmė – <strong>iki 3 minučių</strong> (180 s įskaitant titrus).</span>
+                <span class="rule-num">2</span>
+                <span id="dynRule2">Maksimali filmo trukmė – iki 3 minučių (180 s įskaitant titrus).</span>
               </li>
               <li>
-                <span class="rule-icon">✓</span>
-                <span>Vienas dalyvis gali pateikti tik <strong>vieną filmą</strong>.</span>
+                <span class="rule-num">3</span>
+                <span id="dynRule3">Vienas dalyvis gali pateikti tik vieną filmą.</span>
               </li>
             </ul>
           </div>
-          <div class="card-feature">
+          <div class="card-luxury">
             <ul class="rules-list">
               <li>
-                <span class="rule-icon">✓</span>
-                <span>Filmai, sukurti su suaugusiųjų pagalba, nebus vertinami.</span>
+                <span class="rule-num">4</span>
+                <span id="dynRule4">Filmai, sukurti su suaugusiųjų pagalba, nebus vertinami.</span>
               </li>
               <li>
-                <span class="rule-icon">✓</span>
-                <span>Filmas privalo turėti <strong>angliškus subtitrus</strong> (English subtitles).</span>
+                <span class="rule-num">5</span>
+                <span id="dynRule5">Filmas privalo turėti angliškus subtitrus (English subtitles).</span>
               </li>
               <li>
-                <span class="rule-icon">✓</span>
-                <span>Kiekvienas dalyvis gaus tiesioginę nuorodą į peržiūros transliaciją el. paštu.</span>
+                <span class="rule-num">6</span>
+                <span id="dynRule6">Kiekvienas dalyvis gaus tiesioginę nuorodą į peržiūros transliaciją el. paštu.</span>
               </li>
             </ul>
           </div>
@@ -112,28 +109,28 @@
     <section id="categories" class="section">
       <div class="container">
         <div class="section-header">
-          <div class="section-subtitle">Varžytuvės</div>
+          <div class="section-tagline">Varžytuvės</div>
           <h2 class="section-title">Kategorijos ir Apdovanojimai</h2>
         </div>
         <div class="grid-2">
-          <div class="card-feature category-card">
-            <div class="category-badge">I Kategorija</div>
-            <h3 style="color:#fff; margin-bottom:8px;">Nuo 10 iki 13 metų amžiaus</h3>
-            <p style="color:var(--text-muted); font-size:0.92rem;">Jaunųjų režisierių vizualiniai eksperimentai ir pirmieji autoriniai žingsniai kine.</p>
+          <div class="card-luxury category-card">
+            <div class="category-num">I Kategorija</div>
+            <h3 style="color:#fff; font-size:1.15rem; margin-bottom:8px;" id="dynCat1Age">Nuo 10 iki 13 metų amžiaus</h3>
+            <p style="color:var(--text-muted); font-size:0.94rem;" id="dynCat1Desc">Jaunųjų režisierių vizualiniai eksperimentai ir autoriniai žingsniai kine.</p>
           </div>
-          <div class="card-feature category-card">
-            <div class="category-badge">II Kategorija</div>
-            <h3 style="color:#fff; margin-bottom:8px;">Nuo 14 iki 18 metų amžiaus</h3>
-            <p style="color:var(--text-muted); font-size:0.92rem;">Vyresniųjų moksleivių kinematografinė kalba, gilesnė dramaturgija ir požiūrio kampas.</p>
+          <div class="card-luxury category-card">
+            <div class="category-num">II Kategorija</div>
+            <h3 style="color:#fff; font-size:1.15rem; margin-bottom:8px;" id="dynCat2Age">Nuo 14 iki 18 metų amžiaus</h3>
+            <p style="color:var(--text-muted); font-size:0.94rem;" id="dynCat2Desc">Vyresniųjų moksleivių kinematografinė kalba, gilesnė dramaturgija ir požiūrio kampas.</p>
           </div>
         </div>
         <div class="awards-banner">
-          <h3 style="color:var(--gold); font-size:1.2rem; font-family:'Cinzel', serif;">Oficialios nominacijos abiejose kategorijose</h3>
+          <h3 style="color:var(--gold); font-size:1.35rem; font-family:'Cormorant Garamond', serif;">Oficialios nominacijos abiejose kategorijose</h3>
           <div class="awards-pills">
             <span class="award-pill">🥇 1-oji Vieta</span>
             <span class="award-pill">🥈 2-oji Vieta</span>
             <span class="award-pill">🥉 3-ioji Vieta</span>
-            <span class="award-pill">🏆 Žiūrovų Simpatijų Prizas (Audience Choice)</span>
+            <span class="award-pill">🏆 Žiūrovų Simpatijų Prizas</span>
           </div>
         </div>
       </div>
@@ -142,7 +139,7 @@
     <section id="submit" class="section">
       <div class="container">
         <div class="section-header">
-          <div class="section-subtitle">Registracija</div>
+          <div class="section-tagline">Registracija</div>
           <h2 class="section-title">Pateikite Savo Filmą</h2>
         </div>
 
@@ -151,7 +148,7 @@
             <div class="form-row">
               <div class="form-group">
                 <label for="participantName">Vardas ir Pavardė *</label>
-                <input type="text" id="participantName" class="form-input" placeholder="pvz. Vardenis Pavardenis" required>
+                <input type="text" id="participantName" class="form-input" placeholder="Vardenis Pavardenis" required>
               </div>
               <div class="form-group">
                 <label for="participantEmail">El. pašto adresas *</label>
@@ -180,8 +177,8 @@
                 <input type="text" id="countryCity" class="form-input" placeholder="Lietuva, Kaunas" required>
               </div>
               <div class="form-group">
-                <label for="institution">Mokykla, gimnazija arba kino studija</label>
-                <input type="text" id="institution" class="form-input" placeholder="pvz. Kauno Ąžuolyno gimnazija">
+                <label for="institution">Mokykla, gimnazija arba studija</label>
+                <input type="text" id="institution" class="form-input" placeholder="Gimnazijos pavadinimas">
               </div>
             </div>
 
@@ -191,21 +188,21 @@
             </div>
 
             <div class="form-group">
-              <label for="deviceModel">Kameros / Įrenginio modelis (išmanusis ar planšetė) *</label>
-              <input type="text" id="deviceModel" class="form-input" placeholder="pvz. iPhone 14 Pro, Samsung Tab S8" required>
+              <label for="deviceModel">Kameros / Įrenginio modelis *</label>
+              <input type="text" id="deviceModel" class="form-input" placeholder="pvz. iPhone 14 Pro, Samsung Galaxy Tab" required>
             </div>
 
             <div class="form-group">
               <label for="synopsis">Trumpas filmo aprašymas / Idėja *</label>
-              <textarea id="synopsis" class="form-textarea" placeholder="Apie ką jūsų filmas ir kaip atskleidžiate festivalio temą?" required></textarea>
+              <textarea id="synopsis" class="form-textarea" placeholder="Kaip jūsų filmas atskleidžia festivalio temą?" required></textarea>
             </div>
 
             <div class="form-group">
-              <label>Vaizdo įrašo failas (MP4 / MOV / WEBM, maks. 3 minutės) *</label>
+              <label>Vaizdo įrašo failas (MP4 / MOV / WEBM, iki 3 minučių) *</label>
               <div class="upload-zone" id="uploadZone">
                 <div class="upload-icon">🎞️</div>
                 <p style="font-weight:700; color:#fff;">Spustelėkite arba įtempkite video failą čia</p>
-                <p style="color:var(--text-muted); font-size:0.8rem; margin-top:4px;">Sistema automatiškai patikrins failo trukmę (ne ilgiau kaip 180 s)</p>
+                <p style="color:var(--text-muted); font-size:0.82rem; margin-top:4px;">Sistema automatiškai patikrins trukmę (iki 180 sekundžių)</p>
                 <input type="file" id="videoFileInput" accept="video/mp4,video/quicktime,video/webm" required>
               </div>
               <div id="uploadFeedback" class="upload-feedback"></div>
@@ -249,17 +246,36 @@
   <footer>
     <div class="container">
       <img src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media" alt="Logo" style="height:55px; margin-bottom:12px;">
-      <h4 style="font-family:'Cinzel', serif; color:#fff; letter-spacing:1px;">Ąžuolynas International Students Film Festival</h4>
+      <h4 style="font-family:'Cormorant Garamond', serif; font-size:1.3rem; color:#fff; letter-spacing:1px;">Ąžuolynas International Students Film Festival</h4>
       <p class="footer-contact">
-        Klausimams ir partnerystei: <a href="mailto:azuolynasfilmfestival@gmail.com">azuolynasfilmfestival@gmail.com</a>
+        Klausimams ir susisiekimui: <a href="mailto:azuolynasfilmfestival@gmail.com">azuolynasfilmfestival@gmail.com</a>
       </p>
-      <p style="color:var(--text-dim); font-size:0.8rem; margin-top:8px;">Gegužės 27 d., 15:00 (Lietuvos laiku) • YouTube</p>
+      <p style="color:var(--text-faint); font-size:0.82rem; margin-top:8px;">Gegužės 27 d., 15:00 (Lietuvos laiku) • YouTube</p>
     </div>
   </footer>
 
   <script src="../config.js"></script>
   <script src="../email-templates.js"></script>
   <script>
+    db.collection("settings").doc("festival").onSnapshot((doc) => {
+      const data = doc.exists && doc.data().lt ? doc.data().lt : DEFAULT_CONTENT.lt;
+      document.getElementById("dynHeroBadge").textContent = data.heroBadge || DEFAULT_CONTENT.lt.heroBadge;
+      document.getElementById("dynTopic").textContent = `„${data.topic || DEFAULT_CONTENT.lt.topic}“`;
+      document.getElementById("dynDates").textContent = data.datesSubmissions || DEFAULT_CONTENT.lt.datesSubmissions;
+      document.getElementById("dynEvent").textContent = data.dateEvent || DEFAULT_CONTENT.lt.dateEvent;
+      document.getElementById("dynTarget").textContent = data.targetAudience || DEFAULT_CONTENT.lt.targetAudience;
+      if (data.rule1) document.getElementById("dynRule1").textContent = data.rule1;
+      if (data.rule2) document.getElementById("dynRule2").textContent = data.rule2;
+      if (data.rule3) document.getElementById("dynRule3").textContent = data.rule3;
+      if (data.rule4) document.getElementById("dynRule4").textContent = data.rule4;
+      if (data.rule5) document.getElementById("dynRule5").textContent = data.rule5;
+      if (data.rule6) document.getElementById("dynRule6").textContent = data.rule6;
+      if (data.cat1Age) document.getElementById("dynCat1Age").textContent = data.cat1Age;
+      if (data.cat1Desc) document.getElementById("dynCat1Desc").textContent = data.cat1Desc;
+      if (data.cat2Age) document.getElementById("dynCat2Age").textContent = data.cat2Age;
+      if (data.cat2Desc) document.getElementById("dynCat2Desc").textContent = data.cat2Desc;
+    });
+
     let verifiedVideoFile = null;
     let videoDurationSeconds = 0;
 
@@ -267,11 +283,8 @@
     const catSelect = document.getElementById("participantCategory");
     ageInput.addEventListener("input", (e) => {
       const val = parseInt(e.target.value, 10);
-      if (val >= 10 && val <= 13) {
-        catSelect.value = "Category I (10-13)";
-      } else if (val >= 14 && val <= 18) {
-        catSelect.value = "Category II (14-18)";
-      }
+      if (val >= 10 && val <= 13) catSelect.value = "Category I (10-13)";
+      else if (val >= 14 && val <= 18) catSelect.value = "Category II (14-18)";
     });
 
     const fileInput = document.getElementById("videoFileInput");
@@ -293,7 +306,7 @@
           verifiedVideoFile = null;
           fileInput.value = "";
           feedback.className = "upload-feedback error";
-          feedback.textContent = `Klaida: filmo trukmė yra ${videoDurationSeconds} s. Leidžiama ne daugiau 180 s (3 min.)!`;
+          feedback.textContent = `Klaida: filmo trukmė yra ${videoDurationSeconds} s. Leidžiama iki 180 s (3 min.)!`;
         } else {
           verifiedVideoFile = file;
           feedback.className = "upload-feedback success";
@@ -381,7 +394,7 @@
               }
             });
 
-            alert("Dėkojame! Jūsų filmo paraiška sėkmingai gauta ir patvirtinimo laiškas išsiųstas.");
+            alert("Dėkojame! Jūsų filmo paraiška sėkmingai gauta.");
             form.reset();
             verifiedVideoFile = null;
             feedback.textContent = "";
@@ -392,7 +405,7 @@
         );
       } catch (error) {
         console.error(error);
-        alert("Įvyko nenumatyta klaida. Bandykite dar kartą.");
+        alert("Įvyko klaida. Bandykite vėliau.");
         submitBtn.disabled = false;
       }
     });
