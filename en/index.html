@@ -8,13 +8,13 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Ąžuolynas International Students Film Festival | Official Submissions</title>
-  <meta name="description" content="Official submission platform for Ąžuolynas International Students Film Festival. Topic: 'An unusual view at ordinary things'. Event recording on site.">
+  <meta name="description" content="The «Ažuolynas» Film Festival is named after one of the sights of Kaunas. Films up to 3 mins made on phone/tablet. Submissions open until April 2nd, 2026.">
   <meta name="robots" content="index, follow, max-image-preview:large, max-video-preview:-1">
   <link rel="canonical" href="https://azuolynasinternationalfilmfestival.github.io/site/en/index.html">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Ąžuolynas International Students Film Festival">
   <meta property="og:title" content="Ąžuolynas International Students Film Festival | Official Submissions">
-  <meta property="og:description" content="Submit your smartphone/tablet short film under 3 minutes. Topic: 'An unusual view at ordinary things'. Watch event recording on site.">
+  <meta property="og:description" content="Submit your smartphone/tablet short film under 3 minutes until April 2nd, 2026. Opening ceremony on April 17th, 2026.">
   <meta property="og:url" content="https://azuolynasinternationalfilmfestival.github.io/site/en/index.html">
   <meta property="og:image" content="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media">
   <meta property="og:image:width" content="1200">
@@ -22,7 +22,7 @@
   <meta property="og:locale" content="en_US">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Ąžuolynas International Students Film Festival">
-  <meta name="twitter:description" content="International Students Film Festival. Event recording available on site May 27th.">
+  <meta name="twitter:description" content="International Students Film Festival. Submissions open until April 2nd, 2026.">
   <meta name="twitter:image" content="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media">
   <link rel="icon" type="image/webp" href="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media">
   <link rel="stylesheet" href="../style.css">
@@ -31,9 +31,9 @@
     "@context": "https://schema.org",
     "@type": "Festival",
     "name": "Ąžuolynas International Students Film Festival",
-    "description": "An international film festival celebrating student creators worldwide. Event recording hosted directly on the official site.",
-    "startDate": "2026-05-27T15:00:00+03:00",
-    "endDate": "2026-05-27T18:00:00+03:00",
+    "description": "The «Ažuolynas» Film Festival is named after one of the sights of Kaunas, at the foot of which our studio is located.",
+    "startDate": "2026-04-17T15:00:00+03:00",
+    "endDate": "2026-04-17T18:00:00+03:00",
     "eventAttendanceMode": "https://schema.org/OnlineEventAttendanceMode",
     "eventStatus": "https://schema.org/EventScheduled",
     "location": {
@@ -46,16 +46,7 @@
       "name": "Ąžuolynas Film Festival Committee",
       "email": "azuolynasfilmfestival@gmail.com",
       "url": "https://azuolynasinternationalfilmfestival.github.io/site/"
-    },
-    "award": [
-      "1st Place Category I (10-13 yrs)",
-      "2nd Place Category I (10-13 yrs)",
-      "3rd Place Category I (10-13 yrs)",
-      "1st Place Category II (14-18 yrs)",
-      "2nd Place Category II (14-18 yrs)",
-      "3rd Place Category II (14-18 yrs)",
-      "Audience Choice Award"
-    ]
+    }
   }
   </script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
@@ -73,11 +64,12 @@
       </a>
       <ul class="nav-links">
         <li><a href="#about">About</a></li>
+        <li><a href="#terms">Terms</a></li>
+        <li><a href="#categories">Categories & Prizes</a></li>
+        <li><a href="#archive">Archive (2024–2025)</a></li>
         <li id="navLinkResults" style="display:none;"><a href="#results">Results</a></li>
         <li id="navLinkVoting" style="display:none;"><a href="#competition">Voting</a></li>
         <li id="navLinkScreening"><a href="#screening">Screening</a></li>
-        <li><a href="#terms">Terms</a></li>
-        <li><a href="#categories">Categories</a></li>
         <li id="navLinkSubmit"><a href="#submit">Submit</a></li>
       </ul>
       <div class="lang-switch">
@@ -92,6 +84,10 @@
       <div class="container">
         <div class="hero-badge" id="dynHeroBadge">International Students Film Festival</div>
         <h1 class="hero-title">Ąžuolynas Film Festival</h1>
+        <p class="hero-about-text" id="dynAboutText">
+          The «Ažuolynas» Film Festival is named after one of the sights of Kaunas, at the foot of which our studio is located.
+        </p>
+
         <div class="hero-topic-card">
           <span class="hero-topic-label">Festival Topic:</span>
           <span class="hero-topic-val" id="dynTopic">“An unusual view at ordinary things”</span>
@@ -99,23 +95,135 @@
 
         <div class="meta-row">
           <div class="meta-box">
-            <div class="meta-box-label">Submissions Accepted</div>
-            <div class="meta-box-value" id="dynDates">February 14th – April 17th</div>
+            <div class="meta-box-label">Submissions Deadline</div>
+            <div class="meta-box-value" id="dynDates">Until April 2nd, 2026</div>
           </div>
           <div class="meta-box">
-            <div class="meta-box-label">Event Recording</div>
-            <div class="meta-box-value" id="dynEvent">May 27th, 15:00 (On Site)</div>
+            <div class="meta-box-label">Opening Ceremony</div>
+            <div class="meta-box-value" id="dynEvent">April 17th, 2026</div>
           </div>
           <div class="meta-box">
             <div class="meta-box-label">Eligibility</div>
-            <div class="meta-box-value" id="dynTarget">Students Worldwide</div>
+            <div class="meta-box-value" id="dynTarget">Students (10–18 yrs)</div>
           </div>
         </div>
 
         <div class="cta-flex">
           <a href="#submit" id="heroSubmitBtn" class="btn-solid">Submit Your Film</a>
           <a href="#competition" id="heroVoteBtn" class="btn-outline" style="display:none;">Vote on Entries</a>
-          <a href="#screening" id="heroScreeningBtn" class="btn-outline">Watch Screening</a>
+          <a href="#archive" class="btn-outline">2024–2025 Retrospective</a>
+        </div>
+      </div>
+    </section>
+
+    <section id="terms" class="section-block">
+      <div class="container">
+        <div class="section-head">
+          <div class="section-tag">Guidelines</div>
+          <h2 class="section-heading">Terms and Conditions</h2>
+        </div>
+
+        <div class="content-card">
+          <ul class="rule-items">
+            <li>
+              <span class="rule-idx">1</span>
+              <span id="dynRule1">The film must be shot on a phone/tablet;</span>
+            </li>
+            <li>
+              <span class="rule-idx">2</span>
+              <span id="dynRule2">The film must be strictly up to 3 minutes;</span>
+            </li>
+            <li>
+              <span class="rule-idx">3</span>
+              <span id="dynRule3">From one participant no more than one work;</span>
+            </li>
+          </ul>
+
+          <div class="policy-callout">
+            <p id="dynPolicyText">
+              Since the creative vision of children and their self-expression are important to us, works with the dominant participation of adults are not accepted at the festival. Films made only by children will be given priority.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="categories" class="section-block">
+      <div class="container">
+        <div class="section-head">
+          <div class="section-tag">Competition</div>
+          <h2 class="section-heading">Two Age Categories & Awards</h2>
+        </div>
+
+        <div class="two-col-grid">
+          <div class="content-card cat-border">
+            <div class="cat-label">Category I</div>
+            <div class="cat-title" id="dynCat1Age">From 10 to 13 years old</div>
+            <div class="cat-desc" id="dynCat1Desc">For budding visual artists beginning their cinematic storytelling journey.</div>
+          </div>
+
+          <div class="content-card cat-border">
+            <div class="cat-label">Category II</div>
+            <div class="cat-title" id="dynCat2Age">From 14 to 18 years old</div>
+            <div class="cat-desc" id="dynCat2Desc">For youth directors exploring bold perspectives and nuanced compositions.</div>
+          </div>
+        </div>
+
+        <div class="awards-panel">
+          <div class="awards-panel-title">Honours & The Prizes</div>
+          <div class="awards-chips">
+            <span class="chip">🥇 1st Place</span>
+            <span class="chip">🥈 2nd Place</span>
+            <span class="chip">🥉 3rd Place</span>
+            <span class="chip">🏆 Audience Choice Award</span>
+          </div>
+
+          <div class="prize-showcase">
+            <img src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/IMG_3457.jpeg?alt=media&token=7ebb0797-889a-453e-a6a1-ad2e47aa3d27" alt="The Prizes">
+            <div class="prize-caption">Official awards and trophies for winning filmmakers</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="archive" class="section-block">
+      <div class="container">
+        <div class="section-head">
+          <div class="section-tag">Archive</div>
+          <h2 class="section-heading">Past Festivals (2024–2025)</h2>
+        </div>
+
+        <div class="two-col-grid">
+          <div class="archive-card">
+            <div class="archive-card-header">
+              <span class="archive-year">Fest 2025</span>
+              <span class="badge badge-accepted">2025 Edition</span>
+            </div>
+            <div class="player-screen">
+              <video controls playsinline preload="metadata" src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/A%CC%A8z%CC%8Cuolynas%20International%20Film%20Festival%202025.mp4?alt=media&token=f62b9379-1600-456c-8d17-6f4e1f062017"></video>
+            </div>
+          </div>
+
+          <div class="archive-card">
+            <div class="archive-card-header">
+              <span class="archive-year">Fest 2024</span>
+              <span class="badge badge-accepted">2024 Edition</span>
+            </div>
+            <div class="player-screen">
+              <video controls playsinline preload="metadata" src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/The%20A%CC%A8z%CC%8Cuolynas%20Film%20Festival%202024.mp4?alt=media&token=cf0417c4-0ffd-4d70-b318-3f9a5e2c81f0"></video>
+            </div>
+          </div>
+        </div>
+
+        <div class="gallery-grid">
+          <div class="gallery-item">
+            <img src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/IMG_3458.jpeg?alt=media&token=224af1bd-25ff-494e-8136-fbf330d3ad5b" alt="Photos from 2025 festival">
+            <div class="gallery-caption">Moments from the 2025 Film Festival Ceremony</div>
+          </div>
+          <div class="gallery-item">
+            <img src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/IMG_3459.jpeg?alt=media&token=dfdda212-9ea6-433f-af80-8c5b5b57f361" alt="Festival laureates 2025">
+            <div class="gallery-caption">Festival laureates and attendees in 2025</div>
+          </div>
         </div>
       </div>
     </section>
@@ -151,87 +259,9 @@
           <div class="player-screen" id="screeningPlayerContainer">
             <div class="player-idle" id="screeningPlaceholder">
               <div class="player-idle-icon">🎬</div>
-              <div class="player-idle-title" id="dynRecordingPlaceholder">The official festival recording will be published here on May 27th at 15:00.</div>
+              <div class="player-idle-title" id="dynRecordingPlaceholder">The official festival recording will be published here on April 17th, 2026.</div>
               <div class="player-idle-sub">All submitted works and jury results will be viewable right here.</div>
             </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section id="terms" class="section-block">
-      <div class="container">
-        <div class="section-head">
-          <div class="section-tag">Guidelines</div>
-          <h2 class="section-heading">Terms of Participation</h2>
-        </div>
-
-        <div class="two-col-grid">
-          <div class="content-card">
-            <ul class="rule-items">
-              <li>
-                <span class="rule-idx">1</span>
-                <span id="dynRule1">Your film must be filmed strictly on a tablet or smartphone.</span>
-              </li>
-              <li>
-                <span class="rule-idx">2</span>
-                <span id="dynRule2">The duration cannot exceed 3 minutes (180 s including credits).</span>
-              </li>
-              <li>
-                <span class="rule-idx">3</span>
-                <span id="dynRule3">From one participant: only one film entry.</span>
-              </li>
-            </ul>
-          </div>
-
-          <div class="content-card">
-            <ul class="rule-items">
-              <li>
-                <span class="rule-idx">4</span>
-                <span id="dynRule4">Films made with adult assistance will not be considered.</span>
-              </li>
-              <li>
-                <span class="rule-idx">5</span>
-                <span id="dynRule5">Your film must have English subtitles.</span>
-              </li>
-              <li>
-                <span class="rule-idx">6</span>
-                <span id="dynRule6">The festival screening recording will be hosted directly on this website.</span>
-              </li>
-            </ul>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section id="categories" class="section-block">
-      <div class="container">
-        <div class="section-head">
-          <div class="section-tag">Competition</div>
-          <h2 class="section-heading">Categories & Awards</h2>
-        </div>
-
-        <div class="two-col-grid">
-          <div class="content-card cat-border">
-            <div class="cat-label">Category I</div>
-            <div class="cat-title" id="dynCat1Age">From 10 to 13 years old</div>
-            <div class="cat-desc" id="dynCat1Desc">For budding visual artists beginning their cinematic storytelling journey.</div>
-          </div>
-
-          <div class="content-card cat-border">
-            <div class="cat-label">Category II</div>
-            <div class="cat-title" id="dynCat2Age">From 14 to 18 years old</div>
-            <div class="cat-desc" id="dynCat2Desc">For youth directors exploring bold perspectives and nuanced compositions.</div>
-          </div>
-        </div>
-
-        <div class="awards-panel">
-          <div class="awards-panel-title">Honours in Each Category</div>
-          <div class="awards-chips">
-            <span class="chip">🥇 1st Place</span>
-            <span class="chip">🥈 2nd Place</span>
-            <span class="chip">🥉 3rd Place</span>
-            <span class="chip">🏆 Audience Choice Award</span>
           </div>
         </div>
       </div>
@@ -299,11 +329,11 @@
             </div>
 
             <div class="input-cell">
-              <label>Film Video File (MP4 / MOV / WEBM, up to 3 mins) *</label>
+              <label>Film Video File (MP4 / MOV / WEBM, strictly up to 3 mins) *</label>
               <div class="drop-area" id="uploadZone">
                 <div class="drop-icon">🎬</div>
                 <div class="drop-title">Select or drag video file here</div>
-                <div class="drop-sub">Duration automatically checked (max 180s)</div>
+                <div class="drop-sub">Duration automatically checked (strictly max 180s)</div>
                 <input type="file" id="videoFileInput" accept="video/mp4,video/quicktime,video/webm" required>
               </div>
               <div id="uploadFeedback" class="drop-alert"></div>
@@ -319,19 +349,19 @@
             <div class="consent-list">
               <label class="consent-line">
                 <input type="checkbox" required>
-                <span>I confirm that the film was shot entirely on a phone or tablet.</span>
+                <span>I confirm that the film was shot on a phone or tablet.</span>
               </label>
               <label class="consent-line">
                 <input type="checkbox" required>
-                <span>I confirm that the total duration does not exceed 3 minutes.</span>
+                <span>I confirm that the total duration is strictly up to 3 minutes.</span>
               </label>
               <label class="consent-line">
                 <input type="checkbox" required>
-                <span>I confirm that the film was made without adult assistance.</span>
+                <span>I confirm that the film was made by children without dominant adult participation.</span>
               </label>
               <label class="consent-line">
                 <input type="checkbox" required>
-                <span>I confirm that the film includes English subtitles.</span>
+                <span>I confirm that I am submitting no more than one work.</span>
               </label>
             </div>
 
@@ -371,7 +401,7 @@
       <div class="footer-mail">
         Contact: <a href="mailto:azuolynasfilmfestival@gmail.com">azuolynasfilmfestival@gmail.com</a>
       </div>
-      <div class="footer-note">May 27th, 15:00 (Lithuanian Time) • Recorded Event on Site</div>
+      <div class="footer-note">Submissions until April 2nd, 2026 • Opening Ceremony on April 17th, 2026</div>
     </div>
   </footer>
 
@@ -405,10 +435,8 @@
 
       const secScreening = document.getElementById("screening");
       const navScreening = document.getElementById("navLinkScreening");
-      const heroScreening = document.getElementById("heroScreeningBtn");
       if (secScreening) secScreening.style.display = showScreening ? "block" : "none";
       if (navScreening) navScreening.style.display = showScreening ? "block" : "none";
-      if (heroScreening) heroScreening.style.display = showScreening ? "inline-flex" : "none";
 
       const secSubmit = document.getElementById("submit");
       const navSubmit = document.getElementById("navLinkSubmit");
@@ -418,16 +446,20 @@
       if (heroSubmit) heroSubmit.style.display = showSubmit ? "inline-flex" : "none";
 
       document.getElementById("dynHeroBadge").textContent = data.heroBadge || DEFAULT_CONTENT.en.heroBadge;
+      if (document.getElementById("dynAboutText")) {
+        document.getElementById("dynAboutText").textContent = data.aboutText || DEFAULT_CONTENT.en.aboutText;
+      }
       document.getElementById("dynTopic").textContent = `“${data.topic || DEFAULT_CONTENT.en.topic}”`;
       document.getElementById("dynDates").textContent = data.datesSubmissions || DEFAULT_CONTENT.en.datesSubmissions;
       document.getElementById("dynEvent").textContent = data.dateEvent || DEFAULT_CONTENT.en.dateEvent;
       document.getElementById("dynTarget").textContent = data.targetAudience || DEFAULT_CONTENT.en.targetAudience;
+
       if (data.rule1) document.getElementById("dynRule1").textContent = data.rule1;
       if (data.rule2) document.getElementById("dynRule2").textContent = data.rule2;
       if (data.rule3) document.getElementById("dynRule3").textContent = data.rule3;
-      if (data.rule4) document.getElementById("dynRule4").textContent = data.rule4;
-      if (data.rule5) document.getElementById("dynRule5").textContent = data.rule5;
-      if (data.rule6) document.getElementById("dynRule6").textContent = data.rule6;
+      if (data.policyText && document.getElementById("dynPolicyText")) {
+        document.getElementById("dynPolicyText").textContent = data.policyText;
+      }
       if (data.cat1Age) document.getElementById("dynCat1Age").textContent = data.cat1Age;
       if (data.cat1Desc) document.getElementById("dynCat1Desc").textContent = data.cat1Desc;
       if (data.cat2Age) document.getElementById("dynCat2Age").textContent = data.cat2Age;
@@ -635,7 +667,7 @@
           verifiedVideoFile = null;
           fileInput.value = "";
           feedback.className = "drop-alert error";
-          feedback.textContent = `Error: Duration is ${videoDurationSeconds} s. Allowed limit is 180 s (3 mins)!`;
+          feedback.textContent = `Error: Duration is ${videoDurationSeconds} s. Allowed limit is strictly up to 180 s (3 mins)!`;
         } else {
           verifiedVideoFile = file;
           feedback.className = "drop-alert success";
