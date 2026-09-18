@@ -15,46 +15,43 @@ const storage = firebase.storage();
 
 const AUTHORIZED_ADMIN_EMAILS = [
   "azuolynasfilmfestival@gmail.com",
-  "azuolynasfilmfest@gmail.com",
-  "dominikphotofficial.lt@gmail.com"
+  "azuolynasfilmfest@gmail.com"
 ];
 
 const DEFAULT_CONTENT = {
   lt: {
     heroBadge: "Tarptautinis Mokinių Filmų Festivalis",
     topic: "Neįprastas žvilgsnis į įprastus dalykus",
-    datesSubmissions: "Vasario 14 d. – Balandžio 17 d.",
-    dateEvent: "Gegužės 27 d., 15:00 (Vaizdo įrašas svetainėje)",
-    targetAudience: "Mokiniai iš viso pasaulio",
+    aboutText: "„Ąžuolyno“ filmų festivalis pavadintas vieno iš Kauno lankytinų vietų – Ąžuolyno parko – garbei, kurio papėdėje yra įsikūrusi mūsų studija.",
+    datesSubmissions: "Iki 2026 m. balandžio 2 d.",
+    dateEvent: "2026 m. balandžio 17 d. (Atidarymo ceremonija)",
+    targetAudience: "Mokiniai (10–18 m.)",
     rule1: "Filmas privalo būti nufilmuotas išmaniuoju telefonu arba planšete.",
-    rule2: "Maksimali filmo trukmė – iki 3 minučių (180 s įskaitant titrus).",
-    rule3: "Vienas dalyvis gali pateikti tik vieną filmą.",
-    rule4: "Filmai, sukurti su suaugusiųjų pagalba, nebus vertinami.",
-    rule5: "Filmas privalo turėti angliškus subtitrus (English subtitles).",
-    rule6: "Festivalio peržiūros vaizdo įrašas bus patalpintas tiesiogiai šioje svetainėje.",
+    rule2: "Maksimali filmo trukmė – griežtai iki 3 minučių.",
+    rule3: "Vienas dalyvis gali pateikti ne daugiau kaip vieną darbą.",
+    policyText: "Kadangi mums svarbi vaikų kūrybinė vizija ir jų saviraiška, darbai su dominuojančiu suaugusiųjų dalyvavimu festivalyje nepriimami. Pirmenybė bus teikiama filmams, kuriuos sukūrė tik patys vaikai.",
     cat1Age: "Nuo 10 iki 13 metų amžiaus",
-    cat1Desc: "Jaunųjų režisierių vizualiniai eksperimentai ir autoriniai žingsniai kine.",
+    cat1Desc: "Pradedančiųjų kino kūrėjų vizualiniai ieškojimai ir autorinis pasakojimas.",
     cat2Age: "Nuo 14 iki 18 metų amžiaus",
-    cat2Desc: "Vyresniųjų moksleivių kinematografinė kalba, gilesnė dramaturgija ir požiūrio kampas.",
-    recordingPlaceholder: "Festivalio vaizdo įrašas bus patalpintas gegužės 27 d. 15:00 val."
+    cat2Desc: "Vyresniųjų moksleivių kinematografinė kalba, gilesnė dramaturgija ir savitas braižas.",
+    recordingPlaceholder: "Festivalio atidarymo vaizdo įrašas bus patalpintas 2026 m. balandžio 17 d."
   },
   en: {
     heroBadge: "International Students Film Festival",
     topic: "An unusual view at ordinary things",
-    datesSubmissions: "February 14th – April 17th",
-    dateEvent: "May 27th, 15:00 (Recorded Event on Site)",
-    targetAudience: "Students Worldwide",
-    rule1: "Your film must be filmed strictly on a tablet or smartphone.",
-    rule2: "The duration cannot exceed 3 minutes (180 s including credits).",
-    rule3: "From one participant: only one film entry.",
-    rule4: "Films made with adult assistance will not be considered.",
-    rule5: "Your film must have English subtitles.",
-    rule6: "The festival screening recording will be hosted directly on this website.",
+    aboutText: "The «Ažuolynas» Film Festival is named after one of the sights of Kaunas, at the foot of which our studio is located.",
+    datesSubmissions: "Until April 2nd, 2026",
+    dateEvent: "April 17th, 2026 (Opening Ceremony)",
+    targetAudience: "Students (10–18 yrs)",
+    rule1: "The film must be shot on a phone/tablet;",
+    rule2: "The film must be strictly up to 3 minutes;",
+    rule3: "From one participant no more than one work;",
+    policyText: "Since the creative vision of children and their self-expression are important to us, works with the dominant participation of adults are not accepted at the festival. Films made only by children will be given priority.",
     cat1Age: "From 10 to 13 years old",
     cat1Desc: "For budding visual artists beginning their cinematic storytelling journey.",
     cat2Age: "From 14 to 18 years old",
     cat2Desc: "For youth directors exploring bold perspectives and nuanced compositions.",
-    recordingPlaceholder: "The official festival recording will be published here on May 27th at 15:00."
+    recordingPlaceholder: "The official festival recording will be published here on April 17th, 2026."
   },
   recordingVideoUrl: ""
 };
