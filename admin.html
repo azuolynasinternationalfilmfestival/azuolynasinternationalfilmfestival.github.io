@@ -13,23 +13,23 @@
 </head>
 <body class="admin-viewport">
 
-  <div id="loginSection" style="display:flex; align-items:center; justify-content:center; flex:1; padding:20px;">
-    <div style="background:var(--bg-surface); border:1px solid var(--border-color); padding:40px 32px; border-radius:var(--site-radius); width:100%; max-width:380px; text-align:center;">
-      <img src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media" alt="Logo" style="height:56px; margin-bottom:14px;">
-      <h2 style="font-family:var(--font-cinema); font-size:clamp(1.3rem, 2.5vw, 1.55rem); color:#fff; margin-bottom:4px;">Valdymo Skydas</h2>
-      <p style="font-size:0.82rem; color:var(--text-muted); margin-bottom:24px;">Autorizuota prieiga</p>
+  <div id="loginSection" class="admin-auth-container">
+    <div class="admin-auth-card">
+      <img src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media" alt="Logo" class="admin-auth-logo">
+      <h2 class="admin-auth-title">Valdymo Skydas</h2>
+      <p class="admin-auth-sub">Autorizuota prieiga</p>
 
       <form id="adminAuthForm">
-        <div class="input-cell" style="text-align:left;">
+        <div class="input-cell">
           <label for="loginEmail">Identifikatorius</label>
           <input type="email" id="loginEmail" class="field" autocomplete="username" required>
         </div>
-        <div class="input-cell" style="text-align:left;">
+        <div class="input-cell">
           <label for="loginPassword">Slaptažodis</label>
           <input type="password" id="loginPassword" class="field" autocomplete="current-password" required>
         </div>
-        <div id="authErrMsg" style="color:var(--status-red); font-size:0.8rem; margin-bottom:12px; display:none;"></div>
-        <button type="submit" class="btn-solid" style="width:100%;">Prisijungti</button>
+        <div id="authErrMsg" class="auth-error"></div>
+        <button type="submit" id="loginSubmitBtn" class="btn-solid btn-full">Prisijungti</button>
       </form>
     </div>
   </div>
@@ -37,18 +37,18 @@
   <div id="panelSection" style="display:none; flex-direction:column; flex:1;">
     <div class="admin-topbar">
       <div class="admin-brand">
-        <img src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media" alt="Logo" style="height:32px;">
+        <img src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media" alt="Logo" class="admin-brand-logo">
         <span class="admin-brand-title">Ąžuolynas Fest Skydas</span>
       </div>
 
       <div class="admin-nav-group">
-        <button id="tabSubmissionsBtn" class="admin-nav-item active" onclick="switchTab('submissions')">Paraiškos</button>
-        <button id="tabArchiveBtn" class="admin-nav-item" onclick="switchTab('archive')">Archyvas & Medija</button>
-        <button id="tabSettingsBtn" class="admin-nav-item" onclick="switchTab('settings')">Nustatymai & Skiltys</button>
+        <button id="tabSubmissionsBtn" class="admin-nav-item active">Paraiškos</button>
+        <button id="tabArchiveBtn" class="admin-nav-item">Archyvas & Medija</button>
+        <button id="tabSettingsBtn" class="admin-nav-item">Nustatymai & Skiltys</button>
       </div>
 
       <div>
-        <button id="logoutBtn" class="btn-outline" style="height:34px; padding:0 14px; font-size:0.8rem;">Atsijungti</button>
+        <button id="logoutBtn" class="btn-outline btn-sm">Atsijungti</button>
       </div>
     </div>
 
@@ -74,7 +74,7 @@
         </div>
 
         <div class="admin-winner-panel">
-          <h3 style="color:var(--primary-emerald); font-family:var(--font-cinema); font-size:clamp(1.15rem, 2vw, 1.35rem); margin-bottom:14px;">Laimėtojų ir Nominacijų Valdymas</h3>
+          <h3 class="content-card-title">Laimėtojų ir Nominacijų Valdymas</h3>
           <div class="input-row">
             <div class="input-cell">
               <label for="adminSelectFilm">Pasirinkite filmą</label>
@@ -86,20 +86,20 @@
             </div>
           </div>
           <div style="display:flex; justify-content:flex-end; margin-bottom:20px;">
-            <button id="assignWinnerBtn" class="btn-solid" style="height:40px; padding:0 20px;">Paskelbti Laimėtoju</button>
+            <button id="assignWinnerBtn" class="btn-solid btn-sm">Paskelbti Laimėtoju</button>
           </div>
-          <h4 style="color:var(--text-white); font-family:var(--font-cinema); font-size:clamp(0.98rem, 1.5vw, 1.15rem); margin-bottom:12px;">Paskelbti Festivalio Laureatai</h4>
+          <h4>Paskelbti Festivalio Laureatai</h4>
           <div id="adminWinnersList"></div>
         </div>
 
-        <div class="table-toolbar" style="margin-top:28px;">
-          <input type="text" id="filterSearch" class="field" style="max-width:280px; height:38px;" placeholder="Ieškoti pagal autorių, filmą...">
-          <select id="filterCategory" class="field" style="width:auto; height:38px;">
+        <div class="table-toolbar">
+          <input type="text" id="filterSearch" class="field toolbar-search" placeholder="Ieškoti pagal autorių, filmą...">
+          <select id="filterCategory" class="field toolbar-select">
             <option value="all">Visos kategorijos</option>
             <option value="Category I (10-13)">I Kategorija (10-13)</option>
             <option value="Category II (14-18)">II Kategorija (14-18)</option>
           </select>
-          <select id="filterStatus" class="field" style="width:auto; height:38px;">
+          <select id="filterStatus" class="field toolbar-select">
             <option value="all">Visi statusai</option>
             <option value="submitted">Pateikta</option>
             <option value="accepted">Priimta</option>
@@ -108,7 +108,7 @@
             <option value="winner">Laureatas</option>
             <option value="rejected">Atmesta</option>
           </select>
-          <select id="filterVoting" class="field" style="width:auto; height:38px;">
+          <select id="filterVoting" class="field toolbar-select">
             <option value="all">Balsavimo atranka (Visi)</option>
             <option value="inVoting">Tik dalyvaujantys balsavime</option>
             <option value="notInVoting">Nedalyvaujantys balsavime</option>
@@ -136,10 +136,10 @@
       </div>
 
       <div id="archiveTab" style="display:none;">
-        <div class="two-col-grid" style="margin-bottom:28px;">
+        <div class="two-col-grid">
           <div class="content-card">
-            <h3 style="color:var(--primary-emerald); font-family:var(--font-cinema); font-size:clamp(1.15rem, 2vw, 1.35rem); margin-bottom:8px;">Pridėti Vaizdo Įrašą (Retrospektyva)</h3>
-            <p style="color:var(--text-muted); font-size:0.84rem; margin-bottom:16px;">Pridėkite ankstesnių metų festivalio vaizdo įrašus (pvz. Fest 2025, Fest 2024).</p>
+            <h3 class="content-card-title">Pridėti Vaizdo Įrašą (Retrospektyva)</h3>
+            <p class="content-card-sub">Pridėkite ankstesnių metų festivalio vaizdo įrašus (pvz. Fest 2025, Fest 2024).</p>
 
             <div class="input-cell">
               <label for="arcVidTitle">Pavadinimas / Metai *</label>
@@ -158,24 +158,24 @@
 
             <div class="input-cell">
               <label>Arba įkelkite video failą iš įrenginio</label>
-              <div class="drop-area" id="arcVidDropArea" style="padding:18px;">
-                <div class="drop-title" style="font-size:0.86rem;">Pasirinkti video failą</div>
+              <div class="drop-area">
+                <div class="drop-title">Pasirinkti video failą</div>
                 <input type="file" id="arcVidFile" accept="video/mp4,video/quicktime,video/webm">
               </div>
-              <div id="arcVidFileStatus" style="font-size:0.78rem; color:var(--primary-emerald); margin-top:4px;"></div>
+              <div id="arcVidFileStatus" class="file-status-label"></div>
             </div>
 
-            <div class="bar-box" id="arcVidProgressContainer" style="margin-bottom:12px;">
+            <div class="bar-box" id="arcVidProgressContainer">
               <div class="bar-line"><div class="bar-fill" id="arcVidProgressFill"></div></div>
-              <div id="arcVidProgressStatus" style="font-size:0.76rem; color:var(--text-muted); margin-top:4px; text-align:right;">0%</div>
+              <div id="arcVidProgressStatus" class="bar-status-text">0%</div>
             </div>
 
-            <button id="arcVidSaveBtn" class="btn-solid" style="width:100%;">Pridėti Į Vaizdo Įrašų Archyvą</button>
+            <button id="arcVidSaveBtn" class="btn-solid btn-full">Pridėti Į Vaizdo Įrašų Archyvą</button>
           </div>
 
           <div class="content-card">
-            <h3 style="color:var(--primary-emerald); font-family:var(--font-cinema); font-size:clamp(1.15rem, 2vw, 1.35rem); margin-bottom:8px;">Pridėti Festivalio Nuotrauką</h3>
-            <p style="color:var(--text-muted); font-size:0.84rem; margin-bottom:16px;">Pridėkite festivalio akimirkų, dalyvių ar apdovanojimų nuotraukas.</p>
+            <h3 class="content-card-title">Pridėti Festivalio Nuotrauką</h3>
+            <p class="content-card-sub">Pridėkite festivalio akimirkų, dalyvių ar apdovanojimų nuotraukas.</p>
 
             <div class="input-cell">
               <label for="arcImgCaption">Nuotraukos aprašymas / Paraštė *</label>
@@ -189,47 +189,47 @@
 
             <div class="input-cell">
               <label>Arba įkelkite nuotraukos failą</label>
-              <div class="drop-area" id="arcImgDropArea" style="padding:18px;">
-                <div class="drop-title" style="font-size:0.86rem;">Pasirinkti nuotraukos failą</div>
+              <div class="drop-area">
+                <div class="drop-title">Pasirinkti nuotraukos failą</div>
                 <input type="file" id="arcImgFile" accept="image/jpeg,image/png,image/webp">
               </div>
-              <div id="arcImgFileStatus" style="font-size:0.78rem; color:var(--primary-emerald); margin-top:4px;"></div>
+              <div id="arcImgFileStatus" class="file-status-label"></div>
             </div>
 
-            <div class="bar-box" id="arcImgProgressContainer" style="margin-bottom:12px;">
+            <div class="bar-box" id="arcImgProgressContainer">
               <div class="bar-line"><div class="bar-fill" id="arcImgProgressFill"></div></div>
-              <div id="arcImgProgressStatus" style="font-size:0.76rem; color:var(--text-muted); margin-top:4px; text-align:right;">0%</div>
+              <div id="arcImgProgressStatus" class="bar-status-text">0%</div>
             </div>
 
-            <button id="arcImgSaveBtn" class="btn-solid" style="width:100%;">Pridėti Į Nuotraukų Galeriją</button>
+            <button id="arcImgSaveBtn" class="btn-solid btn-full">Pridėti Į Nuotraukų Galeriją</button>
 
             <div style="border-top:1px solid var(--border-color); margin-top:24px; padding-top:20px;">
-              <h4 style="color:var(--text-white); font-family:var(--font-cinema); font-size:1.05rem; margin-bottom:10px;">Oficiali Prizų Nuotrauka</h4>
+              <h4>Oficiali Prizų Nuotrauka</h4>
               <div class="input-cell">
                 <label for="arcPrizesUrl">Prizų nuotraukos URL</label>
                 <input type="url" id="arcPrizesUrl" class="field" placeholder="https://firebasestorage...">
               </div>
-              <button id="arcPrizesSaveBtn" class="btn-outline" style="width:100%;">Atnaujinti Prizų Nuotrauką</button>
+              <button id="arcPrizesSaveBtn" class="btn-outline btn-full">Atnaujinti Prizų Nuotrauką</button>
             </div>
           </div>
         </div>
 
-        <div class="content-card" style="margin-bottom:28px;">
-          <h3 style="color:var(--text-white); font-family:var(--font-cinema); font-size:clamp(1.1rem, 2vw, 1.3rem); margin-bottom:14px;">Esami Archyvo Vaizdo Įrašai</h3>
-          <div id="adminArchiveVideosList" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); gap:18px;"></div>
+        <div class="content-card">
+          <h4>Esami Archyvo Vaizdo Įrašai</h4>
+          <div id="adminArchiveVideosList" class="admin-media-grid" style="margin-top:14px;"></div>
         </div>
 
         <div class="content-card">
-          <h3 style="color:var(--text-white); font-family:var(--font-cinema); font-size:clamp(1.1rem, 2vw, 1.3rem); margin-bottom:14px;">Esamos Archyvo Nuotraukos</h3>
-          <div id="adminArchivePhotosList" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(220px, 1fr)); gap:18px;"></div>
+          <h4>Esamos Archyvo Nuotraukos</h4>
+          <div id="adminArchivePhotosList" class="admin-media-grid" style="margin-top:14px;"></div>
         </div>
       </div>
 
       <div id="settingsTab" style="display:none;">
-        <div class="content-card" style="margin-bottom:20px;">
-          <h3 style="color:var(--primary-emerald); font-family:var(--font-cinema); font-size:clamp(1.15rem, 2vw, 1.35rem); margin-bottom:8px;">Svetainės Skilčių Matomumas (Viešas rodymas)</h3>
-          <p style="color:var(--text-muted); font-size:0.84rem; margin-bottom:18px;">Valdykite, kurios skiltys ir jų meniu nuorodos yra rodomos viešiems lankytojams.</p>
-          <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(230px, 1fr)); gap:14px;">
+        <div class="content-card">
+          <h3 class="content-card-title">Svetainės Skilčių Matomumas (Viešas rodymas)</h3>
+          <p class="content-card-sub">Valdykite, kurios skiltys ir jų meniu nuorodos yra rodomos viešiems lankytojams.</p>
+          <div class="switch-grid">
             <label class="switch-label">
               <input type="checkbox" id="cfgShowVoting" class="switch-input">
               <span class="switch-slider"></span>
@@ -265,8 +265,8 @@
           </div>
         </div>
 
-        <div class="content-card" style="margin-bottom:20px;">
-          <h3 style="color:var(--primary-emerald); font-family:var(--font-cinema); font-size:clamp(1.15rem, 2vw, 1.35rem); margin-bottom:8px;">Svetainėje Rodomas Vaizdo Įrašas</h3>
+        <div class="content-card">
+          <h3 class="content-card-title">Svetainėje Rodomas Vaizdo Įrašas</h3>
           <div class="input-cell" style="margin-bottom:0;">
             <label for="cfgRecordingUrl">Vaizdo įrašo URL (Tiesioginė MP4 nuoroda arba YouTube nuoroda)</label>
             <input type="text" id="cfgRecordingUrl" class="field" placeholder="https://www.youtube.com/watch?v=...">
@@ -275,71 +275,71 @@
 
         <div class="two-col-grid">
           <div class="content-card">
-            <h3 style="color:var(--text-white); font-family:var(--font-cinema); font-size:clamp(1.05rem, 1.8vw, 1.25rem); margin-bottom:12px;">Lietuviška versija (LT)</h3>
+            <h4>Lietuviška versija (LT)</h4>
             <div class="input-cell">
-              <label>Festivalio tema</label>
+              <label for="cfgLtTopic">Festivalio tema</label>
               <input type="text" id="cfgLtTopic" class="field">
             </div>
             <div class="input-cell">
-              <label>Apie festivalį (tekstas)</label>
-              <textarea id="cfgLtAbout" class="field" style="min-height:70px;"></textarea>
+              <label for="cfgLtAbout">Apie festivalį (tekstas)</label>
+              <textarea id="cfgLtAbout" class="field"></textarea>
             </div>
             <div class="input-cell">
-              <label>Hero žyma</label>
+              <label for="cfgLtHeroBadge">Hero žyma</label>
               <input type="text" id="cfgLtHeroBadge" class="field">
             </div>
             <div class="input-cell">
-              <label>Paraiškų datos</label>
+              <label for="cfgLtDates">Paraiškų datos</label>
               <input type="text" id="cfgLtDates" class="field">
             </div>
             <div class="input-cell">
-              <label>Renginio data ir vieta</label>
+              <label for="cfgLtEvent">Renginio data ir vieta</label>
               <input type="text" id="cfgLtEvent" class="field">
             </div>
             <div class="input-cell">
-              <label>Dalyvių auditorija</label>
+              <label for="cfgLtTarget">Dalyvių auditorija</label>
               <input type="text" id="cfgLtTarget" class="field">
             </div>
             <div class="input-cell">
-              <label>Laukimo pranešimas</label>
+              <label for="cfgLtRecordingPh">Laukimo pranešimas</label>
               <input type="text" id="cfgLtRecordingPh" class="field">
             </div>
           </div>
 
           <div class="content-card">
-            <h3 style="color:var(--text-white); font-family:var(--font-cinema); font-size:clamp(1.05rem, 1.8vw, 1.25rem); margin-bottom:12px;">Angliška versija (EN)</h3>
+            <h4>Angliška versija (EN)</h4>
             <div class="input-cell">
-              <label>Festival Topic</label>
+              <label for="cfgEnTopic">Festival Topic</label>
               <input type="text" id="cfgEnTopic" class="field">
             </div>
             <div class="input-cell">
-              <label>About Festival (text)</label>
-              <textarea id="cfgEnAbout" class="field" style="min-height:70px;"></textarea>
+              <label for="cfgEnAbout">About Festival (text)</label>
+              <textarea id="cfgEnAbout" class="field"></textarea>
             </div>
             <div class="input-cell">
-              <label>Hero Badge</label>
+              <label for="cfgEnHeroBadge">Hero Badge</label>
               <input type="text" id="cfgEnHeroBadge" class="field">
             </div>
             <div class="input-cell">
-              <label>Submissions Dates</label>
+              <label for="cfgEnDates">Submissions Dates</label>
               <input type="text" id="cfgEnDates" class="field">
             </div>
             <div class="input-cell">
-              <label>Event Date & Location</label>
+              <label for="cfgEnEvent">Event Date & Location</label>
               <input type="text" id="cfgEnEvent" class="field">
             </div>
             <div class="input-cell">
-              <label>Target Audience</label>
+              <label for="cfgEnTarget">Target Audience</label>
               <input type="text" id="cfgEnTarget" class="field">
             </div>
             <div class="input-cell">
-              <label>Screening Placeholder Text</label>
+              <label for="cfgEnRecordingPh">Screening Placeholder Text</label>
               <input type="text" id="cfgEnRecordingPh" class="field">
             </div>
           </div>
         </div>
 
-        <div style="margin-top:20px; display:flex; justify-content:flex-end;">
+        <div style="display:flex; justify-content:flex-end;">
           <button id="saveSettingsBtn" class="btn-solid">Išsaugoti Pakeitimus</button>
         </div>
       </div>
@@ -349,15 +349,15 @@
   <div id="entryModal" class="modal-curtain">
     <div class="modal-dialog">
       <div class="modal-title-row">
-        <h3 id="mTitle" style="color:var(--text-white); font-family:var(--font-cinema); font-size:clamp(1.2rem, 2vw, 1.45rem);">Filmo peržiūra</h3>
-        <button class="modal-close" onclick="closeEntryModal()">&times;</button>
+        <h3 id="mTitle" style="color:var(--text-white); font-family:var(--font-cinema);">Filmo peržiūra</h3>
+        <button id="modalCloseBtn" class="modal-close">&times;</button>
       </div>
 
       <video id="mVideo" class="modal-video-frame" controls playsinline></video>
 
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; gap:8px;">
+      <div class="modal-actions-bar">
         <button id="mDeleteBtn" class="btn-delete">Ištrinti paraišką</button>
-        <a id="mDownloadLink" href="" target="_blank" download class="btn-outline" style="height:34px; padding:0 14px; font-size:0.8rem;">Atsisiųsti video</a>
+        <a id="mDownloadLink" href="" target="_blank" download class="btn-outline btn-sm">Atsisiųsti video</a>
       </div>
 
       <div class="modal-details">
@@ -371,7 +371,7 @@
         <p id="mSynopsis" style="color:var(--text-muted); font-style:italic; margin-top:2px;"></p>
       </div>
 
-      <div style="background:var(--bg-card); border:1px solid var(--border-color); border-radius:var(--site-radius); padding:16px;">
+      <div class="modal-manage-box">
         <div style="margin-bottom:14px;">
           <label class="consent-line">
             <input type="checkbox" id="mInVoting">
@@ -421,738 +421,20 @@
 
         <div class="input-cell">
           <label for="mCustomText">Papildoma žinutė laiške (nebūtina):</label>
-          <textarea id="mCustomText" class="field" style="min-height:50px;"></textarea>
+          <textarea id="mCustomText" class="field"></textarea>
         </div>
 
-        <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:8px;">
-          <button class="btn-outline" style="height:38px; padding:0 16px;" onclick="closeEntryModal()">Atšaukti</button>
-          <button id="mSaveBtn" class="btn-solid" style="height:38px; padding:0 20px;">Išsaugoti</button>
+        <div style="display:flex; justify-content:flex-end; gap:8px;">
+          <button id="modalCancelBtn" class="btn-outline btn-sm">Atšaukti</button>
+          <button id="mSaveBtn" class="btn-solid btn-sm">Išsaugoti</button>
         </div>
       </div>
     </div>
   </div>
 
-  <script src="config.js"></script>
+  <div id="toastContainer" class="toast-container"></div>
+
   <script src="email-templates.js"></script>
-  <script>
-    let submissionsList = [];
-    let currentEntry = null;
-    let festivalSettings = {};
-
-    const loginSection = document.getElementById("loginSection");
-    const panelSection = document.getElementById("panelSection");
-    const adminAuthForm = document.getElementById("adminAuthForm");
-    const authErrMsg = document.getElementById("authErrMsg");
-    const logoutBtn = document.getElementById("logoutBtn");
-
-    auth.onAuthStateChanged((user) => {
-      if (user && AUTHORIZED_ADMIN_EMAILS.includes(user.email.toLowerCase())) {
-        loginSection.style.display = "none";
-        panelSection.style.display = "flex";
-        fetchSubmissions();
-        fetchSettings();
-      } else if (user) {
-        auth.signOut();
-        authErrMsg.style.display = "block";
-        authErrMsg.textContent = "Prieiga apribota.";
-      } else {
-        loginSection.style.display = "flex";
-        panelSection.style.display = "none";
-      }
-    });
-
-    adminAuthForm.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      authErrMsg.style.display = "none";
-      const email = document.getElementById("loginEmail").value.trim();
-      const pass = document.getElementById("loginPassword").value;
-
-      try {
-        await auth.signInWithEmailAndPassword(email, pass);
-      } catch (err) {
-        authErrMsg.style.display = "block";
-        authErrMsg.textContent = "Neteisingi prisijungimo duomenys.";
-      }
-    });
-
-    logoutBtn.addEventListener("click", () => auth.signOut());
-
-    function switchTab(tab) {
-      document.getElementById("submissionsTab").style.display = tab === "submissions" ? "block" : "none";
-      document.getElementById("archiveTab").style.display = tab === "archive" ? "block" : "none";
-      document.getElementById("settingsTab").style.display = tab === "settings" ? "block" : "none";
-
-      document.getElementById("tabSubmissionsBtn").className = `admin-nav-item ${tab === 'submissions' ? 'active' : ''}`;
-      document.getElementById("tabArchiveBtn").className = `admin-nav-item ${tab === 'archive' ? 'active' : ''}`;
-      document.getElementById("tabSettingsBtn").className = `admin-nav-item ${tab === 'settings' ? 'active' : ''}`;
-    }
-
-    function createMediaEmbed(url) {
-      if (!url) return '<div style="background:#020606; width:100%; height:100%; display:flex; align-items:center; justify-content:center; color:var(--text-subtle); font-size:0.75rem;">Nėra nuorodos</div>';
-      const cleanUrl = url.trim();
-      if (cleanUrl.includes("youtube.com") || cleanUrl.includes("youtu.be")) {
-        let embed = cleanUrl;
-        if (cleanUrl.includes("watch?v=")) embed = cleanUrl.replace("watch?v=", "embed/");
-        else if (cleanUrl.includes("youtu.be/")) embed = cleanUrl.replace("youtu.be/", "www.youtube.com/embed/");
-        return `<iframe src="${embed}" allowfullscreen style="width:100%; height:100%; border:none;"></iframe>`;
-      }
-      return `<video src="${cleanUrl}" controls playsinline style="width:100%; height:100%; object-fit:cover;"></video>`;
-    }
-
-    function fetchSettings() {
-      db.collection("settings").doc("festival").onSnapshot((doc) => {
-        const d = doc.exists ? doc.data() : DEFAULT_CONTENT;
-        festivalSettings = d;
-        const lt = d.lt || DEFAULT_CONTENT.lt;
-        const en = d.en || DEFAULT_CONTENT.en;
-
-        document.getElementById("cfgShowVoting").checked = d.showVoting === true;
-        document.getElementById("cfgShowResults").checked = d.showResults === true;
-        document.getElementById("cfgShowScreening").checked = d.showScreening !== false;
-        document.getElementById("cfgShowSubmit").checked = d.showSubmit !== false;
-
-        document.getElementById("cfgRecordingUrl").value = d.recordingVideoUrl || "";
-
-        document.getElementById("cfgLtTopic").value = lt.topic || "";
-        document.getElementById("cfgLtAbout").value = lt.aboutText || "";
-        document.getElementById("cfgLtHeroBadge").value = lt.heroBadge || "";
-        document.getElementById("cfgLtDates").value = lt.datesSubmissions || "";
-        document.getElementById("cfgLtEvent").value = lt.dateEvent || "";
-        document.getElementById("cfgLtTarget").value = lt.targetAudience || "";
-        document.getElementById("cfgLtRecordingPh").value = lt.recordingPlaceholder || "";
-
-        document.getElementById("cfgEnTopic").value = en.topic || "";
-        document.getElementById("cfgEnAbout").value = en.aboutText || "";
-        document.getElementById("cfgEnHeroBadge").value = en.heroBadge || "";
-        document.getElementById("cfgEnDates").value = en.datesSubmissions || "";
-        document.getElementById("cfgEnEvent").value = en.dateEvent || "";
-        document.getElementById("cfgEnTarget").value = en.targetAudience || "";
-        document.getElementById("cfgEnRecordingPh").value = en.recordingPlaceholder || "";
-
-        document.getElementById("arcPrizesUrl").value = d.prizesPhotoUrl || "https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/IMG_3457.jpeg?alt=media&token=7ebb0797-889a-453e-a6a1-ad2e47aa3d27";
-
-        renderArchiveManagerUI();
-      });
-    }
-
-    document.getElementById("saveSettingsBtn").addEventListener("click", async () => {
-      const btn = document.getElementById("saveSettingsBtn");
-      btn.disabled = true;
-
-      const updated = {
-        showVoting: document.getElementById("cfgShowVoting").checked,
-        showResults: document.getElementById("cfgShowResults").checked,
-        showScreening: document.getElementById("cfgShowScreening").checked,
-        showSubmit: document.getElementById("cfgShowSubmit").checked,
-        recordingVideoUrl: document.getElementById("cfgRecordingUrl").value.trim(),
-        lt: {
-          topic: document.getElementById("cfgLtTopic").value.trim(),
-          aboutText: document.getElementById("cfgLtAbout").value.trim(),
-          heroBadge: document.getElementById("cfgLtHeroBadge").value.trim(),
-          datesSubmissions: document.getElementById("cfgLtDates").value.trim(),
-          dateEvent: document.getElementById("cfgLtEvent").value.trim(),
-          targetAudience: document.getElementById("cfgLtTarget").value.trim(),
-          recordingPlaceholder: document.getElementById("cfgLtRecordingPh").value.trim()
-        },
-        en: {
-          topic: document.getElementById("cfgEnTopic").value.trim(),
-          aboutText: document.getElementById("cfgEnAbout").value.trim(),
-          heroBadge: document.getElementById("cfgEnHeroBadge").value.trim(),
-          datesSubmissions: document.getElementById("cfgEnDates").value.trim(),
-          dateEvent: document.getElementById("cfgEnEvent").value.trim(),
-          targetAudience: document.getElementById("cfgEnTarget").value.trim(),
-          recordingPlaceholder: document.getElementById("cfgEnRecordingPh").value.trim()
-        }
-      };
-
-      try {
-        await db.collection("settings").doc("festival").set(updated, { merge: true });
-        alert("Pakeitimai išsaugoti.");
-      } catch (err) {
-        console.error(err);
-        alert("Klaida: " + err.message);
-      } finally {
-        btn.disabled = false;
-      }
-    });
-
-    function getArchiveVideos() {
-      if (festivalSettings.archiveVideos && Array.isArray(festivalSettings.archiveVideos)) {
-        return festivalSettings.archiveVideos;
-      }
-      return [
-        {
-          id: "default_2025",
-          title: "Fest 2025",
-          label: "2025 m. įrašas",
-          url: "https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/A%CC%A8z%CC%8Cuolynas%20International%20Film%20Festival%202025.mp4?alt=media&token=f62b9379-1600-456c-8d17-6f4e1f062017"
-        },
-        {
-          id: "default_2024",
-          title: "Fest 2024",
-          label: "2024 m. įrašas",
-          url: "https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/The%20A%CC%A8z%CC%8Cuolynas%20Film%20Festival%202024.mp4?alt=media&token=cf0417c4-0ffd-4d70-b318-3f9a5e2c81f0"
-        }
-      ];
-    }
-
-    function getArchivePhotos() {
-      if (festivalSettings.archivePhotos && Array.isArray(festivalSettings.archivePhotos)) {
-        return festivalSettings.archivePhotos;
-      }
-      return [
-        {
-          id: "default_img_2025_1",
-          caption: "Akimirkos iš 2025 m. festivalio ceremonijos",
-          url: "https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/IMG_3458.jpeg?alt=media&token=224af1bd-25ff-494e-8136-fbf330d3ad5b"
-        },
-        {
-          id: "default_img_2025_2",
-          caption: "Festivalio laureatai ir dalyviai 2025 m.",
-          url: "https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/IMG_3459.jpeg?alt=media&token=dfdda212-9ea6-433f-af80-8c5b5b57f361"
-        }
-      ];
-    }
-
-    function renderArchiveManagerUI() {
-      const vidsContainer = document.getElementById("adminArchiveVideosList");
-      const photosContainer = document.getElementById("adminArchivePhotosList");
-
-      const vids = getArchiveVideos();
-      vidsContainer.innerHTML = vids.map((v) => `
-        <div style="background:var(--bg-card); border:1px solid var(--border-color); border-radius:var(--site-radius); padding:14px; display:flex; flex-direction:column; justify-content:space-between;">
-          <div>
-            <div style="font-weight:700; color:#fff; font-family:var(--font-cinema); font-size:1.05rem; margin-bottom:4px;">${v.title}</div>
-            <div style="font-size:0.78rem; color:var(--primary-emerald); margin-bottom:8px;">${v.label || ''}</div>
-            <div style="aspect-ratio:16/9; background:#000; border-radius:4px; overflow:hidden; margin-bottom:10px;">
-              ${createMediaEmbed(v.url)}
-            </div>
-          </div>
-          <button class="btn-delete" style="width:100%; justify-content:center;" onclick="removeArchiveVideo('${v.id}')">Pašalinti iš svetainės</button>
-        </div>
-      `).join("");
-
-      const photos = getArchivePhotos();
-      photosContainer.innerHTML = photos.map((p) => `
-        <div style="background:var(--bg-card); border:1px solid var(--border-color); border-radius:var(--site-radius); padding:14px; display:flex; flex-direction:column; justify-content:space-between;">
-          <div>
-            <div style="aspect-ratio:4/3; background:#000; border-radius:4px; overflow:hidden; margin-bottom:8px;">
-              <img src="${p.url}" style="width:100%; height:100%; object-fit:cover; display:block;">
-            </div>
-            <div style="font-size:0.8rem; color:var(--text-muted); margin-bottom:10px; line-height:1.4;">${p.caption || ''}</div>
-          </div>
-          <button class="btn-delete" style="width:100%; justify-content:center;" onclick="removeArchivePhoto('${p.id}')">Pašalinti nuotrauką</button>
-        </div>
-      `).join("");
-    }
-
-    let selectedArcVidFile = null;
-    const arcVidFileInput = document.getElementById("arcVidFile");
-    const arcVidFileStatus = document.getElementById("arcVidFileStatus");
-
-    arcVidFileInput.addEventListener("change", (e) => {
-      selectedArcVidFile = e.target.files[0] || null;
-      arcVidFileStatus.textContent = selectedArcVidFile ? `Pasirinktas failas: ${selectedArcVidFile.name}` : "";
-    });
-
-    document.getElementById("arcVidSaveBtn").addEventListener("click", async () => {
-      const btn = document.getElementById("arcVidSaveBtn");
-      const title = document.getElementById("arcVidTitle").value.trim();
-      const label = document.getElementById("arcVidLabel").value.trim();
-      let url = document.getElementById("arcVidUrl").value.trim();
-
-      if (!title) {
-        alert("Įveskite vaizdo įrašo pavadinimą!");
-        return;
-      }
-
-      if (!url && !selectedArcVidFile) {
-        alert("Įveskite vaizdo įrašo URL arba pasirinkite failą!");
-        return;
-      }
-
-      btn.disabled = true;
-
-      try {
-        if (selectedArcVidFile) {
-          const prContainer = document.getElementById("arcVidProgressContainer");
-          const prFill = document.getElementById("arcVidProgressFill");
-          const prStatus = document.getElementById("arcVidProgressStatus");
-          prContainer.style.display = "block";
-
-          const ext = selectedArcVidFile.name.split('.').pop() || 'mp4';
-          const path = `archive_videos/${Date.now()}_${Math.random().toString(36).substring(2, 8)}.${ext}`;
-          const task = storage.ref(path).put(selectedArcVidFile);
-
-          await new Promise((resolve, reject) => {
-            task.on("state_changed",
-              (snap) => {
-                const pct = Math.round((snap.bytesTransferred / snap.totalBytes) * 100);
-                prFill.style.width = pct + "%";
-                prStatus.textContent = pct + "%";
-              },
-              reject,
-              async () => {
-                url = await task.snapshot.ref.getDownloadURL();
-                resolve();
-              }
-            );
-          });
-          prContainer.style.display = "none";
-        }
-
-        const currentVideos = getArchiveVideos();
-        currentVideos.unshift({
-          id: "arc_vid_" + Date.now(),
-          title,
-          label,
-          url
-        });
-
-        await db.collection("settings").doc("festival").set({
-          archiveVideos: currentVideos
-        }, { merge: true });
-
-        document.getElementById("arcVidTitle").value = "";
-        document.getElementById("arcVidLabel").value = "";
-        document.getElementById("arcVidUrl").value = "";
-        selectedArcVidFile = null;
-        arcVidFileInput.value = "";
-        arcVidFileStatus.textContent = "";
-
-        alert("Vaizdo įrašas sėkmingai pridėtas į archyvą!");
-      } catch (err) {
-        console.error(err);
-        alert("Klaida: " + err.message);
-      } finally {
-        btn.disabled = false;
-      }
-    });
-
-    window.removeArchiveVideo = async function(id) {
-      if (!confirm("Ar tikrai norite pašalinti šį vaizdo įrašą iš archyvo?")) return;
-      const currentVideos = getArchiveVideos().filter((v) => v.id !== id);
-      try {
-        await db.collection("settings").doc("festival").set({
-          archiveVideos: currentVideos
-        }, { merge: true });
-      } catch (err) {
-        console.error(err);
-        alert("Klaida: " + err.message);
-      }
-    };
-
-    let selectedArcImgFile = null;
-    const arcImgFileInput = document.getElementById("arcImgFile");
-    const arcImgFileStatus = document.getElementById("arcImgFileStatus");
-
-    arcImgFileInput.addEventListener("change", (e) => {
-      selectedArcImgFile = e.target.files[0] || null;
-      arcImgFileStatus.textContent = selectedArcImgFile ? `Pasirinkta nuotrauka: ${selectedArcImgFile.name}` : "";
-    });
-
-    document.getElementById("arcImgSaveBtn").addEventListener("click", async () => {
-      const btn = document.getElementById("arcImgSaveBtn");
-      const caption = document.getElementById("arcImgCaption").value.trim();
-      let url = document.getElementById("arcImgUrl").value.trim();
-
-      if (!caption) {
-        alert("Įveskite nuotraukos aprašymą!");
-        return;
-      }
-
-      if (!url && !selectedArcImgFile) {
-        alert("Įveskite nuotraukos URL arba pasirinkite failą!");
-        return;
-      }
-
-      btn.disabled = true;
-
-      try {
-        if (selectedArcImgFile) {
-          const prContainer = document.getElementById("arcImgProgressContainer");
-          const prFill = document.getElementById("arcImgProgressFill");
-          const prStatus = document.getElementById("arcImgProgressStatus");
-          prContainer.style.display = "block";
-
-          const ext = selectedArcImgFile.name.split('.').pop() || 'jpg';
-          const path = `archive_photos/${Date.now()}_${Math.random().toString(36).substring(2, 8)}.${ext}`;
-          const task = storage.ref(path).put(selectedArcImgFile);
-
-          await new Promise((resolve, reject) => {
-            task.on("state_changed",
-              (snap) => {
-                const pct = Math.round((snap.bytesTransferred / snap.totalBytes) * 100);
-                prFill.style.width = pct + "%";
-                prStatus.textContent = pct + "%";
-              },
-              reject,
-              async () => {
-                url = await task.snapshot.ref.getDownloadURL();
-                resolve();
-              }
-            );
-          });
-          prContainer.style.display = "none";
-        }
-
-        const currentPhotos = getArchivePhotos();
-        currentPhotos.push({
-          id: "arc_photo_" + Date.now(),
-          caption,
-          url
-        });
-
-        await db.collection("settings").doc("festival").set({
-          archivePhotos: currentPhotos
-        }, { merge: true });
-
-        document.getElementById("arcImgCaption").value = "";
-        document.getElementById("arcImgUrl").value = "";
-        selectedArcImgFile = null;
-        arcImgFileInput.value = "";
-        arcImgFileStatus.textContent = "";
-
-        alert("Nuotrauka sėkmingai pridėta į archyvo galeriją!");
-      } catch (err) {
-        console.error(err);
-        alert("Klaida: " + err.message);
-      } finally {
-        btn.disabled = false;
-      }
-    });
-
-    window.removeArchivePhoto = async function(id) {
-      if (!confirm("Ar tikrai norite pašalinti šią nuotrauką?")) return;
-      const currentPhotos = getArchivePhotos().filter((p) => p.id !== id);
-      try {
-        await db.collection("settings").doc("festival").set({
-          archivePhotos: currentPhotos
-        }, { merge: true });
-      } catch (err) {
-        console.error(err);
-        alert("Klaida: " + err.message);
-      }
-    };
-
-    document.getElementById("arcPrizesSaveBtn").addEventListener("click", async () => {
-      const btn = document.getElementById("arcPrizesSaveBtn");
-      const url = document.getElementById("arcPrizesUrl").value.trim();
-      if (!url) {
-        alert("Įveskite prizų nuotraukos URL!");
-        return;
-      }
-      btn.disabled = true;
-      try {
-        await db.collection("settings").doc("festival").set({
-          prizesPhotoUrl: url
-        }, { merge: true });
-        alert("Prizų nuotrauka atnaujinta!");
-      } catch (err) {
-        console.error(err);
-        alert("Klaida: " + err.message);
-      } finally {
-        btn.disabled = false;
-      }
-    });
-
-    function fetchSubmissions() {
-      db.collection("submissions")
-        .orderBy("submittedAt", "desc")
-        .onSnapshot((snap) => {
-          submissionsList = [];
-          snap.forEach((doc) => {
-            submissionsList.push({ id: doc.id, ...doc.data() });
-          });
-          updateMetrics();
-          updateAdminWinnersUI();
-          renderTable();
-        }, (err) => console.error(err));
-    }
-
-    function updateMetrics() {
-      document.getElementById("statTotal").textContent = submissionsList.length;
-      document.getElementById("statAccepted").textContent = submissionsList.filter(s => s.status === "accepted").length;
-      document.getElementById("statVoting").textContent = submissionsList.filter(s => s.inVoting === true).length;
-      document.getElementById("statFinals").textContent = submissionsList.filter(s => s.status === "semifinal" || s.status === "final" || s.status === "winner").length;
-    }
-
-    function updateAdminWinnersUI() {
-      const select = document.getElementById("adminSelectFilm");
-      const list = document.getElementById("adminWinnersList");
-      if (!select || !list) return;
-
-      const previousSelected = select.value;
-      select.innerHTML = '<option value="" disabled selected>Pasirinkite filmą iš sąrašo...</option>';
-
-      submissionsList.forEach((sub) => {
-        const opt = document.createElement("option");
-        opt.value = sub.id;
-        opt.textContent = `${sub.filmTitle} — ${sub.name} (${sub.category || ''})`;
-        select.appendChild(opt);
-      });
-
-      if (previousSelected && submissionsList.some(s => s.id === previousSelected)) {
-        select.value = previousSelected;
-      }
-
-      const winners = submissionsList.filter((s) => s.isWinner === true);
-      if (winners.length === 0) {
-        list.innerHTML = '<p style="color:var(--text-subtle); font-size:0.85rem;">Nėra paskelbtų laimėtojų.</p>';
-        return;
-      }
-
-      list.innerHTML = winners.map((w) => `
-        <div class="winner-item-row">
-          <div>
-            <strong style="color:var(--primary-emerald);">${w.awardTitle || 'Laureatas'}</strong>: 
-            <span style="color:#fff;">${w.filmTitle}</span> 
-            <small style="color:var(--text-muted);">(${w.name})</small>
-          </div>
-          <button class="btn-delete" style="height:32px; padding:0 12px; font-size:0.75rem;" onclick="revokeWinner('${w.id}')">Atšaukti</button>
-        </div>
-      `).join("");
-    }
-
-    document.getElementById("assignWinnerBtn").addEventListener("click", async () => {
-      const filmId = document.getElementById("adminSelectFilm").value;
-      const awardTitle = document.getElementById("adminAwardTitle").value.trim();
-
-      if (!filmId || !awardTitle) {
-        alert("Pasirinkite filmą ir įveskite nominaciją!");
-        return;
-      }
-
-      try {
-        await db.collection("submissions").doc(filmId).update({
-          isWinner: true,
-          awardTitle: awardTitle,
-          status: "winner"
-        });
-        document.getElementById("adminAwardTitle").value = "";
-        alert("Laimėtojas sėkmingai paskelbtas!");
-      } catch (err) {
-        console.error(err);
-        alert("Klaida: " + err.message);
-      }
-    });
-
-    window.revokeWinner = async function(filmId) {
-      try {
-        await db.collection("submissions").doc(filmId).update({
-          isWinner: false,
-          awardTitle: firebase.firestore.FieldValue.delete()
-        });
-        alert("Laimėtojo statusas atšauktas.");
-      } catch (err) {
-        console.error(err);
-        alert("Klaida: " + err.message);
-      }
-    };
-
-    window.toggleVotingParticipation = async function(id, currentStatus) {
-      try {
-        await db.collection("submissions").doc(id).update({
-          inVoting: !currentStatus
-        });
-      } catch (err) {
-        console.error(err);
-        alert("Klaida: " + err.message);
-      }
-    };
-
-    const tableBody = document.getElementById("tableBody");
-    const filterSearch = document.getElementById("filterSearch");
-    const filterCategory = document.getElementById("filterCategory");
-    const filterStatus = document.getElementById("filterStatus");
-    const filterVoting = document.getElementById("filterVoting");
-
-    function renderTable() {
-      const q = filterSearch.value.toLowerCase();
-      const cat = filterCategory.value;
-      const st = filterStatus.value;
-      const vt = filterVoting.value;
-
-      const filtered = submissionsList.filter((item) => {
-        const matchSearch = 
-          (item.name && item.name.toLowerCase().includes(q)) ||
-          (item.filmTitle && item.filmTitle.toLowerCase().includes(q)) ||
-          (item.email && item.email.toLowerCase().includes(q));
-        const matchCat = cat === "all" || item.category === cat;
-        const matchStatus = st === "all" || item.status === st;
-        const matchVoting = 
-          vt === "all" || 
-          (vt === "inVoting" && item.inVoting === true) || 
-          (vt === "notInVoting" && item.inVoting !== true);
-        return matchSearch && matchCat && matchStatus && matchVoting;
-      });
-
-      tableBody.innerHTML = "";
-
-      filtered.forEach((sub) => {
-        const tr = document.createElement("tr");
-
-        let dateStr = "-";
-        if (sub.submittedAt && sub.submittedAt.toDate) {
-          dateStr = sub.submittedAt.toDate().toLocaleDateString("lt-LT", { month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" });
-        }
-
-        const badgeCls = `badge-${sub.status || 'submitted'}`;
-        const isVoting = sub.inVoting === true;
-        const votingBtnStyle = isVoting 
-          ? "background:rgba(16, 185, 129, 0.2); color:#10B981; border:1px solid #10B981; cursor:pointer;" 
-          : "background:rgba(75, 99, 96, 0.2); color:var(--text-muted); border:1px solid var(--border-color); cursor:pointer;";
-
-        tr.innerHTML = `
-          <td style="color:var(--text-subtle); font-size:0.78rem;">${dateStr}</td>
-          <td><strong>${sub.name || ''}</strong><br><small style="color:var(--text-muted);">${sub.email || ''}</small></td>
-          <td>${sub.age || ''} m.<br><small style="color:var(--text-subtle);">${sub.category || ''}</small></td>
-          <td><b style="color:#fff;">${sub.filmTitle || ''}</b></td>
-          <td><b style="color:var(--primary-emerald);">${sub.votesCount || 0}</b></td>
-          <td>
-            <button class="badge" style="${votingBtnStyle}" onclick="toggleVotingParticipation('${sub.id}', ${isVoting})">
-              ${isVoting ? 'RODOMAS' : 'PASLĖPTAS'}
-            </button>
-          </td>
-          <td>${sub.videoDurationSeconds ? sub.videoDurationSeconds + 's' : '-'}</td>
-          <td><span class="badge ${badgeCls}">${sub.status || 'submitted'}</span></td>
-          <td>
-            <div style="display:flex; gap:6px;">
-              <button class="btn-outline" style="height:32px; padding:0 10px; font-size:0.75rem;" onclick="viewEntry('${sub.id}')">Peržiūrėti</button>
-              <button class="btn-delete" style="height:32px; padding:0 10px; font-size:0.75rem;" onclick="deleteEntry('${sub.id}')">Ištrinti</button>
-            </div>
-          </td>
-        `;
-        tableBody.appendChild(tr);
-      });
-    }
-
-    filterSearch.addEventListener("input", renderTable);
-    filterCategory.addEventListener("change", renderTable);
-    filterStatus.addEventListener("change", renderTable);
-    filterVoting.addEventListener("change", renderTable);
-
-    const entryModal = document.getElementById("entryModal");
-    const mVideo = document.getElementById("mVideo");
-
-    entryModal.addEventListener("click", (e) => {
-      if (e.target === entryModal) {
-        closeEntryModal();
-      }
-    });
-
-    window.viewEntry = function(id) {
-      currentEntry = submissionsList.find((x) => x.id === id);
-      if (!currentEntry) return;
-
-      document.getElementById("mTitle").textContent = currentEntry.filmTitle || "Filmas";
-      document.getElementById("mAuthor").textContent = currentEntry.name || "";
-      document.getElementById("mEmail").textContent = currentEntry.email || "";
-      document.getElementById("mAgeInst").textContent = `${currentEntry.age || ''} m. | ${currentEntry.institution || 'Nenurodyta'}`;
-      document.getElementById("mLocation").textContent = currentEntry.location || "";
-      document.getElementById("mDevice").textContent = currentEntry.deviceModel || "";
-      document.getElementById("mDuration").textContent = currentEntry.videoDurationSeconds || "";
-      document.getElementById("mVotes").textContent = currentEntry.votesCount || 0;
-      document.getElementById("mSynopsis").textContent = currentEntry.synopsis || "";
-      document.getElementById("mInVoting").checked = currentEntry.inVoting === true;
-
-      mVideo.src = currentEntry.videoUrl || "";
-      document.getElementById("mDownloadLink").href = currentEntry.videoUrl || "#";
-
-      document.getElementById("mNewStatus").value = currentEntry.status || "submitted";
-      document.getElementById("mEmailLang").value = currentEntry.submissionLang || "lt";
-      document.getElementById("mEmailTemplate").value = "none";
-      document.getElementById("mCustomText").value = "";
-      document.getElementById("mStreamLink").value = "";
-
-      entryModal.style.display = "flex";
-    };
-
-    window.closeEntryModal = function() {
-      entryModal.style.display = "none";
-      mVideo.pause();
-      mVideo.src = "";
-      currentEntry = null;
-    };
-
-    window.deleteEntry = async function(id) {
-      const entry = submissionsList.find(x => x.id === id);
-      if (!entry) return;
-
-      const confirmed = confirm(`Ar tikrai norite ištrinti paraišką „${entry.filmTitle}“ (${entry.name})?`);
-      if (!confirmed) return;
-
-      try {
-        if (entry.storagePath) {
-          try {
-            await storage.ref(entry.storagePath).delete();
-          } catch (e) {
-            console.warn(e);
-          }
-        }
-        await db.collection("submissions").doc(id).delete();
-        alert("Paraiška pašalinta.");
-      } catch (err) {
-        console.error(err);
-        alert("Klaida: " + err.message);
-      }
-    };
-
-    document.getElementById("mDeleteBtn").addEventListener("click", async () => {
-      if (!currentEntry) return;
-      const targetId = currentEntry.id;
-      closeEntryModal();
-      await deleteEntry(targetId);
-    });
-
-    const mSaveBtn = document.getElementById("mSaveBtn");
-    mSaveBtn.addEventListener("click", async () => {
-      if (!currentEntry) return;
-      mSaveBtn.disabled = true;
-
-      const newStatus = document.getElementById("mNewStatus").value;
-      const inVotingVal = document.getElementById("mInVoting").checked;
-      const tpl = document.getElementById("mEmailTemplate").value;
-      const lang = document.getElementById("mEmailLang").value;
-      const customMsg = document.getElementById("mCustomText").value.trim();
-      const streamLink = document.getElementById("mStreamLink").value.trim();
-
-      try {
-        await db.collection("submissions").doc(currentEntry.id).update({
-          status: newStatus,
-          inVoting: inVotingVal,
-          lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
-        });
-
-        if (tpl !== "none") {
-          const emailHtml = generateEmailHtml(lang, tpl, {
-            name: currentEntry.name,
-            filmTitle: currentEntry.filmTitle,
-            category: currentEntry.category,
-            customMessage: customMsg,
-            streamLink: streamLink
-          });
-
-          await db.collection("mail").add({
-            to: [currentEntry.email],
-            message: {
-              subject: emailTexts[lang][tpl].sub,
-              html: emailHtml
-            }
-          });
-          alert("Statusas atnaujintas ir laiškas išsiųstas.");
-        } else {
-          alert("Statusas atnaujintas.");
-        }
-
-        closeEntryModal();
-      } catch (err) {
-        console.error(err);
-        alert("Klaida: " + err.message);
-      } finally {
-        mSaveBtn.disabled = false;
-      }
-    });
-  </script>
+  <script type="module" src="js/admin-main.js"></script>
 </body>
 </html>
