@@ -66,7 +66,8 @@
         <li><a href="#about">About</a></li>
         <li><a href="#terms">Terms</a></li>
         <li><a href="#categories">Categories & Prizes</a></li>
-        <li><a href="#archive">Archive (2024–2025)</a></li>
+        <li><a href="#archive">Archive</a></li>
+        <li><a href="../lt/azuolynas-film-festival-2026.html">2026 Edition</a></li>
         <li id="navLinkResults" style="display:none;"><a href="#results">Results</a></li>
         <li id="navLinkVoting" style="display:none;"><a href="#competition">Voting</a></li>
         <li id="navLinkScreening"><a href="#screening">Screening</a></li>
@@ -74,7 +75,7 @@
       </ul>
       <div class="lang-switch">
         <a href="../lt/index.html" class="lang-btn">LT</a>
-        <a href="../en/index.html" class="lang-btn active">EN</a>
+        <a href="index.html" class="lang-btn active">EN</a>
       </div>
     </div>
   </header>
@@ -179,7 +180,7 @@
           </div>
 
           <div class="prize-showcase">
-            <img src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/IMG_3457.jpeg?alt=media&token=7ebb0797-889a-453e-a6a1-ad2e47aa3d27" alt="The Prizes">
+            <img id="dynPrizeImg" src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/IMG_3457.jpeg?alt=media&token=7ebb0797-889a-453e-a6a1-ad2e47aa3d27" alt="The Prizes">
             <div class="prize-caption">Official awards and trophies for winning filmmakers</div>
           </div>
         </div>
@@ -193,38 +194,8 @@
           <h2 class="section-heading">Past Festivals (2024–2025)</h2>
         </div>
 
-        <div class="two-col-grid">
-          <div class="archive-card">
-            <div class="archive-card-header">
-              <span class="archive-year">Fest 2025</span>
-              <span class="badge badge-accepted">2025 Edition</span>
-            </div>
-            <div class="player-screen">
-              <video controls playsinline preload="metadata" src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/A%CC%A8z%CC%8Cuolynas%20International%20Film%20Festival%202025.mp4?alt=media&token=f62b9379-1600-456c-8d17-6f4e1f062017"></video>
-            </div>
-          </div>
-
-          <div class="archive-card">
-            <div class="archive-card-header">
-              <span class="archive-year">Fest 2024</span>
-              <span class="badge badge-accepted">2024 Edition</span>
-            </div>
-            <div class="player-screen">
-              <video controls playsinline preload="metadata" src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/The%20A%CC%A8z%CC%8Cuolynas%20Film%20Festival%202024.mp4?alt=media&token=cf0417c4-0ffd-4d70-b318-3f9a5e2c81f0"></video>
-            </div>
-          </div>
-        </div>
-
-        <div class="gallery-grid">
-          <div class="gallery-item">
-            <img src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/IMG_3458.jpeg?alt=media&token=224af1bd-25ff-494e-8136-fbf330d3ad5b" alt="Photos from 2025 festival">
-            <div class="gallery-caption">Moments from the 2025 Film Festival Ceremony</div>
-          </div>
-          <div class="gallery-item">
-            <img src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/IMG_3459.jpeg?alt=media&token=dfdda212-9ea6-433f-af80-8c5b5b57f361" alt="Festival laureates 2025">
-            <div class="gallery-caption">Festival laureates and attendees in 2025</div>
-          </div>
-        </div>
+        <div class="two-col-grid" id="archiveVideosContainer"></div>
+        <div class="gallery-grid" id="archivePhotosContainer"></div>
       </div>
     </section>
 
@@ -342,7 +313,7 @@
                 <div class="bar-line">
                   <div class="bar-fill" id="progressFill"></div>
                 </div>
-                <div id="progressStatus" style="font-size:0.78rem; color:var(--text-muted); margin-top:4px; text-align:right;">0%</div>
+                <div id="progressStatus" class="bar-status-text">0%</div>
               </div>
             </div>
 
@@ -365,7 +336,7 @@
               </label>
             </div>
 
-            <button type="submit" id="submitBtn" class="btn-solid" style="width:100%;">
+            <button type="submit" id="submitBtn" class="btn-solid btn-full">
               Submit Entry To Festival
             </button>
           </form>
@@ -377,7 +348,7 @@
   <div id="publicPreviewModal" class="modal-curtain">
     <div class="modal-dialog">
       <div class="modal-title-row">
-        <h3 id="publicModalTitle" style="color:var(--text-white); font-family:var(--font-cinema); font-size:clamp(1.15rem, 2.2vw, 1.45rem);">Film Details</h3>
+        <h3 id="publicModalTitle" style="color:var(--text-white); font-family:var(--font-cinema);">Film Details</h3>
         <button class="modal-close" onclick="closePublicModal()">&times;</button>
       </div>
       <video id="publicModalVideo" class="modal-video-frame" controls playsinline></video>
@@ -394,6 +365,8 @@
     </div>
   </div>
 
+  <div id="toastContainer" class="toast-container"></div>
+
   <footer>
     <div class="container">
       <img src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media" alt="Logo" class="footer-logo">
@@ -409,6 +382,32 @@
   <script src="../email-templates.js"></script>
   <script>
     let filmsCache = [];
+
+    function showToast(message, type = "success") {
+      const container = document.getElementById("toastContainer");
+      if (!container) return;
+      const toast = document.createElement("div");
+      toast.className = `toast toast-${type}`;
+      toast.textContent = message;
+      container.appendChild(toast);
+      requestAnimationFrame(() => toast.classList.add("show"));
+      setTimeout(() => {
+        toast.classList.remove("show");
+        setTimeout(() => toast.remove(), 300);
+      }, 4000);
+    }
+
+    function createMediaEmbed(url) {
+      if (!url) return "";
+      const cleanUrl = url.trim();
+      if (cleanUrl.includes("youtube.com") || cleanUrl.includes("youtu.be")) {
+        let embed = cleanUrl;
+        if (cleanUrl.includes("watch?v=")) embed = cleanUrl.replace("watch?v=", "embed/");
+        else if (cleanUrl.includes("youtu.be/")) embed = cleanUrl.replace("youtu.be/", "www.youtube.com/embed/");
+        return `<iframe src="${embed}" allowfullscreen style="width:100%; height:100%; border:none;"></iframe>`;
+      }
+      return `<video controls playsinline preload="metadata" src="${cleanUrl}" style="width:100%; height:100%; object-fit:cover;"></video>`;
+    }
 
     auth.signInAnonymously().catch((err) => console.error(err));
 
@@ -465,23 +464,70 @@
       if (data.cat2Age) document.getElementById("dynCat2Age").textContent = data.cat2Age;
       if (data.cat2Desc) document.getElementById("dynCat2Desc").textContent = data.cat2Desc;
 
+      if (d.prizesPhotoUrl && document.getElementById("dynPrizeImg")) {
+        document.getElementById("dynPrizeImg").src = d.prizesPhotoUrl;
+      }
+
+      renderArchiveSection(d);
+
       const playerWrap = document.getElementById("screeningPlayerContainer");
       const recUrl = (d.recordingVideoUrl || "").trim();
 
       if (recUrl) {
-        if (recUrl.includes("youtube.com") || recUrl.includes("youtu.be")) {
-          let embedUrl = recUrl;
-          if (recUrl.includes("watch?v=")) embedUrl = recUrl.replace("watch?v=", "embed/");
-          else if (recUrl.includes("youtu.be/")) embedUrl = recUrl.replace("youtu.be/", "www.youtube.com/embed/");
-          playerWrap.innerHTML = `<iframe src="${embedUrl}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
-        } else {
-          playerWrap.innerHTML = `<video controls playsinline src="${recUrl}"></video>`;
-        }
+        playerWrap.innerHTML = createMediaEmbed(recUrl);
       } else {
         const ph = data.recordingPlaceholder || DEFAULT_CONTENT.en.recordingPlaceholder;
         document.getElementById("dynRecordingPlaceholder").textContent = ph;
       }
     });
+
+    function renderArchiveSection(data) {
+      const videosContainer = document.getElementById("archiveVideosContainer");
+      const photosContainer = document.getElementById("archivePhotosContainer");
+
+      const videos = Array.isArray(data.archiveVideos) && data.archiveVideos.length > 0 ? data.archiveVideos : [
+        {
+          title: "Fest 2025",
+          label: "2025 Edition",
+          url: "https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/A%CC%A8z%CC%8Cuolynas%20International%20Film%20Festival%202025.mp4?alt=media&token=f62b9379-1600-456c-8d17-6f4e1f062017"
+        },
+        {
+          title: "Fest 2024",
+          label: "2024 Edition",
+          url: "https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/The%20A%CC%A8z%CC%8Cuolynas%20Film%20Festival%202024.mp4?alt=media&token=cf0417c4-0ffd-4d70-b318-3f9a5e2c81f0"
+        }
+      ];
+
+      videosContainer.innerHTML = videos.map((v) => `
+        <div class="archive-card">
+          <div class="archive-card-header">
+            <span class="archive-year">${v.title || 'Archive'}</span>
+            <span class="badge badge-accepted">${v.label || 'Recording'}</span>
+          </div>
+          <div class="player-screen">
+            ${createMediaEmbed(v.url)}
+          </div>
+        </div>
+      `).join("");
+
+      const photos = Array.isArray(data.archivePhotos) && data.archivePhotos.length > 0 ? data.archivePhotos : [
+        {
+          caption: "Moments from the 2025 Film Festival Ceremony",
+          url: "https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/IMG_3458.jpeg?alt=media&token=224af1bd-25ff-494e-8136-fbf330d3ad5b"
+        },
+        {
+          caption: "Festival laureates and attendees in 2025",
+          url: "https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/IMG_3459.jpeg?alt=media&token=dfdda212-9ea6-433f-af80-8c5b5b57f361"
+        }
+      ];
+
+      photosContainer.innerHTML = photos.map((p) => `
+        <div class="gallery-item">
+          <img src="${p.url}" alt="${p.caption || 'Photo'}">
+          <div class="gallery-caption">${p.caption || ''}</div>
+        </div>
+      `).join("");
+    }
 
     db.collection("submissions").onSnapshot((snapshot) => {
       filmsCache = [];
@@ -600,12 +646,15 @@
           countElem.classList.add("pulse");
           setTimeout(() => countElem.classList.remove("pulse"), 500);
         }
+        showToast("Your vote has been counted!");
       } catch (err) {
         if (err.message === "already-voted") {
           localStorage.setItem("voted_" + filmId, "true");
           if (btn) btn.textContent = "Already Voted";
+          showToast("You have already voted for this film.", "error");
         } else {
           console.error(err);
+          showToast("Voting error. Please try again.", "error");
           if (btn) btn.disabled = false;
         }
       }
@@ -636,6 +685,12 @@
       video.pause();
       video.src = "";
     }
+
+    document.getElementById("publicPreviewModal").addEventListener("click", (e) => {
+      if (e.target === document.getElementById("publicPreviewModal")) {
+        closePublicModal();
+      }
+    });
 
     let verifiedVideoFile = null;
     let videoDurationSeconds = 0;
@@ -685,7 +740,7 @@
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
       if (!verifiedVideoFile) {
-        alert("Please attach a valid video under 3 minutes.");
+        showToast("Please attach a valid video strictly under 3 minutes.", "error");
         return;
       }
 
@@ -717,7 +772,7 @@
           },
           (err) => {
             console.error(err);
-            alert("Upload failed: " + err.message);
+            showToast("Upload failed: " + err.message, "error");
             submitBtn.disabled = false;
           },
           async () => {
@@ -743,21 +798,23 @@
               submittedAt: firebase.firestore.FieldValue.serverTimestamp()
             });
 
-            const emailHtml = generateEmailHtml("en", "submissionReceived", {
-              name,
-              filmTitle,
-              category
-            });
+            if (typeof generateEmailHtml === "function") {
+              const emailHtml = generateEmailHtml("en", "submissionReceived", {
+                name,
+                filmTitle,
+                category
+              });
 
-            await db.collection("mail").add({
-              to: [email],
-              message: {
-                subject: emailTexts.en.submissionReceived.sub,
-                html: emailHtml
-              }
-            });
+              await db.collection("mail").add({
+                to: [email],
+                message: {
+                  subject: emailTexts.en.submissionReceived.sub,
+                  html: emailHtml
+                }
+              });
+            }
 
-            alert("Thank you! Your entry has been submitted successfully.");
+            showToast("Thank you! Your entry has been submitted successfully.");
             form.reset();
             verifiedVideoFile = null;
             feedback.textContent = "";
@@ -768,7 +825,7 @@
         );
       } catch (error) {
         console.error(error);
-        alert("An error occurred during submission.");
+        showToast("An error occurred during submission.", "error");
         submitBtn.disabled = false;
       }
     });
