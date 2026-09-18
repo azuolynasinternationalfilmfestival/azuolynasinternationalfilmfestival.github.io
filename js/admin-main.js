@@ -1,0 +1,51 @@
+import { initAuth } from "./auth.js";
+import { 
+  initSubmissions, 
+  subscribeSubmissions, 
+  unsubscribeSubmissionsListener 
+} from "./submissions.js";
+import { 
+  initSettings, 
+  subscribeSettings, 
+  unsubscribeSettingsListener 
+} from "./settings.js";
+import { initArchive } from "./archive.js";
+
+document.addEventListener("DOMContentLoaded", () => {
+  initSubmissions();
+  initArchive();
+  initSettings();
+  initTabNavigation();
+
+  initAuth({
+    onLoginSuccess: () => {
+      subscribeSubmissions();
+      subscribeSettings();
+    },
+    onLogout: () => {
+      unsubscribeSubmissionsListener();
+      unsubscribeSettingsListener();
+    }
+  });
+});
+
+function initTabNavigation() {
+  const tabs = [
+    { btn: "tabSubmissionsBtn", content: "submissionsTab" },
+    { btn: "tabArchiveBtn", content: "archiveTab" },
+    { btn: "tabSettingsBtn", content: "settingsTab" }
+  ];
+
+  tabs.forEach((tab) => {
+    const btnElem = document.getElementById(tab.btn);
+    if (!btnElem) return;
+
+    btnElem.addEventListener("click", () => {
+      tabs.forEach((t) => {
+        const isCurrent = t.btn === tab.btn;
+        document.getElementById(t.content).style.display = isCurrent ? "block" : "none";
+        document.getElementById(t.btn).classList.toggle("active", isCurrent);
+      });
+    });
+  });
+}
