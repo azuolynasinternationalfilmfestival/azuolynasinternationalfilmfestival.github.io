@@ -68,8 +68,8 @@
         <li><a href="#categories">Categories & Prizes</a></li>
         <li><a href="#archive">Archive</a></li>
         <li><a href="../lt/azuolynas-film-festival-2026.html">2026 Edition</a></li>
-        <li id="navLinkResults" style="display:none;"><a href="#results">Results</a></li>
-        <li id="navLinkVoting" style="display:none;"><a href="#competition">Voting</a></li>
+        <li id="navLinkResults" class="d-none"><a href="#results">Results</a></li>
+        <li id="navLinkVoting" class="d-none"><a href="#competition">Voting</a></li>
         <li id="navLinkScreening"><a href="#screening">Screening</a></li>
         <li id="navLinkSubmit"><a href="#submit">Submit</a></li>
       </ul>
@@ -111,7 +111,7 @@
 
         <div class="cta-flex">
           <a href="#submit" id="heroSubmitBtn" class="btn-solid">Submit Your Film</a>
-          <a href="#competition" id="heroVoteBtn" class="btn-outline" style="display:none;">Vote on Entries</a>
+          <a href="#competition" id="heroVoteBtn" class="btn-outline d-none">Vote on Entries</a>
           <a href="#archive" class="btn-outline">2024–2025 Retrospective</a>
         </div>
       </div>
@@ -199,7 +199,7 @@
       </div>
     </section>
 
-    <section id="results" class="section-block" style="display:none;">
+    <section id="results" class="section-block d-none">
       <div class="container">
         <div class="section-head">
           <div class="section-tag">Laureates</div>
@@ -209,7 +209,7 @@
       </div>
     </section>
 
-    <section id="competition" class="section-block" style="display:none;">
+    <section id="competition" class="section-block d-none">
       <div class="container">
         <div class="section-head">
           <div class="section-tag">Audience Choice</div>
@@ -348,7 +348,7 @@
   <div id="publicPreviewModal" class="modal-curtain">
     <div class="modal-dialog">
       <div class="modal-title-row">
-        <h3 id="publicModalTitle" style="color:var(--text-white); font-family:var(--font-cinema);">Film Details</h3>
+        <h3 id="publicModalTitle" class="modal-title">Film Details</h3>
         <button class="modal-close" onclick="closePublicModal()">&times;</button>
       </div>
       <video id="publicModalVideo" class="modal-video-frame" controls playsinline></video>
@@ -359,8 +359,8 @@
         <p><strong>School / Studio:</strong> <span id="publicModalInstitution"></span></p>
         <p><strong>Camera Device:</strong> <span id="publicModalDevice"></span></p>
         <p><strong>Duration:</strong> <span id="publicModalDuration"></span> s</p>
-        <p style="margin-top:8px; font-weight:700; color:var(--primary-emerald);">Synopsis:</p>
-        <p id="publicModalSynopsis" style="color:var(--text-muted); font-style:italic; margin-top:2px;"></p>
+        <p class="modal-synopsis-label">Synopsis:</p>
+        <p id="publicModalSynopsis" class="modal-synopsis-text"></p>
       </div>
     </div>
   </div>
@@ -404,9 +404,9 @@
         let embed = cleanUrl;
         if (cleanUrl.includes("watch?v=")) embed = cleanUrl.replace("watch?v=", "embed/");
         else if (cleanUrl.includes("youtu.be/")) embed = cleanUrl.replace("youtu.be/", "www.youtube.com/embed/");
-        return `<iframe src="${embed}" allowfullscreen style="width:100%; height:100%; border:none;"></iframe>`;
+        return `<iframe src="${embed}" allowfullscreen class="embed-media"></iframe>`;
       }
-      return `<video controls playsinline preload="metadata" src="${cleanUrl}" style="width:100%; height:100%; object-fit:cover;"></video>`;
+      return `<video controls playsinline preload="metadata" src="${cleanUrl}" class="embed-media"></video>`;
     }
 
     auth.signInAnonymously().catch((err) => console.error(err));
@@ -423,26 +423,26 @@
       const secVoting = document.getElementById("competition");
       const navVoting = document.getElementById("navLinkVoting");
       const heroVote = document.getElementById("heroVoteBtn");
-      if (secVoting) secVoting.style.display = showVoting ? "block" : "none";
-      if (navVoting) navVoting.style.display = showVoting ? "block" : "none";
-      if (heroVote) heroVote.style.display = showVoting ? "inline-flex" : "none";
+      if (secVoting) secVoting.classList.toggle("d-none", !showVoting);
+      if (navVoting) navVoting.classList.toggle("d-none", !showVoting);
+      if (heroVote) heroVote.classList.toggle("d-none", !showVoting);
 
       const secResults = document.getElementById("results");
       const navResults = document.getElementById("navLinkResults");
-      if (secResults) secResults.style.display = showResults ? "block" : "none";
-      if (navResults) navResults.style.display = showResults ? "block" : "none";
+      if (secResults) secResults.classList.toggle("d-none", !showResults);
+      if (navResults) navResults.classList.toggle("d-none", !showResults);
 
       const secScreening = document.getElementById("screening");
       const navScreening = document.getElementById("navLinkScreening");
-      if (secScreening) secScreening.style.display = showScreening ? "block" : "none";
-      if (navScreening) navScreening.style.display = showScreening ? "block" : "none";
+      if (secScreening) secScreening.classList.toggle("d-none", !showScreening);
+      if (navScreening) navScreening.classList.toggle("d-none", !showScreening);
 
       const secSubmit = document.getElementById("submit");
       const navSubmit = document.getElementById("navLinkSubmit");
       const heroSubmit = document.getElementById("heroSubmitBtn");
-      if (secSubmit) secSubmit.style.display = showSubmit ? "block" : "none";
-      if (navSubmit) navSubmit.style.display = showSubmit ? "block" : "none";
-      if (heroSubmit) heroSubmit.style.display = showSubmit ? "inline-flex" : "none";
+      if (secSubmit) secSubmit.classList.toggle("d-none", !showSubmit);
+      if (navSubmit) navSubmit.classList.toggle("d-none", !showSubmit);
+      if (heroSubmit) heroSubmit.classList.toggle("d-none", !showSubmit);
 
       document.getElementById("dynHeroBadge").textContent = data.heroBadge || DEFAULT_CONTENT.en.heroBadge;
       if (document.getElementById("dynAboutText")) {
@@ -543,7 +543,7 @@
       if (!container) return;
       const winners = filmsCache.filter((f) => f.isWinner === true);
       if (winners.length === 0) {
-        container.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: var(--text-muted); padding: 20px;">Official winners will be announced soon.</div>';
+        container.innerHTML = '<div class="empty-state-notice">Official winners will be announced soon.</div>';
         return;
       }
       container.innerHTML = winners.map((w) => `
@@ -567,7 +567,7 @@
       if (!container) return;
       const eligible = filmsCache.filter((f) => f.inVoting === true);
       if (eligible.length === 0) {
-        container.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: var(--text-muted); padding: 20px;">There are currently no films open for voting.</div>';
+        container.innerHTML = '<div class="empty-state-notice">There are currently no films open for voting.</div>';
         return;
       }
 
@@ -600,7 +600,7 @@
                   <span class="vote-num" id="voteCount_${film.id}">${votes} (${pct}%)</span>
                 </div>
                 <div class="vote-bar-bg">
-                  <div class="vote-bar-fill" id="voteFill_${film.id}" style="width: ${pct}%;"></div>
+                  <div class="vote-bar-fill" id="voteFill_${film.id}"></div>
                 </div>
                 <button class="btn-vote" id="voteBtn_${film.id}" onclick="submitVote('${film.id}')" ${hasVoted ? "disabled" : ""}>
                   ${hasVoted ? "Voted" : "Vote for this film"}
@@ -610,6 +610,13 @@
           </div>
         `;
       }).join("");
+
+      eligible.forEach((film) => {
+        const votes = film.votesCount || 0;
+        const pct = totalVotes > 0 ? Math.round((votes / totalVotes) * 100) : 0;
+        const bar = document.getElementById("voteFill_" + film.id);
+        if (bar) bar.style.width = pct + "%";
+      });
     }
 
     async function submitVote(filmId) {
@@ -675,13 +682,13 @@
 
       const video = document.getElementById("publicModalVideo");
       video.src = film.videoUrl || "";
-      document.getElementById("publicPreviewModal").style.display = "flex";
+      document.getElementById("publicPreviewModal").classList.add("active");
     }
 
     function closePublicModal() {
       const modal = document.getElementById("publicPreviewModal");
       const video = document.getElementById("publicModalVideo");
-      modal.style.display = "none";
+      modal.classList.remove("active");
       video.pause();
       video.src = "";
     }
@@ -745,7 +752,7 @@
       }
 
       submitBtn.disabled = true;
-      progressContainer.style.display = "block";
+      progressContainer.classList.add("active");
 
       const name = document.getElementById("participantName").value.trim();
       const email = document.getElementById("participantEmail").value.trim();
@@ -818,7 +825,7 @@
             form.reset();
             verifiedVideoFile = null;
             feedback.textContent = "";
-            progressContainer.style.display = "none";
+            progressContainer.classList.remove("active");
             progressFill.style.width = "0%";
             submitBtn.disabled = false;
           }
