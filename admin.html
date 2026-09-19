@@ -34,7 +34,7 @@
     </div>
   </div>
 
-  <div id="panelSection" style="display:none; flex-direction:column; flex:1;">
+  <div id="panelSection" class="d-none" style="flex-direction:column; flex:1;">
     <div class="admin-topbar">
       <div class="admin-brand">
         <img src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media" alt="Logo" class="admin-brand-logo">
@@ -135,7 +135,7 @@
         </div>
       </div>
 
-      <div id="archiveTab" style="display:none;">
+      <div id="archiveTab" class="d-none">
         <div class="two-col-grid">
           <div class="content-card">
             <h3 class="content-card-title">Pridėti Vaizdo Įrašą (Retrospektyva)</h3>
@@ -225,7 +225,7 @@
         </div>
       </div>
 
-      <div id="settingsTab" style="display:none;">
+      <div id="settingsTab" class="d-none">
         <div class="content-card">
           <h3 class="content-card-title">Svetainės Skilčių Matomumas (Viešas rodymas)</h3>
           <p class="content-card-sub">Valdykite, kurios skiltys ir jų meniu nuorodos yra rodomos viešiems lankytojams.</p>
@@ -349,7 +349,7 @@
   <div id="entryModal" class="modal-curtain">
     <div class="modal-dialog">
       <div class="modal-title-row">
-        <h3 id="mTitle" style="color:var(--text-white); font-family:var(--font-cinema);">Filmo peržiūra</h3>
+        <h3 id="mTitle" class="modal-title">Filmo peržiūra</h3>
         <button id="modalCloseBtn" class="modal-close">&times;</button>
       </div>
 
@@ -367,15 +367,15 @@
         <p><strong>Kameros modelis:</strong> <span id="mDevice"></span></p>
         <p><strong>Trukmė:</strong> <span id="mDuration"></span> s</p>
         <p><strong>Publikos balsai:</strong> <span id="mVotes">0</span></p>
-        <p style="margin-top:8px; font-weight:700; color:var(--primary-emerald);">Sinopsis / Idėja:</p>
-        <p id="mSynopsis" style="color:var(--text-muted); font-style:italic; margin-top:2px;"></p>
+        <p class="modal-synopsis-label">Sinopsis / Idėja:</p>
+        <p id="mSynopsis" class="modal-synopsis-text"></p>
       </div>
 
       <div class="modal-manage-box">
         <div style="margin-bottom:14px;">
           <label class="consent-line">
             <input type="checkbox" id="mInVoting">
-            <span style="color:var(--primary-light); font-weight:600;">Dalyvauja balsavime (rodomas viešoje balsavimo skiltyje)</span>
+            <span style="color:var(--text-color); font-weight:500;">Dalyvauja balsavime (rodomas viešoje balsavimo skiltyje)</span>
           </label>
         </div>
 
@@ -415,7 +415,7 @@
           </div>
           <div class="input-cell">
             <label for="mStreamLink">Nuoroda laiške (nebūtina):</label>
-            <input type="url" id="mStreamLink" class="field" placeholder="https://azuolynasinternationalfilmfestival.github.io/site/">
+            <input type="url" id="mStreamLink" class="field" placeholder="https://azuolynasinternationalfilmfestival.github.io/">
           </div>
         </div>
 
