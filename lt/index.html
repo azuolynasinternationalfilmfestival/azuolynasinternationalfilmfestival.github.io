@@ -10,12 +10,12 @@
   <title>Ąžuolynas International Students Film Festival | Oficiali Paraiškų Platforma</title>
   <meta name="description" content="„Ąžuolyno“ filmų festivalis pavadintas vieno iš Kauno lankytinų vietų garbei. Filmai iki 3 min., nufilmuoti telefonu ar planšete. Paraiškos priimamos iki 2026 m. balandžio 2 d.">
   <meta name="robots" content="index, follow, max-image-preview:large, max-video-preview:-1">
-  <link rel="canonical" href="https://azuolynasinternationalfilmfestival.github.io/site/lt/index.html">
+  <link rel="canonical" href="https://azuolynasinternationalfilmfestival.github.io/lt/index.html">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Ąžuolynas International Students Film Festival">
   <meta property="og:title" content="Ąžuolynas International Students Film Festival | Oficiali Paraiškų Platforma">
   <meta property="og:description" content="Pateikite filmą iki 2026 m. balandžio 2 d. Festivalio atidarymas – 2026 m. balandžio 17 d.">
-  <meta property="og:url" content="https://azuolynasinternationalfilmfestival.github.io/site/lt/index.html">
+  <meta property="og:url" content="https://azuolynasinternationalfilmfestival.github.io/lt/index.html">
   <meta property="og:image" content="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
@@ -39,14 +39,14 @@
     "eventStatus": "https://schema.org/EventScheduled",
     "location": {
       "@type": "VirtualLocation",
-      "url": "https://azuolynasinternationalfilmfestival.github.io/site/"
+      "url": "https://azuolynasinternationalfilmfestival.github.io/"
     },
     "image": "https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media",
     "organizer": {
       "@type": "Organization",
       "name": "Ąžuolynas Film Festival Committee",
       "email": "azuolynasfilmfestival@gmail.com",
-      "url": "https://azuolynasinternationalfilmfestival.github.io/site/"
+      "url": "https://azuolynasinternationalfilmfestival.github.io/"
     }
   }
   </script>
@@ -174,13 +174,13 @@
         <div class="awards-panel">
           <div class="awards-panel-title">Oficialios nominacijos ir prizai</div>
           <div class="awards-chips">
-            <span class="chip">🥇 1-oji Vieta</span>
-            <span class="chip">🥈 2-oji Vieta</span>
-            <span class="chip">🥉 3-ioji Vieta</span>
-            <span class="chip">🏆 Žiūrovų Simpatijų Prizas</span>
+            <span class="chip">1-oji Vieta</span>
+            <span class="chip">2-oji Vieta</span>
+            <span class="chip">3-ioji Vieta</span>
+            <span class="chip">Žiūrovų Simpatijų Prizas</span>
           </div>
 
-          <div class="prize-showcase">
+          <div class="prize-showcase" onclick="openLightboxFromSrc('https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/IMG_3457.jpeg?alt=media&token=7ebb0797-889a-453e-a6a1-ad2e47aa3d27', 'Festivalio laureatų statulėlės ir apdovanojimai')">
             <img id="dynPrizeImg" src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/IMG_3457.jpeg?alt=media&token=7ebb0797-889a-453e-a6a1-ad2e47aa3d27" alt="Festivalio Prizai">
             <div class="prize-caption">Festivalio laureatų statulėlės ir apdovanojimai</div>
           </div>
@@ -366,6 +366,16 @@
     </div>
   </div>
 
+  <div id="lightboxModal" class="lightbox-modal">
+    <button class="lightbox-close" onclick="closeLightbox()">&times;</button>
+    <button class="lightbox-btn lightbox-prev" onclick="stepLightbox(-1)">&#10094;</button>
+    <button class="lightbox-btn lightbox-next" onclick="stepLightbox(1)">&#10095;</button>
+    <div class="lightbox-content">
+      <img id="lightboxImg" class="lightbox-img" src="" alt="Peržiūra">
+      <div id="lightboxCaption" class="lightbox-caption"></div>
+    </div>
+  </div>
+
   <div id="toastContainer" class="toast-container"></div>
 
   <footer>
@@ -383,6 +393,8 @@
   <script src="../email-templates.js"></script>
   <script>
     let filmsCache = [];
+    let galleryPhotosCache = [];
+    let currentLightboxIdx = 0;
 
     function showToast(message, type = "success") {
       const container = document.getElementById("toastContainer");
@@ -511,7 +523,7 @@
         </div>
       `).join("");
 
-      const photos = Array.isArray(data.archivePhotos) && data.archivePhotos.length > 0 ? data.archivePhotos : [
+      galleryPhotosCache = Array.isArray(data.archivePhotos) && data.archivePhotos.length > 0 ? data.archivePhotos : [
         {
           caption: "Akimirkos iš 2025 m. festivalio ceremonijos",
           url: "https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/IMG_3458.jpeg?alt=media&token=224af1bd-25ff-494e-8136-fbf330d3ad5b"
@@ -522,13 +534,68 @@
         }
       ];
 
-      photosContainer.innerHTML = photos.map((p) => `
-        <div class="gallery-item">
-          <img src="${p.url}" alt="${p.caption || 'Nuotrauka'}">
+      photosContainer.innerHTML = galleryPhotosCache.map((p, idx) => `
+        <div class="gallery-item" onclick="openLightbox(${idx})">
+          <div class="gallery-item-media">
+            <img src="${p.url}" alt="${p.caption || 'Nuotrauka'}">
+            <div class="gallery-overlay-hint"><span>Žiūrėti</span></div>
+          </div>
           <div class="gallery-caption">${p.caption || ''}</div>
         </div>
       `).join("");
     }
+
+    function openLightbox(idx) {
+      if (!galleryPhotosCache[idx]) return;
+      currentLightboxIdx = idx;
+      const modal = document.getElementById("lightboxModal");
+      document.getElementById("lightboxImg").src = galleryPhotosCache[idx].url;
+      document.getElementById("lightboxCaption").textContent = galleryPhotosCache[idx].caption || "";
+      modal.classList.add("active");
+    }
+
+    function openLightboxFromSrc(src, caption) {
+      const modal = document.getElementById("lightboxModal");
+      document.getElementById("lightboxImg").src = src;
+      document.getElementById("lightboxCaption").textContent = caption || "";
+      modal.classList.add("active");
+    }
+
+    function closeLightbox() {
+      document.getElementById("lightboxModal").classList.remove("active");
+      document.getElementById("lightboxImg").src = "";
+    }
+
+    function stepLightbox(direction) {
+      if (!galleryPhotosCache.length) return;
+      currentLightboxIdx = (currentLightboxIdx + direction + galleryPhotosCache.length) % galleryPhotosCache.length;
+      openLightbox(currentLightboxIdx);
+    }
+
+    document.getElementById("lightboxModal").addEventListener("click", (e) => {
+      if (e.target === document.getElementById("lightboxModal")) {
+        closeLightbox();
+      }
+    });
+
+    document.addEventListener("keydown", (e) => {
+      const lb = document.getElementById("lightboxModal");
+      if (!lb.classList.contains("active")) return;
+      if (e.key === "Escape") closeLightbox();
+      if (e.key === "ArrowLeft") stepLightbox(-1);
+      if (e.key === "ArrowRight") stepLightbox(1);
+    });
+
+    let touchStartX = 0;
+    let touchEndX = 0;
+    document.getElementById("lightboxModal").addEventListener("touchstart", (e) => {
+      touchStartX = e.changedTouches[0].screenX;
+    }, { passive: true });
+    document.getElementById("lightboxModal").addEventListener("touchend", (e) => {
+      touchEndX = e.changedTouches[0].screenX;
+      if (touchStartX - touchEndX > 50) stepLightbox(1);
+      if (touchEndX - touchStartX > 50) stepLightbox(-1);
+    }, { passive: true });
 
     db.collection("submissions").onSnapshot((snapshot) => {
       filmsCache = [];
