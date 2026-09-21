@@ -1,4 +1,4 @@
-import { auth, AUTHORIZED_ADMIN_EMAILS } from "./firebase-init.js";
+import { auth, AUTHORIZED_ADMIN_EMAILS, PRIMARY_SUPERADMIN_EMAIL } from "./firebase-init.js";
 import { showToast } from "./ui-feedback.js";
 
 export function initAuth({ onLoginSuccess, onLogout }) {
@@ -82,7 +82,7 @@ export function initAuth({ onLoginSuccess, onLogout }) {
 
       if (!AUTHORIZED_ADMIN_EMAILS.includes(email)) {
         resetErrMsg.classList.remove("d-none");
-        resetErrMsg.textContent = "Šis el. pašto adresas nėra autorizuotas administratoriaus skydelyje.";
+        resetErrMsg.textContent = "Šis el. pašto adresas nėra autorizuotas sistemoje.";
         return;
       }
 
@@ -112,13 +112,24 @@ export function initAuth({ onLoginSuccess, onLogout }) {
   });
 }
 
-export async function sendAdminInviteLink(email) {
-  const cleanEmail = email.trim().toLowerCase();
+export async function sendAdminInviteLink(targetEmail) {
+  const currentUser = auth.currentUser;
+  if (!currentUser) {
+    throw new Error("Privalote būti prisijungęs.");
+  }
+
+  if (currentUser.email.toLowerCase() !== PRIMARY_SUPERADMIN_EMAIL) {
+    throw new Error("Tik pagrindinis sistemos administratorius (" + PRIMARY_SUPERADMIN_EMAIL + ") turi teisę siųsti prieigos nuorodas.");
+  }
+
+  const cleanEmail = targetEmail.trim().toLowerCase();
   if (!cleanEmail) {
     throw new Error("Nurodykite el. pašto adresą.");
   }
+
   if (!AUTHORIZED_ADMIN_EMAILS.includes(cleanEmail)) {
-    throw new Error("Šis el. paštas nėra administratoriaus teisių sąraše.");
+    throw new Error("Šis el. pašto adresas nėra patvirtintų administratorių sąraše.");
   }
+
   await auth.sendPasswordResetEmail(cleanEmail);
 }
