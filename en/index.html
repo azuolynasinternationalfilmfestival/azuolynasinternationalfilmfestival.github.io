@@ -852,7 +852,7 @@
           async () => {
             const videoUrl = await uploadTask.snapshot.ref.getDownloadURL();
 
-            await db.collection("submissions").add({
+            const submissionData = {
               name,
               email,
               age,
@@ -870,7 +870,9 @@
               status: "submitted",
               submissionLang: "en",
               submittedAt: firebase.firestore.FieldValue.serverTimestamp()
-            });
+            };
+
+            await db.collection("submissions").add(submissionData);
 
             if (typeof generateEmailHtml === "function") {
               const emailHtml = generateEmailHtml("en", "submissionReceived", {
@@ -884,6 +886,18 @@
                 message: {
                   subject: emailTexts.en.submissionReceived.sub,
                   html: emailHtml
+                }
+              });
+            }
+
+            if (typeof generateAdminNotificationHtml === "function") {
+              const adminEmailHtml = generateAdminNotificationHtml("en", submissionData);
+
+              await db.collection("mail").add({
+                to: ["azuolynasfilmfestival@gmail.com"],
+                message: {
+                  subject: `New Submission: ${filmTitle} (${name})`,
+                  html: adminEmailHtml
                 }
               });
             }
