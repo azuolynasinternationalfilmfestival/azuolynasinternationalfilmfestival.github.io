@@ -40,7 +40,7 @@ export function initAuth({ onLoginSuccess, onLogout }) {
     authErrMsg.classList.add("d-none");
     loginSubmitBtn.disabled = true;
 
-    const email = document.getElementById("loginEmail").value.trim();
+    const email = document.getElementById("loginEmail").value.trim().toLowerCase();
     const pass = document.getElementById("loginPassword").value;
 
     try {
@@ -95,7 +95,11 @@ export function initAuth({ onLoginSuccess, onLogout }) {
         showToast("Nuoroda sėkmingai išsiųsta!");
       } catch (err) {
         resetErrMsg.classList.remove("d-none");
-        resetErrMsg.textContent = "Nepavyko išsiųsti nuorodos: " + err.message;
+        if (err.code === "auth/user-not-found") {
+          resetErrMsg.textContent = "Vartotojas dar nesukurtas Firebase sistemoje. Pirmiausia sukurkite jį Firebase Console -> Authentication.";
+        } else {
+          resetErrMsg.textContent = "Nepavyko išsiųsti nuorodos: " + err.message;
+        }
       } finally {
         sendResetLinkBtn.disabled = false;
       }
@@ -119,7 +123,7 @@ export async function sendAdminInviteLink(targetEmail) {
   }
 
   if (currentUser.email.toLowerCase() !== PRIMARY_SUPERADMIN_EMAIL) {
-    throw new Error("Tik pagrindinis sistemos administratorius (" + PRIMARY_SUPERADMIN_EMAIL + ") turi teisę siųsti prieigos nuorodas.");
+    throw new Error("Tik pagrindinis administratorius turi teisę siųsti prieigos nuorodas.");
   }
 
   const cleanEmail = targetEmail.trim().toLowerCase();
@@ -128,8 +132,15 @@ export async function sendAdminInviteLink(targetEmail) {
   }
 
   if (!AUTHORIZED_ADMIN_EMAILS.includes(cleanEmail)) {
-    throw new Error("Šis el. pašto adresas nėra patvirtintų administratorių sąraše.");
+    AUTHORIZED_ADMIN_EMAILS.push(cleanEmail);
   }
 
-  await auth.sendPasswordResetEmail(cleanEmail);
+  try {
+    await auth.sendPasswordResetEmail(cleanEmail);
+  } catch (err) {
+    if (err.code === "auth/user-not-found") {
+      throw new Error("Vartotojas " + cleanEmail + " dar nesukurtas Firebase Authentication skiltyje. Pirmiausia pridėkite jį Firebase Console -> Authentication -> Users.");
+    }
+    throw err;
+  }
 }
