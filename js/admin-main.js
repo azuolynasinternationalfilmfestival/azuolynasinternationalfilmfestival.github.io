@@ -7,7 +7,8 @@ import {
 import { 
   initSettings, 
   subscribeSettings, 
-  unsubscribeSettingsListener 
+  unsubscribeSettingsListener,
+  evaluateAdminPrivileges
 } from "./settings.js";
 import { initArchive } from "./archive.js";
 
@@ -18,7 +19,8 @@ document.addEventListener("DOMContentLoaded", () => {
   initTabNavigation();
 
   initAuth({
-    onLoginSuccess: () => {
+    onLoginSuccess: (user) => {
+      evaluateAdminPrivileges(user);
       subscribeSubmissions();
       subscribeSettings();
     },
