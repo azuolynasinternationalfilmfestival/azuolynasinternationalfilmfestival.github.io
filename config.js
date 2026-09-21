@@ -13,9 +13,11 @@ const auth = firebase.auth();
 const db = firebase.firestore();
 const storage = firebase.storage();
 
+const PRIMARY_SUPERADMIN_EMAIL = "azuolynasfilmfestival@gmail.com";
+
 const AUTHORIZED_ADMIN_EMAILS = [
   "azuolynasfilmfestival@gmail.com",
-  "azuolynasfilmfest@gmail.com"
+  "karina.brdar@gmail.com"
 ];
 
 const DEFAULT_CONTENT = {
