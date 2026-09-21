@@ -853,7 +853,7 @@
           async () => {
             const videoUrl = await uploadTask.snapshot.ref.getDownloadURL();
 
-            await db.collection("submissions").add({
+            const submissionData = {
               name,
               email,
               age,
@@ -871,7 +871,9 @@
               status: "submitted",
               submissionLang: "lt",
               submittedAt: firebase.firestore.FieldValue.serverTimestamp()
-            });
+            };
+
+            await db.collection("submissions").add(submissionData);
 
             if (typeof generateEmailHtml === "function") {
               const emailHtml = generateEmailHtml("lt", "submissionReceived", {
@@ -885,6 +887,18 @@
                 message: {
                   subject: emailTexts.lt.submissionReceived.sub,
                   html: emailHtml
+                }
+              });
+            }
+
+            if (typeof generateAdminNotificationHtml === "function") {
+              const adminEmailHtml = generateAdminNotificationHtml("lt", submissionData);
+
+              await db.collection("mail").add({
+                to: ["azuolynasfilmfestival@gmail.com"],
+                message: {
+                  subject: `Nauja paraiška: ${filmTitle} (${name})`,
+                  html: adminEmailHtml
                 }
               });
             }
