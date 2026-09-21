@@ -24,6 +24,7 @@
   --bg-dark: var(--bg-color);
   --bg-surface: var(--surface-color);
   --bg-card: var(--surface-card);
+  --bg-card-hover: var(--surface-light);
   --font-cinema: 'Cormorant Garamond', Georgia, serif;
   --font-ui: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   --container-max: 1140px;
@@ -105,6 +106,16 @@ h4 {
   letter-spacing: 0.02em;
   word-break: break-word;
   overflow-wrap: anywhere;
+}
+
+a {
+  color: var(--accent-light);
+  text-decoration: none;
+  transition: var(--transition-smooth);
+}
+
+a:hover {
+  color: var(--text-color);
 }
 
 .container {
@@ -763,7 +774,7 @@ header {
   border-radius: 40px;
   font-size: 0.72rem;
   font-weight: 600;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.05em;
   text-transform: uppercase;
   line-height: 1.2;
 }
@@ -1445,7 +1456,7 @@ footer {
   background: transparent;
   border: none;
   color: var(--text-muted);
-  padding: 6px 18px;
+  padding: 8px 18px;
   border-radius: 40px;
   font-family: var(--font-ui);
   font-size: 0.82rem;
@@ -1454,6 +1465,9 @@ footer {
   cursor: pointer;
   transition: var(--transition-smooth);
   white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .admin-nav-item:hover {
@@ -1464,6 +1478,13 @@ footer {
   background: var(--surface-light);
   color: var(--text-color);
   box-shadow: inset 0 0 0 1px var(--border-color);
+}
+
+.admin-nav-icon {
+  width: 15px;
+  height: 15px;
+  stroke: currentColor;
+  flex-shrink: 0;
 }
 
 .admin-main {
@@ -1853,10 +1874,17 @@ footer {
   background: var(--surface-color);
   border: 1px solid var(--border-color);
   border-radius: var(--site-radius);
-  padding: 18px;
+  padding: 16px;
   margin-bottom: 20px;
   font-size: 0.88rem;
-  line-height: 1.6;
+  line-height: 1.55;
+}
+
+.modal-manage-box {
+  background: var(--surface-color);
+  border: 1px solid var(--border-color);
+  border-radius: var(--site-radius);
+  padding: 18px;
 }
 
 .modal-synopsis-label {
@@ -1869,13 +1897,6 @@ footer {
   color: var(--text-muted);
   font-style: italic;
   margin-top: 4px;
-}
-
-.modal-manage-box {
-  background: var(--surface-color);
-  border: 1px solid var(--border-color);
-  border-radius: var(--site-radius);
-  padding: 18px;
 }
 
 .lightbox-modal {
@@ -2016,10 +2037,9 @@ footer {
 
 @media (max-width: 900px) {
   .nav-links { display: none; }
-  .meta-row, .meta-row-4 { grid-template-columns: 1fr 1fr; }
   .two-col-grid { grid-template-columns: 1fr; }
-  .gallery-grid { grid-template-columns: 1fr; }
   .metrics-row { grid-template-columns: 1fr 1fr; }
+  .gallery-grid { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 600px) {
