@@ -58,9 +58,18 @@
       </div>
 
       <div class="admin-nav-group">
-        <button id="tabSubmissionsBtn" class="admin-nav-item active">Paraiškos</button>
-        <button id="tabArchiveBtn" class="admin-nav-item">Archyvas & Medija</button>
-        <button id="tabSettingsBtn" class="admin-nav-item">Nustatymai & Skiltys</button>
+        <button id="tabSubmissionsBtn" class="admin-nav-item active">
+          <svg class="admin-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+          <span>Paraiškos</span>
+        </button>
+        <button id="tabArchiveBtn" class="admin-nav-item">
+          <svg class="admin-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect><line x1="7" y1="2" x2="7" y2="22"></line><line x1="17" y1="2" x2="17" y2="22"></line><line x1="2" y1="12" x2="22" y2="12"></line><line x1="2" y1="7" x2="7" y2="7"></line><line x1="2" y1="17" x2="7" y2="17"></line><line x1="17" y1="17" x2="22" y2="17"></line><line x1="17" y1="7" x2="22" y2="7"></line></svg>
+          <span>Archyvas & Medija</span>
+        </button>
+        <button id="tabSettingsBtn" class="admin-nav-item">
+          <svg class="admin-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+          <span>Nustatymai & Skiltys</span>
+        </button>
       </div>
 
       <div>
@@ -242,20 +251,23 @@
       </div>
 
       <div id="settingsTab" class="d-none">
-        <div class="content-card">
-          <h3 class="content-card-title">Administratorių Prieigos Pakvietimai</h3>
-          <p class="content-card-sub">Išsiųskite slaptažodžio nustatymo nuorodą naujam ar esamam administratoriui. Nuoroda išsiunčiama tik į autorizuotą el. pašto adresą, per kurią administratorius galės pats susikurti ar atkurti slaptažodį.</p>
+        <div id="adminInviteCard" class="content-card d-none">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+            <h3 class="content-card-title" style="margin-bottom:0;">Prieigos Pakvietimų Valdymas</h3>
+            <span class="badge badge-winner" style="font-size:0.7rem;">Tik Vyr. Administratoriui</span>
+          </div>
+          <p class="content-card-sub">Išsiųskite slaptažodžio nustatymo nuorodą autorizuotam el. paštui. Šį veiksmą gali atlikti tik pagrindinis sistemos administratorius.</p>
           <div class="input-row">
             <div class="input-cell">
-              <label for="inviteAdminEmail">Administratoriaus el. pašto adresas *</label>
-              <input type="email" id="inviteAdminEmail" class="field" placeholder="azuolynasfilmfestival@gmail.com">
+              <label for="inviteAdminEmail">Autorizuotas el. pašto adresas *</label>
+              <input type="email" id="inviteAdminEmail" class="field" placeholder="azuolynasfilmfest@gmail.com">
             </div>
             <div class="input-cell" style="justify-content:flex-end;">
               <button type="button" id="sendInviteBtn" class="btn-solid btn-sm">Išsiųsti prieigos nuorodą</button>
             </div>
           </div>
           <div style="margin-top:12px;">
-            <label style="font-size:0.8rem; color:var(--text-muted); font-weight:600; display:block; margin-bottom:8px;">Autorizuotų administratorių sąrašas:</label>
+            <label style="font-size:0.8rem; color:var(--accent-color); font-weight:600; display:block; margin-bottom:8px;">Sistemoje patvirtinti administratoriai:</label>
             <div id="authorizedEmailsList" style="display:flex; flex-wrap:wrap; gap:8px;"></div>
           </div>
         </div>
