@@ -16,6 +16,8 @@ export const auth = firebase.auth();
 export const db = firebase.firestore();
 export const storage = firebase.storage();
 
+export const PRIMARY_SUPERADMIN_EMAIL = "azuolynasfilmfestival@gmail.com";
+
 export const AUTHORIZED_ADMIN_EMAILS = [
   "azuolynasfilmfestival@gmail.com",
   "azuolynasfilmfest@gmail.com"
