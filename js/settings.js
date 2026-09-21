@@ -1,4 +1,4 @@
-import { db, DEFAULT_CONTENT, AUTHORIZED_ADMIN_EMAILS } from "./firebase-init.js";
+import { db, DEFAULT_CONTENT, AUTHORIZED_ADMIN_EMAILS, PRIMARY_SUPERADMIN_EMAIL } from "./firebase-init.js";
 import { showToast } from "./ui-feedback.js";
 import { syncArchiveState } from "./archive.js";
 import { sendAdminInviteLink } from "./auth.js";
@@ -17,13 +17,27 @@ export function initSettings() {
   renderAuthorizedEmails();
 }
 
+export function evaluateAdminPrivileges(user) {
+  const inviteCard = document.getElementById("adminInviteCard");
+  if (!inviteCard) return;
+
+  const isSuperAdmin = user && user.email && user.email.toLowerCase() === PRIMARY_SUPERADMIN_EMAIL;
+  if (isSuperAdmin) {
+    inviteCard.classList.remove("d-none");
+  } else {
+    inviteCard.classList.add("d-none");
+  }
+}
+
 function renderAuthorizedEmails() {
   const container = document.getElementById("authorizedEmailsList");
   if (!container) return;
 
-  container.innerHTML = AUTHORIZED_ADMIN_EMAILS.map((email) => `
-    <span class="chip" style="font-size:0.78rem; padding:4px 12px;">${email}</span>
-  `).join("");
+  container.innerHTML = AUTHORIZED_ADMIN_EMAILS.map((email) => {
+    const isOwner = email === PRIMARY_SUPERADMIN_EMAIL;
+    const badgeLabel = isOwner ? " (Pagrindinis)" : "";
+    return `<span class="chip" style="font-size:0.78rem; padding:4px 12px; ${isOwner ? 'border-color:var(--accent-color); color:var(--text-color);' : ''}">${email}${badgeLabel}</span>`;
+  }).join("");
 }
 
 async function handleSendAdminInvite() {
@@ -32,7 +46,7 @@ async function handleSendAdminInvite() {
   const email = input.value.trim();
 
   if (!email) {
-    showToast("Įveskite administratoriaus el. pašto adresą!", "error");
+    showToast("Įveskite el. pašto adresą!", "error");
     return;
   }
 
@@ -41,7 +55,7 @@ async function handleSendAdminInvite() {
   try {
     await sendAdminInviteLink(email);
     input.value = "";
-    showToast(`Prieigos nuoroda sėkmingai išsiųsta į ${email}`);
+    showToast(`Prieigos nuoroda išsiųsta į ${email}`);
   } catch (err) {
     showToast("Klaida: " + err.message, "error");
   } finally {
