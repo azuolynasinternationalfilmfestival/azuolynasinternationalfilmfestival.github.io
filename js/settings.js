@@ -1,12 +1,52 @@
-import { db, DEFAULT_CONTENT } from "./firebase-init.js";
+import { db, DEFAULT_CONTENT, AUTHORIZED_ADMIN_EMAILS } from "./firebase-init.js";
 import { showToast } from "./ui-feedback.js";
 import { syncArchiveState } from "./archive.js";
+import { sendAdminInviteLink } from "./auth.js";
 
 let unsubscribeSettings = null;
 
 export function initSettings() {
   const saveBtn = document.getElementById("saveSettingsBtn");
   saveBtn.addEventListener("click", saveSettings);
+
+  const sendInviteBtn = document.getElementById("sendInviteBtn");
+  if (sendInviteBtn) {
+    sendInviteBtn.addEventListener("click", handleSendAdminInvite);
+  }
+
+  renderAuthorizedEmails();
+}
+
+function renderAuthorizedEmails() {
+  const container = document.getElementById("authorizedEmailsList");
+  if (!container) return;
+
+  container.innerHTML = AUTHORIZED_ADMIN_EMAILS.map((email) => `
+    <span class="chip" style="font-size:0.78rem; padding:4px 12px;">${email}</span>
+  `).join("");
+}
+
+async function handleSendAdminInvite() {
+  const input = document.getElementById("inviteAdminEmail");
+  const btn = document.getElementById("sendInviteBtn");
+  const email = input.value.trim();
+
+  if (!email) {
+    showToast("Įveskite administratoriaus el. pašto adresą!", "error");
+    return;
+  }
+
+  btn.disabled = true;
+
+  try {
+    await sendAdminInviteLink(email);
+    input.value = "";
+    showToast(`Prieigos nuoroda sėkmingai išsiųsta į ${email}`);
+  } catch (err) {
+    showToast("Klaida: " + err.message, "error");
+  } finally {
+    btn.disabled = false;
+  }
 }
 
 export function subscribeSettings() {
