@@ -7,14 +7,14 @@ let unsubscribeSettings = null;
 
 export function initSettings() {
   const saveBtn = document.getElementById("saveSettingsBtn");
-  saveBtn.addEventListener("click", saveSettings);
+  if (saveBtn) {
+    saveBtn.addEventListener("click", saveSettings);
+  }
 
   const sendInviteBtn = document.getElementById("sendInviteBtn");
   if (sendInviteBtn) {
     sendInviteBtn.addEventListener("click", handleSendAdminInvite);
   }
-
-  renderAuthorizedEmails();
 }
 
 export function evaluateAdminPrivileges(user) {
@@ -24,8 +24,11 @@ export function evaluateAdminPrivileges(user) {
   const isSuperAdmin = user && user.email && user.email.toLowerCase() === PRIMARY_SUPERADMIN_EMAIL;
   if (isSuperAdmin) {
     inviteCard.classList.remove("d-none");
+    renderAuthorizedEmails();
   } else {
     inviteCard.classList.add("d-none");
+    const container = document.getElementById("authorizedEmailsList");
+    if (container) container.innerHTML = "";
   }
 }
 
@@ -35,7 +38,7 @@ function renderAuthorizedEmails() {
 
   container.innerHTML = AUTHORIZED_ADMIN_EMAILS.map((email) => {
     const isOwner = email === PRIMARY_SUPERADMIN_EMAIL;
-    const badgeLabel = isOwner ? " (Pagrindinis)" : "";
+    const badgeLabel = isOwner ? " (Pagrindinis)" : " (Administratorius)";
     return `<span class="chip" style="font-size:0.78rem; padding:4px 12px; ${isOwner ? 'border-color:var(--accent-color); color:var(--text-color);' : ''}">${email}${badgeLabel}</span>`;
   }).join("");
 }
@@ -43,7 +46,7 @@ function renderAuthorizedEmails() {
 async function handleSendAdminInvite() {
   const input = document.getElementById("inviteAdminEmail");
   const btn = document.getElementById("sendInviteBtn");
-  const email = input.value.trim();
+  const email = input.value.trim().toLowerCase();
 
   if (!email) {
     showToast("Įveskite el. pašto adresą!", "error");
