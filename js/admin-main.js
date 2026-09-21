@@ -43,7 +43,10 @@ function initTabNavigation() {
     btnElem.addEventListener("click", () => {
       tabs.forEach((t) => {
         const isCurrent = t.btn === tab.btn;
-        document.getElementById(t.content).style.display = isCurrent ? "block" : "none";
+        const contentElem = document.getElementById(t.content);
+        if (contentElem) {
+          contentElem.classList.toggle("d-none", !isCurrent);
+        }
         document.getElementById(t.btn).classList.toggle("active", isCurrent);
       });
     });
