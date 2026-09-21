@@ -32,6 +32,12 @@ const emailTexts = {
       detailsTitle: "Pateiktos paraiškos suvestinė:",
       note: "Festivalio peržiūros įrašas ir nugalėtojų paskelbimas bus patalpintas oficialioje festivalio svetainėje 2026 m. balandžio 17 d."
     },
+    adminNotification: {
+      sub: "Nauja paraiška festivaliui!",
+      heading: "Gauta nauja filmo paraiška",
+      body: "Sistemoje užregistruota nauja dalyvio paraiška. Žemiau pateikiami visi kūrėjo ir filmo duomenys.",
+      detailsTitle: "Paraiškos byla:"
+    },
     accepted: {
       sub: "Ąžuolynas Film Fest | Sveikiname! Jūsų filmas priimtas",
       heading: "Puikios žinios, {{name}}!",
@@ -82,6 +88,12 @@ const emailTexts = {
       body: "Thank you for participating! We have safely received your film entry for the Ąžuolynas International Students Film Festival.",
       detailsTitle: "Submission summary:",
       note: "The festival screening recording and winners announcement will be published on our official website on April 17th, 2026."
+    },
+    adminNotification: {
+      sub: "New Film Festival Submission!",
+      heading: "New Film Entry Submitted",
+      body: "A new participant submission has been recorded in the festival system. Details below.",
+      detailsTitle: "Submission Dossier:"
     },
     accepted: {
       sub: "Ąžuolynas Film Fest | Congratulations! Your Film is Accepted",
@@ -162,7 +174,39 @@ function generateEmailHtml(lang, templateKey, data) {
         ${detailsContent}
       </div>
 
-      <p style="font-size: 13px; color: #5C756B; line-height: 1.6; margin: 16px 0 0 0;">${t.note}</p>
+      <p style="font-size: 13px; color: #5C756B; line-height: 1.6; margin: 16px 0 0 0;">${t.note || ''}</p>
+    ${emailWrapperEnd}
+  `;
+}
+
+function generateAdminNotificationHtml(lang, data) {
+  const t = emailTexts[lang].adminNotification;
+  const adminUrl = "https://azuolynasinternationalfilmfestival.github.io/admin.html";
+
+  return `
+    ${emailWrapperStart}
+      <h3 style="color: #F1F3EE; margin: 0 0 14px 0; font-size: 19px; font-weight: 600; font-family: Georgia, serif;">${t.heading}</h3>
+      <p style="font-size: 14px; color: #AABBB2; line-height: 1.65; margin: 0 0 15px 0;">${t.body}</p>
+      
+      <div style="${emailBoxStyle}">
+        <p style="margin: 0 0 12px 0; font-weight: 600; color: #9BC4AE; font-size: 11px; text-transform: uppercase; letter-spacing: 1px;">${t.detailsTitle}</p>
+        <p style="margin: 0 0 6px 0; font-size: 13px; color: #F1F3EE;"><b>Autorius:</b> ${data.name || '-'} (${data.email || '-'})</p>
+        <p style="margin: 0 0 6px 0; font-size: 13px; color: #F1F3EE;"><b>Filmas:</b> ${data.filmTitle || '-'}</p>
+        <p style="margin: 0 0 6px 0; font-size: 13px; color: #F1F3EE;"><b>Kategorija / Amžius:</b> ${data.category || '-'} (${data.age || '-'} m.)</p>
+        <p style="margin: 0 0 6px 0; font-size: 13px; color: #F1F3EE;"><b>Vieta:</b> ${data.location || '-'}</p>
+        <p style="margin: 0 0 6px 0; font-size: 13px; color: #F1F3EE;"><b>Įstaiga:</b> ${data.institution || '-'}</p>
+        <p style="margin: 0 0 6px 0; font-size: 13px; color: #F1F3EE;"><b>Įrenginys:</b> ${data.deviceModel || '-'}</p>
+        <p style="margin: 0 0 6px 0; font-size: 13px; color: #F1F3EE;"><b>Trukmė:</b> ${data.videoDurationSeconds || '-'} s</p>
+        <p style="margin: 10px 0 4px 0; font-size: 12px; color: #9BC4AE; font-weight: 600; text-transform: uppercase;">Sinopsis:</p>
+        <p style="margin: 0 0 14px 0; font-size: 13px; color: #AABBB2; font-style: italic;">${data.synopsis || '-'}</p>
+        ${data.videoUrl ? `<p style="margin: 0;"><a href="${data.videoUrl}" target="_blank" style="color:#6FA58A; font-weight:600; text-decoration:underline;">Atsisiųsti / Peržiūrėti vaizdo įrašą</a></p>` : ''}
+      </div>
+
+      <div style="text-align: center; margin-top: 20px;">
+        <a href="${adminUrl}" target="_blank" style="background-color: #12372F; color: #F1F3EE; border: 1px solid #6FA58A; text-decoration: none; padding: 11px 24px; border-radius: 6px; font-weight: 600; font-size: 14px; display: inline-block;">
+          Atverti Admin Valdymo Skydą
+        </a>
+      </div>
     ${emailWrapperEnd}
   `;
 }
