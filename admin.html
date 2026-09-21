@@ -19,18 +19,34 @@
       <h2 class="admin-auth-title">Valdymo Skydas</h2>
       <p class="admin-auth-sub">Autorizuota prieiga</p>
 
-      <form id="adminAuthForm">
-        <div class="input-cell">
-          <label for="loginEmail">Identifikatorius</label>
-          <input type="email" id="loginEmail" class="field" autocomplete="username" required>
+      <div id="loginFormWrapper">
+        <form id="adminAuthForm">
+          <div class="input-cell">
+            <label for="loginEmail">Identifikatorius</label>
+            <input type="email" id="loginEmail" class="field" autocomplete="username" required>
+          </div>
+          <div class="input-cell">
+            <label for="loginPassword">Slaptažodis</label>
+            <input type="password" id="loginPassword" class="field" autocomplete="current-password" required>
+          </div>
+          <div id="authErrMsg" class="auth-error"></div>
+          <button type="submit" id="loginSubmitBtn" class="btn-solid btn-full">Prisijungti</button>
+        </form>
+        <div style="margin-top:14px;">
+          <button type="button" id="showForgotBtn" class="btn-outline btn-full btn-sm">Nustatyti / Pamiršau slaptažodį</button>
         </div>
+      </div>
+
+      <div id="forgotFormWrapper" class="d-none">
         <div class="input-cell">
-          <label for="loginPassword">Slaptažodis</label>
-          <input type="password" id="loginPassword" class="field" autocomplete="current-password" required>
+          <label for="resetEmail">Autorizuotas el. pašto adresas</label>
+          <input type="email" id="resetEmail" class="field" placeholder="azuolynasfilmfestival@gmail.com" required>
         </div>
-        <div id="authErrMsg" class="auth-error"></div>
-        <button type="submit" id="loginSubmitBtn" class="btn-solid btn-full">Prisijungti</button>
-      </form>
+        <div id="resetErrMsg" class="auth-error"></div>
+        <div id="resetSuccessMsg" class="drop-alert success d-none" style="margin-bottom:14px;"></div>
+        <button type="button" id="sendResetLinkBtn" class="btn-solid btn-full" style="margin-bottom:10px;">Gauti slaptažodžio nustatymo nuorodą</button>
+        <button type="button" id="backToLoginBtn" class="btn-outline btn-full btn-sm">Grįžti į prisijungimą</button>
+      </div>
     </div>
   </div>
 
@@ -226,6 +242,24 @@
       </div>
 
       <div id="settingsTab" class="d-none">
+        <div class="content-card">
+          <h3 class="content-card-title">Administratorių Prieigos Pakvietimai</h3>
+          <p class="content-card-sub">Išsiųskite slaptažodžio nustatymo nuorodą naujam ar esamam administratoriui. Nuoroda išsiunčiama tik į autorizuotą el. pašto adresą, per kurią administratorius galės pats susikurti ar atkurti slaptažodį.</p>
+          <div class="input-row">
+            <div class="input-cell">
+              <label for="inviteAdminEmail">Administratoriaus el. pašto adresas *</label>
+              <input type="email" id="inviteAdminEmail" class="field" placeholder="azuolynasfilmfestival@gmail.com">
+            </div>
+            <div class="input-cell" style="justify-content:flex-end;">
+              <button type="button" id="sendInviteBtn" class="btn-solid btn-sm">Išsiųsti prieigos nuorodą</button>
+            </div>
+          </div>
+          <div style="margin-top:12px;">
+            <label style="font-size:0.8rem; color:var(--text-muted); font-weight:600; display:block; margin-bottom:8px;">Autorizuotų administratorių sąrašas:</label>
+            <div id="authorizedEmailsList" style="display:flex; flex-wrap:wrap; gap:8px;"></div>
+          </div>
+        </div>
+
         <div class="content-card">
           <h3 class="content-card-title">Svetainės Skilčių Matomumas (Viešas rodymas)</h3>
           <p class="content-card-sub">Valdykite, kurios skiltys ir jų meniu nuorodos yra rodomos viešiems lankytojams.</p>
