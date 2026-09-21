@@ -380,12 +380,38 @@
 
   <footer>
     <div class="container">
-      <img src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media" alt="Logo" class="footer-logo">
-      <div class="footer-name">Ąžuolynas International Students Film Festival</div>
-      <div class="footer-mail">
-        Klausimams ir susisiekimui: <a href="mailto:azuolynasfilmfestival@gmail.com">azuolynasfilmfestival@gmail.com</a>
+      <div class="footer-grid">
+        <div class="footer-brand-wrap">
+          <div class="footer-brand-header">
+            <img src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media" alt="Logo" class="footer-logo">
+            <span class="footer-name">Ąžuolynas Fest</span>
+          </div>
+          <p class="footer-tagline">Tarptautinis mokinių filmų festivalis. „Neįprastas žvilgsnis į įprastus dalykus“. Kūrybiškumas, autentiškumas ir jaunųjų režisierių balsas.</p>
+        </div>
+        <div>
+          <div class="footer-col-title">Navigacija</div>
+          <ul class="footer-nav-list">
+            <li><a href="#about">Apie festivalį</a></li>
+            <li><a href="#terms">Dalyvavimo taisyklės</a></li>
+            <li><a href="#categories">Kategorijos & Prizai</a></li>
+            <li><a href="#archive">Retrospektyva (2024–2025)</a></li>
+            <li><a href="azuolynas-film-festival-2026.html">2026 m. Edicijos apžvalga</a></li>
+          </ul>
+        </div>
+        <div>
+          <div class="footer-col-title">Kontaktai</div>
+          <div class="footer-info-list">
+            <p>Kaunas, Lietuva (Ąžuolyno papėdėje)</p>
+            <p>El. paštas: <a href="mailto:azuolynasfilmfestival@gmail.com">azuolynasfilmfestival@gmail.com</a></p>
+            <p>Paraiškos: iki 2026 m. balandžio 2 d.</p>
+            <p>Ceremonija: 2026 m. balandžio 17 d.</p>
+          </div>
+        </div>
       </div>
-      <div class="footer-note">Paraiškos iki 2026 m. balandžio 2 d. • Atidarymas 2026 m. balandžio 17 d.</div>
+      <div class="footer-bottom-bar">
+        <span>&copy; 2026 Ąžuolynas International Students Film Festival. Visos teisės saugomos.</span>
+        <span>Oficiali platforma: azuolynasinternationalfilmfestival.github.io</span>
+      </div>
     </div>
   </footer>
 
@@ -640,11 +666,27 @@
       }
 
       const totalVotes = eligible.reduce((acc, curr) => acc + (curr.votesCount || 0), 0);
+      const userVotedFilmId = localStorage.getItem("festival_voted_film_id");
 
       container.innerHTML = eligible.map((film) => {
         const votes = film.votesCount || 0;
         const pct = totalVotes > 0 ? Math.round((votes / totalVotes) * 100) : 0;
-        const hasVoted = localStorage.getItem("voted_" + film.id) === "true";
+        const isThisFilmVoted = userVotedFilmId === film.id;
+        const isUserAlreadyVoted = Boolean(userVotedFilmId);
+
+        let voteBtnText = "Balsuoti už šį filmą";
+        let voteBtnClass = "btn-vote";
+        let voteBtnDisabled = false;
+
+        if (isThisFilmVoted) {
+          voteBtnText = "Jūsų balsas atiduotas";
+          voteBtnClass = "btn-vote btn-voted";
+          voteBtnDisabled = true;
+        } else if (isUserAlreadyVoted) {
+          voteBtnText = "Balsas jau panaudotas";
+          voteBtnClass = "btn-vote";
+          voteBtnDisabled = true;
+        }
 
         return `
           <div class="film-card">
@@ -670,8 +712,8 @@
                 <div class="vote-bar-bg">
                   <div class="vote-bar-fill" id="voteFill_${film.id}"></div>
                 </div>
-                <button class="btn-vote" id="voteBtn_${film.id}" onclick="submitVote('${film.id}')" ${hasVoted ? "disabled" : ""}>
-                  ${hasVoted ? "Balsas užskaitytas" : "Balsuoti už filmą"}
+                <button class="${voteBtnClass}" id="voteBtn_${film.id}" onclick="submitVote('${film.id}')" ${voteBtnDisabled ? "disabled" : ""}>
+                  ${voteBtnText}
                 </button>
               </div>
             </div>
@@ -688,7 +730,11 @@
     }
 
     async function submitVote(filmId) {
-      if (localStorage.getItem("voted_" + filmId) === "true") return;
+      const existingVote = localStorage.getItem("festival_voted_film_id");
+      if (existingVote) {
+        showToast("Jūs jau esate atidavę savo vienintelį festivalio balsą!", "error");
+        return;
+      }
 
       const btn = document.getElementById("voteBtn_" + filmId);
       if (btn) btn.disabled = true;
@@ -713,23 +759,24 @@
           });
         });
 
-        localStorage.setItem("voted_" + filmId, "true");
-        if (btn) btn.textContent = "Balsas užskaitytas";
+        localStorage.setItem("festival_voted_film_id", filmId);
 
         const countElem = document.getElementById("voteCount_" + filmId);
         if (countElem) {
           countElem.classList.add("pulse");
           setTimeout(() => countElem.classList.remove("pulse"), 500);
         }
-        showToast("Jūsų balsas sėkmingai įskaitytas!");
+
+        renderFilmsGallery();
+        showToast("Dėkojame! Jūsų balsas sėkmingai įskaitytas.");
       } catch (err) {
         if (err.message === "already-voted") {
-          localStorage.setItem("voted_" + filmId, "true");
-          if (btn) btn.textContent = "Jau balsuota";
-          showToast("Už šį filmą jau esate atidavę savo balsą.", "error");
+          localStorage.setItem("festival_voted_film_id", filmId);
+          renderFilmsGallery();
+          showToast("Jūs jau atidavėte savo balsą šiame festivalyje.", "error");
         } else {
           console.error(err);
-          showToast("Klaida balsuojant. Bandykite dar kartą.", "error");
+          showToast("Klaida balsuojant. Bandykite vėliau.", "error");
           if (btn) btn.disabled = false;
         }
       }
