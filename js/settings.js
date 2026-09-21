@@ -1,4 +1,4 @@
-import { db, DEFAULT_CONTENT, AUTHORIZED_ADMIN_EMAILS, PRIMARY_SUPERADMIN_EMAIL } from "./firebase-init.js";
+import { db, DEFAULT_CONTENT, PRIMARY_SUPERADMIN_EMAIL } from "./firebase-init.js";
 import { showToast } from "./ui-feedback.js";
 import { syncArchiveState } from "./archive.js";
 import { sendAdminInviteLink } from "./auth.js";
@@ -24,23 +24,9 @@ export function evaluateAdminPrivileges(user) {
   const isSuperAdmin = user && user.email && user.email.toLowerCase() === PRIMARY_SUPERADMIN_EMAIL;
   if (isSuperAdmin) {
     inviteCard.classList.remove("d-none");
-    renderAuthorizedEmails();
   } else {
     inviteCard.classList.add("d-none");
-    const container = document.getElementById("authorizedEmailsList");
-    if (container) container.innerHTML = "";
   }
-}
-
-function renderAuthorizedEmails() {
-  const container = document.getElementById("authorizedEmailsList");
-  if (!container) return;
-
-  container.innerHTML = AUTHORIZED_ADMIN_EMAILS.map((email) => {
-    const isOwner = email === PRIMARY_SUPERADMIN_EMAIL;
-    const badgeLabel = isOwner ? " (Pagrindinis)" : " (Administratorius)";
-    return `<span class="chip" style="font-size:0.78rem; padding:4px 12px; ${isOwner ? 'border-color:var(--accent-color); color:var(--text-color);' : ''}">${email}${badgeLabel}</span>`;
-  }).join("");
 }
 
 async function handleSendAdminInvite() {
