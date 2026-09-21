@@ -48,8 +48,8 @@ body {
   background-color: var(--bg-color);
   color: var(--text-color);
   font-family: var(--font-ui);
-  font-size: clamp(0.92rem, 1.1vw, 1.02rem);
-  line-height: 1.65;
+  font-size: clamp(0.92rem, 1.05vw, 1.02rem);
+  line-height: 1.7;
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   background-image: 
@@ -72,9 +72,9 @@ body {
 
 h1, .hero-title {
   font-family: var(--font-cinema);
-  font-size: clamp(2.4rem, 5.8vw, 4.4rem);
+  font-size: clamp(2.5rem, 5.5vw, 4.4rem);
   font-weight: 600;
-  line-height: 1.1;
+  line-height: 1.08;
   letter-spacing: 0.01em;
   word-break: break-word;
   overflow-wrap: anywhere;
@@ -82,9 +82,9 @@ h1, .hero-title {
 
 h2, .section-heading {
   font-family: var(--font-cinema);
-  font-size: clamp(1.8rem, 3.6vw, 2.8rem);
+  font-size: clamp(1.9rem, 3.6vw, 2.8rem);
   font-weight: 600;
-  line-height: 1.2;
+  line-height: 1.18;
   letter-spacing: 0.01em;
   word-break: break-word;
   overflow-wrap: anywhere;
@@ -92,7 +92,7 @@ h2, .section-heading {
 
 h3 {
   font-family: var(--font-cinema);
-  font-size: clamp(1.35rem, 2.4vw, 1.85rem);
+  font-size: clamp(1.35rem, 2.3vw, 1.8rem);
   font-weight: 600;
   line-height: 1.25;
   word-break: break-word;
@@ -101,7 +101,7 @@ h3 {
 
 h4 {
   font-family: var(--font-ui);
-  font-size: clamp(0.92rem, 1.4vw, 1.12rem);
+  font-size: clamp(0.92rem, 1.3vw, 1.1rem);
   font-weight: 600;
   letter-spacing: 0.02em;
   word-break: break-word;
@@ -165,7 +165,7 @@ header {
 
 .logo-text {
   font-family: var(--font-cinema);
-  font-size: clamp(1.15rem, 2vw, 1.35rem);
+  font-size: clamp(1.15rem, 1.8vw, 1.35rem);
   font-weight: 600;
   letter-spacing: 0.04em;
   color: var(--text-color);
@@ -238,7 +238,7 @@ header {
 @keyframes cinematicFadeUp {
   from {
     opacity: 0;
-    transform: translateY(20px);
+    transform: translateY(18px);
   }
   to {
     opacity: 1;
@@ -277,7 +277,7 @@ header {
 .hero-about-text {
   max-width: 720px;
   margin: 0 auto 32px auto;
-  font-size: clamp(1rem, 1.25vw, 1.15rem);
+  font-size: clamp(0.98rem, 1.2vw, 1.12rem);
   color: var(--text-muted);
   line-height: 1.75;
   font-weight: 400;
