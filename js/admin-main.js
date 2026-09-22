@@ -11,7 +11,11 @@ import {
   evaluateAdminPrivileges
 } from "./settings.js";
 import { initArchive } from "./archive.js";
-import { initEditions } from "./editions.js";
+import { 
+  initEditions, 
+  subscribeEditions, 
+  unsubscribeEditionsListener 
+} from "./editions.js";
 
 document.addEventListener("DOMContentLoaded", () => {
   initSubmissions();
@@ -24,10 +28,12 @@ document.addEventListener("DOMContentLoaded", () => {
     onLoginSuccess: (user) => {
       evaluateAdminPrivileges(user);
       subscribeSubmissions();
+      subscribeEditions();
       subscribeSettings();
     },
     onLogout: () => {
       unsubscribeSubmissionsListener();
+      unsubscribeEditionsListener();
       unsubscribeSettingsListener();
     }
   });
