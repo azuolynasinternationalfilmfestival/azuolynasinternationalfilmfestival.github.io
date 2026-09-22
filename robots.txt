@@ -2,4 +2,4 @@ User-agent: *
 Allow: /
 Disallow: /admin.html
 Disallow: /site/admin.html
-Sitemap: https://azuolynasinternationalfilmfestival.github.io/site/sitemap.xml
+Sitemap: https://azuolynasinternationalfilmfestival.github.io/sitemap.xml
