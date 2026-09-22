@@ -11,9 +11,11 @@ import {
   evaluateAdminPrivileges
 } from "./settings.js";
 import { initArchive } from "./archive.js";
+import { initEditions } from "./editions.js";
 
 document.addEventListener("DOMContentLoaded", () => {
   initSubmissions();
+  initEditions();
   initArchive();
   initSettings();
   initTabNavigation();
@@ -34,6 +36,7 @@ document.addEventListener("DOMContentLoaded", () => {
 function initTabNavigation() {
   const tabs = [
     { btn: "tabSubmissionsBtn", content: "submissionsTab" },
+    { btn: "tabEditionsBtn", content: "editionsTab" },
     { btn: "tabArchiveBtn", content: "archiveTab" },
     { btn: "tabSettingsBtn", content: "settingsTab" }
   ];
