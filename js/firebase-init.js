@@ -20,7 +20,8 @@ export const PRIMARY_SUPERADMIN_EMAIL = "azuolynasfilmfestival@gmail.com";
 
 export const AUTHORIZED_ADMIN_EMAILS = [
   "azuolynasfilmfestival@gmail.com",
-  "karina.brdar@gmail.com"
+  "karina.brdar@gmail.com",
+  "dominikphotofficial.lt@gmail.com",
 ];
 
 export const DEFAULT_CONTENT = {
@@ -42,5 +43,6 @@ export const DEFAULT_CONTENT = {
     targetAudience: "Students (10–18 yrs)",
     recordingPlaceholder: "The official festival recording will be published here on April 17th, 2026."
   },
-  recordingVideoUrl: ""
+  recordingVideoUrl: "",
+  prizesPhotoUrl: "https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/IMG_3463.jpeg?alt=media&token=af7892ca-e78e-4198-b686-e0181472e8da"
 };
