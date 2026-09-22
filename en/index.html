@@ -204,7 +204,7 @@
           </div>
 
           <div class="prize-showcase" onclick="openLightboxFromSrc('https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/IMG_3463.jpeg?alt=media&token=af7892ca-e78e-4198-b686-e0181472e8da', 'Official awards and trophies for winning filmmakers')">
-            <img id="dynPrizeImg" src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/IMG_3463.jpeg?alt=media&token=af7892ca-e78e-4198-b686-e0181472e8da" alt="The Prizes">
+            <img id="dynPrizeImg" src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/IMG_3463.jpeg?alt=media&token=af7892ca-e78e-4198-b686-e0181472e8da" alt="The Prizes" loading="lazy">
             <div class="prize-caption">Official awards and trophies for winning filmmakers</div>
           </div>
         </div>
@@ -218,8 +218,8 @@
           <h2 class="section-heading">Past Festivals (2024–2025)</h2>
         </div>
 
-        <div class="two-col-grid" id="archiveVideosContainer"></div>
-        <div class="gallery-grid" id="archivePhotosContainer"></div>
+        <div class="archive-media-grid" id="archiveVideosContainer"></div>
+        <div class="archive-media-grid" id="archivePhotosContainer"></div>
       </div>
     </section>
 
@@ -389,11 +389,12 @@
     </div>
   </div>
 
-  <div id="lightboxModal" class="lightbox-modal">
-    <button class="lightbox-close" onclick="closeLightbox()">&times;</button>
-    <button class="lightbox-btn lightbox-prev" onclick="stepLightbox(-1)">&#10094;</button>
-    <button class="lightbox-btn lightbox-next" onclick="stepLightbox(1)">&#10095;</button>
+  <div id="lightboxModal" class="lightbox-modal" role="dialog" aria-modal="true" aria-label="Photo preview">
+    <button class="lightbox-close" onclick="closeLightbox()" aria-label="Close">&times;</button>
+    <button class="lightbox-btn lightbox-prev" onclick="stepLightbox(-1)" aria-label="Previous">&#10094;</button>
+    <button class="lightbox-btn lightbox-next" onclick="stepLightbox(1)" aria-label="Next">&#10095;</button>
     <div class="lightbox-content">
+      <div id="lightboxCounter" class="lightbox-counter"></div>
       <img id="lightboxImg" class="lightbox-img" src="" alt="Preview">
       <div id="lightboxCaption" class="lightbox-caption"></div>
     </div>
@@ -417,8 +418,9 @@
             <li><a href="#about">About Festival</a></li>
             <li><a href="#terms">Terms & Conditions</a></li>
             <li><a href="#categories">Categories & Prizes</a></li>
+            <li><a href="#editions">Editions</a></li>
             <li><a href="#archive">Archive (2024–2025)</a></li>
-            <li><a href="../en/azuolynas-fest-2026.html">2026 Edition Overview</a></li>
+            <li><a href="../lt/azuolynas-fest-2026.html">2026 Edition Overview</a></li>
           </ul>
         </div>
         <div>
@@ -564,7 +566,7 @@
             <h3 class="edition-card-title">${ed.title || ('FEST ' + ed.year)}</h3>
             <div class="edition-card-date">${ed.date || ''}</div>
             <p class="edition-card-text">${ed.subtitle || ''}</p>
-            <a href="${ed.pageUrl || ('azuolynas-fest-' + ed.year + '.html')}" class="btn-solid btn-full">View ${ed.title || 'FEST'} Overview</a>
+            <a href="${ed.pageUrl || ('../lt/azuolynas-fest-' + ed.year + '.html')}" class="btn-solid btn-full">View ${ed.title || 'FEST'} Overview</a>
           </div>
         </div>
       `).join("");
@@ -593,7 +595,8 @@
             <span class="archive-year">${v.title || 'Archive'}</span>
             <span class="badge badge-accepted">${v.label || 'Recording'}</span>
           </div>
-          <div class="player-screen">
+          <div class="video-frame-wrap">
+            <div class="video-play-indicator">▶</div>
             ${createMediaEmbed(v.url)}
           </div>
         </div>
@@ -613,7 +616,7 @@
       photosContainer.innerHTML = galleryPhotosCache.map((p, idx) => `
         <div class="gallery-item" onclick="openLightbox(${idx})">
           <div class="gallery-item-media">
-            <img src="${p.url}" alt="${p.caption || 'Photo'}">
+            <img src="${p.url}" alt="${p.caption || 'Photo'}" loading="lazy">
             <div class="gallery-overlay-hint"><span>View</span></div>
           </div>
           <div class="gallery-caption">${p.caption || ''}</div>
@@ -627,6 +630,10 @@
       const modal = document.getElementById("lightboxModal");
       document.getElementById("lightboxImg").src = galleryPhotosCache[idx].url;
       document.getElementById("lightboxCaption").textContent = galleryPhotosCache[idx].caption || "";
+      const counter = document.getElementById("lightboxCounter");
+      if (counter) {
+        counter.textContent = `${idx + 1} / ${galleryPhotosCache.length}`;
+      }
       modal.classList.add("active");
     }
 
@@ -634,11 +641,16 @@
       const modal = document.getElementById("lightboxModal");
       document.getElementById("lightboxImg").src = src;
       document.getElementById("lightboxCaption").textContent = caption || "";
+      const counter = document.getElementById("lightboxCounter");
+      if (counter) {
+        counter.textContent = "1 / 1";
+      }
       modal.classList.add("active");
     }
 
     function closeLightbox() {
-      document.getElementById("lightboxModal").classList.remove("active");
+      const modal = document.getElementById("lightboxModal");
+      modal.classList.remove("active");
       document.getElementById("lightboxImg").src = "";
     }
 
