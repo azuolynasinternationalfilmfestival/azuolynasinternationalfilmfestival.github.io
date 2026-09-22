@@ -204,7 +204,7 @@
           </div>
 
           <div class="prize-showcase" onclick="openLightboxFromSrc('https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/IMG_3463.jpeg?alt=media&token=af7892ca-e78e-4198-b686-e0181472e8da', 'Oficialūs festivalio apdovanojimai ir laureatų statulėlės')">
-            <img id="dynPrizeImg" src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/IMG_3463.jpeg?alt=media&token=af7892ca-e78e-4198-b686-e0181472e8da" alt="Festivalio Prizai">
+            <img id="dynPrizeImg" src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/IMG_3463.jpeg?alt=media&token=af7892ca-e78e-4198-b686-e0181472e8da" alt="Festivalio Prizai" loading="lazy">
             <div class="prize-caption">Oficialūs festivalio apdovanojimai ir laureatų statulėlės</div>
           </div>
         </div>
@@ -218,8 +218,8 @@
           <h2 class="section-heading">Festivalio Istorija (2024–2025)</h2>
         </div>
 
-        <div class="two-col-grid" id="archiveVideosContainer"></div>
-        <div class="gallery-grid" id="archivePhotosContainer"></div>
+        <div class="archive-media-grid" id="archiveVideosContainer"></div>
+        <div class="archive-media-grid" id="archivePhotosContainer"></div>
       </div>
     </section>
 
@@ -389,11 +389,12 @@
     </div>
   </div>
 
-  <div id="lightboxModal" class="lightbox-modal">
-    <button class="lightbox-close" onclick="closeLightbox()">&times;</button>
-    <button class="lightbox-btn lightbox-prev" onclick="stepLightbox(-1)">&#10094;</button>
-    <button class="lightbox-btn lightbox-next" onclick="stepLightbox(1)">&#10095;</button>
+  <div id="lightboxModal" class="lightbox-modal" role="dialog" aria-modal="true" aria-label="Nuotraukos peržiūra">
+    <button class="lightbox-close" onclick="closeLightbox()" aria-label="Uždaryti">&times;</button>
+    <button class="lightbox-btn lightbox-prev" onclick="stepLightbox(-1)" aria-label="Ankstesnė">&#10094;</button>
+    <button class="lightbox-btn lightbox-next" onclick="stepLightbox(1)" aria-label="Kita">&#10095;</button>
     <div class="lightbox-content">
+      <div id="lightboxCounter" class="lightbox-counter"></div>
       <img id="lightboxImg" class="lightbox-img" src="" alt="Peržiūra">
       <div id="lightboxCaption" class="lightbox-caption"></div>
     </div>
@@ -593,7 +594,8 @@
             <span class="archive-year">${v.title || 'Archyvas'}</span>
             <span class="badge badge-accepted">${v.label || 'Vaizdo įrašas'}</span>
           </div>
-          <div class="player-screen">
+          <div class="video-frame-wrap">
+            <div class="video-play-indicator">▶</div>
             ${createMediaEmbed(v.url)}
           </div>
         </div>
@@ -613,7 +615,7 @@
       photosContainer.innerHTML = galleryPhotosCache.map((p, idx) => `
         <div class="gallery-item" onclick="openLightbox(${idx})">
           <div class="gallery-item-media">
-            <img src="${p.url}" alt="${p.caption || 'Nuotrauka'}">
+            <img src="${p.url}" alt="${p.caption || 'Nuotrauka'}" loading="lazy">
             <div class="gallery-overlay-hint"><span>Žiūrėti</span></div>
           </div>
           <div class="gallery-caption">${p.caption || ''}</div>
@@ -627,6 +629,10 @@
       const modal = document.getElementById("lightboxModal");
       document.getElementById("lightboxImg").src = galleryPhotosCache[idx].url;
       document.getElementById("lightboxCaption").textContent = galleryPhotosCache[idx].caption || "";
+      const counter = document.getElementById("lightboxCounter");
+      if (counter) {
+        counter.textContent = `${idx + 1} / ${galleryPhotosCache.length}`;
+      }
       modal.classList.add("active");
     }
 
@@ -634,11 +640,16 @@
       const modal = document.getElementById("lightboxModal");
       document.getElementById("lightboxImg").src = src;
       document.getElementById("lightboxCaption").textContent = caption || "";
+      const counter = document.getElementById("lightboxCounter");
+      if (counter) {
+        counter.textContent = "1 / 1";
+      }
       modal.classList.add("active");
     }
 
     function closeLightbox() {
-      document.getElementById("lightboxModal").classList.remove("active");
+      const modal = document.getElementById("lightboxModal");
+      modal.classList.remove("active");
       document.getElementById("lightboxImg").src = "";
     }
 
