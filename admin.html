@@ -165,18 +165,27 @@
       </div>
 
       <div id="editionsTab" class="d-none">
-        <div class="content-card">
-          <h3 class="content-card-title">Metų Leidinių (Puslapių) Valdymas</h3>
-          <p class="content-card-sub">Redaguokite konkrečių metų leidinio puslapį (pvz. azuolynas-fest-2026.html), tekstus, laimėtojus ir herojų fonus.</p>
+        <div class="content-card" style="margin-bottom:28px;">
+          <h4>Visi Pridėti Metų Puslapiai (FEST)</h4>
+          <p class="content-card-sub">Žemiau pateikiami visi festivalio leidiniai. Paspauskite „Redaguoti“, kad pakeistumėte tekstus, nuotraukas ar nugalėtojus, arba kurkite naują.</p>
+          <div id="adminEditionsList" class="admin-media-grid"></div>
+        </div>
+
+        <div class="content-card" id="editionFormAnchor">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; flex-wrap:wrap; gap:10px;">
+            <h3 class="content-card-title" id="editionFormHeading" style="margin-bottom:0;">Pridėti / Redaguoti Metų Leidinį</h3>
+            <button type="button" id="resetEditionFormBtn" class="btn-outline btn-xs">Kurti Naują Leidinį</button>
+          </div>
+          <p class="content-card-sub">Redaguokite pasirinktų metų tekstus, fono nuotrauką, nugalėtojų sąrašą ir ceremonijos vaizdo įrašą.</p>
 
           <div class="input-row">
             <div class="input-cell">
-              <label for="edYearSelect">Pasirinkite arba įrašykite metus *</label>
-              <input type="text" id="edYearSelect" class="field" value="2026">
+              <label for="edYearSelect">Metai (Identifikatorius) *</label>
+              <input type="text" id="edYearSelect" class="field" placeholder="2026" required>
             </div>
             <div class="input-cell">
               <label for="edTitle">Puslapio Pavadinimas *</label>
-              <input type="text" id="edTitle" class="field" placeholder="FEST 2026">
+              <input type="text" id="edTitle" class="field" placeholder="FEST 2026" required>
             </div>
           </div>
 
@@ -203,12 +212,12 @@
 
           <div class="input-row">
             <div class="input-cell">
-              <label for="edVideoUrl">Ceremonijos vaizdo įrašo URL (YouTube INGtv)</label>
+              <label for="edVideoUrl">Ceremonijos vaizdo įrašo URL (YouTube INGtv arba MP4)</label>
               <input type="url" id="edVideoUrl" class="field" placeholder="https://www.youtube.com/watch?v=...">
             </div>
             <div class="input-cell">
               <label for="edPageUrl">Nuoroda į puslapį svetainėje</label>
-              <input type="text" id="edPageUrl" class="field" value="azuolynas-fest-2026.html">
+              <input type="text" id="edPageUrl" class="field" placeholder="azuolynas-fest-2026.html">
             </div>
           </div>
 
