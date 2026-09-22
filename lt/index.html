@@ -16,14 +16,14 @@
   <meta property="og:title" content="Ąžuolynas International Students Film Festival | Oficiali Paraiškų Platforma">
   <meta property="og:description" content="Pateikite filmą iki 2026 m. balandžio 2 d. Festivalio atidarymas – 2026 m. balandžio 17 d.">
   <meta property="og:url" content="https://azuolynasinternationalfilmfestival.github.io/lt/index.html">
-  <meta property="og:image" content="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media">
+  <meta property="og:image" content="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/IMG_3463.jpeg?alt=media&token=af7892ca-e78e-4198-b686-e0181472e8da">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta property="og:locale" content="lt_LT">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Ąžuolynas International Students Film Festival">
   <meta name="twitter:description" content="Tarptautinis mokinių filmų festivalis. Paraiškos iki 2026 m. balandžio 2 d.">
-  <meta name="twitter:image" content="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media">
+  <meta name="twitter:image" content="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/IMG_3463.jpeg?alt=media&token=af7892ca-e78e-4198-b686-e0181472e8da">
   <link rel="icon" type="image/webp" href="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media">
   <link rel="stylesheet" href="../style.css">
   <script type="application/ld+json">
@@ -41,7 +41,7 @@
       "@type": "VirtualLocation",
       "url": "https://azuolynasinternationalfilmfestival.github.io/"
     },
-    "image": "https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media",
+    "image": "https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/IMG_3463.jpeg?alt=media&token=af7892ca-e78e-4198-b686-e0181472e8da",
     "organizer": {
       "@type": "Organization",
       "name": "Ąžuolynas Film Festival Committee",
@@ -203,9 +203,9 @@
             <span class="chip">Žiūrovų Simpatijų Prizas</span>
           </div>
 
-          <div class="prize-showcase" onclick="openLightboxFromSrc('https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/IMG_3457.jpeg?alt=media&token=7ebb0797-889a-453e-a6a1-ad2e47aa3d27', 'Festivalio laureatų statulėlės ir apdovanojimai')">
-            <img id="dynPrizeImg" src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/IMG_3457.jpeg?alt=media&token=7ebb0797-889a-453e-a6a1-ad2e47aa3d27" alt="Festivalio Prizai">
-            <div class="prize-caption">Festivalio laureatų statulėlės ir apdovanojimai</div>
+          <div class="prize-showcase" onclick="openLightboxFromSrc('https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/IMG_3463.jpeg?alt=media&token=af7892ca-e78e-4198-b686-e0181472e8da', 'Oficialūs festivalio apdovanojimai ir laureatų statulėlės')">
+            <img id="dynPrizeImg" src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/IMG_3463.jpeg?alt=media&token=af7892ca-e78e-4198-b686-e0181472e8da" alt="Festivalio Prizai">
+            <div class="prize-caption">Oficialūs festivalio apdovanojimai ir laureatų statulėlės</div>
           </div>
         </div>
       </div>
@@ -391,6 +391,8 @@
 
   <div id="lightboxModal" class="lightbox-modal">
     <button class="lightbox-close" onclick="closeLightbox()">&times;</button>
+    <button class="lightbox-btn lightbox-prev" onclick="stepLightbox(-1)">&#10094;</button>
+    <button class="lightbox-btn lightbox-next" onclick="stepLightbox(1)">&#10095;</button>
     <div class="lightbox-content">
       <img id="lightboxImg" class="lightbox-img" src="" alt="Peržiūra">
       <div id="lightboxCaption" class="lightbox-caption"></div>
@@ -524,8 +526,9 @@
       if (data.cat2Age) document.getElementById("dynCat2Age").textContent = data.cat2Age;
       if (data.cat2Desc) document.getElementById("dynCat2Desc").textContent = data.cat2Desc;
 
-      if (d.prizesPhotoUrl && document.getElementById("dynPrizeImg")) {
-        document.getElementById("dynPrizeImg").src = d.prizesPhotoUrl;
+      const prizeImg = document.getElementById("dynPrizeImg");
+      if (prizeImg) {
+        prizeImg.src = d.prizesPhotoUrl || "https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/IMG_3463.jpeg?alt=media&token=af7892ca-e78e-4198-b686-e0181472e8da";
       }
 
       renderArchiveSection(d);
@@ -639,6 +642,12 @@
       document.getElementById("lightboxImg").src = "";
     }
 
+    function stepLightbox(direction) {
+      if (!galleryPhotosCache.length) return;
+      currentLightboxIdx = (currentLightboxIdx + direction + galleryPhotosCache.length) % galleryPhotosCache.length;
+      openLightbox(currentLightboxIdx);
+    }
+
     document.getElementById("lightboxModal").addEventListener("click", (e) => {
       if (e.target === document.getElementById("lightboxModal")) {
         closeLightbox();
@@ -646,8 +655,23 @@
     });
 
     document.addEventListener("keydown", (e) => {
+      const lb = document.getElementById("lightboxModal");
+      if (!lb.classList.contains("active")) return;
       if (e.key === "Escape") closeLightbox();
+      if (e.key === "ArrowLeft") stepLightbox(-1);
+      if (e.key === "ArrowRight") stepLightbox(1);
     });
+
+    let touchStartX = 0;
+    let touchEndX = 0;
+    document.getElementById("lightboxModal").addEventListener("touchstart", (e) => {
+      touchStartX = e.changedTouches[0].screenX;
+    }, { passive: true });
+    document.getElementById("lightboxModal").addEventListener("touchend", (e) => {
+      touchEndX = e.changedTouches[0].screenX;
+      if (touchStartX - touchEndX > 50) stepLightbox(1);
+      if (touchEndX - touchStartX > 50) stepLightbox(-1);
+    }, { passive: true });
 
     db.collection("submissions").onSnapshot((snapshot) => {
       filmsCache = [];
