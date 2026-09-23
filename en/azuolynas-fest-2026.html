@@ -171,7 +171,7 @@
         <div class="gallery-grid" id="editionGalleryGrid">
           <div class="gallery-item" onclick="openLightboxFromSrc('https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/IMG_3463.jpeg?alt=media&token=af7892ca-e78e-4198-b686-e0181472e8da', 'FEST 2026 Official Festival Awards and Trophies')">
             <div class="gallery-item-media">
-              <img src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/IMG_3463.jpeg?alt=media&token=af7892ca-e78e-4198-b686-e0181472e8da" alt="Trophies">
+              <img src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/IMG_3463.jpeg?alt=media&token=af7892ca-e78e-4198-b686-e0181472e8da" alt="Trophies" loading="lazy">
               <div class="gallery-overlay-hint"><span>View</span></div>
             </div>
             <div class="gallery-caption">Official laureate statuettes and festival awards</div>
@@ -179,7 +179,7 @@
 
           <div class="gallery-item" onclick="openLightboxFromSrc('https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/IMG_3458.jpeg?alt=media&token=224af1bd-25ff-494e-8136-fbf330d3ad5b', 'Festival opening and attendees at Kaunas International Gymnasium')">
             <div class="gallery-item-media">
-              <img src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/IMG_3458.jpeg?alt=media&token=224af1bd-25ff-494e-8136-fbf330d3ad5b" alt="Ceremony">
+              <img src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/IMG_3458.jpeg?alt=media&token=224af1bd-25ff-494e-8136-fbf330d3ad5b" alt="Ceremony" loading="lazy">
               <div class="gallery-overlay-hint"><span>View</span></div>
             </div>
             <div class="gallery-caption">Ceremony moments and student participants</div>
@@ -187,7 +187,7 @@
 
           <div class="gallery-item" onclick="openLightboxFromSrc('https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/IMG_3459.jpeg?alt=media&token=dfdda212-9ea6-433f-af80-8c5b5b57f361', 'Award presentation to student laureates')">
             <div class="gallery-item-media">
-              <img src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/IMG_3459.jpeg?alt=media&token=dfdda212-9ea6-433f-af80-8c5b5b57f361" alt="Awards">
+              <img src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/IMG_3459.jpeg?alt=media&token=dfdda212-9ea6-433f-af80-8c5b5b57f361" alt="Awards" loading="lazy">
               <div class="gallery-overlay-hint"><span>View</span></div>
             </div>
             <div class="gallery-caption">Presentation of diplomas and international awards</div>
@@ -197,8 +197,8 @@
     </section>
   </main>
 
-  <div id="lightboxModal" class="lightbox-modal">
-    <button class="lightbox-close" onclick="closeLightbox()">&times;</button>
+  <div id="lightboxModal" class="lightbox-modal" role="dialog" aria-modal="true" aria-label="Photo preview">
+    <button class="lightbox-close" onclick="closeLightbox()" aria-label="Close">&times;</button>
     <div class="lightbox-content">
       <img id="lightboxImg" class="lightbox-img" src="" alt="Preview">
       <div id="lightboxCaption" class="lightbox-caption"></div>
@@ -251,7 +251,8 @@
     }
 
     function closeLightbox() {
-      document.getElementById("lightboxModal").classList.remove("active");
+      const modal = document.getElementById("lightboxModal");
+      modal.classList.remove("active");
       document.getElementById("lightboxImg").src = "";
     }
 
