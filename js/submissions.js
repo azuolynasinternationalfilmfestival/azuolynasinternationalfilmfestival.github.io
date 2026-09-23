@@ -11,10 +11,10 @@ export function initSubmissions() {
   const filterStatus = document.getElementById("filterStatus");
   const filterVoting = document.getElementById("filterVoting");
 
-  filterSearch.addEventListener("input", renderTable);
-  filterCategory.addEventListener("change", renderTable);
-  filterStatus.addEventListener("change", renderTable);
-  filterVoting.addEventListener("change", renderTable);
+  if (filterSearch) filterSearch.addEventListener("input", renderTable);
+  if (filterCategory) filterCategory.addEventListener("change", renderTable);
+  if (filterStatus) filterStatus.addEventListener("change", renderTable);
+  if (filterVoting) filterVoting.addEventListener("change", renderTable);
 
   initEntryModal();
   initWinnersManager();
@@ -48,20 +48,30 @@ export function unsubscribeSubmissionsListener() {
 }
 
 function updateMetrics() {
-  document.getElementById("statTotal").textContent = submissionsList.length;
-  document.getElementById("statAccepted").textContent = submissionsList.filter(s => s.status === "accepted").length;
-  document.getElementById("statVoting").textContent = submissionsList.filter(s => s.inVoting === true).length;
-  document.getElementById("statFinals").textContent = submissionsList.filter(s => ["semifinal", "final", "winner"].includes(s.status)).length;
+  const totalElem = document.getElementById("statTotal");
+  const acceptedElem = document.getElementById("statAccepted");
+  const votingElem = document.getElementById("statVoting");
+  const finalsElem = document.getElementById("statFinals");
+
+  if (totalElem) totalElem.textContent = submissionsList.length;
+  if (acceptedElem) acceptedElem.textContent = submissionsList.filter(s => s.status === "accepted").length;
+  if (votingElem) votingElem.textContent = submissionsList.filter(s => s.inVoting === true).length;
+  if (finalsElem) finalsElem.textContent = submissionsList.filter(s => ["semifinal", "final", "winner"].includes(s.status)).length;
 }
 
 function renderTable() {
-  const q = document.getElementById("filterSearch").value.toLowerCase();
-  const cat = document.getElementById("filterCategory").value;
-  const st = document.getElementById("filterStatus").value;
-  const vt = document.getElementById("filterVoting").value;
+  const searchInput = document.getElementById("filterSearch");
+  const catInput = document.getElementById("filterCategory");
+  const statusInput = document.getElementById("filterStatus");
+  const votingInput = document.getElementById("filterVoting");
+
+  const q = searchInput ? searchInput.value.toLowerCase().trim() : "";
+  const cat = catInput ? catInput.value : "all";
+  const st = statusInput ? statusInput.value : "all";
+  const vt = votingInput ? votingInput.value : "all";
 
   const filtered = submissionsList.filter((item) => {
-    const matchSearch = 
+    const matchSearch = !q ||
       (item.name && item.name.toLowerCase().includes(q)) ||
       (item.filmTitle && item.filmTitle.toLowerCase().includes(q)) ||
       (item.email && item.email.toLowerCase().includes(q));
@@ -75,7 +85,15 @@ function renderTable() {
   });
 
   const tableBody = document.getElementById("tableBody");
+  if (!tableBody) return;
   tableBody.innerHTML = "";
+
+  if (filtered.length === 0) {
+    const emptyTr = document.createElement("tr");
+    emptyTr.innerHTML = `<td colspan="9" style="text-align:center; padding:24px; color:var(--text-muted);">Paraiškų pagal pasirinktus filtrus nerasta.</td>`;
+    tableBody.appendChild(emptyTr);
+    return;
+  }
 
   filtered.forEach((sub) => {
     const tr = document.createElement("tr");
@@ -95,19 +113,19 @@ function renderTable() {
     const votingClass = isVoting ? "badge-voting-active" : "badge-voting-hidden";
 
     tr.innerHTML = `
-      <td class="text-date">${dateStr}</td>
-      <td><strong>${sub.name || ''}</strong><br><span class="text-muted-sm">${sub.email || ''}</span></td>
-      <td>${sub.age || ''} m.<br><span class="text-muted-sm">${sub.category || ''}</span></td>
-      <td><strong style="color:var(--text-white);">${sub.filmTitle || ''}</strong></td>
-      <td><strong style="color:var(--primary-emerald);">${sub.votesCount || 0}</strong></td>
-      <td>
+      <td data-label="Data" class="text-date">${dateStr}</td>
+      <td data-label="Kūrėjas"><strong>${sub.name || ''}</strong><br><span class="text-muted-sm">${sub.email || ''}</span></td>
+      <td data-label="Amžius / Kat.">${sub.age || ''} m.<br><span class="text-muted-sm">${sub.category || ''}</span></td>
+      <td data-label="Filmas"><strong style="color:var(--text-color);">${sub.filmTitle || ''}</strong></td>
+      <td data-label="Balsai"><strong style="color:var(--accent-light);">${sub.votesCount || 0}</strong></td>
+      <td data-label="Balsavime">
         <button class="badge ${votingClass}" data-action="toggle-voting" data-id="${sub.id}" data-status="${isVoting}">
           ${isVoting ? 'RODOMAS' : 'PASLĖPTAS'}
         </button>
       </td>
-      <td>${sub.videoDurationSeconds ? sub.videoDurationSeconds + 's' : '-'}</td>
-      <td><span class="badge ${badgeCls}">${sub.status || 'submitted'}</span></td>
-      <td>
+      <td data-label="Trukmė">${sub.videoDurationSeconds ? sub.videoDurationSeconds + 's' : '-'}</td>
+      <td data-label="Statusas"><span class="badge ${badgeCls}">${sub.status || 'submitted'}</span></td>
+      <td data-label="Veiksmai">
         <div class="action-btns-cell">
           <button class="btn-outline btn-xs" data-action="view" data-id="${sub.id}">Peržiūrėti</button>
           <button class="btn-delete btn-xs" data-action="delete" data-id="${sub.id}">Ištrinti</button>
@@ -118,22 +136,25 @@ function renderTable() {
   });
 }
 
-document.getElementById("tableBody").addEventListener("click", async (e) => {
-  const btn = e.target.closest("button");
-  if (!btn) return;
+const tableBodyElem = document.getElementById("tableBody");
+if (tableBodyElem) {
+  tableBodyElem.addEventListener("click", async (e) => {
+    const btn = e.target.closest("button");
+    if (!btn) return;
 
-  const action = btn.dataset.action;
-  const id = btn.dataset.id;
+    const action = btn.dataset.action;
+    const id = btn.dataset.id;
 
-  if (action === "toggle-voting") {
-    const current = btn.dataset.status === "true";
-    await toggleVoting(id, current, btn);
-  } else if (action === "view") {
-    openModal(id);
-  } else if (action === "delete") {
-    await deleteSubmission(id);
-  }
-});
+    if (action === "toggle-voting") {
+      const current = btn.dataset.status === "true";
+      await toggleVoting(id, current, btn);
+    } else if (action === "view") {
+      openModal(id);
+    } else if (action === "delete") {
+      await deleteSubmission(id);
+    }
+  });
+}
 
 async function toggleVoting(id, currentStatus, btn) {
   btn.disabled = true;
@@ -170,72 +191,77 @@ async function deleteSubmission(id) {
 
 function initEntryModal() {
   const entryModal = document.getElementById("entryModal");
-  const mVideo = document.getElementById("mVideo");
   const modalCloseBtn = document.getElementById("modalCloseBtn");
   const modalCancelBtn = document.getElementById("modalCancelBtn");
   const mDeleteBtn = document.getElementById("mDeleteBtn");
   const mSaveBtn = document.getElementById("mSaveBtn");
 
-  entryModal.addEventListener("click", (e) => {
-    if (e.target === entryModal) closeModal();
-  });
+  if (entryModal) {
+    entryModal.addEventListener("click", (e) => {
+      if (e.target === entryModal) closeModal();
+    });
+  }
 
-  modalCloseBtn.addEventListener("click", closeModal);
-  modalCancelBtn.addEventListener("click", closeModal);
+  if (modalCloseBtn) modalCloseBtn.addEventListener("click", closeModal);
+  if (modalCancelBtn) modalCancelBtn.addEventListener("click", closeModal);
 
-  mDeleteBtn.addEventListener("click", async () => {
-    if (!currentEntry) return;
-    const targetId = currentEntry.id;
-    closeModal();
-    await deleteSubmission(targetId);
-  });
-
-  mSaveBtn.addEventListener("click", async () => {
-    if (!currentEntry) return;
-    mSaveBtn.disabled = true;
-
-    const newStatus = document.getElementById("mNewStatus").value;
-    const inVotingVal = document.getElementById("mInVoting").checked;
-    const tpl = document.getElementById("mEmailTemplate").value;
-    const lang = document.getElementById("mEmailLang").value;
-    const customMsg = document.getElementById("mCustomText").value.trim();
-    const streamLink = document.getElementById("mStreamLink").value.trim();
-
-    try {
-      await db.collection("submissions").doc(currentEntry.id).update({
-        status: newStatus,
-        inVoting: inVotingVal,
-        lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
-      });
-
-      if (tpl !== "none" && typeof generateEmailHtml === "function") {
-        const emailHtml = generateEmailHtml(lang, tpl, {
-          name: currentEntry.name,
-          filmTitle: currentEntry.filmTitle,
-          category: currentEntry.category,
-          customMessage: customMsg,
-          streamLink: streamLink
-        });
-
-        await db.collection("mail").add({
-          to: [currentEntry.email],
-          message: {
-            subject: emailTexts[lang][tpl].sub,
-            html: emailHtml
-          }
-        });
-        showToast("Statusas atnaujintas ir el. laiškas išsiųstas!");
-      } else {
-        showToast("Statusas sėkmingai atnaujintas.");
-      }
-
+  if (mDeleteBtn) {
+    mDeleteBtn.addEventListener("click", async () => {
+      if (!currentEntry) return;
+      const targetId = currentEntry.id;
       closeModal();
-    } catch (err) {
-      showToast("Klaida atnaujinant paraišką: " + err.message, "error");
-    } finally {
-      mSaveBtn.disabled = false;
-    }
-  });
+      await deleteSubmission(targetId);
+    });
+  }
+
+  if (mSaveBtn) {
+    mSaveBtn.addEventListener("click", async () => {
+      if (!currentEntry) return;
+      mSaveBtn.disabled = true;
+
+      const newStatus = document.getElementById("mNewStatus").value;
+      const inVotingVal = document.getElementById("mInVoting").checked;
+      const tpl = document.getElementById("mEmailTemplate").value;
+      const lang = document.getElementById("mEmailLang").value;
+      const customMsg = document.getElementById("mCustomText").value.trim();
+      const streamLink = document.getElementById("mStreamLink").value.trim();
+
+      try {
+        await db.collection("submissions").doc(currentEntry.id).update({
+          status: newStatus,
+          inVoting: inVotingVal,
+          lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+        });
+
+        if (tpl !== "none" && typeof generateEmailHtml === "function") {
+          const emailHtml = generateEmailHtml(lang, tpl, {
+            name: currentEntry.name,
+            filmTitle: currentEntry.filmTitle,
+            category: currentEntry.category,
+            customMessage: customMsg,
+            streamLink: streamLink
+          });
+
+          await db.collection("mail").add({
+            to: [currentEntry.email],
+            message: {
+              subject: emailTexts[lang][tpl].sub,
+              html: emailHtml
+            }
+          });
+          showToast("Statusas atnaujintas ir el. laiškas išsiųstas!");
+        } else {
+          showToast("Statusas sėkmingai atnaujintas.");
+        }
+
+        closeModal();
+      } catch (err) {
+        showToast("Klaida atnaujinant paraišką: " + err.message, "error");
+      } finally {
+        mSaveBtn.disabled = false;
+      }
+    });
+  }
 }
 
 function openModal(id) {
@@ -254,8 +280,13 @@ function openModal(id) {
   document.getElementById("mInVoting").checked = currentEntry.inVoting === true;
 
   const mVideo = document.getElementById("mVideo");
-  mVideo.src = currentEntry.videoUrl || "";
-  document.getElementById("mDownloadLink").href = currentEntry.videoUrl || "";
+  if (mVideo) {
+    mVideo.src = currentEntry.videoUrl || "";
+  }
+  const downloadLink = document.getElementById("mDownloadLink");
+  if (downloadLink) {
+    downloadLink.href = currentEntry.videoUrl || "";
+  }
 
   document.getElementById("mNewStatus").value = currentEntry.status || "submitted";
   document.getElementById("mEmailLang").value = currentEntry.submissionLang || "lt";
@@ -263,62 +294,73 @@ function openModal(id) {
   document.getElementById("mCustomText").value = "";
   document.getElementById("mStreamLink").value = "";
 
-  document.getElementById("entryModal").style.display = "flex";
+  const modal = document.getElementById("entryModal");
+  if (modal) modal.classList.add("active");
 }
 
 function closeModal() {
   const entryModal = document.getElementById("entryModal");
   const mVideo = document.getElementById("mVideo");
-  entryModal.style.display = "none";
-  mVideo.pause();
-  mVideo.src = "";
+  if (entryModal) entryModal.classList.remove("active");
+  if (mVideo) {
+    mVideo.pause();
+    mVideo.src = "";
+  }
   currentEntry = null;
 }
 
 function initWinnersManager() {
   const assignWinnerBtn = document.getElementById("assignWinnerBtn");
-  assignWinnerBtn.addEventListener("click", async () => {
-    const filmId = document.getElementById("adminSelectFilm").value;
-    const awardTitle = document.getElementById("adminAwardTitle").value.trim();
+  if (assignWinnerBtn) {
+    assignWinnerBtn.addEventListener("click", async () => {
+      const filmSelect = document.getElementById("adminSelectFilm");
+      const titleInput = document.getElementById("adminAwardTitle");
 
-    if (!filmId || !awardTitle) {
-      showToast("Pasirinkite filmą ir įveskite nominaciją!", "error");
-      return;
-    }
+      const filmId = filmSelect ? filmSelect.value : "";
+      const awardTitle = titleInput ? titleInput.value.trim() : "";
 
-    assignWinnerBtn.disabled = true;
+      if (!filmId || !awardTitle) {
+        showToast("Pasirinkite filmą ir įveskite nominaciją!", "error");
+        return;
+      }
 
-    try {
-      await db.collection("submissions").doc(filmId).update({
-        isWinner: true,
-        awardTitle: awardTitle,
-        status: "winner"
-      });
-      document.getElementById("adminAwardTitle").value = "";
-      showToast("Laimėtojas sėkmingai paskelbtas!");
-    } catch (err) {
-      showToast("Klaida skelbiant laimėtoją: " + err.message, "error");
-    } finally {
-      assignWinnerBtn.disabled = false;
-    }
-  });
+      assignWinnerBtn.disabled = true;
 
-  document.getElementById("adminWinnersList").addEventListener("click", async (e) => {
-    const btn = e.target.closest("button[data-action='revoke']");
-    if (!btn) return;
-    const filmId = btn.dataset.id;
-    btn.disabled = true;
-    try {
-      await db.collection("submissions").doc(filmId).update({
-        isWinner: false,
-        awardTitle: firebase.firestore.FieldValue.delete()
-      });
-      showToast("Laimėtojo statusas atšauktas.");
-    } catch (err) {
-      showToast("Klaida atšaukiant laimėtoją: " + err.message, "error");
-      btn.disabled = false;
-    }
-  });
+      try {
+        await db.collection("submissions").doc(filmId).update({
+          isWinner: true,
+          awardTitle: awardTitle,
+          status: "winner"
+        });
+        if (titleInput) titleInput.value = "";
+        showToast("Laimėtojas sėkmingai paskelbtas!");
+      } catch (err) {
+        showToast("Klaida skelbiant laimėtoją: " + err.message, "error");
+      } finally {
+        assignWinnerBtn.disabled = false;
+      }
+    });
+  }
+
+  const winnersList = document.getElementById("adminWinnersList");
+  if (winnersList) {
+    winnersList.addEventListener("click", async (e) => {
+      const btn = e.target.closest("button[data-action='revoke']");
+      if (!btn) return;
+      const filmId = btn.dataset.id;
+      btn.disabled = true;
+      try {
+        await db.collection("submissions").doc(filmId).update({
+          isWinner: false,
+          awardTitle: firebase.firestore.FieldValue.delete()
+        });
+        showToast("Laimėtojo statusas atšauktas.");
+      } catch (err) {
+        showToast("Klaida atšaukiant laimėtoją: " + err.message, "error");
+        btn.disabled = false;
+      }
+    });
+  }
 }
 
 function updateWinnersSelector() {
@@ -342,15 +384,15 @@ function updateWinnersSelector() {
 
   const winners = submissionsList.filter((s) => s.isWinner === true);
   if (winners.length === 0) {
-    list.innerHTML = '<p class="text-muted-sm">Nėra paskelbtų laimėtojų.</p>';
+    list.innerHTML = '<p class="text-muted-sm" style="padding:10px 0;">Nėra paskelbtų laimėtojų.</p>';
     return;
   }
 
   list.innerHTML = winners.map((w) => `
     <div class="winner-item-row">
       <div>
-        <strong style="color:var(--primary-emerald);">${w.awardTitle || 'Laureatas'}</strong>: 
-        <strong style="color:var(--text-white);">${w.filmTitle}</strong> 
+        <strong style="color:var(--accent-light);">${w.awardTitle || 'Laureatas'}</strong>: 
+        <strong style="color:var(--text-color);">${w.filmTitle}</strong> 
         <span class="text-muted-sm">(${w.name})</span>
       </div>
       <button class="btn-delete btn-xs" data-action="revoke" data-id="${w.id}">Atšaukti</button>
