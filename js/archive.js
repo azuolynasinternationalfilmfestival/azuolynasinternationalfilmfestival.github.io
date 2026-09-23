@@ -12,29 +12,48 @@ export function initArchive() {
   const arcImgFileInput = document.getElementById("arcImgFile");
   const arcImgFileStatus = document.getElementById("arcImgFileStatus");
 
-  arcVidFileInput.addEventListener("change", (e) => {
-    selectedArcVidFile = e.target.files[0] || null;
-    arcVidFileStatus.textContent = selectedArcVidFile ? `Pasirinktas failas: ${selectedArcVidFile.name}` : "";
-  });
+  if (arcVidFileInput) {
+    arcVidFileInput.addEventListener("change", (e) => {
+      selectedArcVidFile = e.target.files[0] || null;
+      if (arcVidFileStatus) {
+        arcVidFileStatus.textContent = selectedArcVidFile ? `Pasirinktas failas: ${selectedArcVidFile.name}` : "";
+      }
+    });
+  }
 
-  arcImgFileInput.addEventListener("change", (e) => {
-    selectedArcImgFile = e.target.files[0] || null;
-    arcImgFileStatus.textContent = selectedArcImgFile ? `Pasirinkta nuotrauka: ${selectedArcImgFile.name}` : "";
-  });
+  if (arcImgFileInput) {
+    arcImgFileInput.addEventListener("change", (e) => {
+      selectedArcImgFile = e.target.files[0] || null;
+      if (arcImgFileStatus) {
+        arcImgFileStatus.textContent = selectedArcImgFile ? `Pasirinkta nuotrauka: ${selectedArcImgFile.name}` : "";
+      }
+    });
+  }
 
-  document.getElementById("arcVidSaveBtn").addEventListener("click", saveArchiveVideo);
-  document.getElementById("arcImgSaveBtn").addEventListener("click", saveArchivePhoto);
-  document.getElementById("arcPrizesSaveBtn").addEventListener("click", savePrizesPhoto);
+  const arcVidSaveBtn = document.getElementById("arcVidSaveBtn");
+  if (arcVidSaveBtn) arcVidSaveBtn.addEventListener("click", saveArchiveVideo);
 
-  document.getElementById("adminArchiveVideosList").addEventListener("click", (e) => {
-    const btn = e.target.closest("button[data-delete-video]");
-    if (btn) removeArchiveVideo(btn.dataset.deleteVideo);
-  });
+  const arcImgSaveBtn = document.getElementById("arcImgSaveBtn");
+  if (arcImgSaveBtn) arcImgSaveBtn.addEventListener("click", saveArchivePhoto);
 
-  document.getElementById("adminArchivePhotosList").addEventListener("click", (e) => {
-    const btn = e.target.closest("button[data-delete-photo]");
-    if (btn) removeArchivePhoto(btn.dataset.deletePhoto);
-  });
+  const arcPrizesSaveBtn = document.getElementById("arcPrizesSaveBtn");
+  if (arcPrizesSaveBtn) arcPrizesSaveBtn.addEventListener("click", savePrizesPhoto);
+
+  const vidsList = document.getElementById("adminArchiveVideosList");
+  if (vidsList) {
+    vidsList.addEventListener("click", (e) => {
+      const btn = e.target.closest("button[data-delete-video]");
+      if (btn) removeArchiveVideo(btn.dataset.deleteVideo);
+    });
+  }
+
+  const photosList = document.getElementById("adminArchivePhotosList");
+  if (photosList) {
+    photosList.addEventListener("click", (e) => {
+      const btn = e.target.closest("button[data-delete-photo]");
+      if (btn) removeArchivePhoto(btn.dataset.deletePhoto);
+    });
+  }
 }
 
 export function syncArchiveState(settingsData) {
@@ -66,7 +85,10 @@ export function syncArchiveState(settingsData) {
     }
   ];
 
-  document.getElementById("arcPrizesUrl").value = settingsData.prizesPhotoUrl || "https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/IMG_3457.jpeg?alt=media&token=7ebb0797-889a-453e-a6a1-ad2e47aa3d27";
+  const prizesInput = document.getElementById("arcPrizesUrl");
+  if (prizesInput) {
+    prizesInput.value = settingsData.prizesPhotoUrl || "https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/IMG_3463.jpeg?alt=media&token=af7892ca-e78e-4198-b686-e0181472e8da";
+  }
 
   renderArchiveUI();
 }
@@ -75,30 +97,34 @@ function renderArchiveUI() {
   const vidsContainer = document.getElementById("adminArchiveVideosList");
   const photosContainer = document.getElementById("adminArchivePhotosList");
 
-  vidsContainer.innerHTML = archiveVideos.map((v) => `
-    <div class="admin-media-card">
-      <div>
-        <strong style="color:var(--text-white); font-family:var(--font-cinema); font-size:1.05rem;">${v.title}</strong>
-        <div style="font-size:0.78rem; color:var(--primary-emerald); margin:4px 0 8px 0;">${v.label || ''}</div>
-        <div class="admin-media-frame">
-          ${createMediaEmbed(v.url)}
+  if (vidsContainer) {
+    vidsContainer.innerHTML = archiveVideos.map((v) => `
+      <div class="admin-media-card">
+        <div>
+          <strong style="color:var(--text-color); font-family:var(--font-cinema); font-size:1.05rem;">${v.title}</strong>
+          <div style="font-size:0.78rem; color:var(--accent-light); margin:4px 0 8px 0;">${v.label || ''}</div>
+          <div class="admin-media-frame">
+            ${createMediaEmbed(v.url)}
+          </div>
         </div>
+        <button class="btn-delete btn-full" data-delete-video="${v.id}">Pašalinti iš svetainės</button>
       </div>
-      <button class="btn-delete btn-full" data-delete-video="${v.id}">Pašalinti iš svetainės</button>
-    </div>
-  `).join("");
+    `).join("");
+  }
 
-  photosContainer.innerHTML = archivePhotos.map((p) => `
-    <div class="admin-media-card">
-      <div>
-        <div class="admin-media-thumb">
-          <img src="${p.url}" alt="Foto" class="admin-media-img">
+  if (photosContainer) {
+    photosContainer.innerHTML = archivePhotos.map((p) => `
+      <div class="admin-media-card">
+        <div>
+          <div class="admin-media-thumb">
+            <img src="${p.url}" alt="Foto" class="admin-media-img">
+          </div>
+          <div class="admin-media-caption">${p.caption || ''}</div>
         </div>
-        <div class="admin-media-caption">${p.caption || ''}</div>
+        <button class="btn-delete btn-full" data-delete-photo="${p.id}">Pašalinti nuotrauką</button>
       </div>
-      <button class="btn-delete btn-full" data-delete-photo="${p.id}">Pašalinti nuotrauką</button>
-    </div>
-  `).join("");
+    `).join("");
+  }
 }
 
 async function saveArchiveVideo() {
@@ -123,7 +149,7 @@ async function saveArchiveVideo() {
       const prContainer = document.getElementById("arcVidProgressContainer");
       const prFill = document.getElementById("arcVidProgressFill");
       const prStatus = document.getElementById("arcVidProgressStatus");
-      prContainer.style.display = "block";
+      if (prContainer) prContainer.classList.add("active");
 
       const ext = selectedArcVidFile.name.split('.').pop() || 'mp4';
       const path = `archive_videos/${Date.now()}_${Math.random().toString(36).substring(2, 8)}.${ext}`;
@@ -133,8 +159,8 @@ async function saveArchiveVideo() {
         task.on("state_changed",
           (snap) => {
             const pct = Math.round((snap.bytesTransferred / snap.totalBytes) * 100);
-            prFill.style.width = pct + "%";
-            prStatus.textContent = pct + "%";
+            if (prFill) prFill.style.width = pct + "%";
+            if (prStatus) prStatus.textContent = pct + "%";
           },
           reject,
           async () => {
@@ -143,7 +169,7 @@ async function saveArchiveVideo() {
           }
         );
       });
-      prContainer.style.display = "none";
+      if (prContainer) prContainer.classList.remove("active");
     }
 
     const updatedVideos = [
@@ -164,8 +190,10 @@ async function saveArchiveVideo() {
     document.getElementById("arcVidLabel").value = "";
     document.getElementById("arcVidUrl").value = "";
     selectedArcVidFile = null;
-    document.getElementById("arcVidFile").value = "";
-    document.getElementById("arcVidFileStatus").textContent = "";
+    const fileInput = document.getElementById("arcVidFile");
+    if (fileInput) fileInput.value = "";
+    const fileStatus = document.getElementById("arcVidFileStatus");
+    if (fileStatus) fileStatus.textContent = "";
 
     showToast("Vaizdo įrašas sėkmingai pridėtas į archyvą!");
   } catch (err) {
@@ -209,7 +237,7 @@ async function saveArchivePhoto() {
       const prContainer = document.getElementById("arcImgProgressContainer");
       const prFill = document.getElementById("arcImgProgressFill");
       const prStatus = document.getElementById("arcImgProgressStatus");
-      prContainer.style.display = "block";
+      if (prContainer) prContainer.classList.add("active");
 
       const ext = selectedArcImgFile.name.split('.').pop() || 'jpg';
       const path = `archive_photos/${Date.now()}_${Math.random().toString(36).substring(2, 8)}.${ext}`;
@@ -219,8 +247,8 @@ async function saveArchivePhoto() {
         task.on("state_changed",
           (snap) => {
             const pct = Math.round((snap.bytesTransferred / snap.totalBytes) * 100);
-            prFill.style.width = pct + "%";
-            prStatus.textContent = pct + "%";
+            if (prFill) prFill.style.width = pct + "%";
+            if (prStatus) prStatus.textContent = pct + "%";
           },
           reject,
           async () => {
@@ -229,7 +257,7 @@ async function saveArchivePhoto() {
           }
         );
       });
-      prContainer.style.display = "none";
+      if (prContainer) prContainer.classList.remove("active");
     }
 
     const updatedPhotos = [
@@ -248,8 +276,10 @@ async function saveArchivePhoto() {
     document.getElementById("arcImgCaption").value = "";
     document.getElementById("arcImgUrl").value = "";
     selectedArcImgFile = null;
-    document.getElementById("arcImgFile").value = "";
-    document.getElementById("arcImgFileStatus").textContent = "";
+    const fileInput = document.getElementById("arcImgFile");
+    if (fileInput) fileInput.value = "";
+    const fileStatus = document.getElementById("arcImgFileStatus");
+    if (fileStatus) fileStatus.textContent = "";
 
     showToast("Nuotrauka sėkmingai pridėta!");
   } catch (err) {
