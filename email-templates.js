@@ -1,9 +1,9 @@
 const emailWrapperStart = `
 <div style="background-color: #071C18; padding: 35px 15px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
-  <div style="max-width: 580px; margin: 0 auto; background-color: #0D2923; padding: 35px 26px; border-radius: 8px; border-top: 3px solid #6FA58A; border-left: 1px solid rgba(111,165,138,0.18); border-right: 1px solid rgba(111,165,138,0.18); border-bottom: 1px solid rgba(111,165,138,0.18); box-shadow: 0 16px 40px rgba(0,0,0,0.6);">
+  <div style="max-width: 580px; margin: 0 auto; background-color: #0D2923; padding: 35px 26px; border-radius: 6px; border-top: 3px solid #6FA58A; border-left: 1px solid rgba(111,165,138,0.18); border-right: 1px solid rgba(111,165,138,0.18); border-bottom: 1px solid rgba(111,165,138,0.18); box-shadow: 0 16px 40px rgba(0,0,0,0.6);">
     <div style="text-align: center; margin-bottom: 26px;">
       <img src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media" alt="Ąžuolynas Film Fest" style="max-height: 72px; width: auto; display: inline-block;">
-      <h2 style="color: #F1F3EE; margin: 16px 0 4px 0; font-size: 20px; font-family: Georgia, serif; font-weight: 600;">Ąžuolynas Film Festival</h2>
+      <h2 style="color: #F1F3EE; margin: 16px 0 4px 0; font-size: 20px; font-weight: 700; letter-spacing: -0.01em;">Ąžuolynas Film Festival</h2>
       <p style="color: #AABBB2; margin: 0; font-size: 13px;">An unusual view at ordinary things</p>
     </div>
 `;
@@ -14,7 +14,7 @@ const emailWrapperEnd = `
     <hr style="border: none; border-top: 1px solid rgba(111,165,138,0.18); margin: 30px 0 20px 0;">
     <div style="text-align: center;">
       <p style="font-size: 13px; color: #AABBB2; margin: 0 0 6px 0; line-height: 1.6;">
-        <b>ĄŽUOLYNAS INTERNATIONAL STUDENTS FILM FESTIVAL</b><br>
+        <b style="color:#F1F3EE;">ĄŽUOLYNAS INTERNATIONAL STUDENTS FILM FESTIVAL</b><br>
         Email: <a href="mailto:azuolynasfilmfestival@gmail.com" style="color: #9BC4AE; text-decoration: none;">azuolynasfilmfestival@gmail.com</a>
       </p>
       <p style="font-size: 12px; color: #5C756B; margin: 0;">Oficiali platforma: azuolynasinternationalfilmfestival.github.io</p>
@@ -157,8 +157,8 @@ function generateEmailHtml(lang, templateKey, data) {
   }
 
   detailsContent += `
-    <div style="text-align: center; margin-top: 20px;">
-      <a href="${siteUrl}" target="_blank" style="background-color: #12372F; color: #F1F3EE; border: 1px solid #6FA58A; text-decoration: none; padding: 11px 24px; border-radius: 6px; font-weight: 600; font-size: 14px; display: inline-block;">
+    <div style="text-align: center; margin-top: 24px;">
+      <a href="${siteUrl}" target="_blank" style="background-color: #12372F; color: #F1F3EE; border: 1px solid #6FA58A; text-decoration: none; padding: 12px 28px; border-radius: 6px; font-weight: 600; font-size: 14px; display: inline-block;">
         ${lang === "lt" ? "Atverti Festivalio Svetainę" : "Open Festival Website"}
       </a>
     </div>
@@ -166,11 +166,11 @@ function generateEmailHtml(lang, templateKey, data) {
 
   return `
     ${emailWrapperStart}
-      <h3 style="color: #F1F3EE; margin: 0 0 14px 0; font-size: 19px; font-weight: 600; font-family: Georgia, serif;">${greeting}</h3>
+      <h3 style="color: #F1F3EE; margin: 0 0 14px 0; font-size: 19px; font-weight: 700; letter-spacing: -0.01em;">${greeting}</h3>
       <p style="font-size: 14px; color: #AABBB2; line-height: 1.65; margin: 0 0 15px 0;">${t.body}</p>
       
       <div style="${emailBoxStyle}">
-        <p style="margin: 0 0 12px 0; font-weight: 600; color: #9BC4AE; font-size: 11px; text-transform: uppercase; letter-spacing: 1px;">${t.detailsTitle}</p>
+        <p style="margin: 0 0 12px 0; font-weight: 700; color: #9BC4AE; font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em;">${t.detailsTitle}</p>
         ${detailsContent}
       </div>
 
@@ -185,11 +185,11 @@ function generateAdminNotificationHtml(lang, data) {
 
   return `
     ${emailWrapperStart}
-      <h3 style="color: #F1F3EE; margin: 0 0 14px 0; font-size: 19px; font-weight: 600; font-family: Georgia, serif;">${t.heading}</h3>
+      <h3 style="color: #F1F3EE; margin: 0 0 14px 0; font-size: 19px; font-weight: 700; letter-spacing: -0.01em;">${t.heading}</h3>
       <p style="font-size: 14px; color: #AABBB2; line-height: 1.65; margin: 0 0 15px 0;">${t.body}</p>
       
       <div style="${emailBoxStyle}">
-        <p style="margin: 0 0 12px 0; font-weight: 600; color: #9BC4AE; font-size: 11px; text-transform: uppercase; letter-spacing: 1px;">${t.detailsTitle}</p>
+        <p style="margin: 0 0 12px 0; font-weight: 700; color: #9BC4AE; font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em;">${t.detailsTitle}</p>
         <p style="margin: 0 0 6px 0; font-size: 13px; color: #F1F3EE;"><b>Autorius:</b> ${data.name || '-'} (${data.email || '-'})</p>
         <p style="margin: 0 0 6px 0; font-size: 13px; color: #F1F3EE;"><b>Filmas:</b> ${data.filmTitle || '-'}</p>
         <p style="margin: 0 0 6px 0; font-size: 13px; color: #F1F3EE;"><b>Kategorija / Amžius:</b> ${data.category || '-'} (${data.age || '-'} m.)</p>
@@ -197,13 +197,13 @@ function generateAdminNotificationHtml(lang, data) {
         <p style="margin: 0 0 6px 0; font-size: 13px; color: #F1F3EE;"><b>Įstaiga:</b> ${data.institution || '-'}</p>
         <p style="margin: 0 0 6px 0; font-size: 13px; color: #F1F3EE;"><b>Įrenginys:</b> ${data.deviceModel || '-'}</p>
         <p style="margin: 0 0 6px 0; font-size: 13px; color: #F1F3EE;"><b>Trukmė:</b> ${data.videoDurationSeconds || '-'} s</p>
-        <p style="margin: 10px 0 4px 0; font-size: 12px; color: #9BC4AE; font-weight: 600; text-transform: uppercase;">Sinopsis:</p>
+        <p style="margin: 12px 0 4px 0; font-size: 11px; color: #9BC4AE; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em;">Sinopsis:</p>
         <p style="margin: 0 0 14px 0; font-size: 13px; color: #AABBB2; font-style: italic;">${data.synopsis || '-'}</p>
         ${data.videoUrl ? `<p style="margin: 0;"><a href="${data.videoUrl}" target="_blank" style="color:#6FA58A; font-weight:600; text-decoration:underline;">Atsisiųsti / Peržiūrėti vaizdo įrašą</a></p>` : ''}
       </div>
 
-      <div style="text-align: center; margin-top: 20px;">
-        <a href="${adminUrl}" target="_blank" style="background-color: #12372F; color: #F1F3EE; border: 1px solid #6FA58A; text-decoration: none; padding: 11px 24px; border-radius: 6px; font-weight: 600; font-size: 14px; display: inline-block;">
+      <div style="text-align: center; margin-top: 24px;">
+        <a href="${adminUrl}" target="_blank" style="background-color: #12372F; color: #F1F3EE; border: 1px solid #6FA58A; text-decoration: none; padding: 12px 28px; border-radius: 6px; font-weight: 600; font-size: 14px; display: inline-block;">
           Atverti Admin Valdymo Skydą
         </a>
       </div>
