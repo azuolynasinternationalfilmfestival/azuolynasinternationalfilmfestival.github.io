@@ -16,7 +16,7 @@
   <meta property="og:title" content="FEST 2026 | Ąžuolynas International Film Festival">
   <meta property="og:description" content="Mokykloje vyko tradicinis tarptautinis mokinių kino festivalis „Ąžuolynas“. Nugalėtojai, laureatai ir akimirkos.">
   <meta property="og:url" content="https://azuolynasinternationalfilmfestival.github.io/lt/azuolynas-fest-2026.html">
-  <meta property="og:image" content="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/IMG_3457.jpeg?alt=media&token=7ebb0797-889a-453e-a6a1-ad2e47aa3d27">
+  <meta property="og:image" content="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/IMG_3463.jpeg?alt=media&token=af7892ca-e78e-4198-b686-e0181472e8da">
   <link rel="icon" type="image/webp" href="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media">
   <link rel="stylesheet" href="../style.css">
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
@@ -40,7 +40,7 @@
       </ul>
       <div class="lang-switch">
         <a href="azuolynas-fest-2026.html" class="lang-btn active">LT</a>
-        <a href="../en/index.html" class="lang-btn">EN</a>
+        <a href="../en/azuolynas-fest-2026.html" class="lang-btn">EN</a>
       </div>
     </div>
   </header>
@@ -169,9 +169,9 @@
         </div>
 
         <div class="gallery-grid" id="editionGalleryGrid">
-          <div class="gallery-item" onclick="openLightboxFromSrc('https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/IMG_3457.jpeg?alt=media&token=7ebb0797-889a-453e-a6a1-ad2e47aa3d27', 'FEST 2026 oficialūs apdovanojimai ir statulėlės')">
+          <div class="gallery-item" onclick="openLightboxFromSrc('https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/IMG_3463.jpeg?alt=media&token=af7892ca-e78e-4198-b686-e0181472e8da', 'FEST 2026 oficialūs apdovanojimai ir statulėlės')">
             <div class="gallery-item-media">
-              <img src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/IMG_3457.jpeg?alt=media&token=7ebb0797-889a-453e-a6a1-ad2e47aa3d27" alt="Prizai">
+              <img src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/IMG_3463.jpeg?alt=media&token=af7892ca-e78e-4198-b686-e0181472e8da" alt="Prizai" loading="lazy">
               <div class="gallery-overlay-hint"><span>Žiūrėti</span></div>
             </div>
             <div class="gallery-caption">Oficialūs festivalio trofėjai ir laureatų statulėlės</div>
@@ -179,7 +179,7 @@
 
           <div class="gallery-item" onclick="openLightboxFromSrc('https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/IMG_3458.jpeg?alt=media&token=224af1bd-25ff-494e-8136-fbf330d3ad5b', 'Kino šventė Kauno tarptautinėje gimnazijoje')">
             <div class="gallery-item-media">
-              <img src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/IMG_3458.jpeg?alt=media&token=224af1bd-25ff-494e-8136-fbf330d3ad5b" alt="Ceremonija">
+              <img src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/IMG_3458.jpeg?alt=media&token=224af1bd-25ff-494e-8136-fbf330d3ad5b" alt="Ceremonija" loading="lazy">
               <div class="gallery-overlay-hint"><span>Žiūrėti</span></div>
             </div>
             <div class="gallery-caption">Ceremonijos akimirkos ir festivalio dalyviai</div>
@@ -187,7 +187,7 @@
 
           <div class="gallery-item" onclick="openLightboxFromSrc('https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/IMG_3459.jpeg?alt=media&token=dfdda212-9ea6-433f-af80-8c5b5b57f361', 'Apdovanojimai ir laureatų sveikinimai')">
             <div class="gallery-item-media">
-              <img src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/IMG_3459.jpeg?alt=media&token=dfdda212-9ea6-433f-af80-8c5b5b57f361" alt="Apdovanojimai">
+              <img src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/IMG_3459.jpeg?alt=media&token=dfdda212-9ea6-433f-af80-8c5b5b57f361" alt="Apdovanojimai" loading="lazy">
               <div class="gallery-overlay-hint"><span>Žiūrėti</span></div>
             </div>
             <div class="gallery-caption">Laureatų diplomų įteikimas ir svečių sveikinimai</div>
@@ -197,8 +197,8 @@
     </section>
   </main>
 
-  <div id="lightboxModal" class="lightbox-modal">
-    <button class="lightbox-close" onclick="closeLightbox()">&times;</button>
+  <div id="lightboxModal" class="lightbox-modal" role="dialog" aria-modal="true" aria-label="Nuotraukos peržiūra">
+    <button class="lightbox-close" onclick="closeLightbox()" aria-label="Uždaryti">&times;</button>
     <div class="lightbox-content">
       <img id="lightboxImg" class="lightbox-img" src="" alt="Peržiūra">
       <div id="lightboxCaption" class="lightbox-caption"></div>
@@ -251,7 +251,8 @@
     }
 
     function closeLightbox() {
-      document.getElementById("lightboxModal").classList.remove("active");
+      const modal = document.getElementById("lightboxModal");
+      modal.classList.remove("active");
       document.getElementById("lightboxImg").src = "";
     }
 
