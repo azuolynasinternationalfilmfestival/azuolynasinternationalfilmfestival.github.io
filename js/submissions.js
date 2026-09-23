@@ -5,6 +5,15 @@ let submissionsList = [];
 let currentEntry = null;
 let unsubscribeSubmissions = null;
 
+const STATUS_DICTIONARY = {
+  submitted: { label: "Pateikta", className: "status-submitted" },
+  accepted: { label: "Priimta", className: "status-accepted" },
+  semifinal: { label: "Pusfinalis", className: "status-semifinal" },
+  final: { label: "Finalas", className: "status-final" },
+  winner: { label: "Laureatas", className: "status-winner" },
+  rejected: { label: "Atmesta", className: "status-rejected" }
+};
+
 export function initSubmissions() {
   const filterSearch = document.getElementById("filterSearch");
   const filterCategory = document.getElementById("filterCategory");
@@ -108,9 +117,9 @@ function renderTable() {
       });
     }
 
-    const badgeCls = `badge-${sub.status || 'submitted'}`;
+    const rawStatus = sub.status || "submitted";
+    const statusMeta = STATUS_DICTIONARY[rawStatus] || { label: rawStatus, className: "status-submitted" };
     const isVoting = sub.inVoting === true;
-    const votingClass = isVoting ? "badge-voting-active" : "badge-voting-hidden";
 
     tr.innerHTML = `
       <td data-label="Data" class="text-date">${dateStr}</td>
@@ -119,12 +128,18 @@ function renderTable() {
       <td data-label="Filmas"><strong style="color:var(--text-color);">${sub.filmTitle || ''}</strong></td>
       <td data-label="Balsai"><strong style="color:var(--accent-light);">${sub.votesCount || 0}</strong></td>
       <td data-label="Balsavime">
-        <button class="badge ${votingClass}" data-action="toggle-voting" data-id="${sub.id}" data-status="${isVoting}">
-          ${isVoting ? 'RODOMAS' : 'PASLĖPTAS'}
+        <button type="button" class="admin-switch-btn ${isVoting ? 'active' : ''}" data-action="toggle-voting" data-id="${sub.id}" data-status="${isVoting}">
+          <span class="admin-switch-knob"></span>
+          <span>${isVoting ? 'Aktyvus' : 'Išjungtas'}</span>
         </button>
       </td>
       <td data-label="Trukmė">${sub.videoDurationSeconds ? sub.videoDurationSeconds + 's' : '-'}</td>
-      <td data-label="Statusas"><span class="badge ${badgeCls}">${sub.status || 'submitted'}</span></td>
+      <td data-label="Statusas">
+        <span class="status-pill ${statusMeta.className}">
+          <span class="status-dot"></span>
+          <span>${statusMeta.label}</span>
+        </span>
+      </td>
       <td data-label="Veiksmai">
         <div class="action-btns-cell">
           <button class="btn-outline btn-xs" data-action="view" data-id="${sub.id}">Peržiūrėti</button>
