@@ -253,7 +253,7 @@
         <div class="player-card">
           <div class="player-screen" id="screeningPlayerContainer">
             <div class="player-idle" id="screeningPlaceholder">
-              <div class="player-idle-icon">🎬</div>
+              <svg class="cinema-icon" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect><line x1="7" y1="2" x2="7" y2="22"></line><line x1="17" y1="2" x2="17" y2="22"></line><line x1="2" y1="12" x2="22" y2="12"></line><line x1="2" y1="7" x2="7" y2="7"></line><line x1="2" y1="17" x2="7" y2="17"></line><line x1="17" y1="17" x2="22" y2="17"></line><line x1="17" y1="7" x2="22" y2="7"></line></svg>
               <div class="player-idle-title" id="dynRecordingPlaceholder">Festivalio vaizdo įrašas bus patalpintas 2026 m. balandžio 17 d.</div>
               <div class="player-idle-sub">Visi pateikti filmai ir komisijos verdiktas bus pasiekiami tiesiogiai šioje vietoje.</div>
             </div>
@@ -270,6 +270,18 @@
         </div>
 
         <div class="form-sheet">
+          <div id="formSuccessDisplay" class="d-none success-checkmark-box">
+            <svg class="checkmark-svg" viewBox="0 0 52 52">
+              <circle class="checkmark-circle" cx="26" cy="26" r="24"/>
+              <path class="checkmark-check" d="M14 27l8 8 16-16"/>
+            </svg>
+            <h3 style="color:var(--text-color); margin-bottom:8px;">Paraiška sėkmingai gauta!</h3>
+            <p style="color:var(--text-muted); font-size:0.92rem; max-width:480px; margin:0 auto 20px auto;">
+              Nuoširdžiai dėkojame. Jūsų filmas pasiekė festivalio organizatorių komandą. Į jūsų nurodytą el. paštą išsiųstas patvirtinimas.
+            </p>
+            <button type="button" class="btn-outline btn-sm" onclick="resetFormView()">Pateikti kitą paraišką</button>
+          </div>
+
           <form id="submissionForm">
             <div class="input-row">
               <div class="input-cell">
@@ -326,7 +338,7 @@
             <div class="input-cell">
               <label>Vaizdo įrašo failas (MP4 / MOV / WEBM, iki 3 minučių) *</label>
               <div class="drop-area" id="uploadZone">
-                <div class="drop-icon">🎬</div>
+                <svg class="drop-icon-svg" viewBox="0 0 24 24"><polygon points="23 7 16 12 23 17 23 7"></polygon><rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect></svg>
                 <div class="drop-title">Pasirinkite arba įtempkite failą čia</div>
                 <div class="drop-sub">Trukmė automatiškai tikrinama (griežtai iki 180 s)</div>
                 <input type="file" id="videoFileInput" accept="video/mp4,video/quicktime,video/webm" required>
@@ -391,8 +403,12 @@
 
   <div id="lightboxModal" class="lightbox-modal" role="dialog" aria-modal="true" aria-label="Nuotraukos peržiūra">
     <button class="lightbox-close" onclick="closeLightbox()" aria-label="Uždaryti">&times;</button>
-    <button class="lightbox-btn lightbox-prev" onclick="stepLightbox(-1)" aria-label="Ankstesnė">&#10094;</button>
-    <button class="lightbox-btn lightbox-next" onclick="stepLightbox(1)" aria-label="Kita">&#10095;</button>
+    <button class="lightbox-btn lightbox-prev" onclick="stepLightbox(-1)" aria-label="Ankstesnė">
+      <svg class="lightbox-arrow-svg" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"></polyline></svg>
+    </button>
+    <button class="lightbox-btn lightbox-next" onclick="stepLightbox(1)" aria-label="Kita">
+      <svg class="lightbox-arrow-svg" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"></polyline></svg>
+    </button>
     <div class="lightbox-content">
       <div id="lightboxCounter" class="lightbox-counter"></div>
       <img id="lightboxImg" class="lightbox-img" src="" alt="Peržiūra">
@@ -595,7 +611,9 @@
             <span class="badge badge-accepted">${v.label || 'Vaizdo įrašas'}</span>
           </div>
           <div class="video-frame-wrap">
-            <div class="video-play-indicator">▶</div>
+            <div class="video-play-indicator">
+              <svg style="width:12px; height:12px; fill:currentColor; margin-left:2px;" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+            </div>
             ${createMediaEmbed(v.url)}
           </div>
         </div>
@@ -919,6 +937,20 @@
     const progressContainer = document.getElementById("progressContainer");
     const progressFill = document.getElementById("progressFill");
     const progressStatus = document.getElementById("progressStatus");
+    const formSuccessDisplay = document.getElementById("formSuccessDisplay");
+
+    function resetFormView() {
+      if (formSuccessDisplay) formSuccessDisplay.classList.add("d-none");
+      if (form) {
+        form.classList.remove("d-none");
+        form.reset();
+      }
+      verifiedVideoFile = null;
+      if (feedback) feedback.textContent = "";
+      if (progressContainer) progressContainer.classList.remove("active");
+      if (progressFill) progressFill.style.width = "0%";
+      if (submitBtn) submitBtn.disabled = false;
+    }
 
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
@@ -1011,13 +1043,9 @@
               });
             }
 
+            form.classList.add("d-none");
+            formSuccessDisplay.classList.remove("d-none");
             showToast("Dėkojame! Jūsų filmo paraiška sėkmingai gauta.");
-            form.reset();
-            verifiedVideoFile = null;
-            feedback.textContent = "";
-            progressContainer.classList.remove("active");
-            progressFill.style.width = "0%";
-            submitBtn.disabled = false;
           }
         );
       } catch (error) {
