@@ -2461,3 +2461,369 @@ footer {
     scroll-behavior: auto !important;
   }
 }
+
+/* ==========================================================================
+   Social Media Sharing Components (Editions & Results)
+   ========================================================================== */
+
+.edition-social-share {
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(111, 165, 138, 0.2);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.share-prompt {
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--accent-light);
+}
+
+.share-btns {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.btn-share-icon {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: rgba(7, 28, 24, 0.85);
+  border: 1px solid var(--border-color);
+  color: var(--text-color);
+  padding: 8px 14px;
+  border-radius: var(--site-radius);
+  font-family: var(--font-ui);
+  font-size: 0.82rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transition-smooth);
+  text-decoration: none;
+  line-height: 1;
+}
+
+.btn-share-icon:hover {
+  transform: translateY(-2px);
+  border-color: var(--accent-light);
+  color: #ffffff;
+}
+
+.btn-share-fb:hover {
+  background: #1877F2;
+  border-color: #1877F2;
+  color: #ffffff;
+  box-shadow: 0 4px 14px rgba(24, 119, 242, 0.35);
+}
+
+.btn-share-ig {
+  position: relative;
+}
+
+.btn-share-ig:hover {
+  background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+  border-color: transparent;
+  color: #ffffff;
+  box-shadow: 0 4px 14px rgba(220, 39, 67, 0.35);
+}
+
+.btn-share-copy:hover {
+  background: var(--surface-light);
+  border-color: var(--accent-color);
+  color: var(--accent-light);
+}
+
+.share-icon {
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
+}
+
+.share-icon-sm {
+  width: 13px;
+  height: 13px;
+  flex-shrink: 0;
+}
+
+/* Results Section Sharing Header Bar */
+.results-share-header-bar {
+  margin-top: 18px;
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  background: rgba(13, 41, 35, 0.75);
+  border: 1px solid var(--border-color);
+  padding: 10px 18px;
+  border-radius: 40px;
+  flex-wrap: wrap;
+  backdrop-filter: blur(12px);
+}
+
+.results-share-tagline {
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: var(--text-color);
+}
+
+/* Winner Card Social Sharing Bar */
+.winner-actions-col {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.winner-social-share {
+  padding-top: 12px;
+  border-top: 1px solid rgba(111, 165, 138, 0.15);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+}
+
+.winner-share-label {
+  font-size: 0.74rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+}
+
+.winner-share-btns {
+  display: flex;
+  gap: 6px;
+  width: 100%;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.btn-share-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  background: rgba(18, 55, 47, 0.5);
+  border: 1px solid var(--border-color);
+  color: var(--text-muted);
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-family: var(--font-ui);
+  font-size: 0.76rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transition-smooth);
+}
+
+.btn-share-pill:hover {
+  transform: translateY(-1px);
+  color: var(--text-color);
+  border-color: var(--accent-light);
+}
+
+.btn-share-pill.btn-share-fb:hover {
+  background: #1877F2;
+  border-color: #1877F2;
+  color: #fff;
+}
+
+.btn-share-pill.btn-share-ig:hover {
+  background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+  border-color: transparent;
+  color: #fff;
+}
+
+/* Dedicated Edition Hero Share Bar */
+.edition-hero-share-bar {
+  margin-top: 24px;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(7, 28, 24, 0.8);
+  border: 1px solid var(--border-color);
+  padding: 10px 20px;
+  border-radius: 40px;
+  backdrop-filter: blur(14px);
+  flex-wrap: wrap;
+}
+
+.edition-hero-share-label {
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: var(--accent-light);
+}
+
+/* Instagram Highlight & Share Modal */
+.share-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: rgba(3, 13, 11, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.share-modal-overlay.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.share-modal-card {
+  background: var(--surface-card);
+  border: 1px solid var(--border-color);
+  border-radius: calc(var(--site-radius) + 4px);
+  width: 100%;
+  max-width: 520px;
+  padding: 32px 28px;
+  position: relative;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6);
+  transform: scale(0.96);
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+
+.share-modal-overlay.active .share-modal-card {
+  transform: scale(1);
+}
+
+.share-modal-close {
+  position: absolute;
+  top: 16px;
+  right: 18px;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: 1.8rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: var(--transition-smooth);
+}
+
+.share-modal-close:hover {
+  color: var(--text-color);
+  transform: scale(1.1);
+}
+
+.share-modal-header {
+  text-align: center;
+  margin-bottom: 22px;
+}
+
+.share-modal-ig-icon {
+  width: 54px;
+  height: 54px;
+  margin: 0 auto 14px;
+  border-radius: 16px;
+  background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  box-shadow: 0 8px 24px rgba(220, 39, 67, 0.35);
+}
+
+.share-modal-header h3 {
+  font-family: var(--font-cinema);
+  font-size: 1.45rem;
+  color: var(--text-color);
+  margin-bottom: 6px;
+}
+
+.share-modal-header p {
+  font-size: 0.88rem;
+  color: var(--accent-light);
+}
+
+.ig-copy-preview-box {
+  background: #030D0B;
+  border: 1px solid var(--border-color);
+  border-radius: var(--site-radius);
+  padding: 14px 16px;
+  margin-bottom: 18px;
+}
+
+.ig-preview-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+
+.ig-preview-text {
+  font-family: var(--font-ui);
+  font-size: 0.82rem;
+  color: var(--text-color);
+  white-space: pre-wrap;
+  line-height: 1.5;
+  max-height: 120px;
+  overflow-y: auto;
+}
+
+.ig-steps-guide {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 24px;
+}
+
+.ig-step-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.ig-step-num {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: rgba(111, 165, 138, 0.15);
+  border: 1px solid var(--accent-color);
+  color: var(--accent-light);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.74rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.share-modal-footer {
+  display: flex;
+  gap: 12px;
+}
+
+.share-modal-footer .btn-solid,
+.share-modal-footer .btn-outline {
+  flex: 1;
+  text-align: center;
+  justify-content: center;
+}
+
+.btn-ig-primary {
+  background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%) !important;
+  border: none !important;
+  color: #fff !important;
+}
+
+.btn-ig-primary:hover {
+  filter: brightness(1.08);
+  box-shadow: 0 6px 20px rgba(220, 39, 67, 0.4);
+}
+
