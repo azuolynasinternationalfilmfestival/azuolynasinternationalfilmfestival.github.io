@@ -1,0 +1,9 @@
+{
+  "name": "Ąžuolynas International Students Film Festival",
+  "description": "Official Submissions and Platform for the Ąžuolynas International Students Film Festival.",
+  "prompt": "Ąžuolynas International Students Film Festival web platform with submission portal, edition chronology, screening, and voting.",
+  "permissions": [],
+  "capabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
