@@ -253,6 +253,9 @@ function initEntryModal() {
             name: currentEntry.name,
             filmTitle: currentEntry.filmTitle,
             category: currentEntry.category,
+            institution: currentEntry.institution,
+            deviceModel: currentEntry.deviceModel,
+            videoDurationSeconds: currentEntry.videoDurationSeconds,
             customMessage: customMsg,
             streamLink: streamLink
           });
