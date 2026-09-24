@@ -141,6 +141,27 @@
       }
     }
 
+    openAlbum(albumKey) {
+      this.filterByAlbum(albumKey);
+      this.renderAlbumTabs();
+      this.renderGalleryGrid();
+      if (this.filteredPhotos.length > 0) {
+        this.open(0);
+      }
+    }
+
+    startSlideshowForAlbum(albumKey) {
+      this.filterByAlbum(albumKey);
+      this.renderAlbumTabs();
+      this.renderGalleryGrid();
+      if (this.filteredPhotos.length > 0) {
+        this.open(0);
+        if (!this.isPlaying) {
+          this.toggleSlideshow();
+        }
+      }
+    }
+
     renderAlbumTabs() {
       const container = document.getElementById("photoAlbumTabs");
       if (!container) return;
