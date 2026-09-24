@@ -593,8 +593,8 @@
     <section id="results" class="section-block d-none">
       <div class="container">
         <div class="section-head">
-          <div class="section-tag">Laureatai</div>
-          <h2 class="section-heading">Festivalio Rezultatai</h2>
+          <div class="section-tag">Festivalio Laureatai</div>
+          <h2 class="section-heading">Festivalio Rezultatai ir Nugalėtojai</h2>
           <div class="results-share-header-bar">
             <span class="results-share-tagline">Pasidalinkite festivalio laureatais ir nugalėtojais:</span>
             <div class="share-btns">
@@ -612,6 +612,16 @@
             </div>
           </div>
         </div>
+
+        <!-- Categories Filter for Laureates -->
+        <div class="results-filter-bar" id="resultsFilterBar" role="tablist" aria-label="Laureatų kategorijos">
+          <button type="button" class="results-filter-btn active" onclick="FestivalLaureates.setCategory('all', this)">Visi laureatai</button>
+          <button type="button" class="results-filter-btn" onclick="FestivalLaureates.setCategory('top', this)">🏆 Grand Prix ir I vietos</button>
+          <button type="button" class="results-filter-btn" onclick="FestivalLaureates.setCategory('cat1', this)">I Kategorija (10–13 m.)</button>
+          <button type="button" class="results-filter-btn" onclick="FestivalLaureates.setCategory('cat2', this)">II Kategorija (14–18 m.)</button>
+          <button type="button" class="results-filter-btn" onclick="FestivalLaureates.setCategory('special', this)">Žiūrovų simpatijos ir specialieji</button>
+        </div>
+
         <div id="winnersListContainer" class="results-grid"></div>
       </div>
     </section>
@@ -619,9 +629,40 @@
     <section id="competition" class="section-block d-none">
       <div class="container">
         <div class="section-head">
-          <div class="section-tag">Dalyviai ir Balsavimas</div>
-          <h2 class="section-heading">Konkursinė Programa</h2>
+          <div class="section-tag">Žiūrovų Simpatijų Prizas</div>
+          <h2 class="section-heading">Konkursinė Programa ir Balsavimas</h2>
+          <p class="section-lead-text" style="max-width: 720px; margin: 10px auto 0 auto; color: var(--text-muted); font-size: 0.95rem; text-align: center;">
+            Peržiūrėkite moksleivių trumpametražius filmus ir atiduokite savo balsą už Žiūrovų simpatijų prizą! Kiekvienas festivalio lankytojas turi 1 oficialų balsą.
+          </p>
         </div>
+
+        <div class="voting-dashboard-bar">
+          <!-- Live Voter Status -->
+          <div id="voterStatusBanner" class="voter-status-banner"></div>
+
+          <!-- Controls Row -->
+          <div class="voting-controls-row">
+            <div class="voting-tabs-group" id="votingTabsGroup" role="tablist">
+              <button type="button" class="voting-tab-btn active" onclick="FestivalVoting.setCategory('all', this)">Visi filmai</button>
+              <button type="button" class="voting-tab-btn" onclick="FestivalVoting.setCategory('cat1', this)">I Kategorija (10–13 m.)</button>
+              <button type="button" class="voting-tab-btn" onclick="FestivalVoting.setCategory('cat2', this)">II Kategorija (14–18 m.)</button>
+            </div>
+
+            <div class="voting-tools-group">
+              <div class="voting-search-wrap">
+                <svg class="voting-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                <input type="text" id="votingSearchInput" class="voting-search-input" placeholder="Ieškoti pagal filmą, autorių, mokyklą, miestą..." oninput="FestivalVoting.setSearch(this.value)">
+              </div>
+
+              <select id="votingSortSelect" class="voting-sort-select" onchange="FestivalVoting.setSort(this.value)" aria-label="Rikiuoti filmus">
+                <option value="votes">🏆 Daugiausiai balsų (Lyderiai)</option>
+                <option value="title">Pagal pavadinimą (A–Z)</option>
+                <option value="default">Numatytoji tvarka</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
         <div id="filmsGalleryContainer" class="films-grid"></div>
       </div>
     </section>
@@ -789,6 +830,33 @@
         <p><strong>Trukmė:</strong> <span id="publicModalDuration"></span> s</p>
         <p class="modal-synopsis-label">Sinopsis:</p>
         <p id="publicModalSynopsis" class="modal-synopsis-text"></p>
+        <div id="modalVoteStrip" class="modal-vote-strip" style="display:none;">
+          <div class="modal-vote-stats">
+            Žiūrovų balsai: <strong id="modalVoteCount">0</strong>
+          </div>
+          <button type="button" id="modalVoteBtn" class="btn-solid btn-sm">Balsuoti už šį filmą</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Official Vote Confirmation Modal (LT) -->
+  <div id="voteConfirmModal" class="vote-confirm-overlay" role="dialog" aria-modal="true" aria-labelledby="voteConfirmHeading">
+    <div class="vote-confirm-card">
+      <div class="vote-confirm-icon-wrap">★</div>
+      <h3 id="voteConfirmHeading" class="vote-confirm-title">Patvirtinti Savo Balsą</h3>
+      <p style="color:var(--text-muted); font-size:0.88rem;">Atiduodate savo oficialų festivalio balsą už Žiūrovų simpatijų prizą:</p>
+      <div class="vote-confirm-film-box">
+        <div id="voteConfirmFilmTitle" class="vote-confirm-film-name"></div>
+        <div id="voteConfirmDirector" class="vote-confirm-film-meta"></div>
+        <div id="voteConfirmCategory" class="vote-confirm-film-meta" style="color:var(--accent-light); margin-top:2px;"></div>
+      </div>
+      <p class="vote-confirm-notice">
+        ⚠️ <strong>Dėmesio:</strong> Kiekvienas festivalio lankytojas gali atiduoti tik <strong>vieną oficialų balsą</strong>. Šio veiksmo atšaukti ar perkelti kitam filmui negalima.
+      </p>
+      <div class="vote-confirm-actions">
+        <button type="button" class="btn-outline" onclick="FestivalVoting.cancelVote()">Atšaukti</button>
+        <button type="button" class="btn-solid" onclick="FestivalVoting.confirmVote()">★ Patvirtinti Balsą</button>
       </div>
     </div>
   </div>
@@ -893,6 +961,7 @@
   <script src="../config.js"></script>
   <script src="../email-templates.js"></script>
   <script src="../js/social-share.js"></script>
+  <script src="../js/voting-and-winners.js"></script>
   <script>
     let filmsCache = [];
     let galleryPhotosCache = [];
@@ -952,8 +1021,8 @@
       const d = doc.exists ? doc.data() : DEFAULT_CONTENT;
       const data = d.lt || DEFAULT_CONTENT.lt;
 
-      const showVoting = d.showVoting === true;
-      const showResults = d.showResults === true;
+      const showVoting = d.showVoting === true || (Array.isArray(filmsCache) && filmsCache.some(f => f.inVoting === true));
+      const showResults = d.showResults === true || (Array.isArray(filmsCache) && filmsCache.some(f => f.isWinner === true));
       const showScreening = d.showScreening !== false;
       const showSubmit = d.showSubmit !== false;
 
@@ -1188,175 +1257,38 @@
         filmsCache.push({ id: doc.id, ...doc.data() });
       });
       window.filmsCache = filmsCache;
+
+      const hasWinners = filmsCache.some((f) => f.isWinner === true);
+      const hasVoting = filmsCache.some((f) => f.inVoting === true);
+      if (hasWinners) {
+        document.getElementById("results")?.classList.remove("d-none");
+        document.getElementById("navLinkResults")?.classList.remove("d-none");
+      }
+      if (hasVoting) {
+        document.getElementById("competition")?.classList.remove("d-none");
+        document.getElementById("navLinkVoting")?.classList.remove("d-none");
+        document.getElementById("heroVoteBtn")?.classList.remove("d-none");
+      }
+
       renderWinnersSection();
       renderFilmsGallery();
     });
 
     function renderWinnersSection() {
-      const container = document.getElementById("winnersListContainer");
-      if (!container) return;
-      const winners = filmsCache.filter((f) => f.isWinner === true);
-      if (winners.length === 0) {
-        container.innerHTML = '<div class="empty-state-notice">Oficialūs festivalio laureatai netrukus bus paskelbti.</div>';
-        return;
+      if (window.FestivalLaureates) {
+        FestivalLaureates.render(filmsCache, "lt");
       }
-      container.innerHTML = winners.map((w) => `
-        <div class="winner-card">
-          <div class="winner-badge">${w.awardTitle || 'Laureatas'}</div>
-          <div class="winner-title">${w.filmTitle || ''}</div>
-          <div class="winner-meta">
-            <div><strong>${w.name || ''}</strong></div>
-            <div>${w.institution || w.location || ''}</div>
-            <div>${w.category || ''}</div>
-          </div>
-          <div class="winner-actions-col">
-            <button class="btn-preview" onclick="openPublicModal('${w.id}')">
-              PERŽIŪRĖTI FILMĄ
-            </button>
-            <div class="winner-social-share">
-              <span class="winner-share-label">Dalintis apdovanojimu:</span>
-              <div class="winner-share-btns">
-                <button type="button" class="btn-share-pill btn-share-fb" onclick="FestivalShare.shareWinnerFacebook('${w.id}')" title="Dalintis Facebook" aria-label="Facebook">
-                  <svg class="share-icon-sm" viewBox="0 0 24 24"><path fill="currentColor" d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
-                  <span>Facebook</span>
-                </button>
-                <button type="button" class="btn-share-pill btn-share-ig" onclick="FestivalShare.shareWinnerInstagram('${w.id}')" title="Dalintis Instagram" aria-label="Instagram">
-                  <svg class="share-icon-sm" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
-                  <span>Instagram</span>
-                </button>
-                <button type="button" class="btn-share-pill btn-share-copy" onclick="FestivalShare.copyWinnerLink('${w.id}')" title="Kopijuoti apdovanojimo nuorodą" aria-label="Kopijuoti">
-                  <svg class="share-icon-sm" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      `).join("");
     }
 
     function renderFilmsGallery() {
-      const container = document.getElementById("filmsGalleryContainer");
-      if (!container) return;
-      const eligible = filmsCache.filter((f) => f.inVoting === true);
-      if (eligible.length === 0) {
-        container.innerHTML = '<div class="empty-state-notice">Šiuo metu nėra filmų, dalyvaujančių balsavime.</div>';
-        return;
+      if (window.FestivalVoting) {
+        FestivalVoting.init(filmsCache, "lt");
       }
-
-      const totalVotes = eligible.reduce((acc, curr) => acc + (curr.votesCount || 0), 0);
-      const userVotedFilmId = localStorage.getItem("festival_voted_film_id");
-
-      container.innerHTML = eligible.map((film) => {
-        const votes = film.votesCount || 0;
-        const pct = totalVotes > 0 ? Math.round((votes / totalVotes) * 100) : 0;
-        const isThisFilmVoted = userVotedFilmId === film.id;
-        const isUserAlreadyVoted = Boolean(userVotedFilmId);
-
-        let voteBtnText = "Balsuoti už šį filmą";
-        let voteBtnClass = "btn-vote";
-        let voteBtnDisabled = false;
-
-        if (isThisFilmVoted) {
-          voteBtnText = "Jūsų balsas atiduotas";
-          voteBtnClass = "btn-vote btn-voted";
-          voteBtnDisabled = true;
-        } else if (isUserAlreadyVoted) {
-          voteBtnText = "Balsas jau panaudotas";
-          voteBtnClass = "btn-vote";
-          voteBtnDisabled = true;
-        }
-
-        return `
-          <div class="film-card">
-            <div>
-              <div class="film-card-thumb">
-                <video src="${film.videoUrl || ''}" preload="metadata" muted playsinline></video>
-              </div>
-              <div class="film-card-title">${film.filmTitle || ''}</div>
-              <div class="film-card-meta">
-                ${film.name || ''}<br>
-                ${film.category || ''} • ${film.location || ''}
-              </div>
-            </div>
-            <div>
-              <button class="btn-preview" onclick="openPublicModal('${film.id}')">
-                PERŽIŪRĖTI FILMĄ
-              </button>
-              <div class="vote-box">
-                <div class="vote-stats">
-                  <span>Publikos balsai</span>
-                  <span class="vote-num" id="voteCount_${film.id}">${votes} (${pct}%)</span>
-                </div>
-                <div class="vote-bar-bg">
-                  <div class="vote-bar-fill" id="voteFill_${film.id}"></div>
-                </div>
-                <button class="${voteBtnClass}" id="voteBtn_${film.id}" onclick="submitVote('${film.id}')" ${voteBtnDisabled ? "disabled" : ""}>
-                  ${voteBtnText}
-                </button>
-              </div>
-            </div>
-          </div>
-        `;
-      }).join("");
-
-      eligible.forEach((film) => {
-        const votes = film.votesCount || 0;
-        const pct = totalVotes > 0 ? Math.round((votes / totalVotes) * 100) : 0;
-        const bar = document.getElementById("voteFill_" + film.id);
-        if (bar) bar.style.width = pct + "%";
-      });
     }
 
-    async function submitVote(filmId) {
-      const existingVote = localStorage.getItem("festival_voted_film_id");
-      if (existingVote) {
-        showToast("Jūs jau esate atidavę savo vienintelį festivalio balsą!", "error");
-        return;
-      }
-
-      const btn = document.getElementById("voteBtn_" + filmId);
-      if (btn) btn.disabled = true;
-
-      try {
-        const user = auth.currentUser || (await auth.signInAnonymously()).user;
-        const uid = user.uid;
-
-        const filmRef = db.collection("submissions").doc(filmId);
-        const voteAuditRef = db.collection("submissions").doc(filmId).collection("votes").doc(uid);
-
-        await db.runTransaction(async (transaction) => {
-          const voteDoc = await transaction.get(voteAuditRef);
-          if (voteDoc.exists) {
-            throw new Error("already-voted");
-          }
-          transaction.set(voteAuditRef, {
-            votedAt: firebase.firestore.FieldValue.serverTimestamp()
-          });
-          transaction.update(filmRef, {
-            votesCount: firebase.firestore.FieldValue.increment(1)
-          });
-        });
-
-        localStorage.setItem("festival_voted_film_id", filmId);
-
-        const countElem = document.getElementById("voteCount_" + filmId);
-        if (countElem) {
-          countElem.classList.add("pulse");
-          setTimeout(() => countElem.classList.remove("pulse"), 500);
-        }
-
-        renderFilmsGallery();
-        showToast("Dėkojame! Jūsų balsas sėkmingai įskaitytas.");
-      } catch (err) {
-        if (err.message === "already-voted") {
-          localStorage.setItem("festival_voted_film_id", filmId);
-          renderFilmsGallery();
-          showToast("Jūs jau atidavėte savo balsą šiame festivalyje.", "error");
-        } else {
-          console.error(err);
-          showToast("Klaida balsuojant. Bandykite vėliau.", "error");
-          if (btn) btn.disabled = false;
-        }
+    function submitVote(filmId) {
+      if (window.FestivalVoting) {
+        FestivalVoting.promptVote(filmId);
       }
     }
 
@@ -1376,6 +1308,10 @@
       const video = document.getElementById("publicModalVideo");
       video.src = film.videoUrl || "";
       document.getElementById("publicPreviewModal").classList.add("active");
+
+      if (window.FestivalVoting) {
+        FestivalVoting.updateModalVoteBtn(id);
+      }
     }
 
     function closePublicModal() {
