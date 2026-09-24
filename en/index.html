@@ -49,6 +49,54 @@
     }
   }
   </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "Which devices can be used to film for the Ąžuolynas Film Festival?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Any smartphone or tablet running iOS, Android, or iPadOS is eligible. Films must be shot strictly on a phone or tablet. Dedicated DSLR, mirrorless, and cinema cameras are not permitted."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Does the 3-minute limit include opening titles and closing credits?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. The total running time (TRT) of the submitted video file from first frame to last frame must strictly not exceed 3 minutes (180 seconds)."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Can I use phone accessories like tripods, gimbals, or external microphones?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. Phone tripods, mobile gimbals, clip-on lenses, and external microphones plugged directly into your phone or tablet are fully allowed."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Can I edit the video on a laptop or computer?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. The footage must be captured using a phone or tablet, but editing and post-production may be completed on a computer or mobile editing apps."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Can teachers or parents help with the film?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Adult mentors or parents may only provide technical safety assistance and access to equipment. All creative decisions, directing, cinematography, acting, and editing must be led by youth aged 10–18."
+        }
+      }
+    ]
+  }
+  </script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
@@ -65,6 +113,7 @@
       <ul class="nav-links">
         <li><a href="#about">About</a></li>
         <li><a href="#terms">Terms</a></li>
+        <li><a href="#faq">FAQ</a></li>
         <li><a href="#categories">Categories & Prizes</a></li>
         <li><a href="#editions">Editions</a></li>
         <li><a href="#archive">Archive</a></li>
@@ -205,6 +254,292 @@
       </div>
     </section>
 
+    <section id="faq" class="section-block">
+      <div class="container">
+        <div class="section-head">
+          <div class="section-tag">Submission Guidelines FAQ</div>
+          <h2 class="section-heading">Frequently Asked Questions</h2>
+          <p class="section-lead-text" style="max-width: 720px; margin: 10px auto 0 auto; color: var(--text-muted); font-size: 0.95rem; text-align: center;">
+            Everything you need to know about the 3-minute runtime rule, smartphone/tablet camera criteria, and adult guidance policies before submitting.
+          </p>
+        </div>
+
+        <!-- Filter Segmented Tabs -->
+        <div class="faq-filter-bar" role="tablist" aria-label="FAQ categories">
+          <button type="button" class="faq-filter-btn active" onclick="filterFaq('all', this)" role="tab" aria-selected="true">
+            All Questions
+          </button>
+          <button type="button" class="faq-filter-btn" onclick="filterFaq('devices', this)" role="tab" aria-selected="false">
+            Device Requirements
+          </button>
+          <button type="button" class="faq-filter-btn" onclick="filterFaq('runtime', this)" role="tab" aria-selected="false">
+            3-Minute Limit
+          </button>
+          <button type="button" class="faq-filter-btn" onclick="filterFaq('guidance', this)" role="tab" aria-selected="false">
+            Student Eligibility & Mentors
+          </button>
+        </div>
+
+        <!-- Accordion Items -->
+        <div class="faq-accordion-list" id="faqAccordionList">
+          <!-- Device Q1 -->
+          <details class="faq-accordion-item" data-category="devices" open>
+            <summary class="faq-summary">
+              <div class="faq-title-wrap">
+                <span class="faq-topic-tag">Device Requirements</span>
+                <span>Which devices can be used for filming? Does the phone brand or model matter?</span>
+              </div>
+              <span class="faq-icon-chevron" aria-hidden="true">&#9662;</span>
+            </summary>
+            <div class="faq-answer">
+              <p>
+                <strong>Any smartphone or tablet is 100% eligible.</strong> You can shoot with an iPhone, Samsung, Xiaomi, Google Pixel, Huawei, iPad, or any Android/iOS device.
+              </p>
+              <p>
+                The model year does not matter—whether you have the newest flagship device or an older phone, what matters most to our jury is your artistic vision, framing, storytelling, and unique view on ordinary things.
+              </p>
+            </div>
+          </details>
+
+          <!-- Device Q2 -->
+          <details class="faq-accordion-item" data-category="devices">
+            <summary class="faq-summary">
+              <div class="faq-title-wrap">
+                <span class="faq-topic-tag">Device Requirements</span>
+                <span>Can I use phone accessories like tripods, gimbals, clip-on lenses, or external microphones?</span>
+              </div>
+              <span class="faq-icon-chevron" aria-hidden="true">&#9662;</span>
+            </summary>
+            <div class="faq-answer">
+              <p>
+                <strong>Yes, mobile accessories are permitted!</strong> You are encouraged to use:
+              </p>
+              <ul>
+                <li><strong>Tripods and mounts</strong> for stable framing;</li>
+                <li><strong>Mobile gimbals or handheld stabilizers</strong> for smooth tracking shots;</li>
+                <li><strong>Clip-on lenses</strong> (wide-angle, macro, or anamorphic) attached to your phone camera;</li>
+                <li><strong>External microphones</strong> (lavalier/lapel mics, shotgun mics, or wireless mic transmitters) plugged directly into your phone or tablet for clear dialogue.</li>
+              </ul>
+              <div class="faq-spec-box">
+                <strong>Key criteria:</strong> The actual image recording must originate directly from the smartphone or tablet camera sensor.
+              </div>
+            </div>
+          </details>
+
+          <!-- Device Q3 -->
+          <details class="faq-accordion-item" data-category="devices">
+            <summary class="faq-summary">
+              <div class="faq-title-wrap">
+                <span class="faq-topic-tag">Device Requirements</span>
+                <span>Can I shoot with a DSLR, mirrorless camera, GoPro, or cinema camera?</span>
+              </div>
+              <span class="faq-icon-chevron" aria-hidden="true">&#9662;</span>
+            </summary>
+            <div class="faq-answer">
+              <p>
+                <strong>No. Standalone digital cameras (DSLRs, mirrorless cameras, camcorders, GoPros/action cams, or drones) are strictly prohibited.</strong>
+              </p>
+              <p>
+                Festival Rule 1 exists to create a truly equal, accessible playing field for young creators. We believe smartphones and tablets are universal democratic tools that challenge students to focus on visual storytelling rather than expensive studio gear.
+              </p>
+            </div>
+          </details>
+
+          <!-- Device Q4 -->
+          <details class="faq-accordion-item" data-category="devices">
+            <summary class="faq-summary">
+              <div class="faq-title-wrap">
+                <span class="faq-topic-tag">Device Requirements</span>
+                <span>Can I edit my film on a laptop or computer using desktop editing software?</span>
+              </div>
+              <span class="faq-icon-chevron" aria-hidden="true">&#9662;</span>
+            </summary>
+            <div class="faq-answer">
+              <p>
+                <strong>Yes! You are completely free to edit wherever you like.</strong>
+              </p>
+              <p>
+                While the raw video footage must be captured using your smartphone or tablet, the post-production stage (editing, titling, sound design, music mixing, and color grading) can be done either on mobile apps (such as <em>CapCut, VN Video Editor, iMovie, LumaFusion</em>) or on a computer (such as <em>DaVinci Resolve, Adobe Premiere, Final Cut Pro, or Clipchamp</em>).
+              </p>
+            </div>
+          </details>
+
+          <!-- Device Q5 -->
+          <details class="faq-accordion-item" data-category="devices">
+            <summary class="faq-summary">
+              <div class="faq-title-wrap">
+                <span class="faq-topic-tag">Device Requirements</span>
+                <span>Can I submit animation or stop-motion films captured on a phone/tablet?</span>
+              </div>
+              <span class="faq-icon-chevron" aria-hidden="true">&#9662;</span>
+            </summary>
+            <div class="faq-answer">
+              <p>
+                <strong>Yes, absolutely!</strong> Stop-motion animation, claymation, and puppet animation shot frame-by-frame using a phone or tablet (for example with Stop Motion Studio or similar apps) are warmly welcomed in our festival categories.
+              </p>
+            </div>
+          </details>
+
+          <!-- Runtime Q1 -->
+          <details class="faq-accordion-item" data-category="runtime" open>
+            <summary class="faq-summary">
+              <div class="faq-title-wrap">
+                <span class="faq-topic-tag">3-Minute Limit</span>
+                <span>Does the 3-minute limit include the opening title card and closing credits?</span>
+              </div>
+              <span class="faq-icon-chevron" aria-hidden="true">&#9662;</span>
+            </summary>
+            <div class="faq-answer">
+              <p>
+                <strong>Yes. The 3-minute limit (strictly &le; 180 seconds) is Total Running Time (TRT).</strong>
+              </p>
+              <p>
+                It is measured from the very first video frame to the final black screen or credit card.
+              </p>
+              <div class="faq-spec-box">
+                <strong>Pro-tip for filmmakers:</strong> Keep your opening title brief (3–5 seconds) and your closing credits concise (5–8 seconds) so that the remaining time is dedicated to your narrative.
+              </div>
+            </div>
+          </details>
+
+          <!-- Runtime Q2 -->
+          <details class="faq-accordion-item" data-category="runtime">
+            <summary class="faq-summary">
+              <div class="faq-title-wrap">
+                <span class="faq-topic-tag">3-Minute Limit</span>
+                <span>What happens if my film is 3 minutes and 2 seconds (182 seconds)?</span>
+              </div>
+              <span class="faq-icon-chevron" aria-hidden="true">&#9662;</span>
+            </summary>
+            <div class="faq-answer">
+              <p>
+                <strong>Submissions that exceed 180 seconds cannot be accepted for the official competition.</strong>
+              </p>
+              <p>
+                Our submission form automatically inspects video duration when you select your file. If your video is longer than 180 seconds, the upload will be rejected with an alert. Please trim a few frames or speed up end credits in your editing timeline before submitting.
+              </p>
+            </div>
+          </details>
+
+          <!-- Runtime Q3 -->
+          <details class="faq-accordion-item" data-category="runtime">
+            <summary class="faq-summary">
+              <div class="faq-title-wrap">
+                <span class="faq-topic-tag">3-Minute Limit</span>
+                <span>Is there a minimum duration? Can my film be 30 seconds or 1 minute?</span>
+              </div>
+              <span class="faq-icon-chevron" aria-hidden="true">&#9662;</span>
+            </summary>
+            <div class="faq-answer">
+              <p>
+                <strong>There is no minimum duration requirement!</strong>
+              </p>
+              <p>
+                Short-form filmmaking is a recognized art form. Micro-shorts (30s, 60s, or 90s) are just as eligible for awards as longer works, provided they tell a compelling story or offer an original visual viewpoint.
+              </p>
+            </div>
+          </details>
+
+          <!-- Runtime Q4 -->
+          <details class="faq-accordion-item" data-category="runtime">
+            <summary class="faq-summary">
+              <div class="faq-title-wrap">
+                <span class="faq-topic-tag">3-Minute Limit</span>
+                <span>What video formats, resolutions, and file sizes are accepted?</span>
+              </div>
+              <span class="faq-icon-chevron" aria-hidden="true">&#9662;</span>
+            </summary>
+            <div class="faq-answer">
+              <p>
+                We accept the most standard video container formats:
+              </p>
+              <ul>
+                <li><strong>Formats:</strong> MP4, MOV, or WEBM (encoded with H.264 or H.265 video codec and AAC audio);</li>
+                <li><strong>Aspect Ratio:</strong> Both horizontal (16:9 widescreen) and vertical (9:16 mobile format) are accepted;</li>
+                <li><strong>Resolution:</strong> 1080p Full HD (1920&times;1080) is recommended. 4K is also accepted;</li>
+                <li><strong>File Size:</strong> Please keep video files under <strong>300 MB</strong> for seamless web streaming and review.</li>
+              </ul>
+            </div>
+          </details>
+
+          <!-- Guidance Q1 -->
+          <details class="faq-accordion-item" data-category="guidance">
+            <summary class="faq-summary">
+              <div class="faq-title-wrap">
+                <span class="faq-topic-tag">Student Eligibility</span>
+                <span>Who is eligible to participate in the festival?</span>
+              </div>
+              <span class="faq-icon-chevron" aria-hidden="true">&#9662;</span>
+            </summary>
+            <div class="faq-answer">
+              <p>
+                The festival is open to school students, cinema studio members, and independent young filmmakers worldwide aged <strong>10 to 18 years old</strong>:
+              </p>
+              <ul>
+                <li><strong>Category I:</strong> 10 to 13 years old;</li>
+                <li><strong>Category II:</strong> 14 to 18 years old.</li>
+              </ul>
+            </div>
+          </details>
+
+          <!-- Guidance Q2 -->
+          <details class="faq-accordion-item" data-category="guidance">
+            <summary class="faq-summary">
+              <div class="faq-title-wrap">
+                <span class="faq-topic-tag">Mentors & Ethics</span>
+                <span>How much can teachers, parents, or adult mentors help?</span>
+              </div>
+              <span class="faq-icon-chevron" aria-hidden="true">&#9662;</span>
+            </summary>
+            <div class="faq-answer">
+              <p>
+                Adult participation must strictly be limited to:
+              </p>
+              <ul>
+                <li>Providing safety and logistical supervision;</li>
+                <li>Lending equipment (phones, microphones, computers);</li>
+                <li>Helping with file exports or form submission.</li>
+              </ul>
+              <p>
+                <strong>The core creative process must be 100% student-driven:</strong> writing the concept, holding the camera, directing, editing, and acting must be done by children. Films exhibiting dominant adult execution will be disqualified.
+              </p>
+            </div>
+          </details>
+
+          <!-- Guidance Q3 -->
+          <details class="faq-accordion-item" data-category="guidance">
+            <summary class="faq-summary">
+              <div class="faq-title-wrap">
+                <span class="faq-topic-tag">Submission Limit</span>
+                <span>Can I submit more than one film? Can multiple students co-direct?</span>
+              </div>
+              <span class="faq-icon-chevron" aria-hidden="true">&#9662;</span>
+            </summary>
+            <div class="faq-answer">
+              <p>
+                <strong>Each participant can submit no more than one work per festival edition (Rule 3).</strong>
+              </p>
+              <p>
+                Co-directed films by small student teams or school classes are welcomed; in such cases, please list the lead student director on the submission form and mention your co-creators in the institution or synopsis fields.
+              </p>
+            </div>
+          </details>
+        </div>
+
+        <!-- FAQ Help Callout -->
+        <div class="faq-callout-card">
+          <div class="faq-callout-text">
+            <h4>Ready to submit your short film?</h4>
+            <p>Ensure your video is recorded on a phone/tablet, under 180 seconds, and submitted before April 2nd, 2026.</p>
+          </div>
+          <div class="faq-callout-actions">
+            <a href="#submit" class="btn-solid">Submit Your Film</a>
+            <a href="mailto:azuolynasfilmfestival@gmail.com" class="btn-outline">Ask a Question</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <section id="categories" class="section-block">
       <div class="container">
         <div class="section-head">
@@ -318,6 +653,14 @@
         </div>
 
         <div class="form-sheet">
+          <div style="background: rgba(18, 55, 47, 0.25); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 12px 18px; margin-bottom: 24px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+            <span style="font-size: 0.88rem; color: var(--text-color);">
+              📱 <strong>Guidelines Check:</strong> Films must be shot on a phone/tablet and strictly up to 3 mins (180s).
+            </span>
+            <a href="#faq" style="font-size: 0.84rem; color: var(--accent-light); font-weight: 600; text-decoration: underline;">
+              Read Submission FAQ &rarr;
+            </a>
+          </div>
           <form id="submissionForm">
             <div class="input-row">
               <div class="input-cell">
@@ -507,6 +850,7 @@
           <ul class="footer-nav-list">
             <li><a href="#about">About Festival</a></li>
             <li><a href="#terms">Terms & Conditions</a></li>
+            <li><a href="#faq">Submission Guidelines FAQ</a></li>
             <li><a href="#categories">Categories & Prizes</a></li>
             <li><a href="#editions">Editions</a></li>
             <li><a href="#archive">Archive (2024–2025)</a></li>
@@ -537,6 +881,28 @@
     let filmsCache = [];
     let galleryPhotosCache = [];
     let currentLightboxIdx = 0;
+
+    function filterFaq(category, btnElement) {
+      const container = document.getElementById("faqAccordionList");
+      if (!container) return;
+      const items = container.querySelectorAll(".faq-accordion-item");
+      const buttons = document.querySelectorAll(".faq-filter-btn");
+      buttons.forEach((b) => {
+        b.classList.remove("active");
+        b.setAttribute("aria-selected", "false");
+      });
+      if (btnElement) {
+        btnElement.classList.add("active");
+        btnElement.setAttribute("aria-selected", "true");
+      }
+      items.forEach((item) => {
+        if (category === "all" || item.dataset.category === category) {
+          item.style.display = "";
+        } else {
+          item.style.display = "none";
+        }
+      });
+    }
 
     function showToast(message, type = "success") {
       const container = document.getElementById("toastContainer");

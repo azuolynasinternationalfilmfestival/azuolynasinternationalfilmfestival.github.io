@@ -50,6 +50,54 @@
     }
   }
   </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "Kokiais įrenginiais leidžiama filmuoti?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Filmas privalo būti filmuojamas tik išmaniuoju telefonu arba planšete (iOS, Android, iPadOS). Profesionalios kameros (veidrodiniai fotoaparatai, kino kameros, GoPro) yra griežtai draudžiamos."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Ar į 3 minučių trukmės limitą įskaičiuojami titrai?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Taip. Bendra vaizdo įrašo failo trukmė nuo pirmojo kadro iki paskutinio juodo ekrano ar titrų pabaigos griežtai negali viršyti 3 minučių (180 sekundžių)."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Ar galima naudoti telefonų priedus (stovus, stabilizatorius, mikrofonus)?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Taip, galima naudoti stovus, stabilizatorius (gimbal), prisegamus objektyvus bei išorinius mikrofonus, prijungtus prie telefono."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Ar galima montuoti kompiuteriu?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Taip. Filmuota medžiaga privalo būti užfiksuota telefonu ar planšete, tačiau montuoti ir apdoroti garsą galima tiek telefone, tiek kompiuterio programomis."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Kiek suaugusieji (tėvai, mokytojai) gali padėti?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Suaugusieji gali suteikti tik techninę ar saugumo pagalbą. Visi kūrybiniai sprendimai, scenarijus, filmavimas, režisūra ir vaidyba privalo priklausyti mokiniams."
+        }
+      }
+    ]
+  }
+  </script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
@@ -66,6 +114,7 @@
       <ul class="nav-links">
         <li><a href="#about">Apie festivalį</a></li>
         <li><a href="#terms">Taisyklės</a></li>
+        <li><a href="#faq">DUK</a></li>
         <li><a href="#categories">Kategorijos & Prizai</a></li>
         <li><a href="#editions">Metų Leidimai</a></li>
         <li><a href="#archive">Retrospektyva</a></li>
@@ -205,6 +254,292 @@
       </div>
     </section>
 
+    <section id="faq" class="section-block">
+      <div class="container">
+        <div class="section-head">
+          <div class="section-tag">DUK & Dalyvavimo Gairės</div>
+          <h2 class="section-heading">Dažniausiai Užduodami Klausimai</h2>
+          <p class="section-lead-text" style="max-width: 720px; margin: 10px auto 0 auto; color: var(--text-muted); font-size: 0.95rem; text-align: center;">
+            Atsakymai į svarbiausius moksleivių klausimus apie 3 minučių trukmės taisyklę, filmavimo telefonais bei planšetėmis reikalavimus ir suaugusiųjų pagalbą.
+          </p>
+        </div>
+
+        <!-- Filter Segmented Tabs -->
+        <div class="faq-filter-bar" role="tablist" aria-label="DUK kategorijos">
+          <button type="button" class="faq-filter-btn active" onclick="filterFaq('all', this)" role="tab" aria-selected="true">
+            Visi klausimai
+          </button>
+          <button type="button" class="faq-filter-btn" onclick="filterFaq('devices', this)" role="tab" aria-selected="false">
+            Įrenginių reikalavimai
+          </button>
+          <button type="button" class="faq-filter-btn" onclick="filterFaq('runtime', this)" role="tab" aria-selected="false">
+            3 minučių limitas
+          </button>
+          <button type="button" class="faq-filter-btn" onclick="filterFaq('guidance', this)" role="tab" aria-selected="false">
+            Mokiniai ir Mentoriai
+          </button>
+        </div>
+
+        <!-- Accordion Items -->
+        <div class="faq-accordion-list" id="faqAccordionList">
+          <!-- Device Q1 -->
+          <details class="faq-accordion-item" data-category="devices" open>
+            <summary class="faq-summary">
+              <div class="faq-title-wrap">
+                <span class="faq-topic-tag">Įrenginių reikalavimai</span>
+                <span>Kokiais įrenginiais galima filmuoti? Ar svarbi telefono markė ar modelis?</span>
+              </div>
+              <span class="faq-icon-chevron" aria-hidden="true">&#9662;</span>
+            </summary>
+            <div class="faq-answer">
+              <p>
+                <strong>Tinka bet kuris išmanusis telefonas ar planšetė.</strong> Galite filmuoti naudodami „iPhone“, „Samsung“, „Xiaomi“, „Google Pixel“, „Huawei“, „iPad“ ar bet kurį kitą įrenginį su „Android“ arba „iOS“ sistema.
+              </p>
+              <p>
+                Įrenginio modelio naujumas neturi įtakos vertinimui – komisijai svarbiausia jūsų kūrybinė idėja, kadruotė, pasakojimo ritmas ir neįprastas žvilgsnis į įprastus dalykus.
+              </p>
+            </div>
+          </details>
+
+          <!-- Device Q2 -->
+          <details class="faq-accordion-item" data-category="devices">
+            <summary class="faq-summary">
+              <div class="faq-title-wrap">
+                <span class="faq-topic-tag">Įrenginių reikalavimai</span>
+                <span>Ar galima naudoti telefonų priedus: stovus, stabilizatorius, papildomus lęšius ar mikrofonus?</span>
+              </div>
+              <span class="faq-icon-chevron" aria-hidden="true">&#9662;</span>
+            </summary>
+            <div class="faq-answer">
+              <p>
+                <strong>Taip, mobiliosios filmavimo priemonės yra leistinos ir rekomenduojamos!</strong> Galite laisvai naudoti:
+              </p>
+              <ul>
+                <li><strong>Stovus (trikojus) ir laikiklius</strong> stabiliam kadrui;</li>
+                <li><strong>Rankinius stabilizatorius („gimbal“)</strong> sklandžiam judėjimui;</li>
+                <li><strong>Prie telefono tvirtinamus lęšius</strong> (plataus kampo, makro ar anamorfinius);</li>
+                <li><strong>Išorinius mikrofonus</strong> (prisegamus „laivus“, kryptinius ar bevielius), prijungtus tiesiai prie telefono ar planšetės kokybiškam garso įrašymui.</li>
+              </ul>
+              <div class="faq-spec-box">
+                <strong>Esminis kriterijus:</strong> vaizdas privalo būti tiesiogiai įrašomas telefono ar planšetinio kompiuterio kameros jutikliu.
+              </div>
+            </div>
+          </details>
+
+          <!-- Device Q3 -->
+          <details class="faq-accordion-item" data-category="devices">
+            <summary class="faq-summary">
+              <div class="faq-title-wrap">
+                <span class="faq-topic-tag">Įrenginių reikalavimai</span>
+                <span>Ar leidžiama filmuoti veidrodiniais fotoaparatais (DSLR), kino kameromis ar „GoPro“?</span>
+              </div>
+              <span class="faq-icon-chevron" aria-hidden="true">&#9662;</span>
+            </summary>
+            <div class="faq-answer">
+              <p>
+                <strong>Ne. Bet kokios profesionalios ar atskiros kameros (veidrodiniai fotoaparatai, sisteminiai fotoaparatai, veiksmo kameros kaip „GoPro“, dronai) yra griežtai draudžiamos.</strong>
+              </p>
+              <p>
+                1-oji festivalio taisyklė sukurta tam, kad visi moksleiviai turėtų visiškai lygias galimybes. Išmanusis telefonas yra demokratiškas įrankis kiekvieno kišenėje, skatinantis susitelkti į kūrybiškumą, o ne į brangią kino studijos įrangą.
+              </p>
+            </div>
+          </details>
+
+          <!-- Device Q4 -->
+          <details class="faq-accordion-item" data-category="devices">
+            <summary class="faq-summary">
+              <div class="faq-title-wrap">
+                <span class="faq-topic-tag">Įrenginių reikalavimai</span>
+                <span>Ar galiu montuoti filmą kompiuteryje profesionaliomis programomis?</span>
+              </div>
+              <span class="faq-icon-chevron" aria-hidden="true">&#9662;</span>
+            </summary>
+            <div class="faq-answer">
+              <p>
+                <strong>Taip! Montavimo aplinka nėra ribojama.</strong>
+              </p>
+              <p>
+                Filmuota medžiaga privalo būti nufilmuota telefonu ar planšete, tačiau filmo montavimą, garso suvedimą, titrų darymą ir spalvų derinimą galite atlikti tiek mobiliojo telefono programėlėmis (pvz., <em>CapCut, VN, iMovie, LumaFusion</em>), tiek kompiuterio programomis (pvz., <em>DaVinci Resolve, Adobe Premiere, Final Cut Pro, Clipchamp</em>).
+              </p>
+            </div>
+          </details>
+
+          <!-- Device Q5 -->
+          <details class="faq-accordion-item" data-category="devices">
+            <summary class="faq-summary">
+              <div class="faq-title-wrap">
+                <span class="faq-topic-tag">Įrenginių reikalavimai</span>
+                <span>Ar galima pateikti animacinius ar „stop-motion“ filmus, nufotografuotus telefonu?</span>
+              </div>
+              <span class="faq-icon-chevron" aria-hidden="true">&#9662;</span>
+            </summary>
+            <div class="faq-answer">
+              <p>
+                <strong>Taip, žinoma!</strong> Plastilino, lėlių ar popieriaus „stop-motion“ animacija, nufotografuota kadras po kadro telefonu ar planšete (pvz., naudojant programėlę „Stop Motion Studio“ ar analogus), yra labai laukiama ir vertinama mūsų konkurse.
+              </p>
+            </div>
+          </details>
+
+          <!-- Runtime Q1 -->
+          <details class="faq-accordion-item" data-category="runtime" open>
+            <summary class="faq-summary">
+              <div class="faq-title-wrap">
+                <span class="faq-topic-tag">3 Minučių Limitas</span>
+                <span>Ar į 3 minučių trukmę įskaičiuojami pradiniai ir pabaigos titrai?</span>
+              </div>
+              <span class="faq-icon-chevron" aria-hidden="true">&#9662;</span>
+            </summary>
+            <div class="faq-answer">
+              <p>
+                <strong>Taip. 3 minučių limitas (griežtai &le; 180 sekundžių) taikomas bendrai vaizdo failo trukmei.</strong>
+              </p>
+              <p>
+                Trukmė skaičiuojama nuo pat pirmojo vaizdo kadro iki paskutinio juodo ekrano ar garso nutylimo.
+              </p>
+              <div class="faq-spec-box">
+                <strong>Patarimas jauniesiems režisieriams:</strong> pradinius titrus sutelkite į 3–5 sekundes, o pabaigos titrus – iki 5–8 sekundžių, kad kuo daugiau brangaus laiko liktų jūsų istorijai.
+              </div>
+            </div>
+          </details>
+
+          <!-- Runtime Q2 -->
+          <details class="faq-accordion-item" data-category="runtime">
+            <summary class="faq-summary">
+              <div class="faq-title-wrap">
+                <span class="faq-topic-tag">3 Minučių Limitas</span>
+                <span>Kas nutinka, jei filmas viršija 3 minutes vos keliomis sekundėmis (pvz., 3:02)?</span>
+              </div>
+              <span class="faq-icon-chevron" aria-hidden="true">&#9662;</span>
+            </summary>
+            <div class="faq-answer">
+              <p>
+                <strong>Darbai, ilgesni nei 180 sekundžių, negali dalyvauti oficialioje atrankoje.</strong>
+              </p>
+              <p>
+                Pateikimo forma automatiškai patikrina įkeliamo vaizdo įrašo failo ilgį. Jeigu failas yra nors 1 sekunde ilgesnis nei 180 s, sistema parodys perspėjimą ir neleis įkelti. Prieš pateikdami paraišką, sutrumpinkite kadrus montavimo programoje.
+              </p>
+            </div>
+          </details>
+
+          <!-- Runtime Q3 -->
+          <details class="faq-accordion-item" data-category="runtime">
+            <summary class="faq-summary">
+              <div class="faq-title-wrap">
+                <span class="faq-topic-tag">3 Minučių Limitas</span>
+                <span>Ar yra minimali filmo trukmė? Ar filmas gali trukti 45 sekundes ar 1 minutę?</span>
+              </div>
+              <span class="faq-icon-chevron" aria-hidden="true">&#9662;</span>
+            </summary>
+            <div class="faq-answer">
+              <p>
+                <strong>Minimalios trukmės reikalavimo nėra!</strong>
+              </p>
+              <p>
+                Mikrotrumpametražiai filmai (30 s, 60 s ar 90 s) lygiaverčiai kovoja dėl apdovanojimų. Svarbiausia – kad jūsų pasirinkta forma paveikiai perteiktų festivalio temą.
+              </p>
+            </div>
+          </details>
+
+          <!-- Runtime Q4 -->
+          <details class="faq-accordion-item" data-category="runtime">
+            <summary class="faq-summary">
+              <div class="faq-title-wrap">
+                <span class="faq-topic-tag">3 Minučių Limitas</span>
+                <span>Kokie vaizdo formatai ir failų dydžiai yra priimami?</span>
+              </div>
+              <span class="faq-icon-chevron" aria-hidden="true">&#9662;</span>
+            </summary>
+            <div class="faq-answer">
+              <p>
+                Rekomenduojami standartiniai vaizdo formatai:
+              </p>
+              <ul>
+                <li><strong>Formatai:</strong> MP4, MOV arba WEBM (su H.264 arba H.265 kodeku ir AAC garsu);</li>
+                <li><strong>Kraštinių santykis:</strong> Tinka tiek horizontalus (16:9), tiek vertikalus (9:16) formatas;</li>
+                <li><strong>Raiška:</strong> Rekomenduojama 1080p „Full HD“ (1920&times;1080) arba 4K;</li>
+                <li><strong>Failo dydis:</strong> Prašome, kad failas neviršytų <strong>300 MB</strong> sklandžiam peržiūros veikimui.</li>
+              </ul>
+            </div>
+          </details>
+
+          <!-- Guidance Q1 -->
+          <details class="faq-accordion-item" data-category="guidance">
+            <summary class="faq-summary">
+              <div class="faq-title-wrap">
+                <span class="faq-topic-tag">Dalyvių amžius</span>
+                <span>Kas gali dalyvauti festivalyje?</span>
+              </div>
+              <span class="faq-icon-chevron" aria-hidden="true">&#9662;</span>
+            </summary>
+            <div class="faq-answer">
+              <p>
+                Festivalyje gali dalyvauti mokiniai, jaunieji kino studijų ar būrelių nariai nuo <strong>10 iki 18 metų amžiaus</strong>:
+              </p>
+              <ul>
+                <li><strong>I Kategorija:</strong> nuo 10 iki 13 metų;</li>
+                <li><strong>II Kategorija:</strong> nuo 14 iki 18 metų.</li>
+              </ul>
+            </div>
+          </details>
+
+          <!-- Guidance Q2 -->
+          <details class="faq-accordion-item" data-category="guidance">
+            <summary class="faq-summary">
+              <div class="faq-title-wrap">
+                <span class="faq-topic-tag">Tėvų & Mokytojų Pagalba</span>
+                <span>Kiek suaugusieji (tėvai, mokytojai) gali padėti kuriant filmą?</span>
+              </div>
+              <span class="faq-icon-chevron" aria-hidden="true">&#9662;</span>
+            </summary>
+            <div class="faq-answer">
+              <p>
+                Suaugusiųjų pagalba turi apsiriboti tik:
+              </p>
+              <ul>
+                <li>Saugumo užtikrinimu filmavimo aikštelėje;</li>
+                <li>Technikos (telefono, kompiuterio) suteikimu;</li>
+                <li>Pagalba eksportuojant failą ar užpildant registracijos formą.</li>
+              </ul>
+              <p>
+                <strong>Kūrybinė kontrolė privalo 100% priklausyti mokiniams:</strong> scenarijų, kameros valdymą, vaidybą ir režisūrą privalo atlikti patys vaikai. Darbai su dominuojančiu suaugusiųjų įsikišimu nebus vertinami.
+              </p>
+            </div>
+          </details>
+
+          <!-- Guidance Q3 -->
+          <details class="faq-accordion-item" data-category="guidance">
+            <summary class="faq-summary">
+              <div class="faq-title-wrap">
+                <span class="faq-topic-tag">Paraiškų skaičius</span>
+                <span>Kiek filmų gali pateikti vienas autorius? Ar galima kurti komandoje?</span>
+              </div>
+              <span class="faq-icon-chevron" aria-hidden="true">&#9662;</span>
+            </summary>
+            <div class="faq-answer">
+              <p>
+                <strong>Vienas dalyvis gali pateikti ne daugiau kaip vieną darbą per vienerius festivalio metus (3 taisyklė).</strong>
+              </p>
+              <p>
+                Jeigu filmą kūrė bendraautorių komanda ar klasė, registracijos formoje nurodykite pagrindinį režisierių, o kitus kūrėjus paminėkite studijos/mokyklos arba filmo aprašymo laukelyje.
+              </p>
+            </div>
+          </details>
+        </div>
+
+        <!-- FAQ Help Callout -->
+        <div class="faq-callout-card">
+          <div class="faq-callout-text">
+            <h4>Pasirengę pateikti savo filmą?</h4>
+            <p>Įsitikinkite, kad filmas nufilmuotas telefonu/planšete, trunka iki 180 s ir pateikiamas iki 2026 m. balandžio 2 d.</p>
+          </div>
+          <div class="faq-callout-actions">
+            <a href="#submit" class="btn-solid">Pateikti Filmą</a>
+            <a href="mailto:azuolynasfilmfestival@gmail.com" class="btn-outline">Klausti Organizatorių</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <section id="categories" class="section-block">
       <div class="container">
         <div class="section-head">
@@ -328,6 +663,15 @@
               Nuoširdžiai dėkojame. Jūsų filmas pasiekė festivalio organizatorių komandą. Į jūsų nurodytą el. paštą išsiųstas patvirtinimas.
             </p>
             <button type="button" class="btn-outline btn-sm" onclick="resetFormView()">Pateikti kitą paraišką</button>
+          </div>
+
+          <div style="background: rgba(18, 55, 47, 0.25); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 12px 18px; margin-bottom: 24px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+            <span style="font-size: 0.88rem; color: var(--text-color);">
+              📱 <strong>Taisyklių priminimas:</strong> Filmas turi būti nufilmuotas telefonu/planšete ir griežtai iki 3 min. (180 s).
+            </span>
+            <a href="#faq" style="font-size: 0.84rem; color: var(--accent-light); font-weight: 600; text-decoration: underline;">
+              Skaityti DUK &rarr;
+            </a>
           </div>
 
           <form id="submissionForm">
@@ -524,6 +868,7 @@
             <li><a href="#about">Apie festivalį</a></li>
             <li><a href="#editions">Metų leidiniai (FEST)</a></li>
             <li><a href="#terms">Dalyvavimo taisyklės</a></li>
+            <li><a href="#faq">DUK & Reikalavimai</a></li>
             <li><a href="#categories">Kategorijos & Prizai</a></li>
             <li><a href="azuolynas-fest-2026.html">FEST 2026 puslapis</a></li>
           </ul>
@@ -552,6 +897,28 @@
     let filmsCache = [];
     let galleryPhotosCache = [];
     let currentLightboxIdx = 0;
+
+    function filterFaq(category, btnElement) {
+      const container = document.getElementById("faqAccordionList");
+      if (!container) return;
+      const items = container.querySelectorAll(".faq-accordion-item");
+      const buttons = document.querySelectorAll(".faq-filter-btn");
+      buttons.forEach((b) => {
+        b.classList.remove("active");
+        b.setAttribute("aria-selected", "false");
+      });
+      if (btnElement) {
+        btnElement.classList.add("active");
+        btnElement.setAttribute("aria-selected", "true");
+      }
+      items.forEach((item) => {
+        if (category === "all" || item.dataset.category === category) {
+          item.style.display = "";
+        } else {
+          item.style.display = "none";
+        }
+      });
+    }
 
     function showToast(message, type = "success") {
       const container = document.getElementById("toastContainer");
