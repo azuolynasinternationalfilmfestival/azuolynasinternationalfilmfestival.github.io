@@ -242,29 +242,30 @@
   </footer>
 
   <script src="../config.js"></script>
+  <script src="../js/social-share.js"></script>
+  <script src="../js/photo-lightbox.js"></script>
   <script>
-    function openLightboxFromSrc(src, caption) {
-      const modal = document.getElementById("lightboxModal");
-      document.getElementById("lightboxImg").src = src;
-      document.getElementById("lightboxCaption").textContent = caption || "";
-      modal.classList.add("active");
-    }
-
-    function closeLightbox() {
-      const modal = document.getElementById("lightboxModal");
-      modal.classList.remove("active");
-      document.getElementById("lightboxImg").src = "";
-    }
-
-    document.getElementById("lightboxModal").addEventListener("click", (e) => {
-      if (e.target === document.getElementById("lightboxModal")) {
-        closeLightbox();
+    const fest2026Photos = [
+      {
+        url: "https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/IMG_3463.jpeg?alt=media&token=af7892ca-e78e-4198-b686-e0181472e8da",
+        caption: "FEST 2026 oficialūs apdovanojimai, ąžuolo statulėlės ir diplomai",
+        album: "prizes"
+      },
+      {
+        url: "https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/IMG_3458.jpeg?alt=media&token=224af1bd-25ff-494e-8136-fbf330d3ad5b",
+        caption: "Kino šventė Kauno tarptautinėje gimnazijoje: ceremonijos akimirkos ir dalyviai",
+        album: "ceremony"
+      },
+      {
+        url: "https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/IMG_3459.jpeg?alt=media&token=dfdda212-9ea6-433f-af80-8c5b5b57f361",
+        caption: "Festivalio laureatai, svečiai ir komisijos nariai ant scenos",
+        album: "laureates"
       }
-    });
+    ];
 
-    document.addEventListener("keydown", (e) => {
-      if (e.key === "Escape") closeLightbox();
-    });
+    if (window.FestivalLightbox) {
+      window.FestivalLightbox.init(fest2026Photos, "lt");
+    }
 
     db.collection("editions").doc("2026").onSnapshot((doc) => {
       if (!doc.exists) return;

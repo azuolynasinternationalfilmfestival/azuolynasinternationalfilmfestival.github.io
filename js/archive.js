@@ -118,6 +118,7 @@ function renderArchiveUI() {
         <div>
           <div class="admin-media-thumb">
             <img src="${p.url}" alt="Foto" class="admin-media-img">
+            <span style="position:absolute; top:6px; left:6px; background:rgba(7,28,24,0.85); color:var(--accent-light); font-size:0.7rem; font-weight:700; padding:2px 6px; border-radius:3px; border:1px solid rgba(111,165,138,0.3); text-transform:uppercase;">${p.album || 'ceremony'}</span>
           </div>
           <div class="admin-media-caption">${p.caption || ''}</div>
         </div>
@@ -219,6 +220,8 @@ async function removeArchiveVideo(id) {
 async function saveArchivePhoto() {
   const btn = document.getElementById("arcImgSaveBtn");
   const caption = document.getElementById("arcImgCaption").value.trim();
+  const albumSelect = document.getElementById("arcImgAlbum");
+  const album = albumSelect ? albumSelect.value : "ceremony";
   let url = document.getElementById("arcImgUrl").value.trim();
 
   if (!caption) {
@@ -265,7 +268,8 @@ async function saveArchivePhoto() {
       {
         id: "arc_photo_" + Date.now(),
         caption,
-        url
+        url,
+        album
       }
     ];
 

@@ -583,9 +583,25 @@
         <div class="section-head">
           <div class="section-tag">Retrospektyva</div>
           <h2 class="section-heading">Festivalio Istorija (2024–2025)</h2>
+          <p class="section-lead-text" style="max-width: 720px; margin: 10px auto 0 auto; color: var(--text-muted); font-size: 0.95rem; text-align: center;">
+            Atraskite ankstesnių metų ceremonijų vaizdo įrašus, laureatų akimirkas ir festivalio nuotraukų albumus su patogiu priartinimu, demonstracija bei dalinimosi funkcijomis.
+          </p>
         </div>
 
+        <!-- Video Retrospective Grid -->
         <div class="archive-media-grid" id="archiveVideosContainer"></div>
+
+        <!-- Photo Albums Showcase & Filter Bar -->
+        <div class="photo-albums-header">
+          <div class="photo-albums-title-row">
+            <div>
+              <h3 style="font-family:var(--font-cinema); font-size:1.35rem; color:var(--text-color); margin-bottom:4px;">Festivalio Nuotraukų Albumai</h3>
+              <p class="photo-albums-sub">Naršykite ceremonijos akimirkas, laureatus ir festivalio apdovanojimus. Paspauskite bet kurią nuotrauką, kad atvertumėte profesionalią peržiūrą.</p>
+            </div>
+          </div>
+          <div class="photo-albums-tabs" id="photoAlbumTabs" role="tablist" aria-label="Nuotraukų albumai"></div>
+        </div>
+
         <div class="archive-media-grid" id="archivePhotosContainer"></div>
       </div>
     </section>
@@ -962,6 +978,7 @@
   <script src="../email-templates.js"></script>
   <script src="../js/social-share.js"></script>
   <script src="../js/voting-and-winners.js"></script>
+  <script src="../js/photo-lightbox.js"></script>
   <script>
     let filmsCache = [];
     let galleryPhotosCache = [];
@@ -1170,24 +1187,25 @@
 
       galleryPhotosCache = Array.isArray(data.archivePhotos) && data.archivePhotos.length > 0 ? data.archivePhotos : [
         {
-          caption: "Akimirkos iš 2025 m. festivalio ceremonijos",
-          url: "https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/IMG_3458.jpeg?alt=media&token=224af1bd-25ff-494e-8136-fbf330d3ad5b"
+          caption: "Akimirkos iš 2025 m. festivalio ceremonijos Kauno tarptautinėje gimnazijoje",
+          url: "https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/IMG_3458.jpeg?alt=media&token=224af1bd-25ff-494e-8136-fbf330d3ad5b",
+          album: "ceremony"
         },
         {
-          caption: "Festivalio laureatai ir dalyviai 2025 m.",
-          url: "https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/IMG_3459.jpeg?alt=media&token=dfdda212-9ea6-433f-af80-8c5b5b57f361"
+          caption: "Festivalio laureatai, svečiai ir komisijos nariai 2025 m.",
+          url: "https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/IMG_3459.jpeg?alt=media&token=dfdda212-9ea6-433f-af80-8c5b5b57f361",
+          album: "laureates"
+        },
+        {
+          caption: "Oficialūs festivalio apdovanojimai, ąžuolo statulėlės ir laureatų diplomai",
+          url: "https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/IMG_3463.jpeg?alt=media&token=af7892ca-e78e-4198-b686-e0181472e8da",
+          album: "prizes"
         }
       ];
 
-      photosContainer.innerHTML = galleryPhotosCache.map((p, idx) => `
-        <div class="gallery-item" onclick="openLightbox(${idx})">
-          <div class="gallery-item-media">
-            <img src="${p.url}" alt="${p.caption || 'Nuotrauka'}" loading="lazy">
-            <div class="gallery-overlay-hint"><span>Žiūrėti</span></div>
-          </div>
-          <div class="gallery-caption">${p.caption || ''}</div>
-        </div>
-      `).join("");
+      if (window.FestivalLightbox) {
+        FestivalLightbox.init(galleryPhotosCache, "lt");
+      }
     }
 
     function openLightbox(idx) {
