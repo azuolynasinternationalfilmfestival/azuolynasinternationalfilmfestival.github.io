@@ -552,7 +552,7 @@
 
       try {
         let uid = null;
-        if (firebase.auth && firebase.auth().currentUser) {
+        if (typeof firebase !== "undefined" && typeof firebase.auth === "function" && firebase.auth().currentUser) {
           uid = firebase.auth().currentUser.uid;
         } else {
           uid = localStorage.getItem("festival_voter_uid");
@@ -562,7 +562,10 @@
           }
         }
 
-        const db = firebase.firestore();
+        const db = (typeof firebase !== "undefined" && typeof firebase.firestore === "function") ? firebase.firestore() : (window.db || null);
+        if (!db) {
+          throw new Error(isLt ? "Duomenų bazė šiuo metu nepasiekiama." : "Database currently unavailable.");
+        }
         const filmRef = db.collection("submissions").doc(filmId);
         const voteAuditRef = db.collection("submissions").doc(filmId).collection("votes").doc(uid);
 

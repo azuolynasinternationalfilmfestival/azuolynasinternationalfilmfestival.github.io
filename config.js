@@ -8,16 +8,26 @@ const firebaseConfig = {
   measurementId: "G-9Z050BPHJ5"
 };
 
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const db = firebase.firestore();
-const storage = firebase.storage();
+if (typeof firebase !== "undefined") {
+  if (!firebase.apps || !firebase.apps.length) {
+    try {
+      firebase.initializeApp(firebaseConfig);
+    } catch (e) {
+      console.warn("Firebase initializeApp note:", e);
+    }
+  }
+}
 
-const PRIMARY_SUPERADMIN_EMAIL = "azuolynasfilmfestival@gmail.com";
+var auth = (typeof firebase !== "undefined" && typeof firebase.auth === "function") ? firebase.auth() : null;
+var db = (typeof firebase !== "undefined" && typeof firebase.firestore === "function") ? firebase.firestore() : null;
+var storage = (typeof firebase !== "undefined" && typeof firebase.storage === "function") ? firebase.storage() : null;
 
-const AUTHORIZED_ADMIN_EMAILS = [
+var PRIMARY_SUPERADMIN_EMAIL = "azuolynasfilmfestival@gmail.com";
+
+var AUTHORIZED_ADMIN_EMAILS = [
   "azuolynasfilmfestival@gmail.com",
-  "karina.brdar@gmail.com"
+  "karina.brdar@gmail.com",
+  "dominikphotofficial.lt@gmail.com"
 ];
 
 const DEFAULT_CONTENT = {
@@ -68,3 +78,13 @@ const DEFAULT_CONTENT = {
   showSubmit: true,
   recordingVideoUrl: ""
 };
+
+if (typeof window !== "undefined") {
+  window.firebaseConfig = firebaseConfig;
+  window.auth = auth;
+  window.db = db;
+  window.storage = storage;
+  window.PRIMARY_SUPERADMIN_EMAIL = PRIMARY_SUPERADMIN_EMAIL;
+  window.AUTHORIZED_ADMIN_EMAILS = AUTHORIZED_ADMIN_EMAILS;
+  window.DEFAULT_CONTENT = DEFAULT_CONTENT;
+}

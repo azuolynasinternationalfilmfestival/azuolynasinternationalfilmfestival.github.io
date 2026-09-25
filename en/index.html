@@ -895,10 +895,15 @@
   <script src="../js/voting-and-winners.js"></script>
   <script src="../js/photo-lightbox.js"></script>
   <script>
+    window.addEventListener("error", (e) => {
+      console.warn("Script notice:", e.message || e);
+    });
     window.addEventListener("unhandledrejection", (e) => {
       console.warn("Handled promise rejection:", e.reason);
-      e.preventDefault();
+      if (e.preventDefault) e.preventDefault();
     });
+
+    const firestoreDb = window.db || (typeof db !== "undefined" ? db : null);
 
     let filmsCache = [];
     let galleryPhotosCache = [];
@@ -952,9 +957,10 @@
       return `<video controls playsinline preload="metadata" src="${cleanUrl}" class="embed-media"></video>`;
     }
 
-    db.collection("settings").doc("festival").onSnapshot((doc) => {
-      const d = doc.exists ? doc.data() : DEFAULT_CONTENT;
-      const data = d.en || DEFAULT_CONTENT.en;
+    if (firestoreDb) {
+      firestoreDb.collection("settings").doc("festival").onSnapshot((doc) => {
+        const d = doc.exists ? doc.data() : DEFAULT_CONTENT;
+        const data = d.en || DEFAULT_CONTENT.en;
 
       // Tab visibilities from settings (default true unless explicitly set to false; results & voting default false)
       const showAbout = d.showAbout !== false;
@@ -1078,8 +1084,10 @@
     }, (err) => {
       console.warn("Settings snapshot listener:", err.message);
     });
+  }
 
-    db.collection("editions").onSnapshot((snapshot) => {
+  if (firestoreDb) {
+    firestoreDb.collection("editions").onSnapshot((snapshot) => {
       const container = document.getElementById("editionsContainer");
       if (!container) return;
 
@@ -1128,6 +1136,7 @@
     }, (err) => {
       console.warn("Editions snapshot listener:", err.message);
     });
+  }
 
     function renderArchiveSection(data) {
       const videosContainer = document.getElementById("archiveVideosContainer");
@@ -1243,30 +1252,55 @@
       if (touchEndX - touchStartX > 50) stepLightbox(-1);
     }, { passive: true });
 
-    db.collection("submissions").onSnapshot((snapshot) => {
-      filmsCache = [];
-      snapshot.forEach((doc) => {
-        filmsCache.push({ id: doc.id, ...doc.data() });
+    if (firestoreDb) {
+      firestoreDb.collection("submissions").onSnapshot((snapshot) => {
+        filmsCache = [];
+        snapshot.forEach((doc) => {
+          filmsCache.push({ id: doc.id, ...doc.data() });
+        });
+        window.filmsCache = filmsCache;
+
+        const hasWinners = filmsCache.some((f) => f.isWinner === true);
+        const hasVoting = filmsCache.some((f) => f.inVoting === true);
+        if (hasWinners) {
+          document.getElementById("results")?.classList.remove("d-none");
+          document.getElementById("navLinkResults")?.classList.remove("d-none");
+        }
+        if (hasVoting) {
+          document.getElementById("competition")?.classList.remove("d-none");
+          document.getElementById("navLinkVoting")?.classList.remove("d-none");
+          document.getElementById("heroVoteBtn")?.classList.remove("d-none");
+        }
+
+        renderWinnersSection();
+        renderFilmsGallery();
+      }, (err) => {
+        console.warn("Submissions snapshot listener:", err.message);
+        // Fallback: try targeted queries if collection listing was restricted
+        try {
+          firestoreDb.collection("submissions").where("inVoting", "==", true).get().then((snap) => {
+            if (snap && !snap.empty) {
+              snap.forEach((doc) => {
+                if (!filmsCache.some(f => f.id === doc.id)) {
+                  filmsCache.push({ id: doc.id, ...doc.data() });
+                }
+              });
+              renderFilmsGallery();
+            }
+          }).catch(() => {});
+          firestoreDb.collection("submissions").where("isWinner", "==", true).get().then((snap) => {
+            if (snap && !snap.empty) {
+              snap.forEach((doc) => {
+                if (!filmsCache.some(f => f.id === doc.id)) {
+                  filmsCache.push({ id: doc.id, ...doc.data() });
+                }
+              });
+              renderWinnersSection();
+            }
+          }).catch(() => {});
+        } catch (e) {}
       });
-      window.filmsCache = filmsCache;
-
-      const hasWinners = filmsCache.some((f) => f.isWinner === true);
-      const hasVoting = filmsCache.some((f) => f.inVoting === true);
-      if (hasWinners) {
-        document.getElementById("results")?.classList.remove("d-none");
-        document.getElementById("navLinkResults")?.classList.remove("d-none");
-      }
-      if (hasVoting) {
-        document.getElementById("competition")?.classList.remove("d-none");
-        document.getElementById("navLinkVoting")?.classList.remove("d-none");
-        document.getElementById("heroVoteBtn")?.classList.remove("d-none");
-      }
-
-      renderWinnersSection();
-      renderFilmsGallery();
-    }, (err) => {
-      console.warn("Submissions snapshot listener:", err.message);
-    });
+    }
 
     function renderWinnersSection() {
       if (window.FestivalLaureates) {
@@ -1391,7 +1425,11 @@
         const ext = verifiedVideoFile.name.split(".").pop();
         const safeName = name.replace(/[^a-zA-Z0-9]/g, "_");
         const storagePath = `submissions/${Date.now()}_${safeName}.${ext}`;
-        const storageRef = storage.ref(storagePath);
+        const activeStorage = storage || (typeof firebase !== "undefined" && typeof firebase.storage === "function" ? firebase.storage() : null);
+        if (!activeStorage) {
+          throw new Error("Storage service is currently unavailable.");
+        }
+        const storageRef = activeStorage.ref(storagePath);
         const uploadTask = storageRef.put(verifiedVideoFile);
 
         uploadTask.on("state_changed",
@@ -1428,7 +1466,8 @@
               submittedAt: firebase.firestore.FieldValue.serverTimestamp()
             };
 
-            await db.collection("submissions").add(submissionData);
+            const targetDb = firestoreDb || (typeof window !== "undefined" && window.db) || (typeof db !== "undefined" ? db : null) || firebase.firestore();
+            await targetDb.collection("submissions").add(submissionData);
 
             if (typeof generateEmailHtml === "function") {
               const emailHtml = generateEmailHtml("en", "submissionReceived", {
@@ -1440,7 +1479,7 @@
                 videoDurationSeconds
               });
 
-              await db.collection("mail").add({
+              await targetDb.collection("mail").add({
                 to: [email],
                 message: {
                   subject: emailTexts.en.submissionReceived.sub,
@@ -1452,7 +1491,7 @@
             if (typeof generateAdminNotificationHtml === "function") {
               const adminEmailHtml = generateAdminNotificationHtml("en", submissionData);
 
-              await db.collection("mail").add({
+              await targetDb.collection("mail").add({
                 to: ["azuolynasfilmfestival@gmail.com"],
                 message: {
                   subject: `New Submission: ${filmTitle} (${name})`,
