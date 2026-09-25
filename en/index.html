@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <script id="Cookiebot" src="https://consent.cookiebot.com/uc.js" data-cbid="06c15308-ea25-4737-9b50-13705638aa99" data-blockingmode="auto" type="text/javascript"></script>
   <meta charset="UTF-8">
   <link rel="preconnect" href="https://firebasestorage.googleapis.com">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -896,6 +895,11 @@
   <script src="../js/voting-and-winners.js"></script>
   <script src="../js/photo-lightbox.js"></script>
   <script>
+    window.addEventListener("unhandledrejection", (e) => {
+      console.warn("Handled promise rejection:", e.reason);
+      e.preventDefault();
+    });
+
     let filmsCache = [];
     let galleryPhotosCache = [];
     let currentLightboxIdx = 0;

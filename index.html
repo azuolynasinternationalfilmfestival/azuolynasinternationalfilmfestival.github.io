@@ -5,11 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Ąžuolynas International Students Film Festival</title>
   <script>
-    const userLang = (navigator.language || navigator.userLanguage || "lt").toLowerCase();
-    if (userLang.startsWith("en")) {
-      window.location.replace("en/index.html");
-    } else {
-      window.location.replace("lt/index.html");
+    try {
+      var userLang = (navigator.language || navigator.userLanguage || "lt").toLowerCase();
+      if (userLang.indexOf("en") === 0) {
+        window.location.replace("en/index.html");
+      } else {
+        window.location.replace("lt/index.html");
+      }
+    } catch (e) {
+      window.location.href = "lt/index.html";
     }
   </script>
 </head>
