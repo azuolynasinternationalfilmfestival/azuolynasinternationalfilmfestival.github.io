@@ -1,20 +1,40 @@
 const firebaseConfig = {
-  apiKey: "AIzaSyAl-aLSlSHUdrZ4Rr4x23n3bu3QFZSYyB0",
-  authDomain: "azuolynas-film-fest.firebaseapp.com",
-  projectId: "azuolynas-film-fest",
-  storageBucket: "azuolynas-film-fest.firebasestorage.app",
-  messagingSenderId: "541713316291",
-  appId: "1:541713316291:web:51de85684512c9d7e6a576",
-  measurementId: "G-9Z050BPHJ5"
+  projectId: "filmfest-509606",
+  appId: "1:230564112771:web:a3e4ff9d47bf0ff3fb2eb6",
+  apiKey: "AIzaSyDDKEzn0jN_xUTDw5aXABU79ZEYKIACfdE",
+  authDomain: "filmfest-509606.firebaseapp.com",
+  firestoreDatabaseId: "ai-studio-azuolynasinterna-cd7ce36e-5213-4751-8aa0-a7141d397a83",
+  storageBucket: "filmfest-509606.firebasestorage.app",
+  messagingSenderId: "230564112771",
+  measurementId: ""
 };
 
-if (!firebase.apps.length) {
-  firebase.initializeApp(firebaseConfig);
+if (typeof firebase !== "undefined") {
+  if (!firebase.apps || !firebase.apps.length) {
+    try {
+      firebase.initializeApp(firebaseConfig);
+    } catch (e) {
+      console.warn("Firebase initializeApp note:", e);
+    }
+  }
 }
 
-export const auth = firebase.auth();
-export const db = firebase.firestore();
-export const storage = firebase.storage();
+function getFirestoreInstance() {
+  if (typeof firebase === "undefined" || typeof firebase.firestore !== "function") return null;
+  const dbId = firebaseConfig.firestoreDatabaseId;
+  if (dbId && dbId !== "(default)" && typeof firebase.app === "function") {
+    try {
+      return firebase.app().firestore(dbId);
+    } catch (e) {
+      console.warn("Custom databaseId fallback:", e);
+    }
+  }
+  return firebase.firestore();
+}
+
+export const auth = (typeof firebase !== "undefined" && typeof firebase.auth === "function") ? firebase.auth() : null;
+export const db = getFirestoreInstance();
+export const storage = (typeof firebase !== "undefined" && typeof firebase.storage === "function") ? firebase.storage() : null;
 
 export const PRIMARY_SUPERADMIN_EMAIL = "azuolynasfilmfestival@gmail.com";
 
