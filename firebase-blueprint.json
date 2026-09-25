@@ -1,0 +1,78 @@
+{
+  "entities": {
+    "FestivalSettings": {
+      "title": "FestivalSettings",
+      "description": "Global festival settings, tab visibilities, and localized texts",
+      "type": "object",
+      "properties": {
+        "showAbout": { "type": "boolean", "description": "Visibility of About tab & hero" },
+        "showTerms": { "type": "boolean", "description": "Visibility of Terms & rules tab" },
+        "showFaq": { "type": "boolean", "description": "Visibility of FAQ tab" },
+        "showCategories": { "type": "boolean", "description": "Visibility of Categories & prizes tab" },
+        "showEditions": { "type": "boolean", "description": "Visibility of Editions tab" },
+        "showArchive": { "type": "boolean", "description": "Visibility of Archive tab" },
+        "showCurrentEdition": { "type": "boolean", "description": "Visibility of featured FEST edition link" },
+        "showResults": { "type": "boolean", "description": "Visibility of Results & winners tab" },
+        "showVoting": { "type": "boolean", "description": "Visibility of Voting tab" },
+        "showScreening": { "type": "boolean", "description": "Visibility of Screening tab" },
+        "showSubmit": { "type": "boolean", "description": "Visibility of Submission form tab" },
+        "recordingVideoUrl": { "type": "string", "description": "URL of the festival recording video" },
+        "prizesPhotoUrl": { "type": "string", "description": "URL of the prizes photo" }
+      }
+    },
+    "FestivalEdition": {
+      "title": "FestivalEdition",
+      "description": "Information about a specific annual edition of the festival",
+      "type": "object",
+      "properties": {
+        "year": { "type": "string", "description": "Edition year" },
+        "title": { "type": "string", "description": "Edition title" },
+        "subtitle": { "type": "string", "description": "Edition subtitle" },
+        "date": { "type": "string", "description": "Ceremony date" },
+        "heroImage": { "type": "string", "description": "Banner photo URL" },
+        "story": { "type": "string", "description": "Edition story text" },
+        "videoUrl": { "type": "string", "description": "Video recording URL" },
+        "pageUrl": { "type": "string", "description": "Relative page URL" }
+      },
+      "required": ["year", "title"]
+    },
+    "Submission": {
+      "title": "Submission",
+      "description": "Film festival entry submission",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string", "description": "Student filmmaker full name" },
+        "email": { "type": "string", "description": "Contact email" },
+        "age": { "type": "number", "description": "Age 10-18" },
+        "category": { "type": "string", "description": "Competition category" },
+        "location": { "type": "string", "description": "Country and city" },
+        "institution": { "type": "string", "description": "School or film studio" },
+        "filmTitle": { "type": "string", "description": "Film title" },
+        "deviceModel": { "type": "string", "description": "Phone or tablet model used" },
+        "synopsis": { "type": "string", "description": "Film synopsis" },
+        "videoUrl": { "type": "string", "description": "Storage URL of the video" },
+        "videoDurationSeconds": { "type": "number", "description": "Duration in seconds (max 180)" },
+        "status": { "type": "string", "description": "Status (submitted, accepted, semifinal, final, winner, rejected)" },
+        "inVoting": { "type": "boolean", "description": "Whether film is active in public voting" },
+        "isWinner": { "type": "boolean", "description": "Whether film is an official laureate" },
+        "awardTitle": { "type": "string", "description": "Award or nomination title" },
+        "votesCount": { "type": "number", "description": "Audience votes counter" }
+      },
+      "required": ["name", "email", "category", "filmTitle", "videoUrl"]
+    }
+  },
+  "firestore": {
+    "/settings/{settingId}": {
+      "schema": "FestivalSettings",
+      "description": "Global festival settings and tab controls"
+    },
+    "/editions/{editionId}": {
+      "schema": "FestivalEdition",
+      "description": "Annual festival edition documents"
+    },
+    "/submissions/{submissionId}": {
+      "schema": "Submission",
+      "description": "Film entries submitted by participants"
+    }
+  }
+}

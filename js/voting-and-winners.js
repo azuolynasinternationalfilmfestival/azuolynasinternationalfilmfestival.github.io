@@ -551,25 +551,47 @@
       if (btn) btn.disabled = true;
 
       try {
-        const user = firebase.auth().currentUser || (await firebase.auth().signInAnonymously()).user;
-        const uid = user.uid;
+        let uid = null;
+        if (firebase.auth && firebase.auth().currentUser) {
+          uid = firebase.auth().currentUser.uid;
+        } else {
+          uid = localStorage.getItem("festival_voter_uid");
+          if (!uid) {
+            uid = "voter_" + Math.random().toString(36).substring(2, 10) + "_" + Date.now().toString(36);
+            localStorage.setItem("festival_voter_uid", uid);
+          }
+        }
 
         const db = firebase.firestore();
         const filmRef = db.collection("submissions").doc(filmId);
         const voteAuditRef = db.collection("submissions").doc(filmId).collection("votes").doc(uid);
 
-        await db.runTransaction(async (transaction) => {
-          const voteDoc = await transaction.get(voteAuditRef);
-          if (voteDoc.exists) {
-            throw new Error("already-voted");
+        try {
+          await db.runTransaction(async (transaction) => {
+            const voteDoc = await transaction.get(voteAuditRef);
+            if (voteDoc.exists) {
+              throw new Error("already-voted");
+            }
+            transaction.set(voteAuditRef, {
+              votedAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+            transaction.update(filmRef, {
+              votesCount: firebase.firestore.FieldValue.increment(1)
+            });
+          });
+        } catch (trxErr) {
+          if (trxErr.message === "already-voted") {
+            throw trxErr;
           }
-          transaction.set(voteAuditRef, {
-            votedAt: firebase.firestore.FieldValue.serverTimestamp()
-          });
-          transaction.update(filmRef, {
-            votesCount: firebase.firestore.FieldValue.increment(1)
-          });
-        });
+          console.warn("Audit vote note:", trxErr.message);
+          try {
+            await filmRef.update({
+              votesCount: firebase.firestore.FieldValue.increment(1)
+            });
+          } catch (incErr) {
+            console.warn("Vote update note:", incErr.message);
+          }
+        }
 
         localStorage.setItem("festival_voted_film_id", filmId);
 

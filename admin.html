@@ -373,39 +373,113 @@
         </div>
 
         <div class="content-card">
-          <h3 class="content-card-title">Svetainės Skilčių Matomumas (Viešas rodymas)</h3>
-          <p class="content-card-sub">Valdykite, kurios skiltys ir jų meniu nuorodos yra rodomos viešiems lankytojams.</p>
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:12px;">
+            <div>
+              <h3 class="content-card-title" style="margin-bottom:4px;">Svetainės Skilčių ir Meniu Skirtukų Matomumas</h3>
+              <p class="content-card-sub" style="margin-bottom:0;">Valdykite visų svetainės skilčių bei atitinkamų meniu skirtukų rodymą lankytojams. Išjungus skirtuką, paslepiama ir nuoroda navigacijoje, ir pati skiltis.</p>
+            </div>
+            <div style="display:flex; gap:8px;">
+              <button type="button" id="btnShowAllTabs" class="btn-outline btn-xs">Rodyti visus skirtukus</button>
+            </div>
+          </div>
+
           <div class="switch-grid">
+            <label class="switch-label">
+              <input type="checkbox" id="cfgShowAbout" class="switch-input" checked>
+              <span class="switch-slider"></span>
+              <div class="switch-text">
+                <span class="switch-title">Apie festivalį (Hero)</span>
+                <span class="switch-sub">Pagrindinė tema, datos, aprašymas</span>
+              </div>
+            </label>
+
+            <label class="switch-label">
+              <input type="checkbox" id="cfgShowTerms" class="switch-input" checked>
+              <span class="switch-slider"></span>
+              <div class="switch-text">
+                <span class="switch-title">Taisyklės (Reglamentas)</span>
+                <span class="switch-sub">Telefonų reikalavimai, 3 min. taisyklė</span>
+              </div>
+            </label>
+
+            <label class="switch-label">
+              <input type="checkbox" id="cfgShowFaq" class="switch-input" checked>
+              <span class="switch-slider"></span>
+              <div class="switch-text">
+                <span class="switch-title">DUK (Klausimai)</span>
+                <span class="switch-sub">Dažniausiai užduodami klausimai</span>
+              </div>
+            </label>
+
+            <label class="switch-label">
+              <input type="checkbox" id="cfgShowCategories" class="switch-input" checked>
+              <span class="switch-slider"></span>
+              <div class="switch-text">
+                <span class="switch-title">Kategorijos & Prizai</span>
+                <span class="switch-sub">Amžiaus grupės, statulėlės ir taurės</span>
+              </div>
+            </label>
+
+            <label class="switch-label">
+              <input type="checkbox" id="cfgShowEditions" class="switch-input" checked>
+              <span class="switch-slider"></span>
+              <div class="switch-text">
+                <span class="switch-title">Metų Leidimai (FEST)</span>
+                <span class="switch-sub">Oficialūs festivalio metraščiai</span>
+              </div>
+            </label>
+
+            <label class="switch-label">
+              <input type="checkbox" id="cfgShowArchive" class="switch-input" checked>
+              <span class="switch-slider"></span>
+              <div class="switch-text">
+                <span class="switch-title">Retrospektyva (Archyvas)</span>
+                <span class="switch-sub">Ankstesnių metų video ir nuotraukos</span>
+              </div>
+            </label>
+
+            <label class="switch-label">
+              <input type="checkbox" id="cfgShowCurrentEdition" class="switch-input" checked>
+              <span class="switch-slider"></span>
+              <div class="switch-text">
+                <span class="switch-title">FEST 2026 Meniu Nuoroda</span>
+                <span class="switch-sub">Tiesioginis mygtukas į 2026 m. leidinį</span>
+              </div>
+            </label>
+
+            <label class="switch-label">
+              <input type="checkbox" id="cfgShowResults" class="switch-input">
+              <span class="switch-slider"></span>
+              <div class="switch-text">
+                <span class="switch-title">Rezultatai (Laureatai)</span>
+                <span class="switch-sub">Paskelbti festivalio nugalėtojai</span>
+              </div>
+            </label>
+
             <label class="switch-label">
               <input type="checkbox" id="cfgShowVoting" class="switch-input">
               <span class="switch-slider"></span>
               <div class="switch-text">
                 <span class="switch-title">Balsavimo skiltis</span>
-                <span class="switch-sub">Rodo konkursinius filmus ir balsavimą</span>
+                <span class="switch-sub">Konkursiniai filmai ir žiūrovų balsai</span>
               </div>
             </label>
+
             <label class="switch-label">
-              <input type="checkbox" id="cfgShowResults" class="switch-input">
+              <input type="checkbox" id="cfgShowScreening" class="switch-input" checked>
               <span class="switch-slider"></span>
               <div class="switch-text">
-                <span class="switch-title">Rezultatų skiltis</span>
-                <span class="switch-sub">Rodo paskelbtus laureatus</span>
+                <span class="switch-title">Renginio Peržiūra</span>
+                <span class="switch-sub">Festivalio atidarymo vaizdo grotuvas</span>
               </div>
             </label>
+
             <label class="switch-label">
-              <input type="checkbox" id="cfgShowScreening" class="switch-input">
+              <input type="checkbox" id="cfgShowSubmit" class="switch-input" checked>
               <span class="switch-slider"></span>
               <div class="switch-text">
-                <span class="switch-title">Peržiūros skiltis</span>
-                <span class="switch-sub">Rodo festivalio vaizdo įrašo langą</span>
-              </div>
-            </label>
-            <label class="switch-label">
-              <input type="checkbox" id="cfgShowSubmit" class="switch-input">
-              <span class="switch-slider"></span>
-              <div class="switch-text">
-                <span class="switch-title">Registracijos forma</span>
-                <span class="switch-sub">Leidžia teikti naujus filmus</span>
+                <span class="switch-title">Registracijos Forma</span>
+                <span class="switch-sub">Leidžia dalyviams teikti naujus filmus</span>
               </div>
             </label>
           </div>

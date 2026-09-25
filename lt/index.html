@@ -112,13 +112,13 @@
         <span class="logo-text">Ąžuolynas Fest</span>
       </a>
       <ul class="nav-links">
-        <li><a href="#about">Apie festivalį</a></li>
-        <li><a href="#terms">Taisyklės</a></li>
-        <li><a href="faq.html">DUK</a></li>
-        <li><a href="#categories">Kategorijos & Prizai</a></li>
-        <li><a href="#editions">Metų Leidimai</a></li>
-        <li><a href="#archive">Retrospektyva</a></li>
-        <li><a href="azuolynas-fest-2026.html">FEST 2026</a></li>
+        <li id="navLinkAbout"><a href="#about">Apie festivalį</a></li>
+        <li id="navLinkTerms"><a href="#terms">Taisyklės</a></li>
+        <li id="navLinkFaq"><a href="faq.html">DUK</a></li>
+        <li id="navLinkCategories"><a href="#categories">Kategorijos & Prizai</a></li>
+        <li id="navLinkEditions"><a href="#editions">Metų Leidimai</a></li>
+        <li id="navLinkArchive"><a href="#archive">Retrospektyva</a></li>
+        <li id="navLinkCurrentEdition"><a href="azuolynas-fest-2026.html">FEST 2026</a></li>
         <li id="navLinkResults" class="d-none"><a href="#results">Rezultatai</a></li>
         <li id="navLinkVoting" class="d-none"><a href="#competition">Balsavimas</a></li>
         <li id="navLinkScreening"><a href="#screening">Peržiūra</a></li>
@@ -162,7 +162,7 @@
 
         <div class="cta-flex">
           <a href="#submit" id="heroSubmitBtn" class="btn-solid">Pateikti savo filmą</a>
-          <a href="#editions" class="btn-outline">FEST Metraščiai</a>
+          <a href="#editions" id="heroEditionsBtn" class="btn-outline">FEST Metraščiai</a>
           <a href="#competition" id="heroVoteBtn" class="btn-outline d-none">Balsuoti už filmus</a>
         </div>
       </div>
@@ -965,17 +965,72 @@
       return `<video controls playsinline preload="metadata" src="${cleanUrl}" class="embed-media"></video>`;
     }
 
-    auth.signInAnonymously().catch((err) => console.error(err));
-
     db.collection("settings").doc("festival").onSnapshot((doc) => {
       const d = doc.exists ? doc.data() : DEFAULT_CONTENT;
       const data = d.lt || DEFAULT_CONTENT.lt;
 
-      const showVoting = d.showVoting === true || (Array.isArray(filmsCache) && filmsCache.some(f => f.inVoting === true));
+      // Tab visibilities from settings (default true unless explicitly set to false; results & voting default false)
+      const showAbout = d.showAbout !== false;
+      const showTerms = d.showTerms !== false;
+      const showFaq = d.showFaq !== false;
+      const showCategories = d.showCategories !== false;
+      const showEditions = d.showEditions !== false;
+      const showArchive = d.showArchive !== false;
+      const showCurrentEdition = d.showCurrentEdition !== false;
       const showResults = d.showResults === true || (Array.isArray(filmsCache) && filmsCache.some(f => f.isWinner === true));
+      const showVoting = d.showVoting === true || (Array.isArray(filmsCache) && filmsCache.some(f => f.inVoting === true));
       const showScreening = d.showScreening !== false;
       const showSubmit = d.showSubmit !== false;
 
+      // 1. About / Hero
+      const secAbout = document.getElementById("about");
+      const navAbout = document.getElementById("navLinkAbout");
+      if (secAbout) secAbout.classList.toggle("d-none", !showAbout);
+      if (navAbout) navAbout.classList.toggle("d-none", !showAbout);
+
+      // 2. Terms
+      const secTerms = document.getElementById("terms");
+      const navTerms = document.getElementById("navLinkTerms");
+      if (secTerms) secTerms.classList.toggle("d-none", !showTerms);
+      if (navTerms) navTerms.classList.toggle("d-none", !showTerms);
+
+      // 3. FAQ
+      const secFaq = document.getElementById("faq");
+      const navFaq = document.getElementById("navLinkFaq");
+      if (secFaq) secFaq.classList.toggle("d-none", !showFaq);
+      if (navFaq) navFaq.classList.toggle("d-none", !showFaq);
+
+      // 4. Categories & Prizes
+      const secCategories = document.getElementById("categories");
+      const navCategories = document.getElementById("navLinkCategories");
+      if (secCategories) secCategories.classList.toggle("d-none", !showCategories);
+      if (navCategories) navCategories.classList.toggle("d-none", !showCategories);
+
+      // 5. Editions
+      const secEditions = document.getElementById("editions");
+      const navEditions = document.getElementById("navLinkEditions");
+      const heroEditions = document.getElementById("heroEditionsBtn");
+      if (secEditions) secEditions.classList.toggle("d-none", !showEditions);
+      if (navEditions) navEditions.classList.toggle("d-none", !showEditions);
+      if (heroEditions) heroEditions.classList.toggle("d-none", !showEditions);
+
+      // 6. Archive & Media
+      const secArchive = document.getElementById("archive");
+      const navArchive = document.getElementById("navLinkArchive");
+      if (secArchive) secArchive.classList.toggle("d-none", !showArchive);
+      if (navArchive) navArchive.classList.toggle("d-none", !showArchive);
+
+      // 7. Current Edition nav link
+      const navCurrentEdition = document.getElementById("navLinkCurrentEdition");
+      if (navCurrentEdition) navCurrentEdition.classList.toggle("d-none", !showCurrentEdition);
+
+      // 8. Results / Laureates
+      const secResults = document.getElementById("results");
+      const navResults = document.getElementById("navLinkResults");
+      if (secResults) secResults.classList.toggle("d-none", !showResults);
+      if (navResults) navResults.classList.toggle("d-none", !showResults);
+
+      // 9. Voting & Competition
       const secVoting = document.getElementById("competition");
       const navVoting = document.getElementById("navLinkVoting");
       const heroVote = document.getElementById("heroVoteBtn");
@@ -983,16 +1038,13 @@
       if (navVoting) navVoting.classList.toggle("d-none", !showVoting);
       if (heroVote) heroVote.classList.toggle("d-none", !showVoting);
 
-      const secResults = document.getElementById("results");
-      const navResults = document.getElementById("navLinkResults");
-      if (secResults) secResults.classList.toggle("d-none", !showResults);
-      if (navResults) navResults.classList.toggle("d-none", !showResults);
-
+      // 10. Screening
       const secScreening = document.getElementById("screening");
       const navScreening = document.getElementById("navLinkScreening");
       if (secScreening) secScreening.classList.toggle("d-none", !showScreening);
       if (navScreening) navScreening.classList.toggle("d-none", !showScreening);
 
+      // 11. Submit / Registration
       const secSubmit = document.getElementById("submit");
       const navSubmit = document.getElementById("navLinkSubmit");
       const heroSubmit = document.getElementById("heroSubmitBtn");
@@ -1036,6 +1088,8 @@
         const ph = data.recordingPlaceholder || DEFAULT_CONTENT.lt.recordingPlaceholder;
         document.getElementById("dynRecordingPlaceholder").textContent = ph;
       }
+    }, (err) => {
+      console.warn("Settings snapshot listener:", err.message);
     });
 
     db.collection("editions").onSnapshot((snapshot) => {
@@ -1084,6 +1138,8 @@
         </div>
         `;
       }).join("");
+    }, (err) => {
+      console.warn("Editions snapshot listener:", err.message);
     });
 
     function renderArchiveSection(data) {
@@ -1223,6 +1279,8 @@
 
       renderWinnersSection();
       renderFilmsGallery();
+    }, (err) => {
+      console.warn("Submissions snapshot listener:", err.message);
     });
 
     function renderWinnersSection() {

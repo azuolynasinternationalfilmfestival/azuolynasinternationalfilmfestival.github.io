@@ -55,5 +55,16 @@ const DEFAULT_CONTENT = {
     cat2Desc: "For youth directors exploring bold perspectives and nuanced compositions.",
     recordingPlaceholder: "The official festival recording will be published here on April 17th, 2026."
   },
+  showAbout: true,
+  showTerms: true,
+  showFaq: true,
+  showCategories: true,
+  showEditions: true,
+  showArchive: true,
+  showCurrentEdition: true,
+  showResults: false,
+  showVoting: false,
+  showScreening: true,
+  showSubmit: true,
   recordingVideoUrl: ""
 };

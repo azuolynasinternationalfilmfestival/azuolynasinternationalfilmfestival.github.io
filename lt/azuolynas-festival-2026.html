@@ -283,6 +283,8 @@
         else if (embed.includes("youtu.be/")) embed = embed.replace("youtu.be/", "www.youtube.com/embed/");
         wrap.innerHTML = `<iframe src="${embed}" allowfullscreen class="embed-media"></iframe>`;
       }
+    }, (err) => {
+      console.warn("Edition 2026 listener:", err.message);
     });
   </script>
 </body>

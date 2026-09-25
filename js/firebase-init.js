@@ -43,6 +43,17 @@ export const DEFAULT_CONTENT = {
     targetAudience: "Students (10–18 yrs)",
     recordingPlaceholder: "The official festival recording will be published here on April 17th, 2026."
   },
+  showAbout: true,
+  showTerms: true,
+  showFaq: true,
+  showCategories: true,
+  showEditions: true,
+  showArchive: true,
+  showCurrentEdition: true,
+  showResults: false,
+  showVoting: false,
+  showScreening: true,
+  showSubmit: true,
   recordingVideoUrl: "",
   prizesPhotoUrl: "https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/IMG_3463.jpeg?alt=media&token=af7892ca-e78e-4198-b686-e0181472e8da"
 };

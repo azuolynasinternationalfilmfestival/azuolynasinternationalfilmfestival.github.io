@@ -15,6 +15,22 @@ export function initSettings() {
   if (sendInviteBtn) {
     sendInviteBtn.addEventListener("click", handleSendAdminInvite);
   }
+
+  const btnShowAllTabs = document.getElementById("btnShowAllTabs");
+  if (btnShowAllTabs) {
+    btnShowAllTabs.addEventListener("click", () => {
+      const allSwitches = [
+        "cfgShowAbout", "cfgShowTerms", "cfgShowFaq", "cfgShowCategories",
+        "cfgShowEditions", "cfgShowArchive", "cfgShowCurrentEdition",
+        "cfgShowResults", "cfgShowVoting", "cfgShowScreening", "cfgShowSubmit"
+      ];
+      allSwitches.forEach((id) => {
+        const elem = document.getElementById(id);
+        if (elem) elem.checked = true;
+      });
+      showToast("Visi skirtukai pažymėti kaip matomi!");
+    });
+  }
 }
 
 export function evaluateAdminPrivileges(user) {
@@ -63,8 +79,16 @@ export function subscribeSettings() {
       const lt = d.lt || DEFAULT_CONTENT.lt;
       const en = d.en || DEFAULT_CONTENT.en;
 
-      document.getElementById("cfgShowVoting").checked = d.showVoting === true;
+      // Tab Visibilities (default true unless explicitly set to false; voting and results default false)
+      document.getElementById("cfgShowAbout").checked = d.showAbout !== false;
+      document.getElementById("cfgShowTerms").checked = d.showTerms !== false;
+      document.getElementById("cfgShowFaq").checked = d.showFaq !== false;
+      document.getElementById("cfgShowCategories").checked = d.showCategories !== false;
+      document.getElementById("cfgShowEditions").checked = d.showEditions !== false;
+      document.getElementById("cfgShowArchive").checked = d.showArchive !== false;
+      document.getElementById("cfgShowCurrentEdition").checked = d.showCurrentEdition !== false;
       document.getElementById("cfgShowResults").checked = d.showResults === true;
+      document.getElementById("cfgShowVoting").checked = d.showVoting === true;
       document.getElementById("cfgShowScreening").checked = d.showScreening !== false;
       document.getElementById("cfgShowSubmit").checked = d.showSubmit !== false;
 
@@ -104,8 +128,15 @@ async function saveSettings() {
   btn.disabled = true;
 
   const updated = {
-    showVoting: document.getElementById("cfgShowVoting").checked,
+    showAbout: document.getElementById("cfgShowAbout").checked,
+    showTerms: document.getElementById("cfgShowTerms").checked,
+    showFaq: document.getElementById("cfgShowFaq").checked,
+    showCategories: document.getElementById("cfgShowCategories").checked,
+    showEditions: document.getElementById("cfgShowEditions").checked,
+    showArchive: document.getElementById("cfgShowArchive").checked,
+    showCurrentEdition: document.getElementById("cfgShowCurrentEdition").checked,
     showResults: document.getElementById("cfgShowResults").checked,
+    showVoting: document.getElementById("cfgShowVoting").checked,
     showScreening: document.getElementById("cfgShowScreening").checked,
     showSubmit: document.getElementById("cfgShowSubmit").checked,
     recordingVideoUrl: document.getElementById("cfgRecordingUrl").value.trim(),
