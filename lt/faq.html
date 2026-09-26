@@ -63,24 +63,83 @@
       <nav class="nav-links">
         <li><a href="index.html">Pagrindinis</a></li>
         <li><a href="index.html#terms">Taisyklės</a></li>
-        <li><a href="index.html#categories">Kategorijos & Prizai</a></li>
+        <li><a href="index.html#categories">Prizai</a></li>
         <li><a href="azuolynas-fest-2026.html">FEST 2026</a></li>
         <li><a href="index.html#archive">Retrospektyva</a></li>
-        <li><a href="index.html#submit" class="nav-cta-link">Pateikti Filmą</a></li>
       </nav>
 
-      <div class="header-actions-group">
+      <div class="header-actions">
+        <a href="index.html#submit" class="btn-solid btn-nav-cta">Pateikti Filmą</a>
         <div class="lang-switch">
           <a href="faq.html" class="lang-btn active">LT</a>
           <a href="../en/faq.html" class="lang-btn">EN</a>
         </div>
-        <a href="index.html" class="btn-outline btn-xs" style="display:inline-flex; align-items:center; gap:6px;">
-          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
-          <span>Grįžti</span>
-        </a>
+        <button type="button" class="burger-menu-btn" id="menuBurgerBtn" aria-label="Atverti navigacijos meniu" aria-expanded="false" aria-controls="mobileMenuDrawer">
+          <span class="burger-icon" aria-hidden="true">
+            <span class="bar bar-1"></span>
+            <span class="bar bar-2"></span>
+            <span class="bar bar-3"></span>
+          </span>
+          <span class="burger-label">Meniu</span>
+        </button>
       </div>
     </div>
   </header>
+
+  <!-- Responsive Burger Menu Backdrop -->
+  <div class="mobile-menu-backdrop" id="mobileMenuBackdrop" aria-hidden="true"></div>
+
+  <!-- Responsive Burger Menu Drawer -->
+  <aside class="mobile-menu-drawer" id="mobileMenuDrawer" aria-label="Navigacijos meniu" aria-hidden="true">
+    <div class="drawer-header">
+      <a href="index.html" class="drawer-logo-wrap">
+        <img src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media" alt="Ąžuolynas Fest" class="logo-img">
+        <div>
+          <div class="drawer-logo-title">Ąžuolynas Fest</div>
+          <div class="drawer-logo-sub">DUK Centras</div>
+        </div>
+      </a>
+      <button type="button" class="drawer-close-btn" id="menuBurgerCloseBtn" aria-label="Uždaryti meniu">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+
+    <div class="drawer-body">
+      <a href="index.html#submit" class="drawer-cta-btn">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 10l5 5-5 5"/><path d="M4 4v7a4 4 0 0 0 4 4h12"/></svg>
+        <span>Pateikti savo filmą</span>
+      </a>
+
+      <div class="drawer-group">
+        <div class="drawer-section-title">Navigacija</div>
+        <ul class="drawer-nav-list">
+          <li><a href="index.html" class="drawer-nav-link"><span>Pradinis puslapis</span></a></li>
+          <li><a href="index.html#about" class="drawer-nav-link"><span>Apie festivalį</span></a></li>
+          <li><a href="index.html#terms" class="drawer-nav-link"><span>Taisyklės ir Sąlygos</span></a></li>
+          <li><a href="index.html#categories" class="drawer-nav-link"><span>Kategorijos ir Prizai</span></a></li>
+          <li><a href="azuolynas-fest-2026.html" class="drawer-nav-link highlight"><span>FEST 2026 Apžvalga</span></a></li>
+          <li><a href="index.html#editions" class="drawer-nav-link"><span>Metų Leidimai</span></a></li>
+          <li><a href="index.html#archive" class="drawer-nav-link"><span>Retrospektyva ir Archyvas</span></a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="drawer-footer">
+      <div class="drawer-lang-row">
+        <span class="drawer-lang-label">Kalba:</span>
+        <div class="lang-switch">
+          <a href="faq.html" class="lang-btn active">LT</a>
+          <a href="../en/faq.html" class="lang-btn">EN</a>
+        </div>
+      </div>
+      <div class="drawer-info-note">
+        <span>Kauno „Ąžuolyno“ progimnazijos kino studija</span>
+      </div>
+    </div>
+  </aside>
 
   <main class="faq-main-content">
     <!-- Hero Section -->
@@ -460,6 +519,7 @@
     </div>
   </footer>
 
+  <script src="../js/burger-menu.js"></script>
   <!-- FAQ Interactive Filter & Search Script -->
   <script>
     document.addEventListener("DOMContentLoaded", () => {

@@ -22,11 +22,40 @@ if (typeof firebase !== "undefined") {
 function getFirestoreInstance() {
   if (typeof firebase === "undefined" || typeof firebase.firestore !== "function") return null;
   const dbId = firebaseConfig.firestoreDatabaseId;
+  const origFirestore = firebase.firestore;
+
   if (dbId && dbId !== "(default)" && typeof firebase.app === "function") {
     try {
-      return firebase.app().firestore(dbId);
+      const app = firebase.app();
+      if (app && app._delegate && app._delegate.container) {
+        const modularDb = app._delegate.container.getProvider("firestore").getImmediate({ identifier: dbId });
+        const appCompat = app._delegate.container.getProvider("app-compat").getImmediate();
+        const compatDb = (origFirestore && origFirestore.Firestore)
+          ? new origFirestore.Firestore(appCompat, modularDb)
+          : null;
+
+        if (compatDb) {
+          const customFirestore = function(targetApp) {
+            if (targetApp && targetApp !== app && typeof origFirestore === "function") {
+              return origFirestore(targetApp);
+            }
+            return compatDb;
+          };
+          Object.assign(customFirestore, origFirestore);
+          firebase.firestore = customFirestore;
+
+          app.firestore = function(targetId) {
+            if (targetId && targetId !== dbId && typeof origFirestore === "function") {
+              return origFirestore(app);
+            }
+            return compatDb;
+          };
+
+          return compatDb;
+        }
+      }
     } catch (e) {
-      console.warn("Custom databaseId fallback:", e);
+      console.warn("Custom databaseId initialization notice:", e);
     }
   }
   return firebase.firestore();

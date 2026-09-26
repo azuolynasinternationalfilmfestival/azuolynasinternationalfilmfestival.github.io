@@ -562,7 +562,7 @@
           }
         }
 
-        const db = (typeof firebase !== "undefined" && typeof firebase.firestore === "function") ? firebase.firestore() : (window.db || null);
+        const db = (typeof window !== "undefined" && window.db) || ((typeof firebase !== "undefined" && typeof firebase.firestore === "function") ? firebase.firestore() : null);
         if (!db) {
           throw new Error(isLt ? "Duomenų bazė šiuo metu nepasiekiama." : "Database currently unavailable.");
         }
