@@ -5922,4 +5922,410 @@ svg {
   justify-content: center;
 }
 
+/* ==========================================================================
+   Check My Status Component Styles
+   ========================================================================== */
+
+.submission-mode-switch-wrapper {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 28px;
+}
+
+.submission-mode-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(4, 18, 15, 0.75);
+  border: 1px solid var(--border-color);
+  padding: 6px;
+  border-radius: var(--site-radius);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.submission-mode-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: transparent;
+  color: var(--text-muted);
+  border: none;
+  border-radius: calc(var(--site-radius) - 3px);
+  padding: 10px 20px;
+  font-family: var(--font-ui);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  text-decoration: none;
+  outline: none;
+}
+
+.submission-mode-tab:hover {
+  color: #fff;
+}
+
+.submission-mode-tab:focus-visible {
+  box-shadow: 0 0 0 2px var(--accent-light);
+}
+
+.submission-mode-tab.active {
+  background: var(--surface-light);
+  color: #fff;
+  border: 1px solid rgba(111, 165, 138, 0.35);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+}
+
+.submission-mode-tab svg {
+  flex-shrink: 0;
+  color: var(--accent-light);
+}
+
+/* Status Check View Card */
+.status-checker-card {
+  background: var(--surface-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--site-radius);
+  padding: clamp(28px, 4vw, 42px);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45);
+  display: flex;
+  flex-direction: column;
+  gap: 26px;
+  max-width: 900px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.status-checker-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 18px;
+  border-bottom: 1px solid rgba(111, 165, 138, 0.15);
+  padding-bottom: 20px;
+}
+
+.status-checker-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: rgba(18, 55, 47, 0.6);
+  border: 1px solid var(--accent-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent-light);
+  flex-shrink: 0;
+}
+
+.status-checker-title {
+  font-family: var(--font-cinema);
+  font-size: clamp(1.2rem, 2.5vw, 1.45rem);
+  font-weight: 700;
+  color: var(--text-color);
+  margin: 0 0 6px 0;
+  line-height: 1.25;
+}
+
+.status-checker-desc {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.status-search-form {
+  display: flex;
+  gap: 12px;
+  align-items: stretch;
+}
+
+@media (max-width: 640px) {
+  .status-search-form {
+    flex-direction: column;
+  }
+  .submission-mode-tab {
+    padding: 8px 14px;
+    font-size: 0.84rem;
+  }
+}
+
+.status-search-input-wrap {
+  position: relative;
+  flex: 1;
+}
+
+.status-search-icon-prefix {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  pointer-events: none;
+}
+
+.status-search-input {
+  width: 100%;
+  height: 48px;
+  background: var(--bg-color);
+  border: 1px solid var(--border-color);
+  border-radius: var(--site-radius);
+  color: var(--text-color);
+  padding: 0 16px 0 42px;
+  font-family: var(--font-ui);
+  font-size: 0.94rem;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.status-search-input:focus {
+  border-color: var(--accent-light);
+  box-shadow: 0 0 0 3px rgba(111, 165, 138, 0.25);
+}
+
+.status-search-btn {
+  height: 48px;
+  padding: 0 24px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* Results Box */
+.status-results-box {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.status-entry-card {
+  background: rgba(7, 24, 20, 0.7);
+  border: 1px solid rgba(111, 165, 138, 0.25);
+  border-radius: var(--radius-card);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  transition: border-color 0.2s ease;
+}
+
+.status-entry-card:hover {
+  border-color: rgba(111, 165, 138, 0.45);
+}
+
+.status-entry-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.status-entry-title {
+  font-family: var(--font-cinema);
+  font-size: 1.28rem;
+  font-weight: 700;
+  color: var(--text-color);
+  margin: 0 0 6px 0;
+}
+
+.status-entry-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  flex-wrap: wrap;
+}
+
+.status-entry-meta-separator {
+  color: var(--border-color);
+}
+
+/* Stage Step Progress Visualizer */
+.status-stage-tracker {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  padding: 14px 0 6px 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+@media (max-width: 600px) {
+  .status-stage-tracker {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+}
+
+.status-tracker-step {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.status-tracker-bar {
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.12);
+  transition: background 0.3s ease;
+}
+
+.status-tracker-step.completed .status-tracker-bar {
+  background: var(--accent-light);
+}
+
+.status-tracker-step.active .status-tracker-bar {
+  background: linear-gradient(90deg, var(--accent-light) 0%, #a8d5be 100%);
+  box-shadow: 0 0 8px rgba(111, 165, 138, 0.5);
+}
+
+.status-tracker-label {
+  font-size: 0.74rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-subtle);
+}
+
+.status-tracker-step.completed .status-tracker-label,
+.status-tracker-step.active .status-tracker-label {
+  color: var(--text-color);
+}
+
+/* Status Banner / Explanation */
+.status-explanation-banner {
+  padding: 14px 18px;
+  border-radius: var(--radius-sm);
+  background: rgba(18, 55, 47, 0.35);
+  border-left: 4px solid var(--accent-light);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.status-explanation-banner.stage-pending {
+  border-left-color: #e09848;
+  background: rgba(55, 41, 18, 0.35);
+}
+
+.status-explanation-banner.stage-approved {
+  border-left-color: #6fa58a;
+  background: rgba(18, 55, 47, 0.35);
+}
+
+.status-explanation-banner.stage-shortlisted {
+  border-left-color: #48b7e0;
+  background: rgba(18, 48, 55, 0.35);
+}
+
+.status-explanation-banner.stage-finalist {
+  border-left-color: #e0b448;
+  background: rgba(55, 47, 18, 0.35);
+}
+
+.status-explanation-banner.stage-winner {
+  border-left-color: #ffd700;
+  background: rgba(55, 48, 18, 0.45);
+}
+
+.status-explanation-banner.stage-rejected {
+  border-left-color: #8c9b96;
+  background: rgba(28, 38, 35, 0.35);
+}
+
+.status-explanation-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.94rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.status-explanation-text {
+  font-size: 0.88rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* Voting callout */
+.status-voting-callout {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 16px;
+  border-radius: var(--radius-sm);
+  background: rgba(224, 109, 109, 0.12);
+  border: 1px solid rgba(224, 109, 109, 0.3);
+  font-size: 0.86rem;
+  color: #f7c5c5;
+  flex-wrap: wrap;
+}
+
+/* Empty State Card */
+.status-empty-box {
+  padding: 36px 24px;
+  text-align: center;
+  background: rgba(7, 24, 20, 0.5);
+  border: 1px dashed var(--border-color);
+  border-radius: var(--radius-card);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.status-empty-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.status-empty-title {
+  font-family: var(--font-cinema);
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text-color);
+  margin: 0;
+}
+
+.status-empty-desc {
+  font-size: 0.88rem;
+  color: var(--text-muted);
+  max-width: 460px;
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* Loading skeleton */
+.status-loading-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 32px 20px;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.status-loading-spinner {
+  width: 22px;
+  height: 22px;
+  border: 2px solid rgba(111, 165, 138, 0.25);
+  border-top-color: var(--accent-light);
+  border-radius: 50%;
+  animation: statusSpin 0.75s linear infinite;
+}
+
+@keyframes statusSpin {
+  to { transform: rotate(360deg); }
+}
+
 
