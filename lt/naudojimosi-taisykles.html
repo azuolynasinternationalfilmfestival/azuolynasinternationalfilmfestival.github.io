@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="lt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Naudojimosi Taisyklės & Nuostatai | Ąžuolynas International Students Film Festival</title>
+  <meta name="description" content="Oficialūs Ąžuolynas Film Festival nuostatai, dalyvavimo ir naudojimosi taisyklės moksleiviams, tėvams ir mokykloms.">
+  <link rel="icon" type="image/webp" href="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media">
+  <link rel="stylesheet" href="../style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Cinzel:wght@600;700;800&display=swap" rel="stylesheet">
+</head>
+<body class="legal-page-body">
+
+  <!-- Header: Only Burger, Submit CTA, and Language Switcher -->
+  <header class="site-header">
+    <div class="container nav-bar">
+      <a href="index.html" class="logo-wrap">
+        <img src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media" alt="Ąžuolynas Fest" class="logo-img">
+        <span class="logo-text">Ąžuolynas Fest</span>
+      </a>
+
+      <div class="header-actions">
+        <a href="index.html#submit" class="btn-solid btn-nav-cta">Pateikti Filmą</a>
+        <div class="lang-switch">
+          <a href="naudojimosi-taisykles.html" class="lang-btn active">LT</a>
+          <a href="../en/terms-of-service.html" class="lang-btn">EN</a>
+        </div>
+        <button type="button" class="burger-menu-btn" id="menuBurgerBtn" aria-label="Atverti navigacijos meniu" aria-expanded="false" aria-controls="mobileMenuDrawer">
+          <span class="burger-icon" aria-hidden="true">
+            <span class="bar bar-1"></span>
+            <span class="bar bar-2"></span>
+            <span class="bar bar-3"></span>
+          </span>
+          <span class="burger-label">Meniu</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Responsive Burger Menu Backdrop -->
+  <div class="mobile-menu-backdrop" id="mobileMenuBackdrop" aria-hidden="true"></div>
+
+  <!-- Responsive Burger Menu Drawer -->
+  <aside class="mobile-menu-drawer" id="mobileMenuDrawer" aria-label="Navigacijos meniu" aria-hidden="true">
+    <div class="drawer-header">
+      <a href="index.html" class="drawer-logo-wrap">
+        <img src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media" alt="Ąžuolynas Fest" class="logo-img">
+        <div>
+          <div class="drawer-logo-title">Ąžuolynas Fest</div>
+          <div class="drawer-logo-sub">Mokinių filmų festivalis</div>
+        </div>
+      </a>
+      <button type="button" class="drawer-close-btn" id="menuBurgerCloseBtn" aria-label="Uždaryti meniu">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+
+    <div class="drawer-body">
+      <a href="index.html#submit" class="drawer-cta-btn">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 10l5 5-5 5"/><path d="M4 4v7a4 4 0 0 0 4 4h12"/></svg>
+        <span>Pateikti Savo Filmą</span>
+      </a>
+
+      <div class="drawer-group">
+        <div class="drawer-section-title">Festivalis</div>
+        <ul class="drawer-nav-list">
+          <li><a href="index.html" class="drawer-nav-link"><span class="drawer-nav-text">Pradinis puslapis</span></a></li>
+          <li><a href="index.html#about" class="drawer-nav-link"><span class="drawer-nav-text">Apie festivalį</span></a></li>
+          <li><a href="azuolynas-fest-2026.html" class="drawer-nav-link highlight"><span class="drawer-nav-text">FEST 2026 Apžvalga</span></a></li>
+          <li><a href="index.html#editions" class="drawer-nav-link"><span class="drawer-nav-text">Metų Leidimai</span></a></li>
+          <li><a href="index.html#archive" class="drawer-nav-link"><span class="drawer-nav-text">Retrospektyva ir Archyvas</span></a></li>
+        </ul>
+      </div>
+
+      <div class="drawer-group">
+        <div class="drawer-section-title">Dalyviams ir Taisyklės</div>
+        <ul class="drawer-nav-list">
+          <li><a href="index.html#terms" class="drawer-nav-link"><span class="drawer-nav-text">Taisyklės ir Sąlygos</span></a></li>
+          <li><a href="index.html#categories" class="drawer-nav-link"><span class="drawer-nav-text">Kategorijos ir Prizai</span></a></li>
+          <li><a href="faq.html" class="drawer-nav-link"><span class="drawer-nav-text">DUK (Dažniausi Klausimai)</span></a></li>
+          <li><a href="index.html#competition" class="drawer-nav-link"><span class="drawer-nav-text">Žiūrovų Balsavimas</span></a></li>
+          <li><a href="index.html#submit" class="drawer-nav-link highlight"><span class="drawer-nav-text">Pateikti filmą (Registracija)</span></a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="drawer-footer">
+      <div class="drawer-lang-row">
+        <span class="drawer-lang-label">Kalba:</span>
+        <div class="lang-switch">
+          <a href="naudojimosi-taisykles.html" class="lang-btn active">LT</a>
+          <a href="../en/terms-of-service.html" class="lang-btn">EN</a>
+        </div>
+      </div>
+      <div style="margin-top: 12px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.08); display: flex; flex-direction: column; gap: 6px; font-size: 0.8rem;">
+        <a href="privatumo-politika.html" style="color: var(--text-muted); text-decoration: none;">Privatumo politika</a>
+        <a href="naudojimosi-taisykles.html" style="color: var(--accent-light); font-weight: 600; text-decoration: none;">Naudojimosi taisyklės</a>
+      </div>
+      <div class="drawer-info-note" style="margin-top: 8px;">
+        <span>Kauno „Ąžuolyno“ progimnazijos kino studija</span>
+      </div>
+    </div>
+  </aside>
+
+  <main style="padding: clamp(40px, 6vw, 70px) 0 clamp(60px, 8vw, 100px) 0;">
+    <div class="container" style="max-width: 860px;">
+      
+      <div style="margin-bottom: 28px;">
+        <a href="index.html" class="btn-outline btn-xs" style="display:inline-flex; align-items:center; gap:6px; margin-bottom:18px;">
+          &larr; Grįžti į pagrindinį puslapį
+        </a>
+        <div class="section-tag">Oficialūs Nuostatai & Taisyklės</div>
+        <h1 class="section-heading" style="font-size:clamp(1.8rem, 3.5vw, 2.5rem); margin: 8px 0 16px 0;">Festivalio Naudojimosi ir Dalyvavimo Taisyklės</h1>
+        <div style="font-size:0.86rem; color:var(--text-muted);">
+          Galioja 2026 m. sezonui &bull; Kauno „Ąžuolyno“ progimnazija
+        </div>
+      </div>
+
+      <div style="background:var(--surface-card); border:1px solid var(--border-color); border-radius:var(--site-radius); padding:clamp(24px, 4vw, 42px); box-shadow:0 12px 36px rgba(0,0,0,0.35); display:flex; flex-direction:column; gap:28px; line-height:1.7; color:var(--text-color);">
+        
+        <section>
+          <h2 style="font-family:var(--font-cinema); font-size:1.35rem; color:#fff; margin-bottom:10px;">1. Festivalio Tikslai ir Misija</h2>
+          <p>
+            Tarptautinis mokinių filmų festivalis <strong>„Ąžuolynas Fest“</strong> yra edukacinis, kūrybinis kultūros renginys, skatinantis jaunimą pastebėti neįprastas detales kasdienybėje (tema: „Neįprastas žvilgsnis į įprastus dalykus“), lavinti vizualinį raštingumą bei kurti autentišką trumpametražį kiną.
+          </p>
+          <p>
+            Šios taisyklės reglamentuoja paraiškų teikimą, filmų atranką, demonstravimą, žiūrovų balsavimą bei apdovanojimų tvarką.
+          </p>
+        </section>
+
+        <section>
+          <h2 style="font-family:var(--font-cinema); font-size:1.35rem; color:#fff; margin-bottom:10px;">2. Pagrindiniai Reikalavimai Kūriniams</h2>
+          <ul style="padding-left:20px; display:flex; flex-direction:column; gap:10px;">
+            <li><strong>Filmavimo įranga:</strong> Filmas privalo būti nufilmuotas išskirtinai <strong>išmaniuoju telefonu arba planšete</strong>. Tinka bet kokio gamintojo ir modelio įrenginiai. Papildomos priemonės (trikojai, stabilizatoriai, mikrofonai) yra leistinos.</li>
+            <li><strong>Trukmės limitas:</strong> Bendras vaizdo įrašo ilgis negali viršyti <strong>180 sekundžių (3 minučių)</strong>. Į šį laiką įskaičiuojami titrai ir įžanginės užsklandos.</li>
+            <li><strong>Amžiaus kategorijos:</strong> Festivalyje gali dalyvauti moksleiviai nuo 10 iki 18 metų amžiaus:
+              <ul style="padding-left:18px; margin-top:4px;">
+                <li>I Kategorija: 10–13 metų mokiniai;</li>
+                <li>II Kategorija: 14–18 metų mokiniai.</li>
+              </ul>
+            </li>
+            <li><strong>Kūrinių skaičius:</strong> Vienas autorius ar kūrybinė grupė gali pateikti <strong>ne daugiau kaip 1 filmą</strong> einamajam festivalio sezonui.</li>
+            <li><strong>Formatas ir failo dydis:</strong> Priimami MP4, MOV arba WEBM formatai. Rekomenduojamas failo dydis – iki 300 MB.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 style="font-family:var(--font-cinema); font-size:1.35rem; color:#fff; margin-bottom:10px;">3. Autorystė, Suaugusiųjų Pagalba ir Muzika</h2>
+          <p>
+            <strong>Autentiškumas:</strong> Filmo scenarijus, režisūra, filmavimas ir montavimas privalo būti atlikti paties mokinio arba mokinių komandos. Suaugusieji (tėvai, mokytojai) gali suteikti techninę pagalbą ar telefoną, tačiau negali atlikti kūrybinio darbo už vaiką.
+          </p>
+          <p>
+            <strong>Muzikos ir vaizdo teisės:</strong> Dalyviai raginami naudoti autorinėmis teisėmis neapsaugotą (Royalty-Free / Creative Commons) muziką arba originalius garso takelius. Autorius prisiima atsakomybę už garso ir vaizdo licencijų laikymąsi.
+          </p>
+        </section>
+
+        <section>
+          <h2 style="font-family:var(--font-cinema); font-size:1.35rem; color:#fff; margin-bottom:10px;">4. Leidimas Demonstruoti ir Licencija</h2>
+          <p>
+            Pateikdamas filmą, dalyvis (ir jo teisėti atstovai) suteikia festivalio organizatoriams neišimtinę, nemokamą teisę:
+          </p>
+          <ul style="padding-left:20px; display:flex; flex-direction:column; gap:6px;">
+            <li>Demonstruoti filmą oficialioje festivalio interneto svetainėje;</li>
+            <li>Rodyti filmą viešos peržiūros ir apdovanojimų ceremonijos metu Kaune;</li>
+            <li>Naudoti filmo ištraukas (iki 30 sek.), kadrus ir anotacijas festivalio nekomercinėje reklamoje bei archyve.</li>
+          </ul>
+          <p style="margin-top:8px;">
+            Filmo autorinės teisės visada lieka pačiam autoriui (mokiniui).
+          </p>
+        </section>
+
+        <section>
+          <h2 style="font-family:var(--font-cinema); font-size:1.35rem; color:#fff; margin-bottom:10px;">5. Žiūrovų Simpatijų Balsavimo Taisyklės</h2>
+          <p>
+            Oficialioje festivalio platformoje vyksta atviras žiūrovų simpatijų balsavimas. Siekiant užtikrinti sąžiningumą:
+          </p>
+          <ul style="padding-left:20px; display:flex; flex-direction:column; gap:8px;">
+            <li>Kiekvienas svetainės lankytojas gali atiduoti <strong>tik vieną balsą</strong> už savo pasirinktą filmą;</li>
+            <li>Griežtai draudžiama naudoti automatizuotas programas, botus, proxy serverius ar dirbtines balsų klastojimo sistemas;</li>
+            <li>Organizacinis komitetas pasilieka teisę anuliuoti fiktyvius balsus ir, esant piktybiniams pažeidimams, diskvalifikuoti kūrinį iš žiūrovų simpatijų nominacijos.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 style="font-family:var(--font-cinema); font-size:1.35rem; color:#fff; margin-bottom:10px;">6. Vertinimo Komisija ir Rezultatai</h2>
+          <p>
+            Filmų vertinimą atlieka profesionali kino ir medijų pedagogų komisija bei festivalio žiuri. Vertinimo kriterijai apima temos atskleidimą, kūrybiškumą, originalumą bei režisūrinį vientisumą, o ne brangios technikos naudojimą.
+          </p>
+          <p>
+            Komisijos sprendimai dėl laureatų, diplomantų ir specialiųjų prizų skyrimo yra galutiniai ir neskundžiami.
+          </p>
+        </section>
+
+        <section>
+          <h2 style="font-family:var(--font-cinema); font-size:1.35rem; color:#fff; margin-bottom:10px;">7. Kontaktai ir Klausimai</h2>
+          <p>
+            Kilus klausimams dėl taisyklių ar paraiškų teikimo, prašome susisiekti:
+          </p>
+          <div style="background:rgba(18,55,47,0.4); border:1px solid rgba(111,165,138,0.25); border-radius:var(--radius-sm); padding:16px 20px; margin-top:10px;">
+            <div><strong>Ąžuolynas International Students Film Festival</strong></div>
+            <div>El. paštas: <a href="mailto:azuolynasfilmfestival@gmail.com" style="color:var(--accent-light);">azuolynasfilmfestival@gmail.com</a></div>
+            <div>Kauno „Ąžuolyno“ progimnazija, Vytauto pr. 50, Kaunas</div>
+          </div>
+        </section>
+
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand-wrap">
+          <div class="footer-brand-header">
+            <img src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media" alt="Logo" class="footer-logo">
+            <span class="footer-name">Ąžuolynas Fest</span>
+          </div>
+          <p class="footer-tagline">Tarptautinis mokinių filmų festivalis. „Neįprastas žvilgsnis į įprastus dalykus“. Kūrybiškumas, autentiškumas ir jaunųjų režisierių balsas.</p>
+        </div>
+        <div>
+          <div class="footer-col-title">Navigacija</div>
+          <ul class="footer-nav-list">
+            <li><a href="index.html#about">Apie festivalį</a></li>
+            <li><a href="index.html#terms">Dalyvavimo taisyklės</a></li>
+            <li><a href="faq.html">DUK (Klausimai ir atsakymai)</a></li>
+            <li><a href="azuolynas-fest-2026.html">FEST 2026 puslapis</a></li>
+            <li><a href="privatumo-politika.html">Privatumo politika</a></li>
+            <li><a href="naudojimosi-taisykles.html">Naudojimosi taisyklės</a></li>
+          </ul>
+        </div>
+        <div>
+          <div class="footer-col-title">Kontaktai</div>
+          <div class="footer-info-list">
+            <p>Kauno „Ąžuolyno“ progimnazija</p>
+            <p>El. paštas: <a href="mailto:azuolynasfilmfestival@gmail.com">azuolynasfilmfestival@gmail.com</a></p>
+            <p>Paraiškos: iki 2026 m. balandžio 2 d.</p>
+            <p>Ceremonija: 2026 m. balandžio 17 d.</p>
+          </div>
+        </div>
+      </div>
+      <div class="footer-bottom-bar">
+        <span>&copy; 2026 Ąžuolynas International Students Film Festival. Visos teisės saugomos.</span>
+        <div class="footer-bottom-links" style="display:inline-flex; gap:16px;">
+          <a href="privatumo-politika.html" style="color:var(--text-muted); text-decoration:none;">Privatumo politika</a>
+          <a href="naudojimosi-taisykles.html" style="color:var(--text-muted); text-decoration:none;">Naudojimosi taisyklės</a>
+        </div>
+        <span>Oficiali platforma: azuolynasinternationalfilmfestival.github.io</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="../js/burger-menu.js"></script>
+</body>
+</html>

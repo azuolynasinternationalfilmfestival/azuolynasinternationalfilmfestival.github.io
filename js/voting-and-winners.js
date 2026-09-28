@@ -281,6 +281,29 @@
       if (lang) this.currentLang = lang;
       this.render();
       this.updateStatusBanner();
+
+      // Sync server-authoritative live vote counts
+      fetch("/api/votes")
+        .then((res) => (res.ok ? res.json() : null))
+        .then((data) => {
+          if (data && data.success && data.votes) {
+            let changed = false;
+            this.cachedFilms.forEach((film) => {
+              if (data.votes[film.id] !== undefined) {
+                const srvCount = Number(data.votes[film.id]);
+                if (srvCount > (film.votesCount || 0)) {
+                  film.votesCount = srvCount;
+                  changed = true;
+                }
+              }
+            });
+            if (changed) {
+              this.render();
+              this.updateStatusBanner();
+            }
+          }
+        })
+        .catch(() => {});
     },
 
     setCategory: function (cat, btnElem) {
@@ -562,38 +585,66 @@
           }
         }
 
-        const db = (typeof window !== "undefined" && window.db) || ((typeof firebase !== "undefined" && typeof firebase.firestore === "function") ? firebase.firestore() : null);
-        if (!db) {
-          throw new Error(isLt ? "Duomenų bazė šiuo metu nepasiekiama." : "Database currently unavailable.");
-        }
-        const filmRef = db.collection("submissions").doc(filmId);
-        const voteAuditRef = db.collection("submissions").doc(filmId).collection("votes").doc(uid);
+        let voteSucceeded = false;
+        let finalVotesCount = null;
 
+        // 1. Primary: Server-side vote handler (guaranteed persistent commit & audit)
         try {
-          await db.runTransaction(async (transaction) => {
-            const voteDoc = await transaction.get(voteAuditRef);
-            if (voteDoc.exists) {
-              throw new Error("already-voted");
-            }
-            transaction.set(voteAuditRef, {
-              votedAt: firebase.firestore.FieldValue.serverTimestamp()
-            });
-            transaction.update(filmRef, {
-              votesCount: firebase.firestore.FieldValue.increment(1)
-            });
+          const apiResp = await fetch("/api/vote", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ filmId: filmId, voterUid: uid })
           });
-        } catch (trxErr) {
-          if (trxErr.message === "already-voted") {
-            throw trxErr;
+          const result = await apiResp.json().catch(() => null);
+          if (apiResp.ok && result && result.success) {
+            voteSucceeded = true;
+            finalVotesCount = result.votesCount;
+          } else if (result && result.error === "already-voted") {
+            throw new Error("already-voted");
           }
-          console.warn("Audit vote note:", trxErr.message);
-          try {
-            await filmRef.update({
-              votesCount: firebase.firestore.FieldValue.increment(1)
-            });
-          } catch (incErr) {
-            console.warn("Vote update note:", incErr.message);
+        } catch (apiErr) {
+          if (apiErr.message === "already-voted") throw apiErr;
+          console.warn("API vote endpoint fallback:", apiErr);
+        }
+
+        // 2. Fallback: Client-side Firestore SDK
+        if (!voteSucceeded) {
+          const db = (typeof window !== "undefined" && window.db) || ((typeof firebase !== "undefined" && typeof firebase.firestore === "function") ? firebase.firestore() : null);
+          if (db) {
+            const filmRef = db.collection("submissions").doc(filmId);
+            const voteAuditRef = db.collection("submissions").doc(filmId).collection("votes").doc(uid);
+
+            try {
+              await db.runTransaction(async (transaction) => {
+                const voteDoc = await transaction.get(voteAuditRef);
+                if (voteDoc.exists) {
+                  throw new Error("already-voted");
+                }
+                transaction.set(voteAuditRef, {
+                  votedAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                transaction.update(filmRef, {
+                  votesCount: firebase.firestore.FieldValue.increment(1)
+                });
+              });
+              voteSucceeded = true;
+            } catch (trxErr) {
+              if (trxErr.message === "already-voted") throw trxErr;
+              console.warn("Audit vote note:", trxErr.message);
+              try {
+                await filmRef.update({
+                  votesCount: firebase.firestore.FieldValue.increment(1)
+                });
+                voteSucceeded = true;
+              } catch (incErr) {
+                console.warn("Vote update note:", incErr.message);
+              }
+            }
           }
+        }
+
+        if (!voteSucceeded && finalVotesCount === null) {
+          throw new Error("Could not record vote");
         }
 
         localStorage.setItem("festival_voted_film_id", filmId);
@@ -608,10 +659,10 @@
         // Confetti celebration
         triggerFestivalConfetti();
 
-        // Re-render
+        // Update cached film count & re-render
         const targetFilm = this.cachedFilms.find((f) => f.id === filmId);
         if (targetFilm) {
-          targetFilm.votesCount = (targetFilm.votesCount || 0) + 1;
+          targetFilm.votesCount = finalVotesCount !== null ? finalVotesCount : ((targetFilm.votesCount || 0) + 1);
         }
         this.render();
 

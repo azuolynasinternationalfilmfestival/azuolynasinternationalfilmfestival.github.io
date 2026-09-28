@@ -71,14 +71,15 @@ service cloud.firestore {
       // Admins can update any field; audience can increment votesCount
       allow update: if isAdmin() || (
         incoming().diff(existing()).affectedKeys().hasOnly(['votesCount']) &&
-        incoming().votesCount == existing().votesCount + 1
+        incoming().votesCount == (existing().get('votesCount', 0) + 1)
       );
 
       allow delete: if isAdmin();
 
       // Votes subcollection for audit
       match /votes/{voterId} {
-        allow read: if isAdmin();
+        allow get: if isValidId(voterId);
+        allow list: if isAdmin();
         allow create, update: if isValidId(voterId);
       }
     }
