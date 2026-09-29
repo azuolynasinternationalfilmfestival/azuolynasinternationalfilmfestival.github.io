@@ -13,3 +13,11 @@ if (typeof window !== "undefined" && typeof window.generateEmailHtml === "undefi
 } else if (typeof importScripts === "function") {
   importScripts("email-templates.js");
 }
+
+if (typeof module !== "undefined" && module.exports) {
+  try {
+    module.exports = require("./email-templates.js");
+  } catch (e) {
+    // ignore
+  }
+}

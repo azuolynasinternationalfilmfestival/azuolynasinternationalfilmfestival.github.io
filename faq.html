@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="lt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DUK | FAQ | Ąžuolynas Film Festival</title>
+  <meta http-equiv="refresh" content="0; url=lt/faq.html">
+  <script>
+    (function() {
+      const saved = localStorage.getItem("preferred_lang");
+      const userLang = (navigator.language || navigator.userLanguage || "").toLowerCase();
+      if (saved === "en" || (!saved && userLang.startsWith("en"))) {
+        window.location.replace("en/faq.html");
+      } else {
+        window.location.replace("lt/faq.html");
+      }
+    })();
+  </script>
+</head>
+<body>
+  <p>Nukreipiama į festivalio DUK puslapį... <a href="lt/faq.html">Spauskite čia</a>.</p>
+</body>
+</html>

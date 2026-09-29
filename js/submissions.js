@@ -249,7 +249,8 @@ function initEntryModal() {
         });
 
         if (tpl !== "none" && typeof generateEmailHtml === "function") {
-          const emailHtml = generateEmailHtml(lang, tpl, {
+          const emailData = {
+            id: currentEntry.id,
             name: currentEntry.name,
             filmTitle: currentEntry.filmTitle,
             category: currentEntry.category,
@@ -258,12 +259,16 @@ function initEntryModal() {
             videoDurationSeconds: currentEntry.videoDurationSeconds,
             customMessage: customMsg,
             streamLink: streamLink
-          });
+          };
+          const emailHtml = generateEmailHtml(lang, tpl, emailData);
+          const emailSubject = (typeof getEmailSubject === "function")
+            ? getEmailSubject(lang, tpl, emailData)
+            : emailTexts[lang][tpl].sub;
 
           await db.collection("mail").add({
             to: [currentEntry.email],
             message: {
-              subject: emailTexts[lang][tpl].sub,
+              subject: emailSubject,
               html: emailHtml
             }
           });
