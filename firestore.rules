@@ -16,7 +16,18 @@ service cloud.firestore {
         request.auth.token.email.lower() == 'azuolynasfilmfestival@gmail.com' ||
         request.auth.token.email.lower() == 'karina.brdar@gmail.com' ||
         request.auth.token.email.lower() == 'dominikphotofficial.t@gmail.com' ||
-        request.auth.token.email.lower() == 'dominikphotofficial.lt@gmail.com'
+        request.auth.token.email.lower() == 'dominikphotofficial.lt@gmail.com' ||
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' &&
+         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.status == 'active')
+      );
+    }
+
+    function isStaff() {
+      return isSignedIn() && (
+        isAdmin() ||
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.status == 'active')
       );
     }
 
@@ -46,14 +57,13 @@ service cloud.firestore {
 
     // Submissions
     match /submissions/{submissionId} {
-      // Admins can read all; public can read films that are in voting or winners
       allow get: if isValidId(submissionId) && (
-        isAdmin() ||
+        isStaff() ||
         resource.data.inVoting == true ||
         resource.data.isWinner == true
       );
 
-      allow list: if isAdmin() || (
+      allow list: if isStaff() || (
         resource.data.inVoting == true ||
         resource.data.isWinner == true
       );
@@ -68,7 +78,7 @@ service cloud.firestore {
         incoming().inVoting == false &&
         incoming().votesCount == 0;
 
-      // Admins can update any field; audience can increment votesCount
+      // Admins and staff can update; audience can increment votesCount
       allow update: if isAdmin() || (
         incoming().diff(existing()).affectedKeys().hasOnly(['votesCount']) &&
         incoming().votesCount == (existing().get('votesCount', 0) + 1)
@@ -76,18 +86,55 @@ service cloud.firestore {
 
       allow delete: if isAdmin();
 
-      // Votes subcollection for audit
+      // Votes subcollection for film audit
       match /votes/{voterId} {
         allow get: if isValidId(voterId);
-        allow list: if isAdmin();
+        allow list: if isStaff();
         allow create, update: if isValidId(voterId);
       }
     }
 
-    // Mail queue for notifications
+    // Global Anti-Fraud Vote Audit: locks 1 vote per category per device
+    match /votes_audit/{auditId} {
+      allow get: if isValidId(auditId);
+      allow list: if isStaff();
+      allow create: if isValidId(auditId) &&
+        incoming().filmId is string &&
+        incoming().category is string &&
+        incoming().deviceHash is string;
+      allow update, delete: if isAdmin();
+    }
+
+    // User Accounts (RBAC)
+    match /users/{userId} {
+      allow get: if isSignedIn() && (request.auth.uid == userId || isStaff());
+      allow list: if isStaff();
+      allow create: if isAdmin() || (isSignedIn() && request.auth.uid == userId);
+      allow update: if isAdmin() || (
+        isSignedIn() && request.auth.uid == userId &&
+        !incoming().diff(existing()).affectedKeys().hasAny(['role', 'status'])
+      );
+      allow delete: if isAdmin();
+    }
+
+    // Invitations
+    match /invitations/{invitationToken} {
+      // Anyone with valid token can verify invitation info
+      allow get: if isValidId(invitationToken);
+      allow list: if isAdmin();
+      allow create: if isAdmin();
+      allow update: if isAdmin() || (
+        incoming().diff(existing()).affectedKeys().hasOnly(['status', 'acceptedAt', 'activatedUid']) &&
+        incoming().status == 'accepted'
+      );
+      allow delete: if isAdmin();
+    }
+
+    // Mail queue for automated notifications
     match /mail/{mailId} {
-      allow read: if isAdmin();
+      allow read: if isStaff();
       allow create: if isValidId(mailId);
+      allow delete: if isAdmin();
     }
   }
 }

@@ -1,6 +1,7 @@
 import express from 'express';
 import path from 'path';
 import fs from 'fs';
+import crypto from 'crypto';
 import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -12,41 +13,122 @@ const PORT = process.env.PORT || 3000;
 app.use(express.json());
 app.use(express.static(__dirname));
 
-// Persistent Votes Data Store
+// Persistent Data Storage
 const DATA_DIR = path.join(__dirname, 'data');
 const VOTES_FILE = path.join(DATA_DIR, 'votes.json');
+const SETTINGS_FILE = path.join(DATA_DIR, 'settings.json');
+const USERS_FILE = path.join(DATA_DIR, 'users.json');
+const INVITATIONS_FILE = path.join(DATA_DIR, 'invitations.json');
 
 if (!fs.existsSync(DATA_DIR)) {
   fs.mkdirSync(DATA_DIR, { recursive: true });
 }
 
-function loadVotesData() {
+// ---------------------------------------------------------------------------
+// Helpers: Load & Save Persistent JSON Files
+// ---------------------------------------------------------------------------
+function loadJson(file, defaultVal) {
   try {
-    if (fs.existsSync(VOTES_FILE)) {
-      const raw = fs.readFileSync(VOTES_FILE, 'utf-8');
-      return JSON.parse(raw);
+    if (fs.existsSync(file)) {
+      return JSON.parse(fs.readFileSync(file, 'utf-8'));
     }
   } catch (e) {
-    console.warn('Error reading votes file:', e.message);
+    console.warn(`Error reading ${file}:`, e.message);
   }
-  return { votesByFilm: {}, voters: {}, auditLog: [] };
+  return defaultVal;
 }
 
-function saveVotesData(data) {
+function saveJson(file, data) {
   try {
-    fs.writeFileSync(VOTES_FILE, JSON.stringify(data, null, 2), 'utf-8');
+    fs.writeFileSync(file, JSON.stringify(data, null, 2), 'utf-8');
   } catch (e) {
-    console.error('Error saving votes file:', e.message);
+    console.error(`Error saving ${file}:`, e.message);
   }
 }
 
-// API: Get live vote counts for all films
+function loadVotesData() {
+  const d = loadJson(VOTES_FILE, { votesByFilm: {}, votersByDevice: {}, auditLog: [] });
+  if (!d.votesByFilm) d.votesByFilm = {};
+  if (!d.votersByDevice) d.votersByDevice = {};
+  if (!d.auditLog) d.auditLog = [];
+  return d;
+}
+
+function loadSettingsData() {
+  return loadJson(SETTINGS_FILE, {
+    votingActive: true,
+    maintenanceMode: false,
+    publicWinners: true,
+    submissionsOpen: true,
+    autoRankings: true,
+    institutionNameLt: "Kauno Tarptautinė Gimnazija",
+    institutionNameEn: "Kaunas International Gymnasium"
+  });
+}
+
+function loadUsersData() {
+  return loadJson(USERS_FILE, {
+    users: [
+      {
+        uid: "admin_super",
+        email: "azuolynasfilmfestival@gmail.com",
+        name: "Festivalio",
+        surname: "Administratorius",
+        role: "admin",
+        status: "active",
+        createdAt: "2026-01-01T00:00:00.000Z",
+        lastLogin: new Date().toISOString()
+      },
+      {
+        uid: "admin_karina",
+        email: "karina.brdar@gmail.com",
+        name: "Karina",
+        surname: "Brdar",
+        role: "admin",
+        status: "active",
+        createdAt: "2026-01-01T00:00:00.000Z",
+        lastLogin: new Date().toISOString()
+      }
+    ]
+  });
+}
+
+function loadInvitationsData() {
+  return loadJson(INVITATIONS_FILE, { invitations: [] });
+}
+
+// ---------------------------------------------------------------------------
+// Firestore REST Sync Helper
+// ---------------------------------------------------------------------------
+const FIREBASE_API_KEY = 'AIzaSyAl-aLSlSHUdrZ4Rr4x23n3bu3QFZSYyB0';
+const FIREBASE_PROJECT_ID = 'azuolynas-film-fest';
+
+async function syncToFirestore(collection, docId, fields) {
+  try {
+    const patchUrl = `https://firestore.googleapis.com/v1/projects/${FIREBASE_PROJECT_ID}/databases/(default)/documents/${collection}/${docId}?key=${FIREBASE_API_KEY}`;
+    await fetch(patchUrl, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ fields })
+    });
+  } catch (err) {
+    // Non-blocking background sync
+  }
+}
+
+// ---------------------------------------------------------------------------
+// VOTING API (Secure, Per-Device & Per-Category Anti-Fraud Tracking)
+// ---------------------------------------------------------------------------
+
+// API: Get live vote totals and counts
 app.get('/api/votes', (req, res) => {
   try {
     const data = loadVotesData();
+    const settings = loadSettingsData();
     const totalVotes = Object.values(data.votesByFilm || {}).reduce((sum, v) => sum + (Number(v) || 0), 0);
     res.json({
       success: true,
+      votingActive: settings.votingActive !== false,
       votes: data.votesByFilm || {},
       totalVotes: totalVotes
     });
@@ -55,73 +137,117 @@ app.get('/api/votes', (req, res) => {
   }
 });
 
-// API: Cast an audience choice vote securely
+// API: Check device's current votes across categories
+app.get('/api/my-votes', (req, res) => {
+  try {
+    const deviceHash = String(req.query.deviceHash || '').trim();
+    if (!deviceHash) {
+      return res.json({ success: true, votedCategories: {} });
+    }
+    const data = loadVotesData();
+    const userVotes = (data.votersByDevice && data.votersByDevice[deviceHash]) || {};
+    res.json({
+      success: true,
+      votedCategories: userVotes
+    });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to retrieve voter status' });
+  }
+});
+
+// API: Cast audience choice vote (Locks only that specific category for that visitor)
 app.post('/api/vote', async (req, res) => {
   try {
-    const { filmId, voterUid } = req.body || {};
+    const settings = loadSettingsData();
+    if (settings.votingActive === false) {
+      return res.status(403).json({
+        error: 'voting-closed',
+        message: 'Žiūrovų balsavimas šiuo metu yra sustabdytas festivalio administracijos.'
+      });
+    }
+
+    const { filmId, category, deviceHash, voterSalt } = req.body || {};
     if (!filmId || typeof filmId !== 'string') {
       return res.status(400).json({ error: 'filmId is required' });
     }
+
     const cleanFilmId = filmId.trim();
-    const cleanVoterUid = (voterUid && typeof voterUid === 'string' && voterUid.trim().length > 0)
-      ? voterUid.trim()
-      : 'voter_' + Math.random().toString(36).substring(2, 10);
+    const cleanCategory = (category && typeof category === 'string' && category.trim().length > 0)
+      ? category.trim().toLowerCase().replace(/[^a-z0-9_-]/g, '')
+      : 'general';
+
+    // Verify or generate high-entropy device hash
+    let cleanDeviceHash = (deviceHash && typeof deviceHash === 'string' && deviceHash.trim().length >= 16)
+      ? deviceHash.trim()
+      : null;
+
+    if (!cleanDeviceHash) {
+      // Server fallback hash based on IP and headers
+      const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown';
+      const userAgent = req.headers['user-agent'] || 'unknown';
+      const salt = voterSalt || 'default_salt';
+      cleanDeviceHash = crypto.createHash('sha256').update(`${ip}-${userAgent}-${salt}`).digest('hex');
+    }
 
     const votesData = loadVotesData();
+    if (!votesData.votersByDevice) votesData.votersByDevice = {};
     if (!votesData.votesByFilm) votesData.votesByFilm = {};
-    if (!votesData.voters) votesData.voters = {};
     if (!votesData.auditLog) votesData.auditLog = [];
 
-    // Check if voter has already cast a vote
-    if (votesData.voters[cleanVoterUid]) {
-      const existingVote = votesData.voters[cleanVoterUid];
+    const deviceRecord = votesData.votersByDevice[cleanDeviceHash] || {};
+
+    // Check if THIS specific device has already voted in THIS SPECIFIC category
+    if (deviceRecord[cleanCategory]) {
       return res.status(400).json({
         error: 'already-voted',
-        message: 'Vote already recorded for this visitor',
-        filmId: existingVote.filmId
+        category: cleanCategory,
+        filmId: deviceRecord[cleanCategory].filmId,
+        message: 'Jūs jau atidavėte savo balsą šioje kategorijoje.'
       });
     }
 
     // Increment vote count
     const currentVotes = (Number(votesData.votesByFilm[cleanFilmId]) || 0) + 1;
     votesData.votesByFilm[cleanFilmId] = currentVotes;
-    votesData.voters[cleanVoterUid] = {
+
+    // Record under this device for this specific category
+    deviceRecord[cleanCategory] = {
       filmId: cleanFilmId,
       timestamp: new Date().toISOString()
     };
+    votesData.votersByDevice[cleanDeviceHash] = deviceRecord;
+
     votesData.auditLog.push({
       filmId: cleanFilmId,
-      voterUid: cleanVoterUid,
+      category: cleanCategory,
+      deviceHash: cleanDeviceHash,
       timestamp: new Date().toISOString()
     });
 
-    // Save locally
     saveVotesData(votesData);
 
-    // Background sync attempt to Firestore (non-blocking)
-    const apiKey = 'AIzaSyAl-aLSlSHUdrZ4Rr4x23n3bu3QFZSYyB0';
-    const projectId = 'azuolynas-film-fest';
+    // Sync to Firestore in background
     (async () => {
-      try {
-        const patchUrl = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/submissions/${cleanFilmId}?updateMask.fieldPaths=votesCount&key=${apiKey}`;
-        await fetch(patchUrl, {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            fields: {
-              votesCount: { integerValue: String(currentVotes) }
-            }
-          })
-        });
-      } catch (syncErr) {
-        // Silent background fallback
-      }
+      // 1. Update votesCount on submission
+      await syncToFirestore('submissions', cleanFilmId, {
+        votesCount: { integerValue: String(currentVotes) }
+      });
+      // 2. Record vote audit lock in votes_audit
+      const auditDocId = `${cleanCategory}_${cleanDeviceHash.substring(0, 32)}`;
+      await syncToFirestore('votes_audit', auditDocId, {
+        filmId: { stringValue: cleanFilmId },
+        category: { stringValue: cleanCategory },
+        deviceHash: { stringValue: cleanDeviceHash },
+        votedAt: { timestampValue: new Date().toISOString() }
+      });
     })();
 
     return res.json({
       success: true,
       filmId: cleanFilmId,
-      votesCount: currentVotes
+      category: cleanCategory,
+      votesCount: currentVotes,
+      votedCategories: deviceRecord
     });
   } catch (err) {
     console.error('Error in /api/vote:', err);
@@ -129,30 +255,336 @@ app.post('/api/vote', async (req, res) => {
   }
 });
 
-// API: Reset vote for testing purposes
-app.post('/api/vote/test-reset', (req, res) => {
+// ---------------------------------------------------------------------------
+// ADMIN & GLOBAL SETTINGS API
+// ---------------------------------------------------------------------------
+
+// API: Get global settings and feature tumblers
+app.get('/api/admin/settings', (req, res) => {
   try {
-    const { voterUid, clearAll } = req.body || {};
+    const settings = loadSettingsData();
+    res.json({ success: true, settings });
+  } catch (e) {
+    res.status(500).json({ error: 'Failed to read settings' });
+  }
+});
+
+// API: Update global settings and feature tumblers
+app.post('/api/admin/settings', (req, res) => {
+  try {
+    const current = loadSettingsData();
+    const updates = req.body || {};
+    const updated = { ...current, ...updates };
+    saveJson(SETTINGS_FILE, updated);
+
+    // Background sync to Firestore settings/global
+    syncToFirestore('settings', 'global', {
+      votingActive: { booleanValue: updated.votingActive !== false },
+      maintenanceMode: { booleanValue: updated.maintenanceMode === true },
+      publicWinners: { booleanValue: updated.publicWinners !== false },
+      submissionsOpen: { booleanValue: updated.submissionsOpen !== false },
+      institutionNameLt: { stringValue: updated.institutionNameLt || "Kauno Tarptautinė Gimnazija" },
+      institutionNameEn: { stringValue: updated.institutionNameEn || "Kaunas International Gymnasium" }
+    });
+
+    res.json({ success: true, settings: updated });
+  } catch (e) {
+    res.status(500).json({ error: 'Failed to save settings' });
+  }
+});
+
+// API: Live voting results, rankings, and margin calculations
+app.get('/api/admin/voting-stats', (req, res) => {
+  try {
     const votesData = loadVotesData();
-    if (clearAll === true) {
-      votesData.votesByFilm = {};
-      votesData.voters = {};
-      votesData.auditLog = [];
-      saveVotesData(votesData);
-      return res.json({ success: true, message: 'All votes reset' });
+    const votesByFilm = votesData.votesByFilm || {};
+    const auditLog = votesData.auditLog || [];
+
+    // Calculate totals and leaders
+    const entries = Object.entries(votesByFilm).map(([filmId, count]) => ({
+      filmId,
+      count: Number(count) || 0
+    })).sort((a, b) => b.count - a.count);
+
+    const totalVotes = entries.reduce((acc, cur) => acc + cur.count, 0);
+
+    const leader = entries[0] || null;
+    const runnerUp = entries[1] || null;
+    const margin = leader && runnerUp ? leader.count - runnerUp.count : (leader ? leader.count : 0);
+    const marginPct = totalVotes > 0 && leader && runnerUp 
+      ? (((leader.count - runnerUp.count) / totalVotes) * 100).toFixed(1)
+      : (totalVotes > 0 && leader ? "100.0" : "0.0");
+
+    res.json({
+      success: true,
+      totalVotes,
+      entries,
+      leader,
+      runnerUp,
+      margin,
+      marginPct,
+      recentVotes: auditLog.slice(-20).reverse()
+    });
+  } catch (e) {
+    res.status(500).json({ error: 'Failed to calculate voting statistics' });
+  }
+});
+
+// ---------------------------------------------------------------------------
+// USER MANAGEMENT & INVITATIONS API (RBAC)
+// ---------------------------------------------------------------------------
+
+// API: List users and pending invitations
+app.get('/api/admin/users', (req, res) => {
+  try {
+    const usersData = loadUsersData();
+    const invitesData = loadInvitationsData();
+    res.json({
+      success: true,
+      users: usersData.users || [],
+      invitations: (invitesData.invitations || []).filter(i => i.status === 'pending')
+    });
+  } catch (e) {
+    res.status(500).json({ error: 'Failed to fetch users list' });
+  }
+});
+
+// API: Create new invitation
+app.post('/api/admin/invite', async (req, res) => {
+  try {
+    const { name, surname, email, role, adminEmail } = req.body || {};
+    if (!email || typeof email !== 'string' || !email.includes('@')) {
+      return res.status(400).json({ error: 'Valid email is required' });
     }
-    if (voterUid && votesData.voters[voterUid]) {
-      const votedFilmId = votesData.voters[voterUid].filmId;
-      if (votesData.votesByFilm[votedFilmId] > 0) {
-        votesData.votesByFilm[votedFilmId]--;
+
+    const cleanEmail = email.trim().toLowerCase();
+    const cleanRole = ['admin', 'moderator', 'judge', 'accountant', 'viewer'].includes(role) ? role : 'moderator';
+    const cleanName = (name || '').trim();
+    const cleanSurname = (surname || '').trim();
+
+    const token = crypto.randomBytes(20).toString('hex');
+    const code = Math.floor(100000 + Math.random() * 900000).toString();
+
+    const invitesData = loadInvitationsData();
+    if (!invitesData.invitations) invitesData.invitations = [];
+
+    // Expire any existing pending invite for this email
+    invitesData.invitations.forEach(inv => {
+      if (inv.email === cleanEmail && inv.status === 'pending') {
+        inv.status = 'revoked';
       }
-      delete votesData.voters[voterUid];
-      saveVotesData(votesData);
-      return res.json({ success: true, message: `Vote reset for voter ${voterUid}` });
+    });
+
+    const newInvite = {
+      token,
+      code,
+      name: cleanName,
+      surname: cleanSurname,
+      email: cleanEmail,
+      role: cleanRole,
+      status: 'pending',
+      invitedBy: adminEmail || 'azuolynasfilmfestival@gmail.com',
+      createdAt: new Date().toISOString(),
+      expiresAt: new Date(Date.now() + 7 * 24 * 3600 * 1000).toISOString()
+    };
+
+    invitesData.invitations.push(newInvite);
+    saveJson(INVITATIONS_FILE, invitesData);
+
+    // Sync to Firestore
+    syncToFirestore('invitations', token, {
+      token: { stringValue: token },
+      code: { stringValue: code },
+      email: { stringValue: cleanEmail },
+      name: { stringValue: cleanName },
+      surname: { stringValue: cleanSurname },
+      role: { stringValue: cleanRole },
+      status: { stringValue: 'pending' },
+      invitedBy: { stringValue: newInvite.invitedBy },
+      createdAt: { timestampValue: newInvite.createdAt },
+      expiresAt: { timestampValue: newInvite.expiresAt }
+    });
+
+    res.json({
+      success: true,
+      invitation: newInvite
+    });
+  } catch (e) {
+    res.status(500).json({ error: 'Failed to create invitation' });
+  }
+});
+
+// API: Get invitation details for activation page
+app.get('/api/admin/invite-info', (req, res) => {
+  try {
+    const token = String(req.query.token || '').trim();
+    if (!token) {
+      return res.status(400).json({ error: 'Token is required' });
     }
-    res.json({ success: true, message: 'No action needed' });
-  } catch (err) {
-    res.status(500).json({ error: 'Reset failed' });
+    const invitesData = loadInvitationsData();
+    const invite = (invitesData.invitations || []).find(i => i.token === token);
+    if (!invite) {
+      return res.status(404).json({ error: 'Kvietimas nerastas arba nebegalioja' });
+    }
+    if (invite.status !== 'pending') {
+      return res.status(400).json({ error: 'Šis kvietimas jau buvo panaudotas arba atšauktas' });
+    }
+    res.json({
+      success: true,
+      invitation: {
+        email: invite.email,
+        name: invite.name,
+        surname: invite.surname,
+        role: invite.role,
+        code: invite.code,
+        invitedBy: invite.invitedBy
+      }
+    });
+  } catch (e) {
+    res.status(500).json({ error: 'Failed to verify invitation' });
+  }
+});
+
+// API: Activate account via invitation code
+app.post('/api/admin/activate-invite', (req, res) => {
+  try {
+    const { token, code, password, name, surname, uid } = req.body || {};
+    if (!token || !code) {
+      return res.status(400).json({ error: 'Token and code are required' });
+    }
+
+    const invitesData = loadInvitationsData();
+    const invite = (invitesData.invitations || []).find(i => i.token === token && i.code === String(code).trim());
+    if (!invite || invite.status !== 'pending') {
+      return res.status(400).json({ error: 'Neteisingas arba nebegaliojantis kvietimo kodas' });
+    }
+
+    // Mark invitation accepted
+    invite.status = 'accepted';
+    invite.acceptedAt = new Date().toISOString();
+    saveJson(INVITATIONS_FILE, invitesData);
+
+    // Provision User in users list
+    const usersData = loadUsersData();
+    if (!usersData.users) usersData.users = [];
+
+    const existingIdx = usersData.users.findIndex(u => u.email === invite.email);
+    const userUid = uid || 'usr_' + crypto.randomBytes(8).toString('hex');
+
+    const userProfile = {
+      uid: userUid,
+      email: invite.email,
+      name: (name || invite.name || '').trim(),
+      surname: (surname || invite.surname || '').trim(),
+      role: invite.role,
+      status: 'active',
+      createdAt: new Date().toISOString(),
+      lastLogin: new Date().toISOString(),
+      invitedBy: invite.invitedBy
+    };
+
+    if (existingIdx >= 0) {
+      usersData.users[existingIdx] = { ...usersData.users[existingIdx], ...userProfile };
+    } else {
+      usersData.users.push(userProfile);
+    }
+
+    saveJson(USERS_FILE, usersData);
+
+    // Sync to Firestore
+    syncToFirestore('users', userUid, {
+      uid: { stringValue: userUid },
+      email: { stringValue: userProfile.email },
+      name: { stringValue: userProfile.name },
+      surname: { stringValue: userProfile.surname },
+      role: { stringValue: userProfile.role },
+      status: { stringValue: 'active' },
+      createdAt: { timestampValue: userProfile.createdAt },
+      lastLogin: { timestampValue: userProfile.lastLogin }
+    });
+
+    res.json({
+      success: true,
+      user: userProfile
+    });
+  } catch (e) {
+    res.status(500).json({ error: 'Failed to activate account' });
+  }
+});
+
+// API: Toggle user status (active / suspended)
+app.post('/api/admin/users/status', (req, res) => {
+  try {
+    const { email, status } = req.body || {};
+    if (!email) return res.status(400).json({ error: 'Email is required' });
+
+    const usersData = loadUsersData();
+    const user = (usersData.users || []).find(u => u.email.toLowerCase() === String(email).trim().toLowerCase());
+    if (!user) return res.status(404).json({ error: 'User not found' });
+
+    user.status = status === 'suspended' ? 'suspended' : 'active';
+    saveJson(USERS_FILE, usersData);
+
+    if (user.uid) {
+      syncToFirestore('users', user.uid, {
+        status: { stringValue: user.status }
+      });
+    }
+
+    res.json({ success: true, user });
+  } catch (e) {
+    res.status(500).json({ error: 'Failed to update user status' });
+  }
+});
+
+// API: Update user role
+app.post('/api/admin/users/role', (req, res) => {
+  try {
+    const { email, role } = req.body || {};
+    if (!email || !role) return res.status(400).json({ error: 'Email and role are required' });
+
+    const usersData = loadUsersData();
+    const user = (usersData.users || []).find(u => u.email.toLowerCase() === String(email).trim().toLowerCase());
+    if (!user) return res.status(404).json({ error: 'User not found' });
+
+    user.role = role;
+    saveJson(USERS_FILE, usersData);
+
+    if (user.uid) {
+      syncToFirestore('users', user.uid, {
+        role: { stringValue: user.role }
+      });
+    }
+
+    res.json({ success: true, user });
+  } catch (e) {
+    res.status(500).json({ error: 'Failed to update user role' });
+  }
+});
+
+// API: Safely delete user account
+app.post('/api/admin/users/delete', (req, res) => {
+  try {
+    const { email } = req.body || {};
+    if (!email) return res.status(400).json({ error: 'Email is required' });
+
+    const cleanEmail = String(email).trim().toLowerCase();
+    if (cleanEmail === 'azuolynasfilmfestival@gmail.com') {
+      return res.status(403).json({ error: 'Super Administrator cannot be deleted' });
+    }
+
+    const usersData = loadUsersData();
+    const initialLen = (usersData.users || []).length;
+    usersData.users = (usersData.users || []).filter(u => u.email.toLowerCase() !== cleanEmail);
+
+    if (usersData.users.length === initialLen) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    saveJson(USERS_FILE, usersData);
+    res.json({ success: true, message: 'User account removed permanently' });
+  } catch (e) {
+    res.status(500).json({ error: 'Failed to delete user' });
   }
 });
 

@@ -97,6 +97,14 @@ const STATUS_BADGES = {
     labelLt: "CEREMONIJOS ĮRAŠAS",
     labelEn: "FESTIVAL BROADCAST"
   },
+  userInvite: {
+    icon: "🔑",
+    color: "#D4AF37",
+    bg: "rgba(212, 175, 55, 0.18)",
+    border: "#D4AF37",
+    labelLt: "KOMANDOS KVIETIMAS",
+    labelEn: "TEAM INVITATION"
+  },
   adminNotification: {
     icon: "⚡",
     color: "#6FA58A",
@@ -179,6 +187,15 @@ const emailTexts = {
       detailsTitle: "Renginio įrašas",
       note: "Kviečiame patogiai peržiūrėti geriausius mokinių darbus ir ceremonijos akimirkas.",
       ctaText: "Žiūrėti Festivalio Įrašą"
+    },
+    userInvite: {
+      sub: "Ąžuolynas Film Fest | Kvietimas prisijungti prie komandos",
+      preheader: "Jums suteikta prieiga prie Ąžuolyno kino festivalio valdymo platformos.",
+      heading: "Sveiki, {{name}}!",
+      body: "Jūs buvote oficialiai pakviestas prisijungti prie Ąžuolyno tarptautinio mokinių filmų festivalio (Kauno Tarptautinė Gimnazija) valdymo sistemos. Žemiau pateikiami jūsų paskyros aktyvavimo duomenys ir saugus patvirtinimo kodas.",
+      detailsTitle: "Paskyros aktyvavimo byla",
+      note: "Ši nuoroda skirta tik nurodytam asmeniui. Aktyvuokite savo paskyrą nustatydami saugų slaptažodį.",
+      ctaText: "Aktyvuoti Paskyrą Dabar"
     }
   },
   en: {
@@ -252,6 +269,15 @@ const emailTexts = {
       detailsTitle: "Broadcast Information",
       note: "Sit back and enjoy the remarkable films crafted by youth creators from around the world.",
       ctaText: "Watch Festival Broadcast"
+    },
+    userInvite: {
+      sub: "Ąžuolynas Film Fest | Staff Team Invitation",
+      preheader: "You have been invited to the Ąžuolynas Film Festival administration portal.",
+      heading: "Hello, {{name}}!",
+      body: "You have been officially invited to join the staff committee of the Ąžuolynas International Students Film Festival at Kaunas International Gymnasium. Below are your account credentials and secure verification code.",
+      detailsTitle: "Account Activation Record",
+      note: "This invitation is personal and confidential. Please activate your account by setting a secure password.",
+      ctaText: "Activate My Account Now"
     }
   }
 };
@@ -293,10 +319,12 @@ function buildEmailDocument({ lang, preheader, statusKey, childrenHtml }) {
     .btn-primary:hover { background-color: #17453B !important; border-color: #8AE0BA !important; }
     @media screen and (max-width: 600px) {
       .email-shell { width: 100% !important; max-width: 100% !important; }
-      .email-card { padding: 22px 16px !important; }
+      .email-card { padding: 20px 14px !important; }
       .meta-grid-label, .meta-grid-value { display: block !important; width: 100% !important; }
       .meta-grid-value { padding-top: 2px !important; }
-      .footer-cell { padding: 20px 12px !important; }
+      .footer-cell { padding: 20px 10px !important; }
+      .cta-table { width: 100% !important; }
+      .btn-primary { display: block !important; width: 100% !important; box-sizing: border-box !important; text-align: center !important; padding: 14px 16px !important; }
     }
   </style>
 </head>
@@ -492,7 +520,7 @@ function generateEmailHtml(templateKey, lang, data = {}) {
 
   const ctaUrl = data.ctaUrl || EMAIL_THEME.siteUrl;
   const ctaButtonHtml = `
-    <table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center" style="margin: 24px auto 14px auto;">
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center" class="cta-table" style="margin: 24px auto 14px auto;">
       <tr>
         <td align="center" style="border-radius: 6px; background-color: #12372F; border: 1px solid #6FA58A;">
           <a href="${ctaUrl}" target="_blank" class="btn-primary" style="display: inline-block; padding: 13px 28px; font-size: 13px; font-weight: 700; color: #F8FAF7; text-decoration: none; border-radius: 6px; letter-spacing: 0.02em;">
@@ -612,7 +640,7 @@ function generateAdminNotificationHtml(lang, data = {}) {
       ${videoLinkHtml}
     </div>
 
-    <table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center" style="margin: 24px auto 8px auto;">
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center" class="cta-table" style="margin: 24px auto 8px auto;">
       <tr>
         <td align="center" style="border-radius: 6px; background-color: #12372F; border: 1px solid #6FA58A;">
           <a href="${adminUrl}" target="_blank" class="btn-primary" style="display: inline-block; padding: 13px 28px; font-size: 13px; font-weight: 700; color: #F8FAF7; text-decoration: none; border-radius: 6px; letter-spacing: 0.02em;">
@@ -631,16 +659,107 @@ function generateAdminNotificationHtml(lang, data = {}) {
   });
 }
 
+/**
+ * Generates an automated dark-themed team invitation email with verification code and activation link.
+ */
+function generateInviteEmailHtml(lang, data = {}) {
+  const currentLang = (lang === "lt" || lang === "en") ? lang : "lt";
+  const texts = emailTexts[currentLang] || emailTexts.lt;
+  const t = texts.userInvite;
+  const isLt = currentLang === "lt";
+
+  const inviteeName = [data.name || "", data.surname || ""].filter(Boolean).join(" ") || (isLt ? "Būsimas komandos narys" : "New Team Member");
+  const email = data.email || "-";
+  const role = data.role || "moderator";
+  const code = data.code || Math.floor(100000 + Math.random() * 900000).toString();
+  const token = data.token || "";
+  const inviteUrl = data.inviteUrl || `${EMAIL_THEME.adminUrl}?invite_token=${encodeURIComponent(token)}&code=${encodeURIComponent(code)}`;
+
+  const roleLabels = {
+    admin: isLt ? "Administratorius (Super Admin)" : "Administrator (Full Access)",
+    moderator: isLt ? "Moderatorius (Paraiškos ir turinys)" : "Moderator (Content & Submissions)",
+    judge: isLt ? "Žiuri / Teisėjas (Vertinimas)" : "Jury / Judge (Scoring)",
+    accountant: isLt ? "Buhalteris / Sąskaitos" : "Accountant / Finance",
+    viewer: isLt ? "Žiūrovas (Tik peržiūra)" : "Viewer (Read Only)"
+  };
+
+  const roleDisplay = roleLabels[role] || role;
+
+  let metaRows = "";
+  metaRows += buildMetaRow(isLt ? "Gavėjas:" : "Invitee:", `<b>${escapeHtml(inviteeName)}</b> (<a href="mailto:${escapeHtml(email)}" style="color:#9BC4AE; text-decoration:none;">${escapeHtml(email)}</a>)`);
+  metaRows += buildMetaRow(isLt ? "Priskirta rolė:" : "Assigned Role:", `<span style="color:#D4AF37; font-weight:700; text-transform:uppercase; letter-spacing:0.04em;">🛡️ ${escapeHtml(roleDisplay)}</span>`);
+  if (data.invitedBy) {
+    metaRows += buildMetaRow(isLt ? "Pakvietė:" : "Invited By:", escapeHtml(data.invitedBy));
+  }
+  metaRows += buildMetaRow(isLt ? "Galiojimas:" : "Valid Until:", isLt ? "7 dienas nuo išsiuntimo" : "7 days from dispatch");
+
+  const childrenHtml = `
+    <h2 style="color: #F8FAF7; margin: 0 0 10px 0; font-size: 20px; font-weight: 700; letter-spacing: -0.01em;">
+      ${t.heading.replace("{{name}}", escapeHtml(inviteeName))}
+    </h2>
+    <p style="font-size: 14px; color: #BAC9C0; line-height: 1.65; margin: 0 0 18px 0;">
+      ${t.body}
+    </p>
+
+    <!-- Activation Code Box -->
+    <div style="background-color: #081B17; border: 1px solid rgba(212, 175, 55, 0.4); border-radius: 8px; padding: 20px; margin: 20px 0; text-align: center;">
+      <p style="margin: 0 0 6px 0; font-size: 11px; font-weight: 700; color: #D4AF37; text-transform: uppercase; letter-spacing: 0.1em;">
+        ${isLt ? "Jūsų unikalus patvirtinimo kodas:" : "Your Unique Verification Code:"}
+      </p>
+      <div style="font-family: 'Courier New', Courier, monospace; font-size: 28px; font-weight: 800; letter-spacing: 8px; color: #F8FAF7; padding: 8px 0;">
+        ${escapeHtml(code)}
+      </div>
+      <p style="margin: 6px 0 0 0; font-size: 11px; color: #7A9689;">
+        ${isLt ? "Įveskite šį kodą arba paspauskite tiesioginį aktyvavimo mygtuką žemiau" : "Enter this code or click the direct activation button below"}
+      </p>
+    </div>
+
+    <!-- Details Box -->
+    <div style="background-color: #081B17; border: 1px solid rgba(111,165,138,0.22); border-radius: 6px; padding: 18px 20px; margin: 18px 0;">
+      <p style="margin: 0 0 12px 0; font-weight: 700; color: #9BC4AE; font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em;">
+        ${t.detailsTitle}
+      </p>
+      <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+        ${metaRows}
+      </table>
+    </div>
+
+    <!-- Direct CTA Button -->
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center" class="cta-table" style="margin: 24px auto 14px auto;">
+      <tr>
+        <td align="center" style="border-radius: 6px; background-color: #17453B; border: 1px solid #D4AF37;">
+          <a href="${inviteUrl}" target="_blank" class="btn-primary" style="display: inline-block; padding: 14px 32px; font-size: 13px; font-weight: 800; color: #F8FAF7; text-decoration: none; border-radius: 6px; letter-spacing: 0.04em;">
+            ${escapeHtml(t.ctaText)} &rarr;
+          </a>
+        </td>
+      </tr>
+    </table>
+
+    <p style="font-size: 11px; color: #7A9689; line-height: 1.6; margin: 16px 0 0 0; text-align: center;">
+      ${t.note}
+    </p>
+  `;
+
+  return buildEmailDocument({
+    lang: currentLang,
+    preheader: `${t.preheader} (${inviteeName} - ${roleDisplay})`,
+    statusKey: "userInvite",
+    childrenHtml
+  });
+}
+
 // Global browser and runtime scope compatibility
 if (typeof window !== "undefined") {
   window.emailTexts = emailTexts;
   window.generateEmailHtml = generateEmailHtml;
   window.generateAdminNotificationHtml = generateAdminNotificationHtml;
+  window.generateInviteEmailHtml = generateInviteEmailHtml;
 }
 if (typeof globalThis !== "undefined") {
   globalThis.emailTexts = emailTexts;
   globalThis.generateEmailHtml = generateEmailHtml;
   globalThis.generateAdminNotificationHtml = generateAdminNotificationHtml;
+  globalThis.generateInviteEmailHtml = generateInviteEmailHtml;
 }
 
 // Node / CommonJS module export compatibility (for backend/tests)
@@ -648,6 +767,7 @@ if (typeof module !== "undefined" && module.exports) {
   module.exports = {
     emailTexts,
     generateEmailHtml,
-    generateAdminNotificationHtml
+    generateAdminNotificationHtml,
+    generateInviteEmailHtml
   };
 }

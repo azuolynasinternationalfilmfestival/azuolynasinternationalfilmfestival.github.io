@@ -2,7 +2,7 @@
   "entities": {
     "FestivalSettings": {
       "title": "FestivalSettings",
-      "description": "Global festival settings, tab visibilities, and localized texts",
+      "description": "Global festival settings, tab visibilities, and localized controls",
       "type": "object",
       "properties": {
         "showAbout": { "type": "boolean", "description": "Visibility of About tab & hero" },
@@ -16,6 +16,7 @@
         "showVoting": { "type": "boolean", "description": "Visibility of Voting tab" },
         "showScreening": { "type": "boolean", "description": "Visibility of Screening tab" },
         "showSubmit": { "type": "boolean", "description": "Visibility of Submission form tab" },
+        "maintenanceMode": { "type": "boolean", "description": "Whether maintenance mode is active" },
         "recordingVideoUrl": { "type": "string", "description": "URL of the festival recording video" },
         "prizesPhotoUrl": { "type": "string", "description": "URL of the prizes photo" }
       }
@@ -59,6 +60,53 @@
         "votesCount": { "type": "number", "description": "Audience votes counter" }
       },
       "required": ["name", "email", "category", "filmTitle", "videoUrl"]
+    },
+    "UserAccount": {
+      "title": "UserAccount",
+      "description": "Platform administrator or committee member profile",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "Firebase Auth User UID" },
+        "email": { "type": "string", "description": "User email address" },
+        "name": { "type": "string", "description": "First name" },
+        "surname": { "type": "string", "description": "Last name" },
+        "role": { "type": "string", "description": "Role: admin, moderator, judge, accountant, viewer" },
+        "status": { "type": "string", "description": "Status: active, suspended, pending" },
+        "createdAt": { "type": "string", "description": "ISO timestamp of account creation" },
+        "lastLogin": { "type": "string", "description": "ISO timestamp of last activity" },
+        "invitedBy": { "type": "string", "description": "Admin email who created the invitation" }
+      },
+      "required": ["email", "role", "status"]
+    },
+    "Invitation": {
+      "title": "Invitation",
+      "description": "Secure access invitation token for committee members",
+      "type": "object",
+      "properties": {
+        "token": { "type": "string", "description": "Unique cryptographic invitation token" },
+        "name": { "type": "string", "description": "Invitee first name" },
+        "surname": { "type": "string", "description": "Invitee last name" },
+        "email": { "type": "string", "description": "Invitee email" },
+        "role": { "type": "string", "description": "Assigned role" },
+        "code": { "type": "string", "description": "6-character verification code" },
+        "status": { "type": "string", "description": "Status: pending, accepted, revoked" },
+        "createdAt": { "type": "string", "description": "Creation timestamp" },
+        "expiresAt": { "type": "string", "description": "Expiration timestamp" },
+        "invitedBy": { "type": "string", "description": "Admin email who issued the invite" }
+      },
+      "required": ["token", "email", "role", "code", "status"]
+    },
+    "VoteAudit": {
+      "title": "VoteAudit",
+      "description": "Audit and rate-limiting document for audience voting per device and category",
+      "type": "object",
+      "properties": {
+        "filmId": { "type": "string", "description": "ID of film voted for" },
+        "category": { "type": "string", "description": "Category slug (e.g. cat1 or cat2)" },
+        "deviceHash": { "type": "string", "description": "SHA-256 fingerprint hash of voter device" },
+        "votedAt": { "type": "string", "description": "Timestamp when vote was cast" }
+      },
+      "required": ["filmId", "category", "deviceHash"]
     }
   },
   "firestore": {
@@ -73,6 +121,18 @@
     "/submissions/{submissionId}": {
       "schema": "Submission",
       "description": "Film entries submitted by participants"
+    },
+    "/users/{userId}": {
+      "schema": "UserAccount",
+      "description": "Admin and staff user accounts"
+    },
+    "/invitations/{invitationToken}": {
+      "schema": "Invitation",
+      "description": "Pending user invitation tokens"
+    },
+    "/votes_audit/{auditId}": {
+      "schema": "VoteAudit",
+      "description": "Device vote locks per category"
     }
   }
 }

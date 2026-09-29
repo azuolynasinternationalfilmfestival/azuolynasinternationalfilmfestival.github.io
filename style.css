@@ -3533,6 +3533,148 @@ footer {
   .toast-container { left: 16px; right: 16px; bottom: 16px; }
   .lightbox-btn { display: none; }
   .footer-bottom-bar { flex-direction: column; text-align: center; gap: 12px; }
+
+  /* FAQ mobile responsive adjustments to prevent crooked rendering */
+  .faq-card-header {
+    padding: 16px 14px !important;
+    display: grid !important;
+    grid-template-columns: 1fr auto !important;
+    grid-template-areas:
+      "tag chevron"
+      "title title" !important;
+    row-gap: 10px !important;
+    column-gap: 10px !important;
+    align-items: center !important;
+  }
+  .faq-category-tag {
+    grid-area: tag !important;
+    justify-self: start !important;
+    font-size: 0.7rem !important;
+    padding: 2px 8px !important;
+  }
+  .faq-chevron-icon {
+    grid-area: chevron !important;
+    justify-self: end !important;
+    width: 28px !important;
+    height: 28px !important;
+  }
+  .faq-card-question {
+    grid-area: title !important;
+    font-size: 1.02rem !important;
+    line-height: 1.38 !important;
+  }
+  .faq-card-body {
+    padding: 0 14px 18px 14px !important;
+    font-size: 0.88rem !important;
+  }
+  .faq-category-nav {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    justify-content: flex-start !important;
+    padding: 4px 4px 12px 4px !important;
+    margin: 6px 0 24px 0 !important;
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+  }
+  .faq-category-nav::-webkit-scrollbar {
+    display: none !important;
+  }
+  .faq-nav-pill {
+    flex-shrink: 0 !important;
+    padding: 7px 14px !important;
+    font-size: 0.8rem !important;
+  }
+  .faq-bottom-callout {
+    padding: 22px 16px !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    text-align: center !important;
+  }
+  .faq-callout-info {
+    min-width: 0 !important;
+  }
+  .faq-callout-btn-group {
+    flex-direction: column !important;
+    width: 100% !important;
+  }
+  .faq-streamlined-card {
+    padding: 20px 14px !important;
+    grid-template-columns: 1fr !important;
+    gap: 20px !important;
+  }
+  .faq-streamlined-actions {
+    padding: 16px 14px !important;
+  }
+
+  /* Grids and card layouts */
+  .two-col-grid,
+  .three-col-grid,
+  .archive-media-grid,
+  .admin-media-grid,
+  .switch-grid {
+    grid-template-columns: 1fr !important;
+    gap: 16px !important;
+  }
+  .player-card {
+    padding: 12px 10px !important;
+  }
+  .drop-area {
+    padding: 22px 14px !important;
+  }
+  .consent-list {
+    padding: 16px 14px !important;
+  }
+  .table-toolbar {
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+  .toolbar-search {
+    max-width: 100% !important;
+    width: 100% !important;
+  }
+  .toolbar-select {
+    width: 100% !important;
+  }
+  
+  /* Modals on phones */
+  .modal-curtain {
+    padding: 10px !important;
+  }
+  .modal-dialog {
+    padding: 18px 14px !important;
+    max-height: 92vh !important;
+    border-radius: var(--site-radius) !important;
+    width: 100% !important;
+  }
+  .modal-video-frame {
+    aspect-ratio: 16 / 9 !important;
+    height: auto !important;
+    max-height: 42vh !important;
+    object-fit: contain !important;
+  }
+  .modal-title {
+    font-size: 1.2rem !important;
+  }
+  .modal-vote-strip {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 10px !important;
+  }
+  .modal-vote-strip .btn-solid {
+    width: 100% !important;
+    text-align: center !important;
+    justify-content: center !important;
+  }
+  .vote-confirm-card {
+    padding: 22px 16px !important;
+    max-width: 100% !important;
+  }
+  .vote-confirm-actions {
+    flex-direction: column !important;
+    gap: 10px !important;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -4806,10 +4948,9 @@ footer {
    ========================================================= */
 #confettiCanvas {
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
+  inset: 0;
+  width: 100%;
+  height: 100%;
   pointer-events: none;
   z-index: 10050;
 }
