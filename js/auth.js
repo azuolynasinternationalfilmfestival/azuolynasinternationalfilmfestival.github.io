@@ -1,4 +1,4 @@
-import { auth, AUTHORIZED_ADMIN_EMAILS, PRIMARY_SUPERADMIN_EMAIL } from "./firebase-init.js";
+import { auth, db, AUTHORIZED_ADMIN_EMAILS, PRIMARY_SUPERADMIN_EMAIL } from "./firebase-init.js";
 import { showToast } from "./ui-feedback.js";
 
 export function initAuth({ onLoginSuccess, onLogout }) {
@@ -18,16 +18,48 @@ export function initAuth({ onLoginSuccess, onLogout }) {
   const resetErrMsg = document.getElementById("resetErrMsg");
   const resetSuccessMsg = document.getElementById("resetSuccessMsg");
 
-  auth.onAuthStateChanged((user) => {
-    if (user && AUTHORIZED_ADMIN_EMAILS.includes(user.email.toLowerCase())) {
-      loginSection.classList.add("d-none");
-      panelSection.classList.remove("d-none");
-      authErrMsg.classList.add("d-none");
-      onLoginSuccess(user);
-    } else if (user) {
-      auth.signOut();
-      authErrMsg.classList.remove("d-none");
-      authErrMsg.textContent = "Prieiga apribota: paskyrai nesuteiktos administratoriaus teisės.";
+  auth.onAuthStateChanged(async (user) => {
+    if (user) {
+      const emailLower = (user.email || "").toLowerCase();
+      const isSuperAdmin = emailLower === PRIMARY_SUPERADMIN_EMAIL.toLowerCase();
+
+      // Check Firestore user doc for account status and assigned role
+      let userDoc = null;
+      if (db) {
+        try {
+          const docId = emailLower.replace(/[^a-zA-Z0-9_-]/g, "_");
+          const docSnap = await db.collection("users").doc(docId).get();
+          if (docSnap.exists) {
+            userDoc = docSnap.data();
+          }
+        } catch (err) {
+          console.warn("User status check notice:", err);
+        }
+      }
+
+      // Check if user is blocked / suspended
+      if (userDoc && userDoc.status === "suspended" && !isSuperAdmin) {
+        auth.signOut();
+        authErrMsg.classList.remove("d-none");
+        authErrMsg.textContent = "Prieiga apribota: ši paskyra yra užblokuota administratoriaus.";
+        return;
+      }
+
+      const isAuthorized =
+        isSuperAdmin ||
+        AUTHORIZED_ADMIN_EMAILS.includes(emailLower) ||
+        (userDoc && (userDoc.role === "admin" || userDoc.role === "moderator" || userDoc.role === "judge" || userDoc.role === "accountant"));
+
+      if (isAuthorized) {
+        loginSection.classList.add("d-none");
+        panelSection.classList.remove("d-none");
+        authErrMsg.classList.add("d-none");
+        onLoginSuccess(user);
+      } else {
+        auth.signOut();
+        authErrMsg.classList.remove("d-none");
+        authErrMsg.textContent = "Prieiga apribota: paskyrai nesuteiktos administratoriaus ar komandos teisės.";
+      }
     } else {
       loginSection.classList.remove("d-none");
       panelSection.classList.add("d-none");

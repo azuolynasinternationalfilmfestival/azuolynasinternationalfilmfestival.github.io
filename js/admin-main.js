@@ -16,11 +16,17 @@ import {
   subscribeEditions, 
   unsubscribeEditionsListener 
 } from "./editions.js";
+import {
+  initUsers,
+  subscribeUsers,
+  unsubscribeUsersListener
+} from "./users.js";
 
 document.addEventListener("DOMContentLoaded", () => {
   initSubmissions();
   initEditions();
   initArchive();
+  initUsers();
   initSettings();
   initTabNavigation();
 
@@ -29,11 +35,13 @@ document.addEventListener("DOMContentLoaded", () => {
       evaluateAdminPrivileges(user);
       subscribeSubmissions();
       subscribeEditions();
+      subscribeUsers();
       subscribeSettings();
     },
     onLogout: () => {
       unsubscribeSubmissionsListener();
       unsubscribeEditionsListener();
+      unsubscribeUsersListener();
       unsubscribeSettingsListener();
     }
   });
@@ -44,6 +52,7 @@ function initTabNavigation() {
     { btn: "tabSubmissionsBtn", content: "submissionsTab" },
     { btn: "tabEditionsBtn", content: "editionsTab" },
     { btn: "tabArchiveBtn", content: "archiveTab" },
+    { btn: "tabUsersBtn", content: "usersTab" },
     { btn: "tabSettingsBtn", content: "settingsTab" }
   ];
 

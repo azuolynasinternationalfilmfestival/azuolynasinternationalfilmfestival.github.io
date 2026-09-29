@@ -70,6 +70,10 @@
           <svg class="admin-nav-icon icon-svg-crisp" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect><line x1="7" y1="2" x2="7" y2="22"></line><line x1="17" y1="2" x2="17" y2="22"></line><line x1="2" y1="12" x2="22" y2="12"></line><line x1="2" y1="7" x2="7" y2="7"></line><line x1="2" y1="17" x2="7" y2="17"></line><line x1="17" y1="17" x2="22" y2="17"></line><line x1="17" y1="7" x2="22" y2="7"></line></svg>
           <span>Archyvas & Medija</span>
         </button>
+        <button id="tabUsersBtn" class="admin-nav-item">
+          <svg class="admin-nav-icon icon-svg-crisp" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+          <span>Vartotojai & Prieiga</span>
+        </button>
         <button id="tabSettingsBtn" class="admin-nav-item">
           <svg class="admin-nav-icon icon-svg-crisp" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
           <span>Nustatymai & Skiltys</span>
@@ -351,6 +355,88 @@
           </div>
 
           <div id="adminArchivePhotosList" class="admin-media-grid" style="margin-top:14px;"></div>
+        </div>
+      </div>
+
+      <div id="usersTab" class="d-none">
+        <div class="metrics-row">
+          <div class="metric-card">
+            <div class="metric-label">Viso vartotojų</div>
+            <div class="metric-num" id="statUsersTotal">0</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">Aktyvūs (Prieiga leista)</div>
+            <div class="metric-num" id="statUsersActive" style="color:var(--accent-light);">0</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">Užblokuoti (Prieiga apribota)</div>
+            <div class="metric-num" id="statUsersBlocked" style="color:#fca5a5;">0</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">Administratoriai</div>
+            <div class="metric-num" id="statUsersAdmins" style="color:#d8b4fe;">0</div>
+          </div>
+        </div>
+
+        <div class="content-card" style="margin-top:20px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px; margin-bottom:6px;">
+            <div>
+              <h3 class="content-card-title" style="margin-bottom:4px;">Vartotojų Prieigos ir Rolių Valdymas</h3>
+              <p class="content-card-sub" style="margin-bottom:0;">Stebėkite ir valdykite festivalio organizatorių, vertinimo komisijos bei moderatorių paskyras. Valdykite teises, blokuokite/atblokuokite prieigą arba pašalinkite paskyras.</p>
+            </div>
+            <div>
+              <button type="button" id="btnOpenInviteModal" class="btn-solid btn-sm" style="display:inline-flex; align-items:center; gap:8px;">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><line x1="20" y1="8" x2="20" y2="14"></line><line x1="23" y1="11" x2="17" y2="11"></line></svg>
+                <span>Pakviesti naują vartotoją</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="table-toolbar">
+          <input type="text" id="filterUserSearch" class="field toolbar-search" placeholder="Ieškoti pagal vardą, el. paštą...">
+          <select id="filterUserRole" class="field toolbar-select">
+            <option value="all">Visos rolės (Visos)</option>
+            <option value="admin">Administratorius</option>
+            <option value="moderator">Moderatorius</option>
+            <option value="judge">Teisėjas / Komisija</option>
+            <option value="accountant">Buhalteris</option>
+            <option value="viewer">Žiūrovas</option>
+          </select>
+          <select id="filterUserStatus" class="field toolbar-select">
+            <option value="all">Visi statusai</option>
+            <option value="active">Tik aktyvūs (Prieiga leista)</option>
+            <option value="suspended">Tik užblokuoti</option>
+            <option value="pending">Laukiama patvirtinimo</option>
+          </select>
+          <button type="button" id="btnRefreshUsers" class="btn-outline btn-sm" title="Atnaujinti duomenis iš Firestore">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+            <span>Atnaujinti</span>
+          </button>
+        </div>
+
+        <div class="table-box">
+          <table class="clean-table" id="usersTable">
+            <thead>
+              <tr>
+                <th>Vardas, Pavardė</th>
+                <th>El. paštas</th>
+                <th>Rolė</th>
+                <th>Statusas</th>
+                <th>Prieiga (Blokuoti / Atblokuoti)</th>
+                <th>Veiksmai</th>
+              </tr>
+            </thead>
+            <tbody id="usersTableBody">
+              <!-- Dynamically populated from Firestore users collection -->
+            </tbody>
+          </table>
+        </div>
+        <div id="usersLoadingState" class="table-loading-bar d-none">
+          <span>Kraunami vartotojai iš Firestore...</span>
+        </div>
+        <div id="usersEmptyState" class="drop-alert d-none" style="margin-top:16px;">
+          Nėra vartotojų, atitinkančių pasirinktus paieškos ar filtrų kriterijus.
         </div>
       </div>
 
@@ -680,6 +766,72 @@
       <div style="display:flex; justify-content:flex-end; gap:10px;">
         <button type="button" class="btn-outline btn-sm" id="adminPhotoModalCancelBtn">Atšaukti</button>
         <button type="button" class="btn-solid btn-sm" id="saveEditedPhotoBtn">Išsaugoti pakeitimus</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- User Invite / Add Modal -->
+  <div id="userInviteModal" class="admin-modal-overlay d-none">
+    <div class="admin-modal-card" style="max-width:540px;">
+      <div class="admin-modal-header">
+        <h3 class="admin-modal-title">Pakviesti Naują Vartotoją</h3>
+        <button type="button" id="closeInviteModalBtn" style="background:transparent; border:none; color:var(--text-muted); font-size:1.5rem; cursor:pointer; line-height:1;">&times;</button>
+      </div>
+      <p class="content-card-sub" style="margin-top:-6px; margin-bottom:16px;">Naujas vartotojas bus įtrauktas į Firestore duomenų bazę su jūsų paskirta role, o sistemoje sugeneruotas saugus patvirtinimo kodas.</p>
+      <form id="userInviteForm">
+        <div class="input-row">
+          <div class="input-cell">
+            <label for="inviteUserName">Vardas *</label>
+            <input type="text" id="inviteUserName" class="field" placeholder="pvz. Jonas" required>
+          </div>
+          <div class="input-cell">
+            <label for="inviteUserSurname">Pavardė</label>
+            <input type="text" id="inviteUserSurname" class="field" placeholder="pvz. Jonaitis">
+          </div>
+        </div>
+        <div class="input-cell" style="margin-bottom:14px;">
+          <label for="inviteUserEmail">El. pašto adresas *</label>
+          <input type="email" id="inviteUserEmail" class="field" placeholder="vardas.pavarde@gmail.com" required>
+        </div>
+        <div class="input-cell" style="margin-bottom:20px;">
+          <label for="inviteUserRole">Paskirta Rolė *</label>
+          <select id="inviteUserRole" class="field" required>
+            <option value="moderator">Moderatorius (gali peržiūrėti ir vertinti paraiškas)</option>
+            <option value="judge">Teisėjas / Komisijos narys (filmų vertinimas)</option>
+            <option value="accountant">Buhalteris (prizai, apskaita, ataskaitos)</option>
+            <option value="viewer">Žiūrovas (tik vidinė peržiūra)</option>
+            <option value="admin">Administratorius (pilnos sistemos valdymo teisės)</option>
+          </select>
+        </div>
+        <div style="display:flex; justify-content:flex-end; gap:10px;">
+          <button type="button" class="btn-outline btn-sm" id="cancelInviteBtn">Atšaukti</button>
+          <button type="submit" class="btn-solid btn-sm" id="submitInviteBtn">Pakviesti ir Suteikti Prieigą</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- User Delete Confirmation Modal -->
+  <div id="userDeleteModal" class="admin-modal-overlay d-none">
+    <div class="admin-modal-card" style="max-width:480px;">
+      <div class="admin-modal-header">
+        <h3 class="admin-modal-title" style="color:#f87171;">Pašalinti Vartotoją?</h3>
+        <button type="button" id="closeDeleteModalBtn" style="background:transparent; border:none; color:var(--text-muted); font-size:1.5rem; cursor:pointer; line-height:1;">&times;</button>
+      </div>
+      <div style="margin-bottom:18px;">
+        <p style="color:var(--text-color); font-size:0.92rem; margin-bottom:10px;">
+          Ar tikrai norite visam laikui pašalinti vartotojo paskyrą iš sistemos?
+        </p>
+        <div style="background:var(--surface-color); border:1px solid var(--border-color); border-radius:var(--site-radius); padding:10px 14px; font-family:monospace; font-size:0.85rem; color:var(--accent-light);" id="deleteUserTargetLabel">
+          user@example.com
+        </div>
+        <p style="color:var(--text-muted); font-size:0.8rem; margin-top:10px; margin-bottom:0;">
+          Dėmesio: Šis veiksmas ištrins vartotojo duomenis iš Firestore duomenų bazės ir panaikins prieigą prie festivalio valdymo skydo.
+        </p>
+      </div>
+      <div style="display:flex; justify-content:flex-end; gap:10px;">
+        <button type="button" class="btn-outline btn-sm" id="cancelDeleteBtn">Atšaukti</button>
+        <button type="button" class="btn-delete btn-sm" id="confirmDeleteBtn">Taip, Pašalinti Vartotoją</button>
       </div>
     </div>
   </div>

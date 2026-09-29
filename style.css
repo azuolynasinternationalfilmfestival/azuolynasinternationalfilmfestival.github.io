@@ -6206,5 +6206,220 @@ svg {
   justify-content: center;
 }
 
+/* ==========================================================================
+   Admin Users & Access Management Table & Toggle Switches
+   ========================================================================== */
+.user-cell-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.user-avatar-badge {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(111, 165, 138, 0.25), rgba(8, 27, 23, 0.9));
+  border: 1px solid rgba(111, 165, 138, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-cinema);
+  font-weight: 700;
+  font-size: 0.84rem;
+  color: var(--accent-light);
+  flex-shrink: 0;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+.user-avatar-badge.admin {
+  border-color: rgba(216, 180, 254, 0.5);
+  color: #d8b4fe;
+  background: linear-gradient(135deg, rgba(168, 85, 247, 0.25), rgba(8, 27, 23, 0.9));
+}
+
+.user-name-title {
+  font-weight: 600;
+  color: var(--text-color);
+  font-size: 0.88rem;
+  line-height: 1.25;
+}
+
+.user-name-sub {
+  font-size: 0.74rem;
+  color: var(--text-subtle);
+  margin-top: 3px;
+}
+
+.user-email-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-ui);
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.user-email-wrap a {
+  color: var(--text-color);
+  text-decoration: none;
+  transition: var(--transition-smooth);
+}
+
+.user-email-wrap a:hover {
+  color: var(--accent-light);
+  text-decoration: underline;
+}
+
+.btn-icon-copy {
+  background: transparent;
+  border: 1px solid var(--border-color);
+  color: var(--text-subtle);
+  border-radius: 4px;
+  padding: 3px 6px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition-smooth);
+}
+
+.btn-icon-copy:hover {
+  border-color: var(--accent-color);
+  color: var(--accent-light);
+  background: var(--surface-color);
+}
+
+.table-role-select {
+  background: var(--surface-color);
+  border: 1px solid var(--border-color);
+  color: var(--text-color);
+  padding: 6px 10px;
+  border-radius: var(--site-radius);
+  font-size: 0.8rem;
+  font-family: var(--font-ui);
+  cursor: pointer;
+  outline: none;
+  transition: var(--transition-smooth);
+  width: 140px;
+}
+
+.table-role-select:focus,
+.table-role-select:hover {
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 2px rgba(111, 165, 138, 0.15);
+}
+
+/* Data-Driven Block / Unblock Toggle Switch */
+.table-toggle-switch {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.table-toggle-switch input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.table-toggle-track {
+  width: 44px;
+  height: 24px;
+  background: rgba(220, 38, 38, 0.2);
+  border: 1px solid rgba(220, 38, 38, 0.45);
+  border-radius: 30px;
+  position: relative;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  flex-shrink: 0;
+}
+
+.table-toggle-track::before {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 18px;
+  height: 18px;
+  background: #f87171;
+  border-radius: 50%;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+}
+
+.table-toggle-switch input:checked + .table-toggle-track {
+  background: rgba(13, 148, 136, 0.25);
+  border-color: var(--accent-color);
+}
+
+.table-toggle-switch input:checked + .table-toggle-track::before {
+  transform: translateX(20px);
+  background: var(--accent-light);
+  box-shadow: 0 0 8px rgba(155, 196, 174, 0.8);
+}
+
+.table-toggle-switch input:disabled + .table-toggle-track {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.table-toggle-text {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #fca5a5;
+  transition: color 0.2s ease;
+  min-width: 80px;
+}
+
+.table-toggle-switch input:checked ~ .table-toggle-text {
+  color: var(--accent-light);
+}
+
+/* Action Delete Button */
+.btn-action-delete {
+  background: rgba(220, 38, 38, 0.12);
+  border: 1px solid rgba(220, 38, 38, 0.35);
+  color: #fca5a5;
+  padding: 6px 12px;
+  border-radius: var(--site-radius);
+  font-size: 0.78rem;
+  font-weight: 500;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: var(--transition-smooth);
+}
+
+.btn-action-delete:hover:not(:disabled) {
+  background: rgba(220, 38, 38, 0.26);
+  border-color: #ef4444;
+  color: #ffffff;
+  transform: translateY(-1px);
+}
+
+.btn-action-delete:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  border-color: var(--border-color);
+  color: var(--text-subtle);
+  background: transparent;
+}
+
+.table-loading-bar {
+  padding: 24px;
+  text-align: center;
+  color: var(--accent-light);
+  font-size: 0.88rem;
+  background: var(--surface-card);
+  border: 1px solid var(--border-color);
+  border-top: none;
+  border-radius: 0 0 var(--site-radius) var(--site-radius);
+}
+
 
 
