@@ -1,6 +1,17 @@
 {
   "logs": [
     {
+      "id": "log_1790794378827_98lth",
+      "action": "USER_PERMISSION_CHANGED",
+      "category": "users",
+      "adminEmail": "azuolynasfilmfestival@gmail.com",
+      "adminName": "azuolynasfilmfestival",
+      "target": "karina.brdar@gmail.com",
+      "details": "Vartotojui karina.brdar@gmail.com SUTEIKTA prieiga prie skilties „Vartotojai & Prieiga“",
+      "timestamp": "2026-09-30T18:52:58.827Z",
+      "status": "success"
+    },
+    {
       "id": "log_1790794060283_517ga",
       "action": "USER_DELETED",
       "category": "users",

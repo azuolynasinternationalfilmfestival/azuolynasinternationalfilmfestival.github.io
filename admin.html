@@ -71,7 +71,7 @@
           <svg class="admin-nav-icon icon-svg-crisp" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect><line x1="7" y1="2" x2="7" y2="22"></line><line x1="17" y1="2" x2="17" y2="22"></line><line x1="2" y1="12" x2="22" y2="12"></line><line x1="2" y1="7" x2="7" y2="7"></line><line x1="2" y1="17" x2="7" y2="17"></line><line x1="17" y1="17" x2="22" y2="17"></line><line x1="17" y1="7" x2="22" y2="7"></line></svg>
           <span>Archyvas & Medija</span>
         </button>
-        <button id="tabUsersBtn" class="admin-nav-item">
+        <button id="tabUsersBtn" class="admin-nav-item d-none">
           <svg class="admin-nav-icon icon-svg-crisp" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
           <span>Vartotojai & Prieiga</span>
         </button>
@@ -425,6 +425,7 @@
                 <th>Rolė</th>
                 <th>Statusas</th>
                 <th>Prieiga (Blokuoti / Atblokuoti)</th>
+                <th>Valdymo Skiltis</th>
                 <th>Veiksmai</th>
               </tr>
             </thead>
@@ -895,6 +896,13 @@
               <option value="en">English (EN)</option>
             </select>
           </div>
+        </div>
+
+        <div id="inviteCanManageUsersWrap" style="background:rgba(12, 36, 31, 0.6); border:1px solid rgba(111,165,138,0.3); border-radius:var(--site-radius); padding:10px 14px; margin-bottom:16px;">
+          <label style="cursor:pointer; display:flex; align-items:center; gap:10px; margin:0;">
+            <input type="checkbox" id="inviteCanManageUsers" style="width:16px; height:16px; accent-color:var(--accent-color); cursor:pointer;">
+            <span style="font-size:0.84rem; color:var(--text-color); font-weight:500;">Suteikti prieigą prie skilties <strong>„Vartotojai & Prieiga“</strong> (Gali valdyti vartotojus)</span>
+          </label>
         </div>
 
         <div style="background:rgba(8, 27, 23, 0.7); border:1px solid rgba(111,165,138,0.25); border-radius:var(--site-radius); padding:10px 14px; margin-bottom:18px; display:flex; align-items:center; gap:10px;">

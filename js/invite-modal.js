@@ -69,11 +69,22 @@ export function openInviteModal({ defaultRole = "moderator", email = "", name = 
   const surnameInput = document.getElementById("inviteUserSurname");
   const emailInput = document.getElementById("inviteUserEmail");
   const roleSelect = document.getElementById("inviteUserRole");
+  const canManageWrap = document.getElementById("inviteCanManageUsersWrap");
+  const canManageCheck = document.getElementById("inviteCanManageUsers");
 
   if (nameInput && name) nameInput.value = name;
   if (surnameInput && surname) surnameInput.value = surname;
   if (emailInput && email) emailInput.value = email;
   if (roleSelect && defaultRole) roleSelect.value = defaultRole;
+
+  const currentEmail = (auth && auth.currentUser && auth.currentUser.email ? auth.currentUser.email : "").toLowerCase();
+  const isSuperAdmin = currentEmail === PRIMARY_SUPERADMIN_EMAIL.toLowerCase();
+  if (canManageWrap) {
+    canManageWrap.style.display = isSuperAdmin ? "block" : "none";
+  }
+  if (canManageCheck) {
+    canManageCheck.checked = false;
+  }
 
   modalElement.classList.remove("d-none");
   modalElement.classList.add("active");
@@ -115,6 +126,7 @@ async function handleInviteSubmit(e) {
   const email = (emailInput?.value || "").trim().toLowerCase();
   const role = roleSelect?.value || "moderator";
   const emailLang = langSelect?.value || "lt";
+  const canManageUsers = document.getElementById("inviteCanManageUsers")?.checked === true;
 
   if (!email || !name) {
     showToast("Užpildykite privalomus laukus (Vardą ir El. paštą)!", "error");
@@ -165,6 +177,7 @@ async function handleInviteSubmit(e) {
           surname,
           email,
           role,
+          canManageUsers,
           adminEmail: currentAdminEmail
         })
       });
@@ -190,6 +203,7 @@ async function handleInviteSubmit(e) {
           email,
           role,
           status: "active",
+          canManageUsers,
           createdAt: nowIso,
           updatedAt: nowIso,
           invitedBy: currentAdminEmail
@@ -208,6 +222,7 @@ async function handleInviteSubmit(e) {
           email,
           role,
           status: "pending",
+          canManageUsers,
           createdAt: nowIso,
           expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
           invitedBy: currentAdminEmail
@@ -255,7 +270,7 @@ async function handleInviteSubmit(e) {
 
     // Trigger callbacks & events so users table and other modules update immediately
     if (typeof onUserInvitedCallback === "function") {
-      onUserInvitedCallback({ email, name, surname, role, code: activeVerificationCode, token: activeToken });
+      onUserInvitedCallback({ email, name, surname, role, code: activeVerificationCode, token: activeToken, canManageUsers });
     }
     window.dispatchEvent(new CustomEvent("user-invited", {
       detail: {
@@ -263,6 +278,7 @@ async function handleInviteSubmit(e) {
         name,
         surname,
         role,
+        canManageUsers,
         code: activeVerificationCode,
         token: activeToken,
         createdAt: nowIso

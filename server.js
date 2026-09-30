@@ -500,6 +500,7 @@ app.post('/api/admin/invite', async (req, res) => {
       surname: cleanSurname,
       role: cleanRole,
       status: 'active',
+      canManageUsers: req.body.canManageUsers === true,
       createdAt: new Date().toISOString(),
       lastLogin: new Date().toISOString(),
       invitedBy: adminEmail || 'azuolynasfilmfestival@gmail.com'
@@ -532,6 +533,7 @@ app.post('/api/admin/invite', async (req, res) => {
       surname: { stringValue: cleanSurname },
       role: { stringValue: cleanRole },
       status: { stringValue: 'active' },
+      canManageUsers: { booleanValue: userDoc.canManageUsers === true },
       createdAt: { timestampValue: userDoc.createdAt },
       lastLogin: { timestampValue: userDoc.lastLogin }
     });
@@ -724,6 +726,50 @@ app.post('/api/admin/users/role', (req, res) => {
     res.json({ success: true, user });
   } catch (e) {
     res.status(500).json({ error: 'Failed to update user role' });
+  }
+});
+
+// API: Grant or revoke User Management Access (canManageUsers)
+app.post('/api/admin/users/permission', (req, res) => {
+  try {
+    const { email, canManageUsers, adminEmail } = req.body || {};
+    if (!email) return res.status(400).json({ error: 'Email is required' });
+
+    const callerEmail = String(adminEmail || '').toLowerCase();
+    // Only primary superadmin can grant/revoke this permission
+    if (callerEmail !== 'azuolynasfilmfestival@gmail.com') {
+      return res.status(403).json({ error: 'Tik pagrindinis administratorius gali suteikti prieigą prie vartotojų valdymo skilties' });
+    }
+
+    const usersData = loadUsersData();
+    const user = (usersData.users || []).find(u => u.email.toLowerCase() === String(email).trim().toLowerCase());
+    if (!user) return res.status(404).json({ error: 'User not found' });
+
+    user.canManageUsers = canManageUsers === true;
+    saveJson(USERS_FILE, usersData);
+
+    const docId = user.email.toLowerCase().replace(/[^a-zA-Z0-9_-]/g, '_');
+    syncToFirestore('users', docId, {
+      canManageUsers: { booleanValue: user.canManageUsers }
+    });
+
+    if (user.uid && user.uid !== docId) {
+      syncToFirestore('users', user.uid, {
+        canManageUsers: { booleanValue: user.canManageUsers }
+      });
+    }
+
+    recordActivityLog({
+      action: "USER_PERMISSION_CHANGED",
+      category: "users",
+      adminEmail: callerEmail,
+      target: user.email,
+      details: `Vartotojui ${user.email} ${user.canManageUsers ? 'SUTEIKTA' : 'PANAIKINTA'} prieiga prie skilties „Vartotojai & Prieiga“`
+    });
+
+    res.json({ success: true, user });
+  } catch (e) {
+    res.status(500).json({ error: 'Failed to update user permission' });
   }
 });
 

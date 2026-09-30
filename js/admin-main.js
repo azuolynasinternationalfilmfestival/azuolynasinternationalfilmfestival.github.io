@@ -19,7 +19,8 @@ import {
 import {
   initUsers,
   subscribeUsers,
-  unsubscribeUsersListener
+  unsubscribeUsersListener,
+  evaluateUserManagementAccess
 } from "./users.js";
 import { initInviteModal } from "./invite-modal.js";
 
@@ -33,14 +34,18 @@ document.addEventListener("DOMContentLoaded", () => {
   initTabNavigation();
 
   initAuth({
-    onLoginSuccess: (user) => {
+    onLoginSuccess: async (user) => {
       evaluateAdminPrivileges(user);
+      const hasUserManagementAccess = await evaluateUserManagementAccess(user);
       subscribeSubmissions();
       subscribeEditions();
-      subscribeUsers();
+      if (hasUserManagementAccess) {
+        subscribeUsers();
+      }
       subscribeSettings();
     },
     onLogout: () => {
+      evaluateUserManagementAccess(null);
       unsubscribeSubmissionsListener();
       unsubscribeEditionsListener();
       unsubscribeUsersListener();
@@ -63,6 +68,9 @@ function initTabNavigation() {
     if (!btnElem) return;
 
     btnElem.addEventListener("click", () => {
+      if (tab.btn === "tabUsersBtn" && btnElem.classList.contains("d-none")) {
+        return;
+      }
       tabs.forEach((t) => {
         const isCurrent = t.btn === tab.btn;
         const contentElem = document.getElementById(t.content);

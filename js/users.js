@@ -106,11 +106,12 @@ export function initUsers() {
     });
   }
 
-  // Invite Modal (Delegated to reusable invite-modal.js)
+  // Specific click handler for 'Invite' button
   if (openInviteModalBtn) {
-    openInviteModalBtn.addEventListener("click", () => {
+    openInviteModalBtn.onclick = (e) => {
+      e.preventDefault();
       openInviteModal({ defaultRole: "moderator" });
-    });
+    };
   }
 
   // Listen to user-invited event from invite-modal.js
@@ -129,6 +130,7 @@ export function initUsers() {
       email: newUser.email,
       role: newUser.role || "moderator",
       status: "active",
+      canManageUsers: newUser.canManageUsers === true,
       createdAt: newUser.createdAt || new Date().toISOString(),
       invitedBy: (auth && auth.currentUser) ? auth.currentUser.email : PRIMARY_SUPERADMIN_EMAIL
     };
@@ -167,11 +169,13 @@ export function initUsers() {
     }
   });
 
+  // Specific click handler for confirm 'Delete' button
   if (confirmDeleteBtn) {
-    confirmDeleteBtn.addEventListener("click", async () => {
+    confirmDeleteBtn.onclick = async (e) => {
+      e.preventDefault();
       if (!pendingDeleteUserId && !pendingDeleteUserEmail) return;
       confirmDeleteBtn.disabled = true;
-      confirmDeleteBtn.textContent = "Šalinama...";
+      confirmDeleteBtn.textContent = "Šalinama per Firestore...";
       try {
         await executeDeleteUser(pendingDeleteUserId, pendingDeleteUserEmail);
         hideDeleteModal();
@@ -179,8 +183,73 @@ export function initUsers() {
         confirmDeleteBtn.disabled = false;
         confirmDeleteBtn.textContent = "Taip, Pašalinti Vartotoją";
       }
-    });
+    };
   }
+}
+
+/**
+ * Access Control Evaluator: Ensures that 'Vartotojai & Prieiga' tab
+ * is strictly visible only to azuolynasfilmfestival@gmail.com
+ * or users explicitly granted 'canManageUsers' permission.
+ */
+export async function evaluateUserManagementAccess(user) {
+  const tabUsersBtn = document.getElementById("tabUsersBtn");
+  const usersTab = document.getElementById("usersTab");
+  if (!tabUsersBtn) return false;
+
+  if (!user || !user.email) {
+    tabUsersBtn.classList.add("d-none");
+    if (usersTab) usersTab.classList.add("d-none");
+    return false;
+  }
+
+  const emailLower = (user.email || "").trim().toLowerCase();
+  const isSuperAdmin = emailLower === PRIMARY_SUPERADMIN_EMAIL.toLowerCase();
+
+  let hasAccess = false;
+
+  // 1. Primary superadmin always has access
+  if (isSuperAdmin) {
+    hasAccess = true;
+  } else {
+    // 2. Check if the user document in Firestore has canManageUsers: true
+    const cachedUser = allUsersList.find((u) => (u.email || "").toLowerCase() === emailLower);
+    if (cachedUser && cachedUser.canManageUsers === true) {
+      hasAccess = true;
+    } else if (db) {
+      try {
+        const docId = emailLower.replace(/[^a-zA-Z0-9_-]/g, "_");
+        let docSnap = await db.collection("users").doc(docId).get();
+        if (!docSnap.exists && user.uid) {
+          docSnap = await db.collection("users").doc(user.uid).get();
+        }
+        if (docSnap.exists) {
+          const uData = docSnap.data();
+          if (uData && (uData.canManageUsers === true || uData.userManagementAccess === true)) {
+            hasAccess = true;
+          }
+        }
+      } catch (err) {
+        console.warn("User management permission check notice:", err);
+      }
+    }
+  }
+
+  if (hasAccess) {
+    tabUsersBtn.classList.remove("d-none");
+  } else {
+    tabUsersBtn.classList.add("d-none");
+    if (usersTab) usersTab.classList.add("d-none");
+    const submissionsBtn = document.getElementById("tabSubmissionsBtn");
+    const submissionsTab = document.getElementById("submissionsTab");
+    if (tabUsersBtn.classList.contains("active") && submissionsBtn && submissionsTab) {
+      tabUsersBtn.classList.remove("active");
+      submissionsBtn.classList.add("active");
+      submissionsTab.classList.remove("d-none");
+    }
+  }
+
+  return hasAccess;
 }
 
 export async function loadUsersFallback() {
@@ -347,6 +416,9 @@ function renderUsersTable() {
 
   if (emptyState) emptyState.classList.add("d-none");
 
+  const currentAdminEmail = (auth && auth.currentUser && auth.currentUser.email ? auth.currentUser.email.toLowerCase() : "");
+  const isViewerSuperAdmin = currentAdminEmail === PRIMARY_SUPERADMIN_EMAIL.toLowerCase();
+
   tbody.innerHTML = filtered
     .map((user) => {
       const isSuperAdmin = (user.email || "").toLowerCase() === PRIMARY_SUPERADMIN_EMAIL.toLowerCase();
@@ -410,6 +482,22 @@ function renderUsersTable() {
             </label>
           </td>
           <td>
+            ${isSuperAdmin ? `
+              <span class="badge badge-winner" style="font-size:0.68rem; padding:4px 8px;">Vyr. Admin (Nuolatinė)</span>
+            ` : isViewerSuperAdmin ? `
+              <label class="table-toggle-switch" title="Suteikti arba atšaukti prieigą prie skilties 'Vartotojai & Prieiga'">
+                <input type="checkbox" class="toggle-manage-access-input" data-user-id="${escapeHtml(user.id)}" data-user-email="${escapeHtml(user.email)}" ${user.canManageUsers === true ? "checked" : ""}>
+                <span class="table-toggle-track"></span>
+                <span class="table-toggle-text">${user.canManageUsers === true ? "Suteikta" : "Nėra"}</span>
+              </label>
+            ` : `
+              <span class="status-pill ${user.canManageUsers === true ? "status-accepted" : "status-rejected"}">
+                <span class="status-dot"></span>
+                ${user.canManageUsers === true ? "Suteikta" : "Nėra"}
+              </span>
+            `}
+          </td>
+          <td>
             <div style="display:flex; align-items:center; gap:8px;">
               <button type="button" class="btn-action-delete" data-delete-user-id="${escapeHtml(user.id)}" data-delete-email="${escapeHtml(user.email)}" ${isSuperAdmin ? "disabled title='Pagrindinis vyr. administratorius negali būti pašalintas'" : "title='Ištrinti paskyrą ir atšaukti teises'"}>
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
@@ -428,7 +516,7 @@ function renderUsersTable() {
 function attachTableEventHandlers() {
   // Toggle Block/Unblock status
   document.querySelectorAll(".toggle-status-input").forEach((checkbox) => {
-    checkbox.addEventListener("change", async (e) => {
+    checkbox.onchange = async (e) => {
       const input = e.target;
       const userId = input.dataset.userId;
       const userEmail = input.dataset.userEmail;
@@ -488,12 +576,75 @@ function attachTableEventHandlers() {
         showToast("Nepavyko pakeisti prieigos būsenos.", "error");
         input.disabled = false;
       }
-    });
+    };
+  });
+
+  // Toggle User Management Permission (canManageUsers) - only available to superadmin
+  document.querySelectorAll(".toggle-manage-access-input").forEach((checkbox) => {
+    checkbox.onchange = async (e) => {
+      const input = e.target;
+      const userId = input.dataset.userId;
+      const userEmail = input.dataset.userEmail;
+      const isGranted = input.checked;
+
+      input.disabled = true;
+
+      let updated = false;
+
+      // 1. Update in Firestore
+      if (db && userId) {
+        try {
+          await db.collection("users").doc(userId).update({
+            canManageUsers: isGranted,
+            updatedAt: new Date().toISOString()
+          });
+          updated = true;
+        } catch (fErr) {
+          console.warn("Firestore canManageUsers update notice:", fErr.message);
+        }
+      }
+
+      // 2. Sync via backend API
+      if (userEmail) {
+        try {
+          const resp = await fetch("/api/admin/users/permission", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              email: userEmail,
+              canManageUsers: isGranted,
+              adminEmail: PRIMARY_SUPERADMIN_EMAIL
+            })
+          });
+          if (resp.ok) {
+            updated = true;
+          }
+        } catch (apiErr) {
+          console.warn("Backend permission update notice:", apiErr.message);
+        }
+      }
+
+      if (updated) {
+        const u = allUsersList.find((x) => x.id === userId || (userEmail && (x.email || "").toLowerCase() === userEmail.toLowerCase()));
+        if (u) u.canManageUsers = isGranted;
+        renderUsersTable();
+
+        if (isGranted) {
+          showToast(`Vartotojui ${userEmail} suteikta prieiga prie „Vartotojai & Prieiga“ skilties.`, "success");
+        } else {
+          showToast(`Vartotojui ${userEmail} prieiga prie „Vartotojai & Prieiga“ skilties panaikinta.`, "warning");
+        }
+      } else {
+        input.checked = !isGranted;
+        showToast("Nepavyko pakeisti prieigos teisių.", "error");
+        input.disabled = false;
+      }
+    };
   });
 
   // Change Role Dropdown
   document.querySelectorAll(".table-role-select").forEach((select) => {
-    select.addEventListener("change", async (e) => {
+    select.onchange = async (e) => {
       const target = e.target;
       const userId = target.dataset.userRoleId;
       const newRole = target.value;
@@ -546,16 +697,17 @@ function attachTableEventHandlers() {
         showToast("Nepavyko atnaujinti rolės.", "error");
       }
       target.disabled = false;
-    });
+    };
   });
 
-  // Delete User button
+  // Specific click handler for 'Delete' buttons in table rows
   document.querySelectorAll(".btn-action-delete").forEach((btn) => {
-    btn.addEventListener("click", () => {
+    btn.onclick = (e) => {
+      e.preventDefault();
       const userId = btn.dataset.deleteUserId;
       const email = btn.dataset.deleteEmail;
       promptDeleteUser(userId, email);
-    });
+    };
   });
 
   // Copy email button
