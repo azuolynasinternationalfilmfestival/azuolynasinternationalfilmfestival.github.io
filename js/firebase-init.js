@@ -61,7 +61,18 @@ function getFirestoreInstance() {
   return firebase.firestore();
 }
 
-export const auth = (typeof firebase !== "undefined" && typeof firebase.auth === "function") ? firebase.auth() : null;
+export function getFirebaseAuth() {
+  if (typeof firebase !== "undefined" && typeof firebase.auth === "function") {
+    try {
+      return firebase.auth();
+    } catch (e) {
+      return null;
+    }
+  }
+  return null;
+}
+
+export const auth = getFirebaseAuth();
 export const db = getFirestoreInstance();
 export const storage = (typeof firebase !== "undefined" && typeof firebase.storage === "function") ? firebase.storage() : null;
 export const functions = (typeof firebase !== "undefined" && typeof firebase.functions === "function") ? firebase.functions("europe-west1") : null;

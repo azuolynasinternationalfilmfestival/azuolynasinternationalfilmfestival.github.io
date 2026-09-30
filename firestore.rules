@@ -11,17 +11,23 @@ service cloud.firestore {
       return request.auth != null;
     }
 
-    function isAdmin() {
-      return isSignedIn() && (
-        ('email' in request.auth.token && request.auth.token.email != null && (
+    function isWhitelistedAdmin() {
+      return isSignedIn() &&
+        'email' in request.auth.token &&
+        request.auth.token.email != null && (
           request.auth.token.email.lower() == 'azuolynasfilmfestival@gmail.com' ||
           request.auth.token.email.lower() == 'karina.brdar@gmail.com' ||
           request.auth.token.email.lower() == 'dominikphotofficial.t@gmail.com' ||
           request.auth.token.email.lower() == 'dominikphotofficial.lt@gmail.com'
-        )) ||
-        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
-         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' &&
-         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.status == 'active')
+        );
+    }
+
+    function isAdmin() {
+      return isWhitelistedAdmin() || (
+        isSignedIn() &&
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.status == 'active'
       );
     }
 
@@ -107,29 +113,16 @@ service cloud.firestore {
       allow update, delete: if isAdmin();
     }
 
-    // User Accounts (RBAC)
+    // User Accounts (RBAC) - Strictly permitted for azuolynasfilmfestival@gmail.com or whitelisted admin emails
     match /users/{userId} {
-      allow get: if isSignedIn() && (request.auth.uid == userId || isStaff());
-      allow list: if isStaff();
-      allow create: if isAdmin() || (isSignedIn() && request.auth.uid == userId);
-      allow update: if isAdmin() || (
-        isSignedIn() && request.auth.uid == userId &&
-        !incoming().diff(existing()).affectedKeys().hasAny(['role', 'status'])
-      );
-      allow delete: if isAdmin();
+      allow read, write: if isWhitelistedAdmin();
     }
 
     // Invitations
     match /invitations/{invitationToken} {
       // Anyone with valid token can verify invitation info
       allow get: if isValidId(invitationToken);
-      allow list: if isAdmin() || isStaff();
-      allow create: if isAdmin() || isStaff();
-      allow update: if isAdmin() || (
-        incoming().diff(existing()).affectedKeys().hasOnly(['status', 'acceptedAt', 'activatedUid']) &&
-        incoming().status == 'accepted'
-      );
-      allow delete: if isAdmin();
+      allow list, create, update, delete: if isWhitelistedAdmin();
     }
 
     // Mail queue for automated notifications
@@ -139,11 +132,9 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
-    // Administrative Activity Logs
+    // Administrative Activity Logs - Strictly permitted for azuolynasfilmfestival@gmail.com or whitelisted admin emails
     match /logs/{logId} {
-      allow read: if isStaff();
-      allow create: if isStaff() || isAdmin();
-      allow update, delete: if isAdmin();
+      allow read, write: if isWhitelistedAdmin();
     }
   }
 }
