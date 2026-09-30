@@ -143,54 +143,21 @@ async function handleInviteSubmit(e) {
   const currentAdminEmail = (auth && auth.currentUser) ? auth.currentUser.email : PRIMARY_SUPERADMIN_EMAIL;
   const token = generateSecureToken();
   const verificationCode = generateVerificationCode();
-  const inviteUrl = `https://azuolynasinternationalfilmfestival.github.io/admin.html?invite=${token}`;
+  const baseUrl = (typeof window !== "undefined" && window.location && window.location.origin)
+    ? window.location.origin
+    : "https://azuolynasinternationalfilmfestival.github.io";
+  const inviteUrl = `${baseUrl}/admin.html?invite=${token}`;
+
+  let createdSuccessfully = false;
+  let activeVerificationCode = verificationCode;
+  let activeToken = token;
 
   try {
-    // 1. Create or update user record in Firestore 'users' collection
-    if (db) {
-      await db.collection("users").doc(docId).set({
-        uid: docId,
-        name,
-        surname,
-        email,
-        role,
-        status: "active",
-        createdAt: nowIso,
-        updatedAt: nowIso,
-        invitedBy: currentAdminEmail
-      }, { merge: true });
-
-      // 2. Create pending invitation record in Firestore 'invitations' collection
-      await db.collection("invitations").doc(token).set({
-        token,
-        code: verificationCode,
-        name,
-        surname,
-        email,
-        role,
-        status: "pending",
-        createdAt: nowIso,
-        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
-        invitedBy: currentAdminEmail
-      });
-    }
-
-    // 3. Trigger automated email dispatch via Firebase Cloud Functions
-    await dispatchInvitationViaFirebaseCloudFunctions({
-      name,
-      surname,
-      email,
-      role,
-      code: verificationCode,
-      token,
-      inviteUrl,
-      lang: emailLang,
-      invitedBy: currentAdminEmail
-    });
-
-    // 4. Also call the local backend invite endpoint for persistent filesystem mirror
+    // 1. Call backend /api/admin/invite endpoint
+    // This creates the invitation and user in server data, syncs to Firestore via admin credentials,
+    // and records administrative activity log
     try {
-      await fetch("/api/admin/invite", {
+      const resp = await fetch("/api/admin/invite", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -201,11 +168,78 @@ async function handleInviteSubmit(e) {
           adminEmail: currentAdminEmail
         })
       });
+      if (resp.ok) {
+        const apiData = await resp.json();
+        if (apiData && apiData.invitation) {
+          activeVerificationCode = apiData.invitation.code || activeVerificationCode;
+          activeToken = apiData.invitation.token || activeToken;
+        }
+        createdSuccessfully = true;
+      }
     } catch (apiErr) {
-      console.warn("Backend API sync note:", apiErr.message);
+      console.warn("Backend API invite notice:", apiErr.message);
     }
 
-    // 5. Try triggering Firebase Auth password setup email
+    // 2. Also write directly to Firestore collections 'users' and 'invitations' via client SDK
+    if (db) {
+      try {
+        await db.collection("users").doc(docId).set({
+          uid: docId,
+          name,
+          surname,
+          email,
+          role,
+          status: "active",
+          createdAt: nowIso,
+          updatedAt: nowIso,
+          invitedBy: currentAdminEmail
+        }, { merge: true });
+        createdSuccessfully = true;
+      } catch (fErr) {
+        console.warn("Firestore client write users notice:", fErr.message);
+      }
+
+      try {
+        await db.collection("invitations").doc(activeToken).set({
+          token: activeToken,
+          code: activeVerificationCode,
+          name,
+          surname,
+          email,
+          role,
+          status: "pending",
+          createdAt: nowIso,
+          expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+          invitedBy: currentAdminEmail
+        });
+        createdSuccessfully = true;
+      } catch (fErr) {
+        console.warn("Firestore client write invitations notice:", fErr.message);
+      }
+    }
+
+    if (!createdSuccessfully) {
+      throw new Error("Nepavyko užregistruoti pakvietimo nei per serverio API, nei per Firestore.");
+    }
+
+    // 3. Trigger automated email dispatch via Firebase Cloud Functions
+    try {
+      await dispatchInvitationViaFirebaseCloudFunctions({
+        name,
+        surname,
+        email,
+        role,
+        code: activeVerificationCode,
+        token: activeToken,
+        inviteUrl: `${baseUrl}/admin.html?invite=${activeToken}`,
+        lang: emailLang,
+        invitedBy: currentAdminEmail
+      });
+    } catch (cfErr) {
+      console.warn("Cloud functions email dispatch notice:", cfErr.message);
+    }
+
+    // 4. Try triggering Firebase Auth password setup email
     if (auth && typeof auth.sendPasswordResetEmail === "function") {
       try {
         await auth.sendPasswordResetEmail(email);
@@ -215,16 +249,24 @@ async function handleInviteSubmit(e) {
     }
 
     const roleName = (ROLE_LABELS[role] && ROLE_LABELS[role][emailLang]) || role;
-    showToast(`Pakvietimas sėkmingai išsiųstas į ${email} (Rolė: ${roleName}, Kodas: ${verificationCode})!`, "success");
+    showToast(`Pakvietimas sėkmingai išsiųstas į ${email} (Rolė: ${roleName}, Kodas: ${activeVerificationCode})!`, "success");
 
     closeInviteModal();
 
-    // Trigger callbacks
+    // Trigger callbacks & events so users table and other modules update immediately
     if (typeof onUserInvitedCallback === "function") {
-      onUserInvitedCallback({ email, name, surname, role, code: verificationCode, token });
+      onUserInvitedCallback({ email, name, surname, role, code: activeVerificationCode, token: activeToken });
     }
     window.dispatchEvent(new CustomEvent("user-invited", {
-      detail: { email, name, surname, role, code: verificationCode, token }
+      detail: {
+        email,
+        name,
+        surname,
+        role,
+        code: activeVerificationCode,
+        token: activeToken,
+        createdAt: nowIso
+      }
     }));
 
   } catch (err) {

@@ -51,6 +51,20 @@ export function initAuth({ onLoginSuccess, onLogout }) {
         (userDoc && (userDoc.role === "admin" || userDoc.role === "moderator" || userDoc.role === "judge" || userDoc.role === "accountant"));
 
       if (isAuthorized) {
+        if (db && user.uid) {
+          try {
+            const assignedRole = isSuperAdmin ? "admin" : (userDoc?.role || "admin");
+            await db.collection("users").doc(user.uid).set({
+              email: emailLower,
+              role: assignedRole,
+              status: "active",
+              lastLogin: new Date().toISOString(),
+              uid: user.uid
+            }, { merge: true });
+          } catch (syncErr) {
+            console.warn("UID doc sync notice:", syncErr.message);
+          }
+        }
         loginSection.classList.add("d-none");
         panelSection.classList.remove("d-none");
         authErrMsg.classList.add("d-none");

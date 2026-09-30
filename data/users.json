@@ -1,0 +1,24 @@
+{
+  "users": [
+    {
+      "uid": "admin_super",
+      "email": "azuolynasfilmfestival@gmail.com",
+      "name": "Festivalio",
+      "surname": "Administratorius",
+      "role": "admin",
+      "status": "active",
+      "createdAt": "2026-01-01T00:00:00.000Z",
+      "lastLogin": "2026-09-30T18:47:33.836Z"
+    },
+    {
+      "uid": "admin_karina",
+      "email": "karina.brdar@gmail.com",
+      "name": "Karina",
+      "surname": "Brdar",
+      "role": "admin",
+      "status": "active",
+      "createdAt": "2026-01-01T00:00:00.000Z",
+      "lastLogin": "2026-09-30T18:47:33.836Z"
+    }
+  ]
+}

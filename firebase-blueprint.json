@@ -109,6 +109,22 @@
         "votedAt": { "type": "string", "description": "Timestamp when vote was cast" }
       },
       "required": ["filmId", "category", "deviceHash"]
+    },
+    "ActivityLog": {
+      "title": "ActivityLog",
+      "description": "Audit trail log of administrative actions across the platform",
+      "type": "object",
+      "properties": {
+        "action": { "type": "string", "description": "Action code, e.g. USER_INVITED, USER_DELETED, STATUS_TOGGLED, SETTINGS_CHANGED" },
+        "category": { "type": "string", "description": "Action category: users, settings, security, media" },
+        "adminEmail": { "type": "string", "description": "Email of admin who executed action" },
+        "adminName": { "type": "string", "description": "Name of admin who executed action" },
+        "target": { "type": "string", "description": "Target entity or identifier affected" },
+        "details": { "type": "string", "description": "Human-readable description of action" },
+        "timestamp": { "type": "string", "description": "ISO timestamp of event" },
+        "status": { "type": "string", "description": "Execution status: success, warning, error" }
+      },
+      "required": ["action", "adminEmail", "timestamp"]
     }
   },
   "firestore": {
@@ -135,6 +151,10 @@
     "/votes_audit/{auditId}": {
       "schema": "VoteAudit",
       "description": "Device vote locks per category"
+    },
+    "/logs/{logId}": {
+      "schema": "ActivityLog",
+      "description": "Administrative activity and audit logs"
     }
   }
 }

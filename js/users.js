@@ -84,10 +84,6 @@ export function initUsers() {
   const statusSelect = document.getElementById("filterUserStatus");
   const refreshBtn = document.getElementById("btnRefreshUsers");
   const openInviteModalBtn = document.getElementById("btnOpenInviteModal");
-  const inviteForm = document.getElementById("userInviteForm");
-  const inviteModal = document.getElementById("userInviteModal");
-  const closeInviteModalBtn = document.getElementById("closeInviteModalBtn");
-  const cancelInviteBtn = document.getElementById("cancelInviteBtn");
 
   const deleteModal = document.getElementById("userDeleteModal");
   const closeDeleteModalBtn = document.getElementById("closeDeleteModalBtn");
@@ -117,9 +113,41 @@ export function initUsers() {
     });
   }
 
+  // Listen to user-invited event from invite-modal.js
+  window.addEventListener("user-invited", (e) => {
+    const newUser = e.detail;
+    if (!newUser || !newUser.email) return;
+
+    const emailSanitized = newUser.email.trim().toLowerCase().replace(/[^a-zA-Z0-9_-]/g, "_");
+    const existingIdx = allUsersList.findIndex((u) => (u.email || "").toLowerCase() === newUser.email.toLowerCase());
+
+    const item = {
+      id: emailSanitized,
+      uid: emailSanitized,
+      name: newUser.name || "",
+      surname: newUser.surname || "",
+      email: newUser.email,
+      role: newUser.role || "moderator",
+      status: "active",
+      createdAt: newUser.createdAt || new Date().toISOString(),
+      invitedBy: (auth && auth.currentUser) ? auth.currentUser.email : PRIMARY_SUPERADMIN_EMAIL
+    };
+
+    if (existingIdx >= 0) {
+      allUsersList[existingIdx] = { ...allUsersList[existingIdx], ...item };
+    } else {
+      allUsersList.unshift(item);
+    }
+    updateUserMetrics();
+    renderUsersTable();
+  });
+
   // Delete Confirmation Modal
   const hideDeleteModal = () => {
-    if (deleteModal) deleteModal.classList.add("d-none");
+    if (deleteModal) {
+      deleteModal.classList.remove("active");
+      deleteModal.classList.add("d-none");
+    }
     pendingDeleteUserId = null;
     pendingDeleteUserEmail = null;
   };
@@ -127,29 +155,77 @@ export function initUsers() {
   if (closeDeleteModalBtn) closeDeleteModalBtn.addEventListener("click", hideDeleteModal);
   if (cancelDeleteBtn) cancelDeleteBtn.addEventListener("click", hideDeleteModal);
 
+  if (deleteModal) {
+    deleteModal.addEventListener("click", (e) => {
+      if (e.target === deleteModal) hideDeleteModal();
+    });
+  }
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && deleteModal && deleteModal.classList.contains("active")) {
+      hideDeleteModal();
+    }
+  });
+
   if (confirmDeleteBtn) {
     confirmDeleteBtn.addEventListener("click", async () => {
-      if (!pendingDeleteUserId) return;
+      if (!pendingDeleteUserId && !pendingDeleteUserEmail) return;
       confirmDeleteBtn.disabled = true;
+      confirmDeleteBtn.textContent = "Šalinama...";
       try {
         await executeDeleteUser(pendingDeleteUserId, pendingDeleteUserEmail);
         hideDeleteModal();
       } finally {
         confirmDeleteBtn.disabled = false;
+        confirmDeleteBtn.textContent = "Taip, Pašalinti Vartotoją";
       }
     });
   }
 }
 
+export async function loadUsersFallback() {
+  try {
+    const resp = await fetch("/api/admin/users");
+    if (resp.ok) {
+      const data = await resp.json();
+      if (data && Array.isArray(data.users) && data.users.length) {
+        allUsersList = data.users.map((u) => ({
+          id: u.uid || u.id || (u.email ? u.email.replace(/[^a-zA-Z0-9_-]/g, "_") : "usr_" + Math.random().toString(36).substring(2)),
+          ...u,
+        }));
+
+        allUsersList.sort((a, b) => {
+          if (a.role === "admin" && b.role !== "admin") return -1;
+          if (b.role === "admin" && a.role !== "admin") return 1;
+          const timeA = new Date(a.createdAt || 0).getTime();
+          const timeB = new Date(b.createdAt || 0).getTime();
+          return timeB - timeA;
+        });
+
+        updateUserMetrics();
+        renderUsersTable();
+      }
+    }
+  } catch (err) {
+    console.warn("Fallback load users notice:", err);
+  }
+}
+
 export function subscribeUsers() {
-  if (!db) return;
+  const loadingElem = document.getElementById("usersLoadingState");
+  if (loadingElem) loadingElem.classList.remove("d-none");
+
+  // Always attempt fallback load in parallel so users show immediately
+  loadUsersFallback();
+
+  if (!db) {
+    if (loadingElem) loadingElem.classList.add("d-none");
+    return;
+  }
 
   if (unsubscribeUsers) {
     unsubscribeUsers();
   }
-
-  const loadingElem = document.getElementById("usersLoadingState");
-  if (loadingElem) loadingElem.classList.remove("d-none");
 
   try {
     unsubscribeUsers = db.collection("users").onSnapshot(
@@ -186,12 +262,13 @@ export function subscribeUsers() {
       (err) => {
         if (loadingElem) loadingElem.classList.add("d-none");
         handleFirestoreError(err, OperationType.LIST, "users");
-        showToast("Klaida nuskaitant vartotojus: " + err.message, "error");
+        loadUsersFallback();
       }
     );
   } catch (err) {
     if (loadingElem) loadingElem.classList.add("d-none");
     handleFirestoreError(err, OperationType.LIST, "users");
+    loadUsersFallback();
   }
 }
 
@@ -360,22 +437,55 @@ function attachTableEventHandlers() {
 
       input.disabled = true;
 
-      try {
-        await db.collection("users").doc(userId).update({
-          status: newStatus,
-          updatedAt: new Date().toISOString(),
-        });
+      let updated = false;
+
+      // 1. Update in Firestore
+      if (db && userId) {
+        try {
+          await db.collection("users").doc(userId).update({
+            status: newStatus,
+            updatedAt: new Date().toISOString(),
+          });
+          updated = true;
+        } catch (fErr) {
+          console.warn("Firestore status update notice:", fErr.message);
+        }
+      }
+
+      // 2. Sync via backend API
+      if (userEmail) {
+        try {
+          const resp = await fetch("/api/admin/users/status", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              email: userEmail,
+              status: newStatus,
+              adminEmail: (auth && auth.currentUser) ? auth.currentUser.email : PRIMARY_SUPERADMIN_EMAIL
+            })
+          });
+          if (resp.ok) {
+            updated = true;
+          }
+        } catch (apiErr) {
+          console.warn("Backend status update notice:", apiErr.message);
+        }
+      }
+
+      if (updated) {
+        const u = allUsersList.find((x) => x.id === userId || (userEmail && (x.email || "").toLowerCase() === userEmail.toLowerCase()));
+        if (u) u.status = newStatus;
+        updateUserMetrics();
+        renderUsersTable();
 
         if (newActive) {
-          showToast(`Vartotojas ${userEmail} sėkmingai atblokuotas (Prieiga aktyvi).`);
+          showToast(`Vartotojas ${userEmail || userId} atblokuotas (Prieiga aktyvi).`, "success");
         } else {
-          showToast(`Vartotojas ${userEmail} užblokuotas (Prieiga sustabdyta).`, "warning");
+          showToast(`Vartotojas ${userEmail || userId} užblokuotas (Prieiga sustabdyta).`, "warning");
         }
-      } catch (err) {
+      } else {
         input.checked = !newActive; // revert
-        handleFirestoreError(err, OperationType.UPDATE, `users/${userId}`);
-        showToast("Nepavyko pakeisti prieigos būsenos: " + err.message, "error");
-      } finally {
+        showToast("Nepavyko pakeisti prieigos būsenos.", "error");
         input.disabled = false;
       }
     });
@@ -391,18 +501,51 @@ function attachTableEventHandlers() {
 
       target.disabled = true;
 
-      try {
-        await db.collection("users").doc(userId).update({
-          role: newRole,
-          updatedAt: new Date().toISOString(),
-        });
-        showToast(`Rolė sėkmingai pakeista į: ${roleName}`);
-      } catch (err) {
-        handleFirestoreError(err, OperationType.UPDATE, `users/${userId}`);
-        showToast("Nepavyko atnaujinti rolės: " + err.message, "error");
-      } finally {
-        target.disabled = false;
+      const userObj = allUsersList.find((x) => x.id === userId);
+      const userEmail = userObj ? userObj.email : null;
+
+      let updated = false;
+
+      // 1. Update in Firestore
+      if (db && userId) {
+        try {
+          await db.collection("users").doc(userId).update({
+            role: newRole,
+            updatedAt: new Date().toISOString(),
+          });
+          updated = true;
+        } catch (fErr) {
+          console.warn("Firestore role update notice:", fErr.message);
+        }
       }
+
+      // 2. Sync via backend API
+      if (userEmail) {
+        try {
+          const resp = await fetch("/api/admin/users/role", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              email: userEmail,
+              role: newRole,
+              adminEmail: (auth && auth.currentUser) ? auth.currentUser.email : PRIMARY_SUPERADMIN_EMAIL
+            })
+          });
+          if (resp.ok) {
+            updated = true;
+          }
+        } catch (apiErr) {
+          console.warn("Backend role update notice:", apiErr.message);
+        }
+      }
+
+      if (updated) {
+        if (userObj) userObj.role = newRole;
+        showToast(`Rolė sėkmingai pakeista į: ${roleName}`, "success");
+      } else {
+        showToast("Nepavyko atnaujinti rolės.", "error");
+      }
+      target.disabled = false;
     });
   });
 
@@ -429,7 +572,7 @@ function attachTableEventHandlers() {
 }
 
 function promptDeleteUser(userId, email) {
-  if (email.toLowerCase() === PRIMARY_SUPERADMIN_EMAIL.toLowerCase()) {
+  if (email && email.toLowerCase() === PRIMARY_SUPERADMIN_EMAIL.toLowerCase()) {
     showToast("Pagrindinis administratorius negali būti pašalintas!", "error");
     return;
   }
@@ -439,17 +582,52 @@ function promptDeleteUser(userId, email) {
 
   const modal = document.getElementById("userDeleteModal");
   const label = document.getElementById("deleteUserTargetLabel");
-  if (label) label.textContent = `${email} (${userId})`;
-  if (modal) modal.classList.remove("d-none");
+  if (label) label.textContent = `${email || "Nenurodytas"} (ID: ${userId})`;
+  if (modal) {
+    modal.classList.remove("d-none");
+    modal.classList.add("active");
+  }
 }
 
 async function executeDeleteUser(userId, email) {
+  let deleted = false;
+
+  // 1. Try deleting via Firestore client SDK
+  if (db && userId) {
+    try {
+      await db.collection("users").doc(userId).delete();
+      deleted = true;
+    } catch (fErr) {
+      console.warn("Firestore client delete user notice:", fErr.message);
+    }
+  }
+
+  // 2. Also call backend API /api/admin/users/delete
   try {
-    await db.collection("users").doc(userId).delete();
-    showToast(`Vartotojas ${email} sėkmingai pašalintas iš sistemos.`);
-  } catch (err) {
-    handleFirestoreError(err, OperationType.DELETE, `users/${userId}`);
-    showToast("Nepavyko pašalinti vartotojo: " + err.message, "error");
+    const resp = await fetch("/api/admin/users/delete", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        userId,
+        email,
+        adminEmail: (auth && auth.currentUser) ? auth.currentUser.email : PRIMARY_SUPERADMIN_EMAIL
+      })
+    });
+    if (resp.ok) {
+      deleted = true;
+    }
+  } catch (apiErr) {
+    console.warn("Backend API delete user notice:", apiErr.message);
+  }
+
+  if (deleted) {
+    // Remove from in-memory list and update UI instantly
+    allUsersList = allUsersList.filter((u) => u.id !== userId && (!email || (u.email || "").toLowerCase() !== email.toLowerCase()));
+    updateUserMetrics();
+    renderUsersTable();
+    showToast(`Vartotojas ${email || userId} sėkmingai pašalintas iš sistemos.`, "success");
+  } else {
+    showToast("Nepavyko pašalinti vartotojo. Patikrinkite interneto ryšį arba teises.", "error");
   }
 }
 

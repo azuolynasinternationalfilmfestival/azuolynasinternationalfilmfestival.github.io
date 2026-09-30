@@ -1,0 +1,16 @@
+{
+  "invitations": [
+    {
+      "token": "ae8f2a09ca9b47db473ceed9964fa6aea938e295",
+      "code": "347521",
+      "name": "Testas",
+      "surname": "Vartotojas",
+      "email": "test.vartotojas@ktg.lt",
+      "role": "judge",
+      "status": "revoked",
+      "invitedBy": "azuolynasfilmfestival@gmail.com",
+      "createdAt": "2026-09-30T18:47:33.836Z",
+      "expiresAt": "2026-10-07T18:47:33.836Z"
+    }
+  ]
+}

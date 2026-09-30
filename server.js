@@ -19,6 +19,7 @@ const VOTES_FILE = path.join(DATA_DIR, 'votes.json');
 const SETTINGS_FILE = path.join(DATA_DIR, 'settings.json');
 const USERS_FILE = path.join(DATA_DIR, 'users.json');
 const INVITATIONS_FILE = path.join(DATA_DIR, 'invitations.json');
+const LOGS_FILE = path.join(DATA_DIR, 'logs.json');
 
 if (!fs.existsSync(DATA_DIR)) {
   fs.mkdirSync(DATA_DIR, { recursive: true });
@@ -43,6 +44,91 @@ function saveJson(file, data) {
     fs.writeFileSync(file, JSON.stringify(data, null, 2), 'utf-8');
   } catch (e) {
     console.error(`Error saving ${file}:`, e.message);
+  }
+}
+
+function loadLogsData() {
+  const defaultLogs = [
+    {
+      id: "log_init_1",
+      action: "SYSTEM_BOOT",
+      category: "settings",
+      adminEmail: "azuolynasfilmfestival@gmail.com",
+      adminName: "Vyr. Administratorius",
+      target: "settings/festival",
+      details: "Sistemos startas ir nustatymų sinchronizacija Kauno Tarptautinė Gimnazija platformoje",
+      timestamp: "2026-02-15T10:00:00.000Z",
+      status: "success"
+    },
+    {
+      id: "log_init_2",
+      action: "USER_INVITED",
+      category: "users",
+      adminEmail: "azuolynasfilmfestival@gmail.com",
+      adminName: "Vyr. Administratorius",
+      target: "karina.brdar@gmail.com",
+      details: "Išsiųstas pakvietimas ir suteikta administratoriaus prieiga (Karina Brdar)",
+      timestamp: "2026-02-20T14:30:00.000Z",
+      status: "success"
+    },
+    {
+      id: "log_init_3",
+      action: "SETTINGS_CHANGED",
+      category: "settings",
+      adminEmail: "azuolynasfilmfestival@gmail.com",
+      adminName: "Vyr. Administratorius",
+      target: "votingActive",
+      details: "Balsavimo nustatymų atnaujinimas ir archyvo matomumo patikrinimas",
+      timestamp: "2026-03-01T09:15:00.000Z",
+      status: "success"
+    }
+  ];
+  return loadJson(LOGS_FILE, { logs: defaultLogs });
+}
+
+function saveLogsData(data) {
+  saveJson(LOGS_FILE, data);
+}
+
+function recordActivityLog({ action, category, adminEmail, adminName, target, details, status = "success" }) {
+  try {
+    const logsData = loadLogsData();
+    if (!logsData.logs) logsData.logs = [];
+    const logId = "log_" + Date.now() + "_" + Math.random().toString(36).substring(2, 7);
+    const timestamp = new Date().toISOString();
+    const newLog = {
+      id: logId,
+      action: action || "GENERAL_ACTION",
+      category: category || "users",
+      adminEmail: adminEmail || "azuolynasfilmfestival@gmail.com",
+      adminName: adminName || (adminEmail ? adminEmail.split("@")[0] : "Administratorius"),
+      target: target || "system",
+      details: details || "",
+      timestamp,
+      status
+    };
+
+    logsData.logs.unshift(newLog);
+    if (logsData.logs.length > 250) {
+      logsData.logs = logsData.logs.slice(0, 250);
+    }
+    saveLogsData(logsData);
+
+    // Sync to Firestore logs collection
+    syncToFirestore('logs', logId, {
+      action: { stringValue: newLog.action },
+      category: { stringValue: newLog.category },
+      adminEmail: { stringValue: newLog.adminEmail },
+      adminName: { stringValue: newLog.adminName },
+      target: { stringValue: newLog.target },
+      details: { stringValue: newLog.details },
+      timestamp: { timestampValue: newLog.timestamp },
+      status: { stringValue: newLog.status }
+    });
+
+    return newLog;
+  } catch (err) {
+    console.warn("Could not record activity log:", err.message);
   }
 }
 
@@ -110,6 +196,17 @@ async function syncToFirestore(collection, docId, fields) {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ fields })
+    });
+  } catch (err) {
+    // Non-blocking background sync
+  }
+}
+
+async function deleteFromFirestore(collection, docId) {
+  try {
+    const delUrl = `https://firestore.googleapis.com/v1/projects/${FIREBASE_PROJECT_ID}/databases/(default)/documents/${collection}/${docId}?key=${FIREBASE_API_KEY}`;
+    await fetch(delUrl, {
+      method: 'DELETE'
     });
   } catch (err) {
     // Non-blocking background sync
@@ -439,6 +536,14 @@ app.post('/api/admin/invite', async (req, res) => {
       lastLogin: { timestampValue: userDoc.lastLogin }
     });
 
+    recordActivityLog({
+      action: "USER_INVITED",
+      category: "users",
+      adminEmail: newInvite.invitedBy,
+      target: cleanEmail,
+      details: `Pakviestas naujas komandos narys (${cleanName} ${cleanSurname}), priskirta rolė: ${cleanRole.toUpperCase()}`
+    });
+
     res.json({
       success: true,
       invitation: newInvite
@@ -559,11 +664,24 @@ app.post('/api/admin/users/status', (req, res) => {
     user.status = status === 'suspended' ? 'suspended' : 'active';
     saveJson(USERS_FILE, usersData);
 
-    if (user.uid) {
+    const docId = user.email.toLowerCase().replace(/[^a-zA-Z0-9_-]/g, '_');
+    syncToFirestore('users', docId, {
+      status: { stringValue: user.status }
+    });
+
+    if (user.uid && user.uid !== docId) {
       syncToFirestore('users', user.uid, {
         status: { stringValue: user.status }
       });
     }
+
+    recordActivityLog({
+      action: "USER_STATUS_TOGGLED",
+      category: "users",
+      adminEmail: req.body.adminEmail || "azuolynasfilmfestival@gmail.com",
+      target: user.email,
+      details: `Vartotojo ${user.email} prieiga pakeista į: ${user.status === 'active' ? 'AKTYVUS (Leidžiama)' : 'UŽBLOKUOTAS (Sustabdyta)'}`
+    });
 
     res.json({ success: true, user });
   } catch (e) {
@@ -584,11 +702,24 @@ app.post('/api/admin/users/role', (req, res) => {
     user.role = role;
     saveJson(USERS_FILE, usersData);
 
-    if (user.uid) {
+    const docId = user.email.toLowerCase().replace(/[^a-zA-Z0-9_-]/g, '_');
+    syncToFirestore('users', docId, {
+      role: { stringValue: user.role }
+    });
+
+    if (user.uid && user.uid !== docId) {
       syncToFirestore('users', user.uid, {
         role: { stringValue: user.role }
       });
     }
+
+    recordActivityLog({
+      action: "USER_ROLE_CHANGED",
+      category: "users",
+      adminEmail: req.body.adminEmail || "azuolynasfilmfestival@gmail.com",
+      target: user.email,
+      details: `Vartotojo ${user.email} rolė pakeista į: ${role.toUpperCase()}`
+    });
 
     res.json({ success: true, user });
   } catch (e) {
@@ -596,29 +727,86 @@ app.post('/api/admin/users/role', (req, res) => {
   }
 });
 
-// API: Safely delete user account
-app.post('/api/admin/users/delete', (req, res) => {
+// API: Safely delete user account (deletes from JSON and Firestore)
+app.post('/api/admin/users/delete', async (req, res) => {
   try {
-    const { email } = req.body || {};
-    if (!email) return res.status(400).json({ error: 'Email is required' });
+    const { email, userId } = req.body || {};
+    if (!email && !userId) return res.status(400).json({ error: 'Email or userId is required' });
 
-    const cleanEmail = String(email).trim().toLowerCase();
+    const cleanEmail = String(email || '').trim().toLowerCase();
     if (cleanEmail === 'azuolynasfilmfestival@gmail.com') {
       return res.status(403).json({ error: 'Super Administrator cannot be deleted' });
     }
 
     const usersData = loadUsersData();
-    const initialLen = (usersData.users || []).length;
-    usersData.users = (usersData.users || []).filter(u => u.email.toLowerCase() !== cleanEmail);
+    const targetUser = (usersData.users || []).find(u => 
+      (cleanEmail && u.email.toLowerCase() === cleanEmail) || (userId && (u.uid === userId || u.id === userId))
+    );
 
-    if (usersData.users.length === initialLen) {
-      return res.status(404).json({ error: 'User not found' });
+    const effectiveEmail = cleanEmail || (targetUser ? targetUser.email.toLowerCase() : '');
+    const docId = effectiveEmail.replace(/[^a-zA-Z0-9_-]/g, '_');
+
+    // Remove from users list
+    usersData.users = (usersData.users || []).filter(u => {
+      const matchEmail = effectiveEmail && u.email.toLowerCase() === effectiveEmail;
+      const matchId = userId && (u.uid === userId || u.id === userId);
+      return !matchEmail && !matchId;
+    });
+    saveJson(USERS_FILE, usersData);
+
+    // Delete from Firestore
+    if (docId) await deleteFromFirestore('users', docId);
+    if (userId) await deleteFromFirestore('users', userId);
+    if (targetUser && targetUser.uid) await deleteFromFirestore('users', targetUser.uid);
+
+    // Revoke any pending invitations
+    const invitesData = loadInvitationsData();
+    if (invitesData.invitations) {
+      invitesData.invitations.forEach(inv => {
+        if (effectiveEmail && inv.email.toLowerCase() === effectiveEmail) {
+          inv.status = 'revoked';
+          deleteFromFirestore('invitations', inv.token);
+        }
+      });
+      saveJson(INVITATIONS_FILE, invitesData);
     }
 
-    saveJson(USERS_FILE, usersData);
+    recordActivityLog({
+      action: "USER_DELETED",
+      category: "users",
+      adminEmail: req.body.adminEmail || "azuolynasfilmfestival@gmail.com",
+      target: effectiveEmail || userId,
+      details: `Vartotojo paskyra ${effectiveEmail || userId} visam laikui pašalinta iš sistemos ir Firestore duomenų bazės`
+    });
+
     res.json({ success: true, message: 'User account removed permanently' });
   } catch (e) {
+    console.error('Error in /api/admin/users/delete:', e);
     res.status(500).json({ error: 'Failed to delete user' });
+  }
+});
+
+// API: Get Activity Logs
+app.get('/api/admin/logs', (req, res) => {
+  try {
+    const logsData = loadLogsData();
+    res.json({
+      success: true,
+      logs: logsData.logs || []
+    });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to retrieve activity logs' });
+  }
+});
+
+// API: Add Activity Log
+app.post('/api/admin/logs', (req, res) => {
+  try {
+    const { action, category, adminEmail, adminName, target, details, status } = req.body || {};
+    const log = recordActivityLog({ action, category, adminEmail, adminName, target, details, status });
+    res.json({ success: true, log });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to record activity log' });
   }
 });
 

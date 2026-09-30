@@ -1,0 +1,59 @@
+{
+  "logs": [
+    {
+      "id": "log_1790794060283_517ga",
+      "action": "USER_DELETED",
+      "category": "users",
+      "adminEmail": "azuolynasfilmfestival@gmail.com",
+      "adminName": "azuolynasfilmfestival",
+      "target": "test.vartotojas@ktg.lt",
+      "details": "Vartotojo paskyra test.vartotojas@ktg.lt visam laikui pašalinta iš sistemos ir Firestore duomenų bazės",
+      "timestamp": "2026-09-30T18:47:40.283Z",
+      "status": "success"
+    },
+    {
+      "id": "log_1790794053913_evdm0",
+      "action": "USER_INVITED",
+      "category": "users",
+      "adminEmail": "azuolynasfilmfestival@gmail.com",
+      "adminName": "azuolynasfilmfestival",
+      "target": "test.vartotojas@ktg.lt",
+      "details": "Pakviestas naujas komandos narys (Testas Vartotojas), priskirta rolė: JUDGE",
+      "timestamp": "2026-09-30T18:47:33.913Z",
+      "status": "success"
+    },
+    {
+      "id": "log_init_1",
+      "action": "SYSTEM_BOOT",
+      "category": "settings",
+      "adminEmail": "azuolynasfilmfestival@gmail.com",
+      "adminName": "Vyr. Administratorius",
+      "target": "settings/festival",
+      "details": "Sistemos startas ir nustatymų sinchronizacija Kauno Tarptautinė Gimnazija platformoje",
+      "timestamp": "2026-02-15T10:00:00.000Z",
+      "status": "success"
+    },
+    {
+      "id": "log_init_2",
+      "action": "USER_INVITED",
+      "category": "users",
+      "adminEmail": "azuolynasfilmfestival@gmail.com",
+      "adminName": "Vyr. Administratorius",
+      "target": "karina.brdar@gmail.com",
+      "details": "Išsiųstas pakvietimas ir suteikta administratoriaus prieiga (Karina Brdar)",
+      "timestamp": "2026-02-20T14:30:00.000Z",
+      "status": "success"
+    },
+    {
+      "id": "log_init_3",
+      "action": "SETTINGS_CHANGED",
+      "category": "settings",
+      "adminEmail": "azuolynasfilmfestival@gmail.com",
+      "adminName": "Vyr. Administratorius",
+      "target": "votingActive",
+      "details": "Balsavimo nustatymų atnaujinimas ir archyvo matomumo patikrinimas",
+      "timestamp": "2026-03-01T09:15:00.000Z",
+      "status": "success"
+    }
+  ]
+}
