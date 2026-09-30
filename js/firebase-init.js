@@ -103,8 +103,11 @@ export const DEFAULT_CONTENT = {
   showCurrentEdition: true,
   showResults: false,
   showVoting: false,
+  votingActive: false,
   showScreening: true,
   showSubmit: true,
+  maintenanceMode: false,
+  archiveVisibility: true,
   recordingVideoUrl: "",
   prizesPhotoUrl: "https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/IMG_3463.jpeg?alt=media&token=af7892ca-e78e-4198-b686-e0181472e8da"
 };

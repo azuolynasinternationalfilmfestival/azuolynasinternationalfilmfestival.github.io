@@ -76,8 +76,8 @@
           <span>Vartotojai & Prieiga</span>
         </button>
         <button id="tabSettingsBtn" class="admin-nav-item">
-          <svg class="admin-nav-icon icon-svg-crisp" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
-          <span>Nustatymai & Skiltys</span>
+          <svg class="admin-nav-icon icon-svg-crisp" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+          <span>Globalūs Nustatymai</span>
         </button>
       </div>
 
@@ -442,6 +442,66 @@
       </div>
 
       <div id="settingsTab" class="d-none">
+        <!-- Global Settings Primary Controls Card (tied to settings/festival Firestore document) -->
+        <div class="content-card" style="border: 1px solid var(--accent-light); box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4); margin-bottom: 24px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:14px; border-bottom:1px solid var(--border-color); padding-bottom:12px;">
+            <div>
+              <div style="display:flex; align-items:center; gap:8px;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--accent-light);">
+                  <circle cx="12" cy="12" r="3"></circle>
+                  <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                </svg>
+                <h3 class="content-card-title" style="margin:0;">Globalūs Sistemos Nustatymai (Global Settings)</h3>
+              </div>
+              <p class="content-card-sub" style="margin:4px 0 0 0;">
+                Tiesioginiai sistemos jungikliai (tumbler), akimirksniu sinchronizuojami su <code>settings/festival</code> dokumentu Firestore duomenų bazėje.
+              </p>
+            </div>
+            <span class="badge badge-winner" style="font-size:0.75rem;">Firestore: settings/festival</span>
+          </div>
+
+          <div class="switch-grid" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));">
+            <!-- 1. Maintenance Mode Tumbler -->
+            <label class="switch-label global-control-switch" id="lblMaintenanceMode" style="border:1px solid rgba(220, 38, 38, 0.4); background:rgba(30, 10, 10, 0.35);">
+              <input type="checkbox" id="cfgMaintenanceMode" class="switch-input">
+              <span class="switch-slider"></span>
+              <div class="switch-text">
+                <span class="switch-title" style="display:flex; align-items:center; gap:6px;">
+                  <span>Profilaktikos rėžimas (Maintenance Mode)</span>
+                  <span class="status-pill status-rejected" id="badgeMaintenanceMode" style="display:none; font-size:0.68rem; padding:2px 8px;">Aktyvus</span>
+                </span>
+                <span class="switch-sub">Laikinai apriboja viešąją svetainės prieigą ir rodo pranešimą</span>
+              </div>
+            </label>
+
+            <!-- 2. Voting Active/Closed Tumbler -->
+            <label class="switch-label global-control-switch" id="lblVotingActive" style="border:1px solid rgba(111, 165, 138, 0.35);">
+              <input type="checkbox" id="cfgVotingActive" class="switch-input">
+              <span class="switch-slider"></span>
+              <div class="switch-text">
+                <span class="switch-title" style="display:flex; align-items:center; gap:6px;">
+                  <span>Balsavimas aktyvus (Voting Active / Closed)</span>
+                  <span class="status-pill status-accepted" id="badgeVotingActive" style="display:none; font-size:0.68rem; padding:2px 8px;">Atidarytas</span>
+                </span>
+                <span class="switch-sub">Leidžia žiūrovams atiduoti balsus arba uždaro apklausą</span>
+              </div>
+            </label>
+
+            <!-- 3. Archive Visibility Tumbler -->
+            <label class="switch-label global-control-switch" id="lblArchiveVisibility" style="border:1px solid rgba(111, 165, 138, 0.35);">
+              <input type="checkbox" id="cfgArchiveVisibility" class="switch-input" checked>
+              <span class="switch-slider"></span>
+              <div class="switch-text">
+                <span class="switch-title" style="display:flex; align-items:center; gap:6px;">
+                  <span>Archyvo matomumas (Archive Visibility)</span>
+                  <span class="status-pill status-accepted" id="badgeArchiveVisibility" style="font-size:0.68rem; padding:2px 8px;">Matomas</span>
+                </span>
+                <span class="switch-sub">Valdo retrospektyvos, ankstesnių metų video ir nuotraukų rodymą</span>
+              </div>
+            </label>
+          </div>
+        </div>
+
         <div id="adminInviteCard" class="content-card d-none">
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
             <h3 class="content-card-title" style="margin-bottom:0;">Prieigos Pakvietimų Valdymas</h3>

@@ -6421,5 +6421,19 @@ svg {
   border-radius: 0 0 var(--site-radius) var(--site-radius);
 }
 
+.global-control-switch {
+  padding: 16px 18px;
+  border-radius: var(--site-radius);
+  transition: all 0.25s ease;
+  cursor: pointer;
+}
+
+.global-control-switch:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+  border-color: var(--accent-light);
+}
+
+
 
 

@@ -16,13 +16,55 @@ export function initSettings() {
     sendInviteBtn.addEventListener("click", handleSendAdminInvite);
   }
 
+  // Bind Instant Global Control Tumblers (tied to single settings/festival Firestore doc)
+  const maintenanceSwitch = document.getElementById("cfgMaintenanceMode");
+  if (maintenanceSwitch) {
+    maintenanceSwitch.addEventListener("change", async (e) => {
+      const isEnabled = e.target.checked;
+      await updateGlobalTumbler({
+        maintenanceMode: isEnabled
+      }, isEnabled ? "Profilaktikos rėžimas ĮJUNGTAS (Platformos prieiga apribota)" : "Profilaktikos rėžimas IŠJUNGTAS (Platforma atvira lankytojams)", e.target);
+    });
+  }
+
+  const votingSwitch = document.getElementById("cfgVotingActive");
+  if (votingSwitch) {
+    votingSwitch.addEventListener("change", async (e) => {
+      const isEnabled = e.target.checked;
+      // Keep cfgShowVoting in sync
+      const showVotingElem = document.getElementById("cfgShowVoting");
+      if (showVotingElem) showVotingElem.checked = isEnabled;
+
+      await updateGlobalTumbler({
+        votingActive: isEnabled,
+        showVoting: isEnabled
+      }, isEnabled ? "Žiūrovų balsavimas ATIDARYTAS (Balsavimo skiltis aktyvi)" : "Žiūrovų balsavimas UŽDARYTAS (Apklausa sustabdyta)", e.target);
+    });
+  }
+
+  const archiveSwitch = document.getElementById("cfgArchiveVisibility");
+  if (archiveSwitch) {
+    archiveSwitch.addEventListener("change", async (e) => {
+      const isEnabled = e.target.checked;
+      // Keep cfgShowArchive in sync
+      const showArchiveElem = document.getElementById("cfgShowArchive");
+      if (showArchiveElem) showArchiveElem.checked = isEnabled;
+
+      await updateGlobalTumbler({
+        archiveVisibility: isEnabled,
+        showArchive: isEnabled
+      }, isEnabled ? "Archyvas MATOMAS (Retrospektyva viešai pasiekiama)" : "Archyvas PASLĖPTAS (Retrospektyvos skiltis išjungta)", e.target);
+    });
+  }
+
   const btnShowAllTabs = document.getElementById("btnShowAllTabs");
   if (btnShowAllTabs) {
     btnShowAllTabs.addEventListener("click", () => {
       const allSwitches = [
         "cfgShowAbout", "cfgShowTerms", "cfgShowFaq", "cfgShowCategories",
         "cfgShowEditions", "cfgShowArchive", "cfgShowCurrentEdition",
-        "cfgShowResults", "cfgShowVoting", "cfgShowScreening", "cfgShowSubmit"
+        "cfgShowResults", "cfgShowVoting", "cfgShowScreening", "cfgShowSubmit",
+        "cfgVotingActive", "cfgArchiveVisibility"
       ];
       allSwitches.forEach((id) => {
         const elem = document.getElementById(id);
@@ -32,6 +74,42 @@ export function initSettings() {
     });
   }
 }
+
+async function updateGlobalTumbler(patchData, successMsg, toggleInput) {
+  if (toggleInput) toggleInput.disabled = true;
+
+  try {
+    const payload = {
+      ...patchData,
+      updatedAt: new Date().toISOString()
+    };
+
+    // 1. Update single Firestore document: settings/festival
+    if (db) {
+      await db.collection("settings").doc("festival").set(payload, { merge: true });
+    }
+
+    // 2. Sync to local backend settings API for mirror consistency
+    try {
+      await fetch("/api/admin/settings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(patchData)
+      });
+    } catch (apiErr) {
+      console.warn("Backend settings sync notice:", apiErr.message);
+    }
+
+    showToast(successMsg, "success");
+  } catch (err) {
+    console.error("Error updating settings/festival tumbler:", err);
+    if (toggleInput) toggleInput.checked = !toggleInput.checked; // Revert switch state on error
+    showToast("Klaida keičiant nustatymą: " + err.message, "error");
+  } finally {
+    if (toggleInput) toggleInput.disabled = false;
+  }
+}
+
 
 export function evaluateAdminPrivileges(user) {
   const inviteCard = document.getElementById("adminInviteCard");
@@ -78,6 +156,32 @@ export function subscribeSettings() {
       const d = doc.exists ? doc.data() : DEFAULT_CONTENT;
       const lt = d.lt || DEFAULT_CONTENT.lt;
       const en = d.en || DEFAULT_CONTENT.en;
+
+      // Global Control Tumblers (tied to settings/festival)
+      const isMaintenance = d.maintenanceMode === true;
+      const isVotingActive = (d.votingActive === true || d.showVoting === true);
+      const isArchiveVisible = (d.archiveVisibility !== false && d.showArchive !== false);
+
+      const mElem = document.getElementById("cfgMaintenanceMode");
+      if (mElem) mElem.checked = isMaintenance;
+      const mBadge = document.getElementById("badgeMaintenanceMode");
+      if (mBadge) mBadge.style.display = isMaintenance ? "inline-flex" : "none";
+
+      const vElem = document.getElementById("cfgVotingActive");
+      if (vElem) vElem.checked = isVotingActive;
+      const vBadge = document.getElementById("badgeVotingActive");
+      if (vBadge) {
+        vBadge.style.display = isVotingActive ? "inline-flex" : "none";
+        vBadge.textContent = isVotingActive ? "Atidarytas" : "Uždarytas";
+      }
+
+      const aElem = document.getElementById("cfgArchiveVisibility");
+      if (aElem) aElem.checked = isArchiveVisible;
+      const aBadge = document.getElementById("badgeArchiveVisibility");
+      if (aBadge) {
+        aBadge.className = isArchiveVisible ? "status-pill status-accepted" : "status-pill status-rejected";
+        aBadge.textContent = isArchiveVisible ? "Matomas" : "Paslėptas";
+      }
 
       // Tab Visibilities (default true unless explicitly set to false; voting and results default false)
       document.getElementById("cfgShowAbout").checked = d.showAbout !== false;
@@ -127,16 +231,23 @@ async function saveSettings() {
   const btn = document.getElementById("saveSettingsBtn");
   btn.disabled = true;
 
+  const maintenanceChecked = document.getElementById("cfgMaintenanceMode") ? document.getElementById("cfgMaintenanceMode").checked : false;
+  const votingChecked = document.getElementById("cfgVotingActive") ? document.getElementById("cfgVotingActive").checked : false;
+  const archiveChecked = document.getElementById("cfgArchiveVisibility") ? document.getElementById("cfgArchiveVisibility").checked : true;
+
   const updated = {
+    maintenanceMode: maintenanceChecked,
+    votingActive: votingChecked,
+    archiveVisibility: archiveChecked,
     showAbout: document.getElementById("cfgShowAbout").checked,
     showTerms: document.getElementById("cfgShowTerms").checked,
     showFaq: document.getElementById("cfgShowFaq").checked,
     showCategories: document.getElementById("cfgShowCategories").checked,
     showEditions: document.getElementById("cfgShowEditions").checked,
-    showArchive: document.getElementById("cfgShowArchive").checked,
+    showArchive: archiveChecked,
     showCurrentEdition: document.getElementById("cfgShowCurrentEdition").checked,
     showResults: document.getElementById("cfgShowResults").checked,
-    showVoting: document.getElementById("cfgShowVoting").checked,
+    showVoting: votingChecked,
     showScreening: document.getElementById("cfgShowScreening").checked,
     showSubmit: document.getElementById("cfgShowSubmit").checked,
     recordingVideoUrl: document.getElementById("cfgRecordingUrl").value.trim(),
