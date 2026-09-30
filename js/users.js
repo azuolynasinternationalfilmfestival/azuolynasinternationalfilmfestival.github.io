@@ -1,5 +1,6 @@
 import { db, auth, PRIMARY_SUPERADMIN_EMAIL, AUTHORIZED_ADMIN_EMAILS } from "./firebase-init.js";
 import { showToast } from "./ui-feedback.js";
+import { openInviteModal } from "./invite-modal.js";
 
 const OperationType = {
   CREATE: "create",
@@ -109,26 +110,11 @@ export function initUsers() {
     });
   }
 
-  // Invite Modal
-  if (openInviteModalBtn && inviteModal) {
+  // Invite Modal (Delegated to reusable invite-modal.js)
+  if (openInviteModalBtn) {
     openInviteModalBtn.addEventListener("click", () => {
-      inviteModal.classList.remove("d-none");
-      document.getElementById("inviteUserName")?.focus();
+      openInviteModal({ defaultRole: "moderator" });
     });
-  }
-
-  const hideInviteModal = () => {
-    if (inviteModal) {
-      inviteModal.classList.add("d-none");
-      inviteForm?.reset();
-    }
-  };
-
-  if (closeInviteModalBtn) closeInviteModalBtn.addEventListener("click", hideInviteModal);
-  if (cancelInviteBtn) cancelInviteBtn.addEventListener("click", hideInviteModal);
-
-  if (inviteForm) {
-    inviteForm.addEventListener("submit", handleInviteUserSubmit);
   }
 
   // Delete Confirmation Modal
@@ -464,101 +450,6 @@ async function executeDeleteUser(userId, email) {
   } catch (err) {
     handleFirestoreError(err, OperationType.DELETE, `users/${userId}`);
     showToast("Nepavyko pašalinti vartotojo: " + err.message, "error");
-  }
-}
-
-async function handleInviteUserSubmit(e) {
-  e.preventDefault();
-  const nameInput = document.getElementById("inviteUserName");
-  const surnameInput = document.getElementById("inviteUserSurname");
-  const emailInput = document.getElementById("inviteUserEmail");
-  const roleInput = document.getElementById("inviteUserRole");
-  const submitBtn = document.getElementById("submitInviteBtn");
-
-  const name = nameInput.value.trim();
-  const surname = surnameInput.value.trim();
-  const email = emailInput.value.trim().toLowerCase();
-  const role = roleInput.value;
-
-  if (!email || !name) {
-    showToast("Užpildykite privalomus laukus (Vardą ir El. paštą)!", "error");
-    return;
-  }
-
-  submitBtn.disabled = true;
-  submitBtn.textContent = "Kuriama...";
-
-  const docId = sanitizeEmailToDocId(email);
-  const nowIso = new Date().toISOString();
-  const currentAdminEmail = auth.currentUser ? auth.currentUser.email : PRIMARY_SUPERADMIN_EMAIL;
-
-  const newUserRecord = {
-    uid: docId,
-    name,
-    surname,
-    email,
-    role,
-    status: "active",
-    createdAt: nowIso,
-    updatedAt: nowIso,
-    invitedBy: currentAdminEmail,
-  };
-
-  try {
-    // 1. Create/update user document in Firestore users collection
-    await db.collection("users").doc(docId).set(newUserRecord, { merge: true });
-
-    // 2. Generate unique secure invitation verification token
-    const token = generateSecureToken();
-    const verificationCode = generateVerificationCode();
-    await db.collection("invitations").doc(token).set({
-      token,
-      name,
-      surname,
-      email,
-      role,
-      code: verificationCode,
-      status: "pending",
-      createdAt: nowIso,
-      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(), // 7 days
-      invitedBy: currentAdminEmail,
-    });
-
-    // 3. Queue automated dark email notification in mail collection
-    await db.collection("mail").add({
-      to: email,
-      template: "userInvite",
-      data: {
-        name: `${name} ${surname}`.trim(),
-        role: ROLE_LABELS[role] || role,
-        code: verificationCode,
-        inviteUrl: `https://azuolynasinternationalfilmfestival.github.io/admin.html?invite=${token}`,
-      },
-      createdAt: nowIso,
-      status: "queued",
-    });
-
-    // Also trigger password reset email dispatch if user already registered or can receive
-    try {
-      if (typeof auth.sendPasswordResetEmail === "function") {
-        await auth.sendPasswordResetEmail(email);
-      }
-    } catch (authErr) {
-      // Ignore auth/user-not-found as this is an invitation for new accounts
-      console.info("Auth reset notice (account may be newly invited):", authErr.message);
-    }
-
-    showToast(`Vartotojas ${name} (${email}) sėkmingai pridėtas su role „${ROLE_LABELS[role]}“!`);
-
-    const modal = document.getElementById("userInviteModal");
-    if (modal) modal.classList.add("d-none");
-    e.target.reset();
-  } catch (err) {
-    handleFirestoreError(err, OperationType.CREATE, `users/${docId}`);
-    showToast("Klaida kuriant vartotoją: " + err.message, "error");
-  } finally {
-    submitBtn.disabled = false;
-    submitBtn.textContent = "Pakviesti ir Suteikti Prieigą";
   }
 }
 

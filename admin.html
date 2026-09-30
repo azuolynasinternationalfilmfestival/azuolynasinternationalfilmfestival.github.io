@@ -10,6 +10,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-functions-compat.js"></script>
 </head>
 <body class="admin-viewport">
 
@@ -452,8 +453,12 @@
               <label for="inviteAdminEmail">El. pašto adresas *</label>
               <input type="email" id="inviteAdminEmail" class="field" placeholder="">
             </div>
-            <div class="input-cell" style="justify-content:flex-end;">
-              <button type="button" id="sendInviteBtn" class="btn-solid btn-sm">Išsiųsti prieigos nuorodą</button>
+            <div class="input-cell" style="justify-content:flex-end; gap:8px; flex-direction:row; align-items:flex-end;">
+              <button type="button" id="sendInviteBtn" class="btn-outline btn-sm">Išsiųsti prieigos nuorodą</button>
+              <button type="button" class="btn-solid btn-sm" data-open-invite-modal style="display:inline-flex; align-items:center; gap:6px;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><line x1="20" y1="8" x2="20" y2="14"></line><line x1="23" y1="11" x2="17" y2="11"></line></svg>
+                <span>Naujo nario pakvietimas</span>
+              </button>
             </div>
           </div>
         </div>
@@ -770,42 +775,87 @@
     </div>
   </div>
 
-  <!-- User Invite / Add Modal -->
+  <!-- Reusable User Invite Modal (Cloud Functions & Firestore) -->
   <div id="userInviteModal" class="admin-modal-overlay d-none">
     <div class="admin-modal-card" style="max-width:540px;">
       <div class="admin-modal-header">
-        <h3 class="admin-modal-title">Pakviesti Naują Vartotoją</h3>
+        <div style="display:flex; align-items:center; gap:10px;">
+          <div style="width:34px; height:34px; border-radius:50%; background:rgba(111,165,138,0.2); border:1px solid var(--accent-color); display:flex; align-items:center; justify-content:center; color:var(--accent-light);">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+              <circle cx="9" cy="7" r="4"></circle>
+              <line x1="20" y1="8" x2="20" y2="14"></line>
+              <line x1="23" y1="11" x2="17" y2="11"></line>
+            </svg>
+          </div>
+          <div>
+            <h3 class="admin-modal-title" style="margin:0;">Pakviesti Naują Vartotoją</h3>
+            <span style="font-size:0.75rem; color:var(--accent-light);">Kauno Tarptautinė Gimnazija &bull; Firebase Cloud Functions</span>
+          </div>
+        </div>
         <button type="button" id="closeInviteModalBtn" style="background:transparent; border:none; color:var(--text-muted); font-size:1.5rem; cursor:pointer; line-height:1;">&times;</button>
       </div>
-      <p class="content-card-sub" style="margin-top:-6px; margin-bottom:16px;">Naujas vartotojas bus įtrauktas į Firestore duomenų bazę su jūsų paskirta role, o sistemoje sugeneruotas saugus patvirtinimo kodas.</p>
+
+      <p class="content-card-sub" style="margin-top:-6px; margin-bottom:16px;">
+        Pridėkite komandos narį prie festivalio valdymo platformos. Paspaudus <strong>„Pakviesti“</strong>, sugeneruojamas unikalus prieigos žetonas, o tamsios temos el. laiškas automatiškai išsiunčiamas per <strong>Firebase Cloud Functions</strong>.
+      </p>
+
       <form id="userInviteForm">
         <div class="input-row">
           <div class="input-cell">
-            <label for="inviteUserName">Vardas *</label>
+            <label for="inviteUserName">Vardas (Name) *</label>
             <input type="text" id="inviteUserName" class="field" placeholder="pvz. Jonas" required>
           </div>
           <div class="input-cell">
-            <label for="inviteUserSurname">Pavardė</label>
+            <label for="inviteUserSurname">Pavardė (Surname)</label>
             <input type="text" id="inviteUserSurname" class="field" placeholder="pvz. Jonaitis">
           </div>
         </div>
+
         <div class="input-cell" style="margin-bottom:14px;">
-          <label for="inviteUserEmail">El. pašto adresas *</label>
+          <label for="inviteUserEmail">El. pašto adresas (Email) *</label>
           <input type="email" id="inviteUserEmail" class="field" placeholder="vardas.pavarde@gmail.com" required>
         </div>
-        <div class="input-cell" style="margin-bottom:20px;">
-          <label for="inviteUserRole">Paskirta Rolė *</label>
-          <select id="inviteUserRole" class="field" required>
-            <option value="moderator">Moderatorius (gali peržiūrėti ir vertinti paraiškas)</option>
-            <option value="judge">Teisėjas / Komisijos narys (filmų vertinimas)</option>
-            <option value="accountant">Buhalteris (prizai, apskaita, ataskaitos)</option>
-            <option value="viewer">Žiūrovas (tik vidinė peržiūra)</option>
-            <option value="admin">Administratorius (pilnos sistemos valdymo teisės)</option>
-          </select>
+
+        <div class="input-row" style="margin-bottom:16px;">
+          <div class="input-cell">
+            <label for="inviteUserRole">Paskirta Rolė (Role) *</label>
+            <select id="inviteUserRole" class="field" required>
+              <option value="accountant">Buhalteris (Accountant) - Prizai & Finansai</option>
+              <option value="moderator" selected>Moderatorius (Moderator) - Paraiškų valdymas</option>
+              <option value="judge">Teisėjas (Judge) - Vertinimo komisijos narys</option>
+              <option value="admin">Administratorius (Administrator) - Pilna sistemos prieiga</option>
+              <option value="viewer">Žiūrovas (Viewer) - Tik vidinė peržiūra</option>
+            </select>
+          </div>
+          <div class="input-cell">
+            <label for="inviteUserLang">Laiško kalba (Email Language)</label>
+            <select id="inviteUserLang" class="field">
+              <option value="lt" selected>Lietuvių (LT)</option>
+              <option value="en">English (EN)</option>
+            </select>
+          </div>
         </div>
+
+        <div style="background:rgba(8, 27, 23, 0.7); border:1px solid rgba(111,165,138,0.25); border-radius:var(--site-radius); padding:10px 14px; margin-bottom:18px; display:flex; align-items:center; gap:10px;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--accent-light); flex-shrink:0;">
+            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+            <polyline points="22,6 12,13 2,6"></polyline>
+          </svg>
+          <div style="font-size:0.78rem; color:var(--text-muted); line-height:1.4;">
+            Išsiunčiamas automatinis <strong>tamsios temos laiškas</strong> su aktyvavimo nuoroda, priskirtos rolės detalėmis ir 6 skaitmenų saugos kodu.
+          </div>
+        </div>
+
         <div style="display:flex; justify-content:flex-end; gap:10px;">
           <button type="button" class="btn-outline btn-sm" id="cancelInviteBtn">Atšaukti</button>
-          <button type="submit" class="btn-solid btn-sm" id="submitInviteBtn">Pakviesti ir Suteikti Prieigą</button>
+          <button type="submit" class="btn-solid btn-sm" id="submitInviteBtn" style="display:inline-flex; align-items:center; gap:8px;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="22" y1="2" x2="11" y2="13"></line>
+              <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+            </svg>
+            <span>Pakviesti / Invite</span>
+          </button>
         </div>
       </form>
     </div>

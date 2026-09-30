@@ -21,12 +21,14 @@ import {
   subscribeUsers,
   unsubscribeUsersListener
 } from "./users.js";
+import { initInviteModal } from "./invite-modal.js";
 
 document.addEventListener("DOMContentLoaded", () => {
   initSubmissions();
   initEditions();
   initArchive();
   initUsers();
+  initInviteModal();
   initSettings();
   initTabNavigation();
 

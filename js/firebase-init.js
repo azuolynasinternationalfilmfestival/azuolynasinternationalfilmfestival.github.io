@@ -64,6 +64,7 @@ function getFirestoreInstance() {
 export const auth = (typeof firebase !== "undefined" && typeof firebase.auth === "function") ? firebase.auth() : null;
 export const db = getFirestoreInstance();
 export const storage = (typeof firebase !== "undefined" && typeof firebase.storage === "function") ? firebase.storage() : null;
+export const functions = (typeof firebase !== "undefined" && typeof firebase.functions === "function") ? firebase.functions("europe-west1") : null;
 
 export const PRIMARY_SUPERADMIN_EMAIL = "azuolynasfilmfestival@gmail.com";
 

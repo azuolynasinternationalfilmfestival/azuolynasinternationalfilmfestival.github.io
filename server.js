@@ -391,7 +391,30 @@ app.post('/api/admin/invite', async (req, res) => {
     invitesData.invitations.push(newInvite);
     saveJson(INVITATIONS_FILE, invitesData);
 
-    // Sync to Firestore
+    // Also provision/link user in users list
+    const usersData = loadUsersData();
+    if (!usersData.users) usersData.users = [];
+    const docId = cleanEmail.replace(/[^a-zA-Z0-9_-]/g, '_');
+    const existingUserIdx = usersData.users.findIndex(u => u.email.toLowerCase() === cleanEmail);
+    const userDoc = {
+      uid: docId,
+      email: cleanEmail,
+      name: cleanName,
+      surname: cleanSurname,
+      role: cleanRole,
+      status: 'active',
+      createdAt: new Date().toISOString(),
+      lastLogin: new Date().toISOString(),
+      invitedBy: adminEmail || 'azuolynasfilmfestival@gmail.com'
+    };
+    if (existingUserIdx >= 0) {
+      usersData.users[existingUserIdx] = { ...usersData.users[existingUserIdx], ...userDoc };
+    } else {
+      usersData.users.push(userDoc);
+    }
+    saveJson(USERS_FILE, usersData);
+
+    // Sync to Firestore (invitations & users)
     syncToFirestore('invitations', token, {
       token: { stringValue: token },
       code: { stringValue: code },
@@ -403,6 +426,17 @@ app.post('/api/admin/invite', async (req, res) => {
       invitedBy: { stringValue: newInvite.invitedBy },
       createdAt: { timestampValue: newInvite.createdAt },
       expiresAt: { timestampValue: newInvite.expiresAt }
+    });
+
+    syncToFirestore('users', docId, {
+      uid: { stringValue: docId },
+      email: { stringValue: cleanEmail },
+      name: { stringValue: cleanName },
+      surname: { stringValue: cleanSurname },
+      role: { stringValue: cleanRole },
+      status: { stringValue: 'active' },
+      createdAt: { timestampValue: userDoc.createdAt },
+      lastLogin: { timestampValue: userDoc.lastLogin }
     });
 
     res.json({
