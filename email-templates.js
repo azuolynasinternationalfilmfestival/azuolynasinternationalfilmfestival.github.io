@@ -714,8 +714,16 @@ function generateAdminNotificationHtml(lang, data = {}) {
 /**
  * Generates an automated dark-themed team invitation email with verification code and activation link.
  */
-function generateInviteEmailHtml(lang, data = {}) {
-  const currentLang = (lang === "lt" || lang === "en") ? lang : "lt";
+function generateInviteEmailHtml(langOrData, maybeData = {}) {
+  let currentLang = "lt";
+  let data = {};
+  if (langOrData && typeof langOrData === "object") {
+    data = langOrData;
+    currentLang = (data.lang === "lt" || data.lang === "en") ? data.lang : "lt";
+  } else {
+    currentLang = (langOrData === "lt" || langOrData === "en") ? langOrData : "lt";
+    data = maybeData || {};
+  }
   const texts = emailTexts[currentLang] || emailTexts.lt;
   const t = texts.userInvite;
   const isLt = currentLang === "lt";

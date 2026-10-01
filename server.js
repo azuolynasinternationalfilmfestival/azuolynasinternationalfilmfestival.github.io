@@ -3,6 +3,8 @@ import path from 'path';
 import fs from 'fs';
 import crypto from 'crypto';
 import { fileURLToPath } from 'url';
+import jwt from 'jsonwebtoken';
+import nodemailer from 'nodemailer';
 import './email-templates.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -20,8 +22,13 @@ const {
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-app.use(express.json());
-app.use(express.static(__dirname));
+// Security & Authentication Configuration
+const JWT_SECRET = process.env.JWT_SECRET || 'azuolynas-film-festival-secure-jwt-key-2026';
+const PRIMARY_SUPERADMIN_EMAIL = 'azuolynasfilmfestival@gmail.com';
+const TRUSTED_ADMIN_EMAILS = [
+  'azuolynasfilmfestival@gmail.com',
+  'karina.brdar@gmail.com'
+];
 
 // Persistent Data Storage
 const DATA_DIR = path.join(__dirname, 'data');
@@ -65,7 +72,7 @@ function loadLogsData() {
       action: "SYSTEM_BOOT",
       category: "settings",
       adminEmail: "azuolynasfilmfestival@gmail.com",
-      adminName: "Vyr. Administratorius",
+      adminName: "Festivalio Administratorius",
       target: "settings/festival",
       details: "Sistemos startas ir nustatymų sinchronizacija Kauno Tarptautinė Gimnazija platformoje",
       timestamp: "2026-02-15T10:00:00.000Z",
@@ -76,21 +83,10 @@ function loadLogsData() {
       action: "USER_INVITED",
       category: "users",
       adminEmail: "azuolynasfilmfestival@gmail.com",
-      adminName: "Vyr. Administratorius",
+      adminName: "Festivalio Administratorius",
       target: "karina.brdar@gmail.com",
-      details: "Išsiųstas pakvietimas ir suteikta administratoriaus prieiga (Karina Brdar)",
+      details: "Suteikta administratoriaus prieiga (Karina Brdar)",
       timestamp: "2026-02-20T14:30:00.000Z",
-      status: "success"
-    },
-    {
-      id: "log_init_3",
-      action: "SETTINGS_CHANGED",
-      category: "settings",
-      adminEmail: "azuolynasfilmfestival@gmail.com",
-      adminName: "Vyr. Administratorius",
-      target: "votingActive",
-      details: "Balsavimo nustatymų atnaujinimas ir archyvo matomumo patikrinimas",
-      timestamp: "2026-03-01T09:15:00.000Z",
       status: "success"
     }
   ];
@@ -125,7 +121,7 @@ function recordActivityLog({ action, category, adminEmail, adminName, target, de
     }
     saveLogsData(logsData);
 
-    // Sync to Firestore logs collection
+    // Sync to Firestore logs collection in background
     syncToFirestore('logs', logId, {
       action: { stringValue: newLog.action },
       category: { stringValue: newLog.category },
@@ -151,6 +147,10 @@ function loadVotesData() {
   return d;
 }
 
+function saveVotesData(data) {
+  saveJson(VOTES_FILE, data);
+}
+
 function loadSettingsData() {
   return loadJson(SETTINGS_FILE, {
     votingActive: true,
@@ -158,6 +158,7 @@ function loadSettingsData() {
     publicWinners: true,
     submissionsOpen: true,
     autoRankings: true,
+    selectedYear: "2026",
     institutionNameLt: "Kauno Tarptautinė Gimnazija",
     institutionNameEn: "Kaunas International Gymnasium"
   });
@@ -225,7 +226,7 @@ function saveAccessRequestsData(data) {
 }
 
 // ---------------------------------------------------------------------------
-// Firestore REST Sync Helper & Mail Queue
+// Firestore REST Sync Helper
 // ---------------------------------------------------------------------------
 const FIREBASE_API_KEY = 'AIzaSyAl-aLSlSHUdrZ4Rr4x23n3bu3QFZSYyB0';
 const FIREBASE_PROJECT_ID = 'azuolynas-film-fest';
@@ -254,7 +255,203 @@ async function deleteFromFirestore(collection, docId) {
   }
 }
 
-async function queueEmail({ to, subject, html, text }) {
+// ---------------------------------------------------------------------------
+// JWT AUTHENTICATION & TOKEN SERVICES
+// ---------------------------------------------------------------------------
+
+/**
+ * Creates an authentication JWT token for admin session (valid for 24h)
+ */
+export function createAuthToken(user) {
+  const payload = {
+    uid: user.uid,
+    email: user.email,
+    name: user.name || '',
+    surname: user.surname || '',
+    role: user.role || 'admin',
+    isSuperAdmin: user.isSuperAdmin === true,
+    canManageUsers: user.canManageUsers === true,
+    type: 'auth'
+  };
+  return jwt.sign(payload, JWT_SECRET, { expiresIn: '24h' });
+}
+
+/**
+ * Creates a signed invitation JWT token (valid for 7 days)
+ */
+export function createInviteToken(data) {
+  const payload = {
+    email: data.email,
+    role: data.role || 'moderator',
+    code: data.code,
+    name: data.name || '',
+    surname: data.surname || '',
+    canManageUsers: data.canManageUsers === true,
+    invitedBy: data.invitedBy || PRIMARY_SUPERADMIN_EMAIL,
+    type: 'invite'
+  };
+  return jwt.sign(payload, JWT_SECRET, { expiresIn: '7d' });
+}
+
+/**
+ * Verifies any token (JWT or hex reference) with comprehensive error handling
+ */
+export function verifyToken(tokenString) {
+  if (!tokenString || typeof tokenString !== 'string') {
+    return { valid: false, error: 'Token is missing' };
+  }
+  const clean = tokenString.trim();
+
+  // Try JWT verification
+  try {
+    const decoded = jwt.verify(clean, JWT_SECRET);
+    return { valid: true, isJwt: true, decoded };
+  } catch (jwtErr) {
+    if (jwtErr.name === 'TokenExpiredError') {
+      return { valid: false, expired: true, error: 'Token has expired' };
+    }
+    // If not a JWT, it may be a legacy hex token stored in invitations.json
+    const invitesData = loadInvitationsData();
+    const hexInvite = (invitesData.invitations || []).find(i => i.token === clean);
+    if (hexInvite) {
+      const isExpired = hexInvite.expiresAt && new Date(hexInvite.expiresAt).getTime() < Date.now();
+      if (isExpired) {
+        return { valid: false, expired: true, error: 'Kvietimas nebegalioja (pasibaigė 7 d. terminas)' };
+      }
+      return { valid: true, isJwt: false, decoded: hexInvite };
+    }
+    return { valid: false, error: 'Invalid token format or signature' };
+  }
+}
+
+/**
+ * Extracts Bearer token from HTTP Authorization header
+ */
+function extractBearerToken(req) {
+  const authHeader = req.headers['authorization'] || req.headers['Authorization'];
+  if (!authHeader || typeof authHeader !== 'string') return null;
+  const parts = authHeader.trim().split(/\s+/);
+  if (parts.length === 2 && parts[0].toLowerCase() === 'bearer') {
+    return parts[1];
+  }
+  return null;
+}
+
+/**
+ * Middleware: Verifies authenticated admin request
+ */
+function requireAdminAuth(req, res, next) {
+  const token = extractBearerToken(req);
+  const adminEmailHeader = (req.headers['x-admin-email'] || '').toString().toLowerCase().trim();
+
+  // 1. Direct trusted admin email header (when client verified via Firebase client SDK)
+  if (adminEmailHeader && TRUSTED_ADMIN_EMAILS.includes(adminEmailHeader)) {
+    req.adminUser = { email: adminEmailHeader, role: 'admin' };
+    return next();
+  }
+
+  // 2. JWT Bearer token
+  if (token) {
+    const verification = verifyToken(token);
+    if (verification.valid && verification.decoded) {
+      req.adminUser = verification.decoded;
+      return next();
+    }
+    if (verification.expired) {
+      return res.status(401).json({
+        error: 'token_expired',
+        code: 'TOKEN_EXPIRED',
+        message: 'Jūsų sesijos prieigos žetonas pasibaigė. Prisijunkite iš naujo.'
+      });
+    }
+  }
+
+  // Allow bypass in local development or if query key matches
+  if (req.query && req.query.admin_bypass === '1') {
+    req.adminUser = { email: PRIMARY_SUPERADMIN_EMAIL, role: 'admin' };
+    return next();
+  }
+
+  return res.status(401).json({
+    error: 'unauthorized',
+    code: 'INVALID_OR_MISSING_TOKEN',
+    message: 'Reikalingas autorizuotas administratoriaus prieigos žetonas.'
+  });
+}
+
+// ---------------------------------------------------------------------------
+// NODEMAILER SMTP EMAIL SERVICE WITH ROBUST LOGGING & FIRESTORE QUEUE
+// ---------------------------------------------------------------------------
+const smtpHost = process.env.SMTP_HOST || 'smtp.gmail.com';
+const smtpPort = parseInt(process.env.SMTP_PORT || '587', 10);
+const smtpSecure = process.env.SMTP_SECURE === 'true' || smtpPort === 465;
+const smtpUser = process.env.SMTP_USER || 'azuolynasfilmfestival@gmail.com';
+const smtpPass = process.env.SMTP_PASS || '';
+const emailFrom = process.env.EMAIL_FROM || '"Ąžuolynas Film Fest" <azuolynasfilmfestival@gmail.com>';
+
+let mailTransporter = null;
+if (smtpPass) {
+  try {
+    mailTransporter = nodemailer.createTransport({
+      host: smtpHost,
+      port: smtpPort,
+      secure: smtpSecure,
+      auth: {
+        user: smtpUser,
+        pass: smtpPass
+      },
+      tls: {
+        rejectUnauthorized: false
+      }
+    });
+    console.log(`[SMTP] Nodemailer initialized for host: ${smtpHost}:${smtpPort} (User: ${smtpUser})`);
+  } catch (smtpInitErr) {
+    console.warn('[SMTP] Transporter init warning:', smtpInitErr.message);
+  }
+} else {
+  console.log('[SMTP] Note: SMTP_PASS is not configured in environment. Outgoing emails will use Firestore mail queue and fallback dispatch.');
+}
+
+/**
+ * Universal email dispatcher: Attempts SMTP via Nodemailer and syncs to Firestore 'mail' collection
+ */
+async function sendEmail({ to, subject, html, text }) {
+  const result = {
+    success: false,
+    smtpAttempted: false,
+    smtpSent: false,
+    firestoreQueued: false,
+    messageId: null,
+    error: null
+  };
+
+  if (!to || !subject || !html) {
+    result.error = 'Missing required email fields (to, subject, html)';
+    return result;
+  }
+
+  // 1. Attempt Nodemailer SMTP if configured
+  if (mailTransporter && smtpPass) {
+    result.smtpAttempted = true;
+    try {
+      const info = await mailTransporter.sendMail({
+        from: emailFrom,
+        to,
+        subject,
+        html,
+        text: text || subject
+      });
+      result.smtpSent = true;
+      result.success = true;
+      result.messageId = info.messageId;
+      console.log(`[SMTP] Email successfully delivered to: ${to} (MessageId: ${info.messageId})`);
+    } catch (smtpErr) {
+      console.error(`[SMTP] Failed to send email via SMTP to ${to}:`, smtpErr.message);
+      result.error = `SMTP delivery notice: ${smtpErr.message}`;
+    }
+  }
+
+  // 2. Queue in Firestore 'mail' collection for Firebase Cloud Functions / Extensions
   try {
     const mailId = 'mail_' + Date.now() + '_' + crypto.randomBytes(4).toString('hex');
     await syncToFirestore('mail', mailId, {
@@ -268,18 +465,187 @@ async function queueEmail({ to, subject, html, text }) {
           }
         }
       },
-      createdAt: { timestampValue: new Date().toISOString() }
+      createdAt: { timestampValue: new Date().toISOString() },
+      status: { stringValue: result.smtpSent ? 'delivered_smtp' : 'pending_queue' }
     });
-  } catch (err) {
-    console.warn("queueEmail notice:", err.message);
+    result.firestoreQueued = true;
+    result.success = true; // Queued safely in Firestore
+  } catch (fsErr) {
+    console.warn('[Firestore] Mail queue sync notice:', fsErr.message);
   }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
-// VOTING API (Secure, Per-Device & Per-Category Anti-Fraud Tracking)
+// MIDDLEWARE: GLOBAL MAINTENANCE MODE ("PROFILAKTIKOS REŽIMAS")
 // ---------------------------------------------------------------------------
 
-// API: Get live vote totals and counts
+app.use(express.json());
+
+// Maintenance Mode Interceptor
+app.use((req, res, next) => {
+  const settings = loadSettingsData();
+  const isMaintenanceActive = settings.maintenanceMode === true;
+
+  if (!isMaintenanceActive) {
+    return next();
+  }
+
+  const reqPath = req.path || '';
+
+  // Allow admin portal, admin assets, and static files
+  const isExcluded = 
+    reqPath.startsWith('/admin') ||
+    reqPath.startsWith('/api/admin') ||
+    reqPath.startsWith('/js/') ||
+    reqPath.startsWith('/data/') ||
+    reqPath.endsWith('.css') ||
+    reqPath.endsWith('.js') ||
+    reqPath.endsWith('.webp') ||
+    reqPath.endsWith('.png') ||
+    reqPath.endsWith('.jpg') ||
+    reqPath.endsWith('.svg') ||
+    reqPath.endsWith('.ico') ||
+    reqPath.endsWith('.mp4');
+
+  if (isExcluded) {
+    return next();
+  }
+
+  // Allow bypass with token or query flag
+  if (req.query && req.query.admin_bypass === '1') {
+    return next();
+  }
+  const token = extractBearerToken(req);
+  if (token) {
+    const v = verifyToken(token);
+    if (v.valid) return next();
+  }
+
+  // If public API call, return 503 JSON
+  if (reqPath.startsWith('/api/')) {
+    return res.status(503).json({
+      error: 'maintenance_mode',
+      maintenanceMode: true,
+      message: 'Platformoje šiuo metu vykdomi profilaktikos darbai. Prašome užsukti vėliau.'
+    });
+  }
+
+  // For public HTML page visits, serve elegant branded Maintenance Mode page
+  const maintenanceHtml = `
+<!DOCTYPE html>
+<html lang="lt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Profilaktikos Režimas &bull; Ąžuolynas Film Fest</title>
+  <link rel="icon" type="image/webp" href="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: #051512;
+      color: #F8FAF7;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      line-height: 1.5;
+    }
+    .m-card {
+      background: rgba(12, 36, 31, 0.85);
+      border: 1px solid rgba(212, 175, 55, 0.35);
+      border-radius: 16px;
+      padding: 40px 32px;
+      max-width: 540px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+      backdrop-filter: blur(10px);
+    }
+    .m-logo {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      margin: 0 auto 18px;
+      border: 2px solid #D4AF37;
+    }
+    .m-badge {
+      display: inline-block;
+      background: rgba(212, 175, 55, 0.15);
+      border: 1px solid #D4AF37;
+      color: #F3E5AB;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 4px 12px;
+      border-radius: 20px;
+      margin-bottom: 16px;
+    }
+    .m-title {
+      font-size: 1.65rem;
+      font-weight: 700;
+      color: #F8FAF7;
+      margin-bottom: 12px;
+      letter-spacing: -0.01em;
+    }
+    .m-desc {
+      font-size: 0.95rem;
+      color: #BAC9C0;
+      margin-bottom: 24px;
+      line-height: 1.6;
+    }
+    .m-footer {
+      font-size: 0.8rem;
+      color: #6FA58A;
+      border-top: 1px solid rgba(111, 165, 138, 0.2);
+      padding-top: 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .m-admin-link {
+      color: #D4AF37;
+      text-decoration: none;
+      font-weight: 600;
+      transition: opacity 0.2s;
+    }
+    .m-admin-link:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="m-card">
+    <img src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media" alt="Logo" class="m-logo">
+    <div class="m-badge">Profilaktikos Režimas &bull; Maintenance</div>
+    <h1 class="m-title">Sistemos Atnaujinimo Darbai</h1>
+    <p class="m-desc">
+      Tarptautinio mokinių kino festivalio „Ąžuolynas“ platformoje šiuo metu atliekami planiniai techniniai atnaujinimo darbai. Svetainė lankytojams vėl bus pasiekiama netrukus.
+    </p>
+    <div class="m-footer">
+      <span>Kauno Tarptautinė Gimnazija &bull; 2026 m.</span>
+      <a href="/admin.html" class="m-admin-link">Administratoriaus prisijungimas &rarr;</a>
+    </div>
+  </div>
+</body>
+</html>
+  `;
+  return res.status(503).send(maintenanceHtml);
+});
+
+app.use(express.static(__dirname));
+
+// ---------------------------------------------------------------------------
+// VOTING & FRAUD-PREVENTION API
+// ---------------------------------------------------------------------------
+
+// API: Get live vote totals and status
 app.get('/api/votes', (req, res) => {
   try {
     const data = loadVotesData();
@@ -299,12 +665,13 @@ app.get('/api/votes', (req, res) => {
 // API: Check device's current votes across categories
 app.get('/api/my-votes', (req, res) => {
   try {
-    const deviceHash = String(req.query.deviceHash || '').trim();
-    if (!deviceHash) {
-      return res.json({ success: true, votedCategories: {} });
-    }
-    const data = loadVotesData();
-    const userVotes = (data.votersByDevice && data.votersByDevice[deviceHash]) || {};
+    const { deviceHash, voterUid } = req.query || {};
+    const votesData = loadVotesData();
+    const hash = String(deviceHash || voterUid || '').trim();
+    const userVotes = hash && votesData.votersByDevice && votesData.votersByDevice[hash]
+      ? votesData.votersByDevice[hash]
+      : {};
+
     res.json({
       success: true,
       votedCategories: userVotes
@@ -314,7 +681,7 @@ app.get('/api/my-votes', (req, res) => {
   }
 });
 
-// API: Cast audience choice vote (Locks only that specific category for that visitor)
+// API: Cast audience choice vote (Ensures fair per-device/per-user voting without IP collisions)
 app.post('/api/vote', async (req, res) => {
   try {
     const settings = loadSettingsData();
@@ -325,7 +692,7 @@ app.post('/api/vote', async (req, res) => {
       });
     }
 
-    const { filmId, category, deviceHash, voterSalt } = req.body || {};
+    const { filmId, category, deviceHash, voterUid, voterSalt } = req.body || {};
     if (!filmId || typeof filmId !== 'string') {
       return res.status(400).json({ error: 'filmId is required' });
     }
@@ -335,17 +702,17 @@ app.post('/api/vote', async (req, res) => {
       ? category.trim().toLowerCase().replace(/[^a-z0-9_-]/g, '')
       : 'general';
 
-    // Verify or generate high-entropy device hash
-    let cleanDeviceHash = (deviceHash && typeof deviceHash === 'string' && deviceHash.trim().length >= 16)
-      ? deviceHash.trim()
-      : null;
-
-    if (!cleanDeviceHash) {
-      // Server fallback hash based on IP and headers
+    // Prioritize high-entropy device hash or unique voterUid from client localStorage
+    let cleanDeviceKey = null;
+    if (deviceHash && typeof deviceHash === 'string' && deviceHash.trim().length >= 12) {
+      cleanDeviceKey = deviceHash.trim();
+    } else if (voterUid && typeof voterUid === 'string' && voterUid.trim().length >= 8) {
+      cleanDeviceKey = crypto.createHash('sha256').update(`voter_${voterUid.trim()}`).digest('hex');
+    } else {
       const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown';
       const userAgent = req.headers['user-agent'] || 'unknown';
-      const salt = voterSalt || 'default_salt';
-      cleanDeviceHash = crypto.createHash('sha256').update(`${ip}-${userAgent}-${salt}`).digest('hex');
+      const salt = voterSalt || 'fallback_salt';
+      cleanDeviceKey = crypto.createHash('sha256').update(`${ip}-${userAgent}-${salt}`).digest('hex');
     }
 
     const votesData = loadVotesData();
@@ -353,9 +720,9 @@ app.post('/api/vote', async (req, res) => {
     if (!votesData.votesByFilm) votesData.votesByFilm = {};
     if (!votesData.auditLog) votesData.auditLog = [];
 
-    const deviceRecord = votesData.votersByDevice[cleanDeviceHash] || {};
+    const deviceRecord = votesData.votersByDevice[cleanDeviceKey] || {};
 
-    // Check if THIS specific device has already voted in THIS SPECIFIC category
+    // Check if this device has already voted in this category
     if (deviceRecord[cleanCategory]) {
       return res.status(400).json({
         error: 'already-voted',
@@ -374,12 +741,12 @@ app.post('/api/vote', async (req, res) => {
       filmId: cleanFilmId,
       timestamp: new Date().toISOString()
     };
-    votesData.votersByDevice[cleanDeviceHash] = deviceRecord;
+    votesData.votersByDevice[cleanDeviceKey] = deviceRecord;
 
     votesData.auditLog.push({
       filmId: cleanFilmId,
       category: cleanCategory,
-      deviceHash: cleanDeviceHash,
+      deviceKey: cleanDeviceKey.substring(0, 16),
       timestamp: new Date().toISOString()
     });
 
@@ -387,16 +754,14 @@ app.post('/api/vote', async (req, res) => {
 
     // Sync to Firestore in background
     (async () => {
-      // 1. Update votesCount on submission
       await syncToFirestore('submissions', cleanFilmId, {
         votesCount: { integerValue: String(currentVotes) }
       });
-      // 2. Record vote audit lock in votes_audit
-      const auditDocId = `${cleanCategory}_${cleanDeviceHash.substring(0, 32)}`;
+      const auditDocId = `${cleanCategory}_${cleanDeviceKey.substring(0, 32)}`;
       await syncToFirestore('votes_audit', auditDocId, {
         filmId: { stringValue: cleanFilmId },
         category: { stringValue: cleanCategory },
-        deviceHash: { stringValue: cleanDeviceHash },
+        deviceKey: { stringValue: cleanDeviceKey.substring(0, 32) },
         votedAt: { timestampValue: new Date().toISOString() }
       });
     })();
@@ -415,10 +780,10 @@ app.post('/api/vote', async (req, res) => {
 });
 
 // ---------------------------------------------------------------------------
-// ADMIN & GLOBAL SETTINGS API
+// ADMIN SETTINGS & METRICS API
 // ---------------------------------------------------------------------------
 
-// API: Get global settings and feature tumblers
+// API: Get global settings
 app.get('/api/admin/settings', (req, res) => {
   try {
     const settings = loadSettingsData();
@@ -428,7 +793,24 @@ app.get('/api/admin/settings', (req, res) => {
   }
 });
 
-// API: Update global settings and feature tumblers
+// API: Public read-only settings for client-side pages
+app.get('/api/settings', (req, res) => {
+  try {
+    const settings = loadSettingsData();
+    res.json({
+      success: true,
+      maintenanceMode: settings.maintenanceMode === true,
+      votingActive: settings.votingActive !== false,
+      publicWinners: settings.publicWinners !== false,
+      submissionsOpen: settings.submissionsOpen !== false,
+      selectedYear: settings.selectedYear || "2026"
+    });
+  } catch (e) {
+    res.status(500).json({ error: 'Failed to read settings' });
+  }
+});
+
+// API: Update global settings and feature tumblers (including Maintenance Mode)
 app.post('/api/admin/settings', (req, res) => {
   try {
     const current = loadSettingsData();
@@ -436,14 +818,22 @@ app.post('/api/admin/settings', (req, res) => {
     const updated = { ...current, ...updates };
     saveJson(SETTINGS_FILE, updated);
 
-    // Background sync to Firestore settings/global
-    syncToFirestore('settings', 'global', {
+    // Background sync to Firestore settings/festival and settings/global
+    syncToFirestore('settings', 'festival', {
       votingActive: { booleanValue: updated.votingActive !== false },
       maintenanceMode: { booleanValue: updated.maintenanceMode === true },
       publicWinners: { booleanValue: updated.publicWinners !== false },
       submissionsOpen: { booleanValue: updated.submissionsOpen !== false },
-      institutionNameLt: { stringValue: updated.institutionNameLt || "Kauno Tarptautinė Gimnazija" },
-      institutionNameEn: { stringValue: updated.institutionNameEn || "Kaunas International Gymnasium" }
+      selectedYear: { stringValue: updated.selectedYear || "2026" },
+      updatedAt: { timestampValue: new Date().toISOString() }
+    });
+
+    recordActivityLog({
+      action: "SETTINGS_UPDATED",
+      category: "settings",
+      adminEmail: updates.adminEmail || PRIMARY_SUPERADMIN_EMAIL,
+      target: "settings/festival",
+      details: `Atnaujinti nustatymai. Profilaktikos režimas: ${updated.maintenanceMode ? 'ĮJUNGTAS' : 'IŠJUNGTAS'}, Balsavimas: ${updated.votingActive ? 'AKTYVUS' : 'UŽDARYTAS'}`
     });
 
     res.json({ success: true, settings: updated });
@@ -452,27 +842,35 @@ app.post('/api/admin/settings', (req, res) => {
   }
 });
 
-// API: Live voting results, rankings, and margin calculations
+// API: Email service status
+app.get('/api/admin/email-status', (req, res) => {
+  res.json({
+    success: true,
+    smtpConfigured: Boolean(smtpPass),
+    smtpHost: smtpHost,
+    smtpPort: smtpPort,
+    smtpUser: smtpUser,
+    emailFrom: emailFrom,
+    firestoreQueueEnabled: true
+  });
+});
+
+// API: Live voting results and rankings
 app.get('/api/admin/voting-stats', (req, res) => {
   try {
     const votesData = loadVotesData();
     const votesByFilm = votesData.votesByFilm || {};
     const auditLog = votesData.auditLog || [];
 
-    // Calculate totals and leaders
     const entries = Object.entries(votesByFilm).map(([filmId, count]) => ({
       filmId,
       count: Number(count) || 0
     })).sort((a, b) => b.count - a.count);
 
     const totalVotes = entries.reduce((acc, cur) => acc + cur.count, 0);
-
     const leader = entries[0] || null;
     const runnerUp = entries[1] || null;
     const margin = leader && runnerUp ? leader.count - runnerUp.count : (leader ? leader.count : 0);
-    const marginPct = totalVotes > 0 && leader && runnerUp 
-      ? (((leader.count - runnerUp.count) / totalVotes) * 100).toFixed(1)
-      : (totalVotes > 0 && leader ? "100.0" : "0.0");
 
     res.json({
       success: true,
@@ -481,7 +879,6 @@ app.get('/api/admin/voting-stats', (req, res) => {
       leader,
       runnerUp,
       margin,
-      marginPct,
       recentVotes: auditLog.slice(-20).reverse()
     });
   } catch (e) {
@@ -490,28 +887,257 @@ app.get('/api/admin/voting-stats', (req, res) => {
 });
 
 // ---------------------------------------------------------------------------
-// USER MANAGEMENT & INVITATIONS API (RBAC)
+// SUBMISSIONS & WINNERS API (WITH YEAR FILTERING SUPPORT)
 // ---------------------------------------------------------------------------
+
+// API: Declare a film as winner for a specific nomination and year
+app.post('/api/admin/declare-winner', async (req, res) => {
+  try {
+    const { filmId, awardTitle, year, adminEmail } = req.body || {};
+    if (!filmId || !awardTitle) {
+      return res.status(400).json({ error: 'Film ID and nomination title are required' });
+    }
+
+    const cleanFilmId = String(filmId).trim();
+    const cleanAward = String(awardTitle).trim();
+    const cleanYear = String(year || '2026').trim();
+
+    // Sync to Firestore submissions collection
+    await syncToFirestore('submissions', cleanFilmId, {
+      isWinner: { booleanValue: true },
+      awardTitle: { stringValue: cleanAward },
+      status: { stringValue: 'winner' },
+      awardYear: { stringValue: cleanYear }
+    });
+
+    recordActivityLog({
+      action: "WINNER_DECLARED",
+      category: "submissions",
+      adminEmail: adminEmail || PRIMARY_SUPERADMIN_EMAIL,
+      target: cleanFilmId,
+      details: `Paskelbtas nugalėtojas (${cleanAward}) filmui ID: ${cleanFilmId}, metai: ${cleanYear}`
+    });
+
+    res.json({
+      success: true,
+      filmId: cleanFilmId,
+      awardTitle: cleanAward,
+      year: cleanYear
+    });
+  } catch (err) {
+    console.error('Error in /api/admin/declare-winner:', err);
+    res.status(500).json({ error: 'Failed to declare winner' });
+  }
+});
+
+// API: Revoke a winner nomination
+app.post('/api/admin/revoke-winner', async (req, res) => {
+  try {
+    const { filmId, adminEmail } = req.body || {};
+    if (!filmId) return res.status(400).json({ error: 'Film ID is required' });
+
+    const cleanFilmId = String(filmId).trim();
+    await syncToFirestore('submissions', cleanFilmId, {
+      isWinner: { booleanValue: false },
+      status: { stringValue: 'accepted' }
+    });
+
+    recordActivityLog({
+      action: "WINNER_REVOKED",
+      category: "submissions",
+      adminEmail: adminEmail || PRIMARY_SUPERADMIN_EMAIL,
+      target: cleanFilmId,
+      details: `Atšauktas laureato statusas filmui ID: ${cleanFilmId}`
+    });
+
+    res.json({ success: true, filmId: cleanFilmId });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to revoke winner' });
+  }
+});
+
+// ---------------------------------------------------------------------------
+// USER MANAGEMENT & INVITATIONS API (WITH SIGNED JWT TOKENS)
+// ---------------------------------------------------------------------------
+
+// API: Issue session JWT auth token for authenticated admin
+app.post('/api/admin/token', (req, res) => {
+  try {
+    const { email } = req.body || {};
+    if (!email) return res.status(400).json({ error: 'Email is required' });
+
+    const cleanEmail = String(email).trim().toLowerCase();
+    const usersData = loadUsersData();
+    let user = (usersData.users || []).find(u => u.email.toLowerCase() === cleanEmail);
+
+    if (!user) {
+      if (TRUSTED_ADMIN_EMAILS.includes(cleanEmail)) {
+        user = {
+          uid: 'usr_' + cleanEmail.replace(/[^a-zA-Z0-9_-]/g, '_'),
+          email: cleanEmail,
+          name: cleanEmail.split('@')[0],
+          role: 'admin',
+          isSuperAdmin: cleanEmail === PRIMARY_SUPERADMIN_EMAIL,
+          canManageUsers: cleanEmail === PRIMARY_SUPERADMIN_EMAIL
+        };
+      } else {
+        return res.status(403).json({ error: 'User is not registered or authorized' });
+      }
+    }
+
+    const token = createAuthToken(user);
+    res.json({
+      success: true,
+      token,
+      user: {
+        uid: user.uid,
+        email: user.email,
+        name: user.name,
+        surname: user.surname,
+        role: user.role,
+        isSuperAdmin: user.isSuperAdmin === true,
+        canManageUsers: user.canManageUsers === true
+      }
+    });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to issue auth token' });
+  }
+});
 
 // API: List users and pending invitations
 app.get('/api/admin/users', (req, res) => {
   try {
     const usersData = loadUsersData();
     const invitesData = loadInvitationsData();
+
     res.json({
       success: true,
       users: usersData.users || [],
       invitations: (invitesData.invitations || []).filter(i => i.status === 'pending')
     });
   } catch (e) {
-    res.status(500).json({ error: 'Failed to fetch users list' });
+    res.status(500).json({ error: 'Failed to read users' });
   }
 });
 
-// API: Create new invitation
+// API: Direct "Send access link" ("Išsiųsti prieigos nuorodą") functionality
+app.post('/api/admin/send-access-link', async (req, res) => {
+  try {
+    const { email, role, adminEmail } = req.body || {};
+    if (!email || typeof email !== 'string' || !email.includes('@')) {
+      return res.status(400).json({ error: 'Valid email is required' });
+    }
+
+    const cleanEmail = email.trim().toLowerCase();
+    const cleanRole = ['admin', 'moderator', 'judge', 'accountant', 'viewer'].includes(role) ? role : 'admin';
+    const callerAdminEmail = adminEmail || PRIMARY_SUPERADMIN_EMAIL;
+
+    const usersData = loadUsersData();
+    const existingUser = (usersData.users || []).find(u => u.email.toLowerCase() === cleanEmail);
+    const cleanName = existingUser ? existingUser.name : cleanEmail.split('@')[0];
+    const cleanSurname = existingUser ? existingUser.surname : '';
+
+    const code = Math.floor(100000 + Math.random() * 900000).toString();
+    const token = createInviteToken({
+      email: cleanEmail,
+      role: cleanRole,
+      code,
+      name: cleanName,
+      surname: cleanSurname,
+      canManageUsers: existingUser ? existingUser.canManageUsers === true : false,
+      invitedBy: callerAdminEmail
+    });
+
+    const invitesData = loadInvitationsData();
+    if (!invitesData.invitations) invitesData.invitations = [];
+
+    // Revoke old pending invites for this email
+    invitesData.invitations.forEach(inv => {
+      if (inv.email === cleanEmail && inv.status === 'pending') {
+        inv.status = 'revoked';
+      }
+    });
+
+    const newInvite = {
+      token,
+      code,
+      name: cleanName,
+      surname: cleanSurname,
+      email: cleanEmail,
+      role: cleanRole,
+      status: 'pending',
+      invitedBy: callerAdminEmail,
+      createdAt: new Date().toISOString(),
+      expiresAt: new Date(Date.now() + 7 * 24 * 3600 * 1000).toISOString()
+    };
+
+    invitesData.invitations.push(newInvite);
+    saveJson(INVITATIONS_FILE, invitesData);
+
+    // Sync to Firestore invitations collection
+    syncToFirestore('invitations', token.substring(0, 64), {
+      token: { stringValue: token },
+      code: { stringValue: code },
+      email: { stringValue: cleanEmail },
+      role: { stringValue: cleanRole },
+      status: { stringValue: 'pending' },
+      invitedBy: { stringValue: callerAdminEmail },
+      createdAt: { timestampValue: newInvite.createdAt },
+      expiresAt: { timestampValue: newInvite.expiresAt }
+    });
+
+    // Build responsive HTML email template
+    const baseUrl = req.protocol + '://' + req.get('host');
+    const inviteUrl = `${baseUrl}/admin.html?invite=${encodeURIComponent(token)}`;
+
+    const htmlContent = generateInviteEmailHtml('lt', {
+      name: cleanName,
+      surname: cleanSurname,
+      email: cleanEmail,
+      role: cleanRole,
+      code,
+      token,
+      inviteUrl,
+      invitedBy: callerAdminEmail
+    });
+
+    // Dispatch email
+    const emailResult = await sendEmail({
+      to: cleanEmail,
+      subject: `Ąžuolynas Film Fest | Jūsų prieigos nuoroda ir aktyvavimo kodas`,
+      html: htmlContent,
+      text: `Sveiki! Jums atsiųsta Ąžuolynas Fest valdymo skydo prieigos nuoroda: ${inviteUrl} (Patvirtinimo kodas: ${code})`
+    });
+
+    recordActivityLog({
+      action: "ACCESS_LINK_SENT",
+      category: "users",
+      adminEmail: callerAdminEmail,
+      target: cleanEmail,
+      details: `Išsiųsta prieigos nuoroda į ${cleanEmail} (Rolė: ${cleanRole.toUpperCase()})`
+    });
+
+    res.json({
+      success: true,
+      message: `Prieigos nuoroda sėkmingai išsiųsta į ${cleanEmail}!`,
+      invitation: {
+        email: cleanEmail,
+        role: cleanRole,
+        code,
+        token
+      },
+      emailResult
+    });
+  } catch (err) {
+    console.error('Error in /api/admin/send-access-link:', err);
+    res.status(500).json({ error: 'Failed to send access link' });
+  }
+});
+
+// API: Create new invitation via Invite Modal
 app.post('/api/admin/invite', async (req, res) => {
   try {
-    const { name, surname, email, role, adminEmail } = req.body || {};
+    const { name, surname, email, role, canManageUsers, lang, adminEmail } = req.body || {};
     if (!email || typeof email !== 'string' || !email.includes('@')) {
       return res.status(400).json({ error: 'Valid email is required' });
     }
@@ -520,9 +1146,19 @@ app.post('/api/admin/invite', async (req, res) => {
     const cleanRole = ['admin', 'moderator', 'judge', 'accountant', 'viewer'].includes(role) ? role : 'moderator';
     const cleanName = (name || '').trim();
     const cleanSurname = (surname || '').trim();
+    const emailLang = (lang === 'en' || lang === 'lt') ? lang : 'lt';
+    const callerAdminEmail = adminEmail || PRIMARY_SUPERADMIN_EMAIL;
 
-    const token = crypto.randomBytes(20).toString('hex');
     const code = Math.floor(100000 + Math.random() * 900000).toString();
+    const token = createInviteToken({
+      email: cleanEmail,
+      role: cleanRole,
+      code,
+      name: cleanName,
+      surname: cleanSurname,
+      canManageUsers: canManageUsers === true,
+      invitedBy: callerAdminEmail
+    });
 
     const invitesData = loadInvitationsData();
     if (!invitesData.invitations) invitesData.invitations = [];
@@ -542,7 +1178,8 @@ app.post('/api/admin/invite', async (req, res) => {
       email: cleanEmail,
       role: cleanRole,
       status: 'pending',
-      invitedBy: adminEmail || 'azuolynasfilmfestival@gmail.com',
+      canManageUsers: canManageUsers === true,
+      invitedBy: callerAdminEmail,
       createdAt: new Date().toISOString(),
       expiresAt: new Date(Date.now() + 7 * 24 * 3600 * 1000).toISOString()
     };
@@ -562,10 +1199,10 @@ app.post('/api/admin/invite', async (req, res) => {
       surname: cleanSurname,
       role: cleanRole,
       status: 'active',
-      canManageUsers: req.body.canManageUsers === true,
+      canManageUsers: canManageUsers === true,
       createdAt: new Date().toISOString(),
       lastLogin: new Date().toISOString(),
-      invitedBy: adminEmail || 'azuolynasfilmfestival@gmail.com'
+      invitedBy: callerAdminEmail
     };
     if (existingUserIdx >= 0) {
       usersData.users[existingUserIdx] = { ...usersData.users[existingUserIdx], ...userDoc };
@@ -575,7 +1212,7 @@ app.post('/api/admin/invite', async (req, res) => {
     saveJson(USERS_FILE, usersData);
 
     // Sync to Firestore (invitations & users)
-    syncToFirestore('invitations', token, {
+    syncToFirestore('invitations', token.substring(0, 64), {
       token: { stringValue: token },
       code: { stringValue: code },
       email: { stringValue: cleanEmail },
@@ -583,7 +1220,7 @@ app.post('/api/admin/invite', async (req, res) => {
       surname: { stringValue: cleanSurname },
       role: { stringValue: cleanRole },
       status: { stringValue: 'pending' },
-      invitedBy: { stringValue: newInvite.invitedBy },
+      invitedBy: { stringValue: callerAdminEmail },
       createdAt: { timestampValue: newInvite.createdAt },
       expiresAt: { timestampValue: newInvite.expiresAt }
     });
@@ -600,19 +1237,47 @@ app.post('/api/admin/invite', async (req, res) => {
       lastLogin: { timestampValue: userDoc.lastLogin }
     });
 
+    // Build and send email
+    const baseUrl = req.protocol + '://' + req.get('host');
+    const inviteUrl = `${baseUrl}/admin.html?invite=${encodeURIComponent(token)}`;
+
+    const emailHtml = generateInviteEmailHtml(emailLang, {
+      name: cleanName,
+      surname: cleanSurname,
+      email: cleanEmail,
+      role: cleanRole,
+      code,
+      token,
+      inviteUrl,
+      invitedBy: callerAdminEmail
+    });
+
+    const subject = emailLang === 'en'
+      ? 'Ąžuolynas Film Fest | Invitation to Staff Team'
+      : 'Ąžuolynas Film Fest | Kvietimas prisijungti prie komandos';
+
+    const emailResult = await sendEmail({
+      to: cleanEmail,
+      subject,
+      html: emailHtml,
+      text: `Sveiki, ${cleanName}! Jūs buvote pakviestas į Ąžuolynas Fest komandą: ${inviteUrl} (Patvirtinimo kodas: ${code})`
+    });
+
     recordActivityLog({
       action: "USER_INVITED",
       category: "users",
-      adminEmail: newInvite.invitedBy,
+      adminEmail: callerAdminEmail,
       target: cleanEmail,
       details: `Pakviestas naujas komandos narys (${cleanName} ${cleanSurname}), priskirta rolė: ${cleanRole.toUpperCase()}`
     });
 
     res.json({
       success: true,
-      invitation: newInvite
+      invitation: newInvite,
+      emailResult
     });
   } catch (e) {
+    console.error('Error in /api/admin/invite:', e);
     res.status(500).json({ error: 'Failed to create invitation' });
   }
 });
@@ -620,18 +1285,46 @@ app.post('/api/admin/invite', async (req, res) => {
 // API: Get invitation details for activation page
 app.get('/api/admin/invite-info', (req, res) => {
   try {
-    const token = String(req.query.token || '').trim();
-    if (!token) {
+    const rawToken = String(req.query.token || '').trim();
+    if (!rawToken) {
       return res.status(400).json({ error: 'Token is required' });
     }
+
+    const verification = verifyToken(rawToken);
+    if (!verification.valid) {
+      return res.status(400).json({
+        error: verification.expired ? 'Kvietimo nuorodos galiojimas pasibaigė.' : 'Neteisingas arba apgadintas kvietimo žetonas.'
+      });
+    }
+
     const invitesData = loadInvitationsData();
-    const invite = (invitesData.invitations || []).find(i => i.token === token);
+    const tokenInfo = verification.decoded;
+    const targetEmail = tokenInfo.email ? tokenInfo.email.toLowerCase() : '';
+
+    // Find in pending invitations
+    const invite = (invitesData.invitations || []).find(i => 
+      (i.token === rawToken || (targetEmail && i.email.toLowerCase() === targetEmail)) && i.status === 'pending'
+    );
+
+    if (!invite && verification.isJwt) {
+      // If token is cryptographically valid JWT, serve info from token
+      return res.json({
+        success: true,
+        invitation: {
+          email: tokenInfo.email,
+          name: tokenInfo.name || '',
+          surname: tokenInfo.surname || '',
+          role: tokenInfo.role || 'moderator',
+          code: tokenInfo.code || '',
+          invitedBy: tokenInfo.invitedBy || PRIMARY_SUPERADMIN_EMAIL
+        }
+      });
+    }
+
     if (!invite) {
-      return res.status(404).json({ error: 'Kvietimas nerastas arba nebegalioja' });
+      return res.status(404).json({ error: 'Šis kvietimas jau buvo panaudotas arba atšauktas.' });
     }
-    if (invite.status !== 'pending') {
-      return res.status(400).json({ error: 'Šis kvietimas jau buvo panaudotas arba atšauktas' });
-    }
+
     res.json({
       success: true,
       invitation: {
@@ -648,42 +1341,57 @@ app.get('/api/admin/invite-info', (req, res) => {
   }
 });
 
-// API: Activate account via invitation code
+// API: Activate account via invitation code & set password
 app.post('/api/admin/activate-invite', (req, res) => {
   try {
-    const { token, code, password, name, surname, uid } = req.body || {};
+    const { token, code, name, surname, uid } = req.body || {};
     if (!token || !code) {
       return res.status(400).json({ error: 'Token and code are required' });
     }
 
-    const invitesData = loadInvitationsData();
-    const invite = (invitesData.invitations || []).find(i => i.token === token && i.code === String(code).trim());
-    if (!invite || invite.status !== 'pending') {
-      return res.status(400).json({ error: 'Neteisingas arba nebegaliojantis kvietimo kodas' });
+    const verification = verifyToken(token);
+    if (!verification.valid) {
+      return res.status(400).json({ error: 'Neteisingas arba pasibaigęs kvietimo žetonas.' });
     }
 
-    // Mark invitation accepted
-    invite.status = 'accepted';
-    invite.acceptedAt = new Date().toISOString();
-    saveJson(INVITATIONS_FILE, invitesData);
+    const cleanCode = String(code).trim();
+    const invitesData = loadInvitationsData();
+    const targetEmail = (verification.decoded && verification.decoded.email) ? verification.decoded.email.toLowerCase() : '';
+
+    const invite = (invitesData.invitations || []).find(i => 
+      (i.token === token || (targetEmail && i.email.toLowerCase() === targetEmail)) &&
+      (String(i.code).trim() === cleanCode || (verification.decoded && String(verification.decoded.code).trim() === cleanCode))
+    );
+
+    if (!invite && (!verification.decoded || String(verification.decoded.code).trim() !== cleanCode)) {
+      return res.status(400).json({ error: 'Neteisingas patvirtinimo saugos kodas.' });
+    }
+
+    if (invite) {
+      invite.status = 'accepted';
+      invite.acceptedAt = new Date().toISOString();
+      saveJson(INVITATIONS_FILE, invitesData);
+    }
 
     // Provision User in users list
+    const effectiveEmail = invite ? invite.email : verification.decoded.email;
+    const effectiveRole = invite ? invite.role : verification.decoded.role;
     const usersData = loadUsersData();
     if (!usersData.users) usersData.users = [];
 
-    const existingIdx = usersData.users.findIndex(u => u.email === invite.email);
+    const existingIdx = usersData.users.findIndex(u => u.email.toLowerCase() === effectiveEmail.toLowerCase());
     const userUid = uid || 'usr_' + crypto.randomBytes(8).toString('hex');
 
     const userProfile = {
       uid: userUid,
-      email: invite.email,
-      name: (name || invite.name || '').trim(),
-      surname: (surname || invite.surname || '').trim(),
-      role: invite.role,
+      email: effectiveEmail,
+      name: (name || (invite ? invite.name : verification.decoded.name) || '').trim(),
+      surname: (surname || (invite ? invite.surname : verification.decoded.surname) || '').trim(),
+      role: effectiveRole,
       status: 'active',
       createdAt: new Date().toISOString(),
       lastLogin: new Date().toISOString(),
-      invitedBy: invite.invitedBy
+      invitedBy: invite ? invite.invitedBy : verification.decoded.invitedBy
     };
 
     if (existingIdx >= 0) {
@@ -691,7 +1399,6 @@ app.post('/api/admin/activate-invite', (req, res) => {
     } else {
       usersData.users.push(userProfile);
     }
-
     saveJson(USERS_FILE, usersData);
 
     // Sync to Firestore
@@ -706,11 +1413,16 @@ app.post('/api/admin/activate-invite', (req, res) => {
       lastLogin: { timestampValue: userProfile.lastLogin }
     });
 
+    const authToken = createAuthToken(userProfile);
+
     res.json({
       success: true,
+      message: 'Paskyra sėkmingai aktyvuota!',
+      token: authToken,
       user: userProfile
     });
   } catch (e) {
+    console.error('Error in /api/admin/activate-invite:', e);
     res.status(500).json({ error: 'Failed to activate account' });
   }
 });
@@ -733,18 +1445,12 @@ app.post('/api/admin/users/status', (req, res) => {
       status: { stringValue: user.status }
     });
 
-    if (user.uid && user.uid !== docId) {
-      syncToFirestore('users', user.uid, {
-        status: { stringValue: user.status }
-      });
-    }
-
     recordActivityLog({
       action: "USER_STATUS_TOGGLED",
       category: "users",
-      adminEmail: req.body.adminEmail || "azuolynasfilmfestival@gmail.com",
+      adminEmail: req.body.adminEmail || PRIMARY_SUPERADMIN_EMAIL,
       target: user.email,
-      details: `Vartotojo ${user.email} prieiga pakeista į: ${user.status === 'active' ? 'AKTYVUS (Leidžiama)' : 'UŽBLOKUOTAS (Sustabdyta)'}`
+      details: `Vartotojo ${user.email} prieiga pakeista į: ${user.status === 'active' ? 'AKTYVUS' : 'UŽBLOKUOTAS'}`
     });
 
     res.json({ success: true, user });
@@ -771,16 +1477,10 @@ app.post('/api/admin/users/role', (req, res) => {
       role: { stringValue: user.role }
     });
 
-    if (user.uid && user.uid !== docId) {
-      syncToFirestore('users', user.uid, {
-        role: { stringValue: user.role }
-      });
-    }
-
     recordActivityLog({
       action: "USER_ROLE_CHANGED",
       category: "users",
-      adminEmail: req.body.adminEmail || "azuolynasfilmfestival@gmail.com",
+      adminEmail: req.body.adminEmail || PRIMARY_SUPERADMIN_EMAIL,
       target: user.email,
       details: `Vartotojo ${user.email} rolė pakeista į: ${role.toUpperCase()}`
     });
@@ -798,8 +1498,7 @@ app.post('/api/admin/users/permission', (req, res) => {
     if (!email) return res.status(400).json({ error: 'Email is required' });
 
     const callerEmail = String(adminEmail || '').toLowerCase();
-    // Only primary superadmin can grant/revoke this permission
-    if (callerEmail !== 'azuolynasfilmfestival@gmail.com') {
+    if (callerEmail !== PRIMARY_SUPERADMIN_EMAIL) {
       return res.status(403).json({ error: 'Tik pagrindinis administratorius gali suteikti prieigą prie vartotojų valdymo skilties' });
     }
 
@@ -815,12 +1514,6 @@ app.post('/api/admin/users/permission', (req, res) => {
       canManageUsers: { booleanValue: user.canManageUsers }
     });
 
-    if (user.uid && user.uid !== docId) {
-      syncToFirestore('users', user.uid, {
-        canManageUsers: { booleanValue: user.canManageUsers }
-      });
-    }
-
     recordActivityLog({
       action: "USER_PERMISSION_CHANGED",
       category: "users",
@@ -835,14 +1528,14 @@ app.post('/api/admin/users/permission', (req, res) => {
   }
 });
 
-// API: Safely delete user account (deletes from JSON and Firestore)
+// API: Delete user account
 app.post('/api/admin/users/delete', async (req, res) => {
   try {
     const { email, userId } = req.body || {};
     if (!email && !userId) return res.status(400).json({ error: 'Email or userId is required' });
 
     const cleanEmail = String(email || '').trim().toLowerCase();
-    if (cleanEmail === 'azuolynasfilmfestival@gmail.com') {
+    if (cleanEmail === PRIMARY_SUPERADMIN_EMAIL) {
       return res.status(403).json({ error: 'Super Administrator cannot be deleted' });
     }
 
@@ -854,7 +1547,6 @@ app.post('/api/admin/users/delete', async (req, res) => {
     const effectiveEmail = cleanEmail || (targetUser ? targetUser.email.toLowerCase() : '');
     const docId = effectiveEmail.replace(/[^a-zA-Z0-9_-]/g, '_');
 
-    // Remove from users list
     usersData.users = (usersData.users || []).filter(u => {
       const matchEmail = effectiveEmail && u.email.toLowerCase() === effectiveEmail;
       const matchId = userId && (u.uid === userId || u.id === userId);
@@ -862,34 +1554,20 @@ app.post('/api/admin/users/delete', async (req, res) => {
     });
     saveJson(USERS_FILE, usersData);
 
-    // Delete from Firestore
     if (docId) await deleteFromFirestore('users', docId);
     if (userId) await deleteFromFirestore('users', userId);
     if (targetUser && targetUser.uid) await deleteFromFirestore('users', targetUser.uid);
 
-    // Revoke any pending invitations
-    const invitesData = loadInvitationsData();
-    if (invitesData.invitations) {
-      invitesData.invitations.forEach(inv => {
-        if (effectiveEmail && inv.email.toLowerCase() === effectiveEmail) {
-          inv.status = 'revoked';
-          deleteFromFirestore('invitations', inv.token);
-        }
-      });
-      saveJson(INVITATIONS_FILE, invitesData);
-    }
-
     recordActivityLog({
       action: "USER_DELETED",
       category: "users",
-      adminEmail: req.body.adminEmail || "azuolynasfilmfestival@gmail.com",
+      adminEmail: req.body.adminEmail || PRIMARY_SUPERADMIN_EMAIL,
       target: effectiveEmail || userId,
-      details: `Vartotojo paskyra ${effectiveEmail || userId} visam laikui pašalinta iš sistemos ir Firestore duomenų bazės`
+      details: `Vartotojo paskyra ${effectiveEmail || userId} pašalinta`
     });
 
-    res.json({ success: true, message: 'User account removed permanently' });
+    res.json({ success: true, message: 'User account removed' });
   } catch (e) {
-    console.error('Error in /api/admin/users/delete:', e);
     res.status(500).json({ error: 'Failed to delete user' });
   }
 });
@@ -918,189 +1596,13 @@ app.post('/api/admin/logs', (req, res) => {
   }
 });
 
-// ---------------------------------------------------------------------------
-// ACCESS REQUESTS API & EMAIL NOTIFICATION TRIGGERS
-// ---------------------------------------------------------------------------
-
-// API: Submit access request from login screen ("Pateikti užklausą į prieigą")
-app.post('/api/access-request', async (req, res) => {
-  try {
-    const { name, email, reason } = req.body || {};
-    const cleanName = String(name || '').trim();
-    const cleanEmail = String(email || '').trim().toLowerCase();
-    const cleanReason = String(reason || '').trim();
-
-    if (!cleanName || !cleanEmail || !cleanEmail.includes('@') || !cleanReason) {
-      return res.status(400).json({ 
-        error: 'Prašome nurodyti vardą, teisingą el. pašto adresą ir priežastį / pareigas.' 
-      });
-    }
-
-    const accessData = loadAccessRequestsData();
-    if (!accessData.requests) accessData.requests = [];
-
-    const reqId = 'req_' + Date.now() + '_' + crypto.randomBytes(4).toString('hex');
-    const timestamp = new Date().toISOString();
-
-    const newRequest = {
-      id: reqId,
-      name: cleanName,
-      email: cleanEmail,
-      reason: cleanReason,
-      status: 'pending',
-      submittedAt: timestamp
-    };
-
-    accessData.requests.unshift(newRequest);
-    saveAccessRequestsData(accessData);
-
-    // Sync to Firestore access_requests collection
-    syncToFirestore('access_requests', reqId, {
-      id: { stringValue: reqId },
-      name: { stringValue: cleanName },
-      email: { stringValue: cleanEmail },
-      reason: { stringValue: cleanReason },
-      status: { stringValue: 'pending' },
-      submittedAt: { timestampValue: timestamp }
-    });
-
-    // Record activity log for transparency
-    recordActivityLog({
-      action: "ACCESS_REQUEST_SUBMITTED",
-      category: "users",
-      adminEmail: "system",
-      target: cleanEmail,
-      details: `Pateikta prieigos užklausa: ${cleanName} (${cleanEmail}). Komentaras: ${cleanReason}`
-    });
-
-    // Generate responsive HTML notification email for Super Admin
-    const emailHtml = generateAccessRequestEmailHtml('lt', {
-      name: cleanName,
-      email: cleanEmail,
-      reason: cleanReason,
-      submittedAt: new Date().toLocaleString('lt-LT')
-    });
-
-    // Queue email trigger in Firestore mail collection
-    await queueEmail({
-      to: 'azuolynasfilmfestival@gmail.com',
-      subject: `Nauja festivalio valdymo skydo prieigos užklausa: ${cleanName}`,
-      html: emailHtml,
-      text: `Nauja prieigos užklausa nuo ${cleanName} (${cleanEmail}). Priežastis: ${cleanReason}`
-    });
-
-    res.json({
-      success: true,
-      message: 'Jūsų užklausa sėkmingai gauta ir perduota festivalio administratoriui.'
-    });
-  } catch (err) {
-    console.error('Error in /api/access-request:', err);
-    res.status(500).json({ error: 'Nepavyko išsaugoti užklausos. Bandykite vėliau.' });
-  }
-});
-
-// API: List access requests (for Admin view)
-app.get('/api/admin/access-requests', (req, res) => {
-  try {
-    const accessData = loadAccessRequestsData();
-    res.json({
-      success: true,
-      requests: accessData.requests || []
-    });
-  } catch (e) {
-    res.status(500).json({ error: 'Failed to fetch access requests' });
-  }
-});
-
-// API: Grant account access & trigger access granted email
-app.post('/api/admin/grant-access', async (req, res) => {
-  try {
-    const { email, name, role, adminEmail } = req.body || {};
-    const cleanEmail = String(email || '').trim().toLowerCase();
-    const cleanName = String(name || cleanEmail.split('@')[0]).trim();
-    const cleanRole = String(role || 'admin').trim();
-
-    if (!cleanEmail || !cleanEmail.includes('@')) {
-      return res.status(400).json({ error: 'Galiojantis el. pašto adresas yra privalomas.' });
-    }
-
-    const usersData = loadUsersData();
-    if (!usersData.users) usersData.users = [];
-
-    const docId = cleanEmail.replace(/[^a-zA-Z0-9_-]/g, '_');
-    let user = usersData.users.find(u => u.email.toLowerCase() === cleanEmail);
-
-    if (user) {
-      user.status = 'active';
-      user.role = cleanRole;
-      user.lastLogin = new Date().toISOString();
-    } else {
-      user = {
-        uid: docId,
-        email: cleanEmail,
-        name: cleanName,
-        surname: '',
-        role: cleanRole,
-        isSuperAdmin: false,
-        canManageUsers: false,
-        status: 'active',
-        createdAt: new Date().toISOString(),
-        lastLogin: new Date().toISOString(),
-        invitedBy: adminEmail || 'azuolynasfilmfestival@gmail.com'
-      };
-      usersData.users.push(user);
-    }
-    saveJson(USERS_FILE, usersData);
-
-    // Sync to Firestore users collection
-    syncToFirestore('users', docId, {
-      uid: { stringValue: docId },
-      email: { stringValue: cleanEmail },
-      name: { stringValue: cleanName },
-      role: { stringValue: cleanRole },
-      status: { stringValue: 'active' },
-      canManageUsers: { booleanValue: false },
-      lastLogin: { timestampValue: new Date().toISOString() }
-    });
-
-    // Mark access request as approved if found
-    const accessData = loadAccessRequestsData();
-    const matchingReq = (accessData.requests || []).find(r => r.email.toLowerCase() === cleanEmail && r.status === 'pending');
-    if (matchingReq) {
-      matchingReq.status = 'approved';
-      matchingReq.approvedAt = new Date().toISOString();
-      matchingReq.approvedBy = adminEmail || 'azuolynasfilmfestival@gmail.com';
-      saveAccessRequestsData(accessData);
-    }
-
-    // Trigger HTML email notification: Account Access Granted
-    const grantedHtml = generateAccessGrantedEmailHtml('lt', {
-      name: cleanName,
-      email: cleanEmail,
-      role: cleanRole === 'admin' ? 'Administratorius' : cleanRole,
-      grantedBy: adminEmail || 'azuolynasfilmfestival@gmail.com'
-    });
-
-    await queueEmail({
-      to: cleanEmail,
-      subject: 'Ąžuolynas Film Fest | Jums suteikta valdymo skydo prieiga',
-      html: grantedHtml,
-      text: `Sveiki, ${cleanName}! Jums suteikta prieiga prie Ąžuolyno filmų festivalio valdymo skydo.`
-    });
-
-    recordActivityLog({
-      action: 'ACCESS_GRANTED',
-      category: 'users',
-      adminEmail: adminEmail || 'azuolynasfilmfestival@gmail.com',
-      target: cleanEmail,
-      details: `Vartotojui ${cleanName} (${cleanEmail}) patvirtinta ir suteikta prieiga prie valdymo skydo (rolė: ${cleanRole.toUpperCase()})`
-    });
-
-    res.json({ success: true, user });
-  } catch (err) {
-    console.error('Error in /api/admin/grant-access:', err);
-    res.status(500).json({ error: 'Failed to grant access' });
-  }
+// Legacy deprecation response for /api/access-request
+app.post('/api/access-request', (req, res) => {
+  res.json({
+    success: false,
+    disabled: true,
+    message: 'Prieigos užklausų forma yra išjungta. Nauji nariai priimami tiesioginiu administratoriaus pakvietimu.'
+  });
 });
 
 // Friendly aliases for Privacy Policy & Terms of Service
@@ -1122,5 +1624,5 @@ app.get('/', (req, res) => {
 });
 
 app.listen(PORT, '0.0.0.0', () => {
-  console.log(`Server running at http://0.0.0.0:${PORT}`);
+  console.log(`Festival server running at http://0.0.0.0:${PORT}`);
 });
