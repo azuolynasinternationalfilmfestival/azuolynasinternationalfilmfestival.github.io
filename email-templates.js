@@ -112,11 +112,45 @@ const STATUS_BADGES = {
     border: "#6FA58A",
     labelLt: "NAUJA DALYVIO PARAIŠKA",
     labelEn: "NEW APPLICANT DOSSIER"
+  },
+  accessRequest: {
+    icon: "🔑",
+    color: "#E5A93C",
+    bg: "rgba(229, 169, 60, 0.18)",
+    border: "#E5A93C",
+    labelLt: "PRIEIGOS UŽKLAUSA",
+    labelEn: "ACCESS REQUEST"
+  },
+  accessGranted: {
+    icon: "🛡️",
+    color: "#6FA58A",
+    bg: "rgba(111, 165, 138, 0.18)",
+    border: "#6FA58A",
+    labelLt: "PRIEIGA SUTEIKTA",
+    labelEn: "ACCESS GRANTED"
   }
 };
 
 const emailTexts = {
   lt: {
+    accessRequest: {
+      sub: "Ąžuolynas Film Fest | Nauja prieigos užklausa!",
+      preheader: "Pateikta nauja užklausa prieigai prie festivalio valdymo skydo.",
+      heading: "Gauta nauja prieigos užklausa",
+      body: "Festivalio platformoje pateikta nauja užklausa dėl prieigos prie valdymo skydo teisių. Prašome peržiūrėti kandidato duomenis ir nuspręsti dėl prieigos suteikimo.",
+      detailsTitle: "Užklausos duomenys",
+      note: "Patvirtinti arba atmesti prieigą galite prisijungę prie valdymo skydo skilties „Vartotojai & Prieiga“.",
+      ctaText: "Peržiūrėti Valdymo Skyde"
+    },
+    accessGranted: {
+      sub: "Ąžuolynas Film Fest | Jums suteikta valdymo skydo prieiga",
+      preheader: "Jūsų prieigos užklausa patvirtinta. Dabar galite prisijungti prie festivalio valdymo skydo.",
+      heading: "Sveikiname, {{name}}!",
+      body: "Pranešame, kad jūsų prieigos užklausa prie Ąžuolyno tarptautinio mokinių filmų festivalio valdymo sistemos buvo sėkmingai patvirtinta!",
+      detailsTitle: "Paskyros prieigos informacija",
+      note: "Prisijunkite naudodami savo registruotą el. pašto adresą arba susietą Google paskyrą.",
+      ctaText: "Prisijungti prie Valdymo Skydo"
+    },
     submissionReceived: {
       sub: "Ąžuolynas Film Fest | Filmo paraiška sėkmingai gauta!",
       preheader: "Dėkojame už paraišką! Jūsų filmas sėkmingai pasiekė festivalio atrankos komisiją.",
@@ -199,6 +233,24 @@ const emailTexts = {
     }
   },
   en: {
+    accessRequest: {
+      sub: "Ąžuolynas Film Fest | New Access Request!",
+      preheader: "A new festival dashboard access request has been submitted.",
+      heading: "New Access Request Received",
+      body: "A user has submitted an access request for the festival management dashboard. Please review the applicant's credentials and determine whether to grant access.",
+      detailsTitle: "Request Details",
+      note: "You can review and manage permissions anytime in the admin panel under 'Users & Access'.",
+      ctaText: "Open Admin Dashboard"
+    },
+    accessGranted: {
+      sub: "Ąžuolynas Film Fest | Dashboard Access Granted",
+      preheader: "Your access request has been approved. You can now sign in to the festival dashboard.",
+      heading: "Congratulations, {{name}}!",
+      body: "We are pleased to inform you that your request for access to the Ąžuolynas International Film Festival management platform has been approved!",
+      detailsTitle: "Account Access Details",
+      note: "Sign in using your authorized email address or your linked Google account.",
+      ctaText: "Sign in to Dashboard"
+    },
     submissionReceived: {
       sub: "Ąžuolynas Film Fest | Film Submission Successfully Received!",
       preheader: "Thank you for submitting! Your film entry has reached the festival selection committee.",
@@ -748,18 +800,156 @@ function generateInviteEmailHtml(lang, data = {}) {
   });
 }
 
+/**
+ * Generates an email notification for a new dashboard access request.
+ */
+function generateAccessRequestEmailHtml(lang, data = {}) {
+  const currentLang = (lang === "lt" || lang === "en") ? lang : "lt";
+  const texts = emailTexts[currentLang] || emailTexts.lt;
+  const t = texts.accessRequest;
+  const isLt = currentLang === "lt";
+
+  const applicantName = data.name || (isLt ? "Pareiškėjas" : "Applicant");
+  const email = data.email || "-";
+  const reason = data.reason || "-";
+  const submittedAt = data.submittedAt || new Date().toLocaleString(isLt ? "lt-LT" : "en-US");
+  const adminUrl = data.adminUrl || EMAIL_THEME.adminUrl;
+
+  let metaRows = "";
+  metaRows += buildMetaRow(isLt ? "Pareiškėjas:" : "Applicant:", `<b>${escapeHtml(applicantName)}</b>`);
+  metaRows += buildMetaRow(isLt ? "El. paštas:" : "Email:", `<a href="mailto:${escapeHtml(email)}" style="color:#9BC4AE; text-decoration:none;">${escapeHtml(email)}</a>`);
+  metaRows += buildMetaRow(isLt ? "Pateikimo laikas:" : "Submitted At:", escapeHtml(submittedAt));
+
+  const childrenHtml = `
+    <h2 style="color: #F8FAF7; margin: 0 0 10px 0; font-size: 20px; font-weight: 700; letter-spacing: -0.01em;">
+      ${t.heading}
+    </h2>
+    <p style="font-size: 14px; color: #BAC9C0; line-height: 1.65; margin: 0 0 18px 0;">
+      ${t.body}
+    </p>
+
+    <!-- Details Box -->
+    <div style="background-color: #081B17; border: 1px solid rgba(111,165,138,0.22); border-radius: 6px; padding: 18px 20px; margin: 18px 0;">
+      <p style="margin: 0 0 12px 0; font-weight: 700; color: #9BC4AE; font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em;">
+        ${t.detailsTitle}
+      </p>
+      <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+        ${metaRows}
+      </table>
+      
+      <div style="margin-top: 14px; padding-top: 12px; border-top: 1px dashed rgba(111,165,138,0.2);">
+        <p style="margin: 0 0 6px 0; font-size: 11px; color: #E5A93C; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em;">
+          ${isLt ? "Nurodyta priežastis / Pareigos:" : "Stated Reason / Role:"}
+        </p>
+        <p style="margin: 0; font-size: 13px; color: #F8FAF7; line-height: 1.6; background-color: rgba(5, 21, 18, 0.5); padding: 10px 14px; border-radius: 4px;">
+          ${escapeHtml(reason)}
+        </p>
+      </div>
+    </div>
+
+    <!-- Direct CTA Button -->
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center" class="cta-table" style="margin: 24px auto 14px auto;">
+      <tr>
+        <td align="center" style="border-radius: 6px; background-color: #17453B; border: 1px solid #6FA58A;">
+          <a href="${adminUrl}" target="_blank" class="btn-primary" style="display: inline-block; padding: 14px 32px; font-size: 13px; font-weight: 800; color: #F8FAF7; text-decoration: none; border-radius: 6px; letter-spacing: 0.04em;">
+            ${escapeHtml(t.ctaText)} &rarr;
+          </a>
+        </td>
+      </tr>
+    </table>
+
+    <p style="font-size: 11px; color: #7A9689; line-height: 1.6; margin: 16px 0 0 0; text-align: center;">
+      ${t.note}
+    </p>
+  `;
+
+  return buildEmailDocument({
+    lang: currentLang,
+    preheader: `${t.preheader} (${applicantName} - ${email})`,
+    statusKey: "accessRequest",
+    childrenHtml
+  });
+}
+
+/**
+ * Generates an email notification confirming that dashboard access has been granted to a user.
+ */
+function generateAccessGrantedEmailHtml(lang, data = {}) {
+  const currentLang = (lang === "lt" || lang === "en") ? lang : "lt";
+  const texts = emailTexts[currentLang] || emailTexts.lt;
+  const t = texts.accessGranted;
+  const isLt = currentLang === "lt";
+
+  const userName = data.name || (isLt ? "Vartotojas" : "Team Member");
+  const email = data.email || "-";
+  const role = data.role || "Administratorius";
+  const adminUrl = data.adminUrl || EMAIL_THEME.adminUrl;
+  const grantedBy = data.grantedBy || "Festivalio Vyr. Administratorius";
+
+  let metaRows = "";
+  metaRows += buildMetaRow(isLt ? "Vartotojas:" : "User:", `<b>${escapeHtml(userName)}</b>`);
+  metaRows += buildMetaRow(isLt ? "Paskyros el. paštas:" : "Account Email:", `<a href="mailto:${escapeHtml(email)}" style="color:#9BC4AE; text-decoration:none;">${escapeHtml(email)}</a>`);
+  metaRows += buildMetaRow(isLt ? "Suteikta rolė:" : "Assigned Role:", `<span style="color:#6FA58A; font-weight:700; text-transform:uppercase;">🛡️ ${escapeHtml(role)}</span>`);
+  metaRows += buildMetaRow(isLt ? "Patvirtino:" : "Approved By:", escapeHtml(grantedBy));
+
+  const childrenHtml = `
+    <h2 style="color: #F8FAF7; margin: 0 0 10px 0; font-size: 20px; font-weight: 700; letter-spacing: -0.01em;">
+      ${t.heading.replace("{{name}}", escapeHtml(userName))}
+    </h2>
+    <p style="font-size: 14px; color: #BAC9C0; line-height: 1.65; margin: 0 0 18px 0;">
+      ${t.body}
+    </p>
+
+    <!-- Details Box -->
+    <div style="background-color: #081B17; border: 1px solid rgba(111,165,138,0.22); border-radius: 6px; padding: 18px 20px; margin: 18px 0;">
+      <p style="margin: 0 0 12px 0; font-weight: 700; color: #9BC4AE; font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em;">
+        ${t.detailsTitle}
+      </p>
+      <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+        ${metaRows}
+      </table>
+    </div>
+
+    <!-- Direct CTA Button -->
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center" class="cta-table" style="margin: 24px auto 14px auto;">
+      <tr>
+        <td align="center" style="border-radius: 6px; background-color: #17453B; border: 1px solid #6FA58A;">
+          <a href="${adminUrl}" target="_blank" class="btn-primary" style="display: inline-block; padding: 14px 32px; font-size: 13px; font-weight: 800; color: #F8FAF7; text-decoration: none; border-radius: 6px; letter-spacing: 0.04em;">
+            ${escapeHtml(t.ctaText)} &rarr;
+          </a>
+        </td>
+      </tr>
+    </table>
+
+    <p style="font-size: 11px; color: #7A9689; line-height: 1.6; margin: 16px 0 0 0; text-align: center;">
+      ${t.note}
+    </p>
+  `;
+
+  return buildEmailDocument({
+    lang: currentLang,
+    preheader: `${t.preheader} (${userName})`,
+    statusKey: "accessGranted",
+    childrenHtml
+  });
+}
+
 // Global browser and runtime scope compatibility
 if (typeof window !== "undefined") {
   window.emailTexts = emailTexts;
   window.generateEmailHtml = generateEmailHtml;
   window.generateAdminNotificationHtml = generateAdminNotificationHtml;
   window.generateInviteEmailHtml = generateInviteEmailHtml;
+  window.generateAccessRequestEmailHtml = generateAccessRequestEmailHtml;
+  window.generateAccessGrantedEmailHtml = generateAccessGrantedEmailHtml;
 }
 if (typeof globalThis !== "undefined") {
   globalThis.emailTexts = emailTexts;
   globalThis.generateEmailHtml = generateEmailHtml;
   globalThis.generateAdminNotificationHtml = generateAdminNotificationHtml;
   globalThis.generateInviteEmailHtml = generateInviteEmailHtml;
+  globalThis.generateAccessRequestEmailHtml = generateAccessRequestEmailHtml;
+  globalThis.generateAccessGrantedEmailHtml = generateAccessGrantedEmailHtml;
 }
 
 // Node / CommonJS module export compatibility (for backend/tests)
@@ -768,6 +958,8 @@ if (typeof module !== "undefined" && module.exports) {
     emailTexts,
     generateEmailHtml,
     generateAdminNotificationHtml,
-    generateInviteEmailHtml
+    generateInviteEmailHtml,
+    generateAccessRequestEmailHtml,
+    generateAccessGrantedEmailHtml
   };
 }

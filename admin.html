@@ -50,8 +50,9 @@
           <span>Prisijungti su Google paskyra</span>
         </button>
 
-        <div style="margin-top:14px;">
+        <div style="margin-top:14px; display:flex; flex-direction:column; gap:8px;">
           <button type="button" id="showForgotBtn" class="btn-outline btn-full btn-sm">Nustatyti / Pamiršau slaptažodį</button>
+          <button type="button" id="showAccessRequestBtn" class="btn-outline btn-full btn-sm" style="border-style:dashed; color:var(--accent-light);">Pateikti užklausą į prieigą</button>
         </div>
       </div>
 
@@ -64,6 +65,35 @@
         <div id="resetSuccessMsg" class="drop-alert success d-none" style="margin-bottom:14px;"></div>
         <button type="button" id="sendResetLinkBtn" class="btn-solid btn-full" style="margin-bottom:10px;">Gauti slaptažodžio nustatymo nuorodą</button>
         <button type="button" id="backToLoginBtn" class="btn-outline btn-full btn-sm">Grįžti į prisijungimą</button>
+      </div>
+
+      <div id="accessRequestFormWrapper" class="d-none">
+        <h3 style="font-size:1.15rem; font-weight:700; margin-bottom:6px; color:var(--text-color);">Prieigos Užklausa</h3>
+        <p style="font-size:0.82rem; color:var(--text-muted); margin-bottom:18px;">Pateikite prašymą festivalio valdymo skydo prieigai gauti. Administratorius peržiūrės jūsų paraišką.</p>
+        
+        <form id="accessRequestForm" action="javascript:void(0);" onsubmit="event.preventDefault(); return false;">
+          <div class="input-cell">
+            <label for="reqFullName">Vardas ir Pavardė *</label>
+            <input type="text" id="reqFullName" class="field" placeholder="pvz. Jonas Jonaitis" required>
+          </div>
+          <div class="input-cell">
+            <label for="reqEmail">El. pašto adresas *</label>
+            <input type="email" id="reqEmail" class="field" placeholder="vardas@pavyzdys.lt" required>
+          </div>
+          <div class="input-cell">
+            <label for="reqReason">Priežastis / Pareigos komandoje *</label>
+            <textarea id="reqReason" class="field" rows="3" placeholder="Nurodykite savo pareigas (pvz. vertinimo komisija, organizatorius) ir priežastį..." style="resize:vertical;" required></textarea>
+          </div>
+          <div id="reqErrMsg" class="auth-error d-none"></div>
+          <div id="reqSuccessMsg" class="drop-alert success d-none" style="margin-bottom:14px;"></div>
+          
+          <button type="button" id="submitAccessRequestBtn" class="btn-solid btn-full" style="margin-bottom:10px;">
+            <span>Pateikti užklausą į prieigą</span>
+          </button>
+          <button type="button" id="backFromRequestBtn" class="btn-outline btn-full btn-sm">
+            <span>Grįžti į prisijungimą</span>
+          </button>
+        </form>
       </div>
     </div>
   </div>
@@ -98,13 +128,29 @@
         </button>
       </div>
 
-      <div>
+      <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+        <div id="currentUserBadge" class="admin-user-pill d-none">
+          <span class="user-avatar-circle" id="currentUserAvatar">👤</span>
+          <div style="display:flex; flex-direction:column; text-align:left; line-height:1.2;">
+            <span id="currentUserName" class="admin-user-name"></span>
+            <span id="currentUserRole" class="admin-role-badge"></span>
+          </div>
+        </div>
         <button id="logoutBtn" class="btn-outline btn-sm">Atsijungti</button>
       </div>
     </div>
 
     <div class="admin-main container">
-      <div id="submissionsTab">
+      <div class="dashboard-banner">
+        <div class="dashboard-banner-content">
+          <h2 class="dashboard-banner-title">Festivalio Valdymo Skydas</h2>
+          <p class="dashboard-banner-sub">Sveiki atvykę! Čia galite peržiūrėti paraiškas, valdyti filmus, balsavimo eigą ir festivalio leidinius.</p>
+        </div>
+        <div class="dashboard-banner-meta" id="dashboardBannerMeta">
+          <span class="live-dot"></span>
+          <span id="dashboardSystemStatus">Sistema paruošta &bull; 2026 m. leidimas</span>
+        </div>
+      </div>
         <div class="metrics-row">
           <div class="metric-card">
             <div class="metric-label">Viso paraiškų</div>
@@ -456,6 +502,24 @@
         </div>
         <div id="usersEmptyState" class="drop-alert d-none" style="margin-top:16px;">
           Nėra vartotojų, atitinkančių pasirinktus paieškos ar filtrų kriterijus.
+        </div>
+
+        <!-- Access Requests Review Card (for Super Admin) -->
+        <div class="content-card" style="margin-top:28px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:12px;">
+            <div>
+              <h4 style="margin:0; font-size:1.05rem; color:var(--text-color);">Gautos Prieigos Užklausos</h4>
+              <p class="content-card-sub" style="margin:2px 0 0 0;">Užklausos, pateiktos per prisijungimo langą („Pateikti užklausą į prieigą“).</p>
+            </div>
+            <button type="button" id="btnRefreshRequests" class="btn-outline btn-xs" style="display:inline-flex; align-items:center; gap:6px;">
+              <span>Atnaujinti užklausas</span>
+            </button>
+          </div>
+          <div id="accessRequestsContainer">
+            <div id="accessRequestsLoading" class="table-loading-bar d-none">Kraunamos užklausos...</div>
+            <div id="accessRequestsEmpty" class="drop-alert" style="margin-top:8px;">Naujų laukiančių prieigos užklausų šiuo metu nėra.</div>
+            <div id="accessRequestsList" class="d-none" style="display:flex; flex-direction:column; gap:12px; margin-top:12px;"></div>
+          </div>
         </div>
       </div>
 

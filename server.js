@@ -3,9 +3,19 @@ import path from 'path';
 import fs from 'fs';
 import crypto from 'crypto';
 import { fileURLToPath } from 'url';
+import './email-templates.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+const {
+  emailTexts,
+  generateEmailHtml,
+  generateAdminNotificationHtml,
+  generateInviteEmailHtml,
+  generateAccessRequestEmailHtml,
+  generateAccessGrantedEmailHtml
+} = globalThis;
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -19,6 +29,7 @@ const VOTES_FILE = path.join(DATA_DIR, 'votes.json');
 const SETTINGS_FILE = path.join(DATA_DIR, 'settings.json');
 const USERS_FILE = path.join(DATA_DIR, 'users.json');
 const INVITATIONS_FILE = path.join(DATA_DIR, 'invitations.json');
+const ACCESS_REQUESTS_FILE = path.join(DATA_DIR, 'access_requests.json');
 const LOGS_FILE = path.join(DATA_DIR, 'logs.json');
 
 if (!fs.existsSync(DATA_DIR)) {
@@ -153,38 +164,68 @@ function loadSettingsData() {
 }
 
 function loadUsersData() {
-  return loadJson(USERS_FILE, {
-    users: [
-      {
-        uid: "admin_super",
-        email: "azuolynasfilmfestival@gmail.com",
-        name: "Festivalio",
-        surname: "Administratorius",
-        role: "admin",
-        status: "active",
-        createdAt: "2026-01-01T00:00:00.000Z",
-        lastLogin: new Date().toISOString()
-      },
-      {
-        uid: "admin_karina",
-        email: "karina.brdar@gmail.com",
-        name: "Karina",
-        surname: "Brdar",
-        role: "admin",
-        status: "active",
-        createdAt: "2026-01-01T00:00:00.000Z",
-        lastLogin: new Date().toISOString()
-      }
-    ]
-  });
+  const defaultUsers = [
+    {
+      uid: "admin_super",
+      email: "azuolynasfilmfestival@gmail.com",
+      name: "Festivalio",
+      surname: "Administratorius",
+      role: "admin",
+      isSuperAdmin: true,
+      canManageUsers: true,
+      status: "active",
+      createdAt: "2026-01-01T00:00:00.000Z",
+      lastLogin: new Date().toISOString()
+    },
+    {
+      uid: "admin_karina",
+      email: "karina.brdar@gmail.com",
+      name: "Karina",
+      surname: "Brdar",
+      role: "admin",
+      isSuperAdmin: false,
+      canManageUsers: false,
+      status: "active",
+      createdAt: "2026-01-01T00:00:00.000Z",
+      lastLogin: new Date().toISOString()
+    }
+  ];
+  const data = loadJson(USERS_FILE, { users: defaultUsers });
+  if (!data.users || data.users.length === 0) {
+    data.users = defaultUsers;
+  }
+  // Enforce correct role & privilege constraints for pre-configured accounts
+  const superAdmin = data.users.find(u => u.email.toLowerCase() === 'azuolynasfilmfestival@gmail.com');
+  if (superAdmin) {
+    superAdmin.isSuperAdmin = true;
+    superAdmin.canManageUsers = true;
+    superAdmin.role = 'admin';
+    superAdmin.status = 'active';
+  }
+  const karina = data.users.find(u => u.email.toLowerCase() === 'karina.brdar@gmail.com');
+  if (karina) {
+    karina.isSuperAdmin = false;
+    karina.canManageUsers = false;
+    karina.role = 'admin';
+    karina.status = 'active';
+  }
+  return data;
 }
 
 function loadInvitationsData() {
   return loadJson(INVITATIONS_FILE, { invitations: [] });
 }
 
+function loadAccessRequestsData() {
+  return loadJson(ACCESS_REQUESTS_FILE, { requests: [] });
+}
+
+function saveAccessRequestsData(data) {
+  saveJson(ACCESS_REQUESTS_FILE, data);
+}
+
 // ---------------------------------------------------------------------------
-// Firestore REST Sync Helper
+// Firestore REST Sync Helper & Mail Queue
 // ---------------------------------------------------------------------------
 const FIREBASE_API_KEY = 'AIzaSyAl-aLSlSHUdrZ4Rr4x23n3bu3QFZSYyB0';
 const FIREBASE_PROJECT_ID = 'azuolynas-film-fest';
@@ -210,6 +251,27 @@ async function deleteFromFirestore(collection, docId) {
     });
   } catch (err) {
     // Non-blocking background sync
+  }
+}
+
+async function queueEmail({ to, subject, html, text }) {
+  try {
+    const mailId = 'mail_' + Date.now() + '_' + crypto.randomBytes(4).toString('hex');
+    await syncToFirestore('mail', mailId, {
+      to: { stringValue: to },
+      message: {
+        mapValue: {
+          fields: {
+            subject: { stringValue: subject },
+            html: { stringValue: html },
+            text: { stringValue: text || subject }
+          }
+        }
+      },
+      createdAt: { timestampValue: new Date().toISOString() }
+    });
+  } catch (err) {
+    console.warn("queueEmail notice:", err.message);
   }
 }
 
@@ -853,6 +915,191 @@ app.post('/api/admin/logs', (req, res) => {
     res.json({ success: true, log });
   } catch (err) {
     res.status(500).json({ error: 'Failed to record activity log' });
+  }
+});
+
+// ---------------------------------------------------------------------------
+// ACCESS REQUESTS API & EMAIL NOTIFICATION TRIGGERS
+// ---------------------------------------------------------------------------
+
+// API: Submit access request from login screen ("Pateikti užklausą į prieigą")
+app.post('/api/access-request', async (req, res) => {
+  try {
+    const { name, email, reason } = req.body || {};
+    const cleanName = String(name || '').trim();
+    const cleanEmail = String(email || '').trim().toLowerCase();
+    const cleanReason = String(reason || '').trim();
+
+    if (!cleanName || !cleanEmail || !cleanEmail.includes('@') || !cleanReason) {
+      return res.status(400).json({ 
+        error: 'Prašome nurodyti vardą, teisingą el. pašto adresą ir priežastį / pareigas.' 
+      });
+    }
+
+    const accessData = loadAccessRequestsData();
+    if (!accessData.requests) accessData.requests = [];
+
+    const reqId = 'req_' + Date.now() + '_' + crypto.randomBytes(4).toString('hex');
+    const timestamp = new Date().toISOString();
+
+    const newRequest = {
+      id: reqId,
+      name: cleanName,
+      email: cleanEmail,
+      reason: cleanReason,
+      status: 'pending',
+      submittedAt: timestamp
+    };
+
+    accessData.requests.unshift(newRequest);
+    saveAccessRequestsData(accessData);
+
+    // Sync to Firestore access_requests collection
+    syncToFirestore('access_requests', reqId, {
+      id: { stringValue: reqId },
+      name: { stringValue: cleanName },
+      email: { stringValue: cleanEmail },
+      reason: { stringValue: cleanReason },
+      status: { stringValue: 'pending' },
+      submittedAt: { timestampValue: timestamp }
+    });
+
+    // Record activity log for transparency
+    recordActivityLog({
+      action: "ACCESS_REQUEST_SUBMITTED",
+      category: "users",
+      adminEmail: "system",
+      target: cleanEmail,
+      details: `Pateikta prieigos užklausa: ${cleanName} (${cleanEmail}). Komentaras: ${cleanReason}`
+    });
+
+    // Generate responsive HTML notification email for Super Admin
+    const emailHtml = generateAccessRequestEmailHtml('lt', {
+      name: cleanName,
+      email: cleanEmail,
+      reason: cleanReason,
+      submittedAt: new Date().toLocaleString('lt-LT')
+    });
+
+    // Queue email trigger in Firestore mail collection
+    await queueEmail({
+      to: 'azuolynasfilmfestival@gmail.com',
+      subject: `Nauja festivalio valdymo skydo prieigos užklausa: ${cleanName}`,
+      html: emailHtml,
+      text: `Nauja prieigos užklausa nuo ${cleanName} (${cleanEmail}). Priežastis: ${cleanReason}`
+    });
+
+    res.json({
+      success: true,
+      message: 'Jūsų užklausa sėkmingai gauta ir perduota festivalio administratoriui.'
+    });
+  } catch (err) {
+    console.error('Error in /api/access-request:', err);
+    res.status(500).json({ error: 'Nepavyko išsaugoti užklausos. Bandykite vėliau.' });
+  }
+});
+
+// API: List access requests (for Admin view)
+app.get('/api/admin/access-requests', (req, res) => {
+  try {
+    const accessData = loadAccessRequestsData();
+    res.json({
+      success: true,
+      requests: accessData.requests || []
+    });
+  } catch (e) {
+    res.status(500).json({ error: 'Failed to fetch access requests' });
+  }
+});
+
+// API: Grant account access & trigger access granted email
+app.post('/api/admin/grant-access', async (req, res) => {
+  try {
+    const { email, name, role, adminEmail } = req.body || {};
+    const cleanEmail = String(email || '').trim().toLowerCase();
+    const cleanName = String(name || cleanEmail.split('@')[0]).trim();
+    const cleanRole = String(role || 'admin').trim();
+
+    if (!cleanEmail || !cleanEmail.includes('@')) {
+      return res.status(400).json({ error: 'Galiojantis el. pašto adresas yra privalomas.' });
+    }
+
+    const usersData = loadUsersData();
+    if (!usersData.users) usersData.users = [];
+
+    const docId = cleanEmail.replace(/[^a-zA-Z0-9_-]/g, '_');
+    let user = usersData.users.find(u => u.email.toLowerCase() === cleanEmail);
+
+    if (user) {
+      user.status = 'active';
+      user.role = cleanRole;
+      user.lastLogin = new Date().toISOString();
+    } else {
+      user = {
+        uid: docId,
+        email: cleanEmail,
+        name: cleanName,
+        surname: '',
+        role: cleanRole,
+        isSuperAdmin: false,
+        canManageUsers: false,
+        status: 'active',
+        createdAt: new Date().toISOString(),
+        lastLogin: new Date().toISOString(),
+        invitedBy: adminEmail || 'azuolynasfilmfestival@gmail.com'
+      };
+      usersData.users.push(user);
+    }
+    saveJson(USERS_FILE, usersData);
+
+    // Sync to Firestore users collection
+    syncToFirestore('users', docId, {
+      uid: { stringValue: docId },
+      email: { stringValue: cleanEmail },
+      name: { stringValue: cleanName },
+      role: { stringValue: cleanRole },
+      status: { stringValue: 'active' },
+      canManageUsers: { booleanValue: false },
+      lastLogin: { timestampValue: new Date().toISOString() }
+    });
+
+    // Mark access request as approved if found
+    const accessData = loadAccessRequestsData();
+    const matchingReq = (accessData.requests || []).find(r => r.email.toLowerCase() === cleanEmail && r.status === 'pending');
+    if (matchingReq) {
+      matchingReq.status = 'approved';
+      matchingReq.approvedAt = new Date().toISOString();
+      matchingReq.approvedBy = adminEmail || 'azuolynasfilmfestival@gmail.com';
+      saveAccessRequestsData(accessData);
+    }
+
+    // Trigger HTML email notification: Account Access Granted
+    const grantedHtml = generateAccessGrantedEmailHtml('lt', {
+      name: cleanName,
+      email: cleanEmail,
+      role: cleanRole === 'admin' ? 'Administratorius' : cleanRole,
+      grantedBy: adminEmail || 'azuolynasfilmfestival@gmail.com'
+    });
+
+    await queueEmail({
+      to: cleanEmail,
+      subject: 'Ąžuolynas Film Fest | Jums suteikta valdymo skydo prieiga',
+      html: grantedHtml,
+      text: `Sveiki, ${cleanName}! Jums suteikta prieiga prie Ąžuolyno filmų festivalio valdymo skydo.`
+    });
+
+    recordActivityLog({
+      action: 'ACCESS_GRANTED',
+      category: 'users',
+      adminEmail: adminEmail || 'azuolynasfilmfestival@gmail.com',
+      target: cleanEmail,
+      details: `Vartotojui ${cleanName} (${cleanEmail}) patvirtinta ir suteikta prieiga prie valdymo skydo (rolė: ${cleanRole.toUpperCase()})`
+    });
+
+    res.json({ success: true, user });
+  } catch (err) {
+    console.error('Error in /api/admin/grant-access:', err);
+    res.status(500).json({ error: 'Failed to grant access' });
   }
 });
 

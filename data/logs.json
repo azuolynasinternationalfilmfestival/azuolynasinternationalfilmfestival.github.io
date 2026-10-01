@@ -1,6 +1,39 @@
 {
   "logs": [
     {
+      "id": "log_1790884155950_7hinq",
+      "action": "ACCESS_GRANTED",
+      "category": "users",
+      "adminEmail": "azuolynasfilmfestival@gmail.com",
+      "adminName": "azuolynasfilmfestival",
+      "target": "tomas.petrauskas@example.com",
+      "details": "Vartotojui Tomas Petrauskas (tomas.petrauskas@example.com) patvirtinta ir suteikta prieiga prie valdymo skydo (rolė: ADMIN)",
+      "timestamp": "2026-10-01T19:49:15.950Z",
+      "status": "success"
+    },
+    {
+      "id": "log_1790884146742_qklng",
+      "action": "ACCESS_REQUEST_SUBMITTED",
+      "category": "users",
+      "adminEmail": "system",
+      "adminName": "system",
+      "target": "tomas.petrauskas@example.com",
+      "details": "Pateikta prieigos užklausa: Tomas Petrauskas (tomas.petrauskas@example.com). Komentaras: Festivalio vertinimo komisijos narys",
+      "timestamp": "2026-10-01T19:49:06.742Z",
+      "status": "success"
+    },
+    {
+      "id": "log_1790884104962_86bwt",
+      "action": "ACCESS_REQUEST_SUBMITTED",
+      "category": "users",
+      "adminEmail": "system",
+      "adminName": "system",
+      "target": "tomas.petrauskas@example.com",
+      "details": "Pateikta prieigos užklausa: Tomas Petrauskas (tomas.petrauskas@example.com). Komentaras: Festivalio vertinimo komisijos narys",
+      "timestamp": "2026-10-01T19:48:24.962Z",
+      "status": "success"
+    },
+    {
       "id": "log_1790794378827_98lth",
       "action": "USER_PERMISSION_CHANGED",
       "category": "users",

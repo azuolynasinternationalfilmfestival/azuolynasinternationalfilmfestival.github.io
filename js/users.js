@@ -42,11 +42,13 @@ const ROLE_LABELS = {
 const DEFAULT_SEED_USERS = [
   {
     email: "azuolynasfilmfestival@gmail.com",
-    name: "Vyr.",
+    name: "Festivalio",
     surname: "Administratorius",
     role: "admin",
+    isSuperAdmin: true,
+    canManageUsers: true,
     status: "active",
-    createdAt: "2026-01-10T10:00:00.000Z",
+    createdAt: "2026-01-01T00:00:00.000Z",
     invitedBy: "Sistemos Pagrindas",
   },
   {
@@ -54,26 +56,10 @@ const DEFAULT_SEED_USERS = [
     name: "Karina",
     surname: "Brdar",
     role: "admin",
+    isSuperAdmin: false,
+    canManageUsers: false,
     status: "active",
-    createdAt: "2026-01-15T12:00:00.000Z",
-    invitedBy: "azuolynasfilmfestival@gmail.com",
-  },
-  {
-    email: "dominikphotofficial.t@gmail.com",
-    name: "Dominik",
-    surname: "Photo",
-    role: "moderator",
-    status: "active",
-    createdAt: "2026-02-01T14:30:00.000Z",
-    invitedBy: "azuolynasfilmfestival@gmail.com",
-  },
-  {
-    email: "dominikphotofficial.lt@gmail.com",
-    name: "Dominik",
-    surname: "Oficialus",
-    role: "judge",
-    status: "active",
-    createdAt: "2026-02-10T09:15:00.000Z",
+    createdAt: "2026-01-01T00:00:00.000Z",
     invitedBy: "azuolynasfilmfestival@gmail.com",
   },
 ];
@@ -103,6 +89,14 @@ export function initUsers() {
     refreshBtn.addEventListener("click", () => {
       showToast("Atnaujinamas vartotojų sąrašas...");
       subscribeUsers();
+    });
+  }
+
+  const refreshReqBtn = document.getElementById("btnRefreshRequests");
+  if (refreshReqBtn) {
+    refreshReqBtn.addEventListener("click", () => {
+      showToast("Atnaujinamos prieigos užklausos...");
+      loadAccessRequests();
     });
   }
 
@@ -286,6 +280,7 @@ export function subscribeUsers() {
 
   // Always attempt fallback load in parallel so users show immediately
   loadUsersFallback();
+  loadAccessRequests();
 
   if (!db) {
     if (loadingElem) loadingElem.classList.add("d-none");
@@ -830,4 +825,101 @@ function escapeHtml(str) {
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#039;");
+}
+
+export async function loadAccessRequests() {
+  const loading = document.getElementById("accessRequestsLoading");
+  const empty = document.getElementById("accessRequestsEmpty");
+  const list = document.getElementById("accessRequestsList");
+  if (!list) return;
+
+  if (loading) loading.classList.remove("d-none");
+  if (empty) empty.classList.add("d-none");
+
+  try {
+    const res = await fetch("/api/admin/access-requests");
+    const data = await res.json();
+    const requests = (data && data.requests) ? data.requests : [];
+
+    if (loading) loading.classList.add("d-none");
+
+    if (!requests || requests.length === 0) {
+      if (empty) empty.classList.remove("d-none");
+      list.classList.add("d-none");
+      list.innerHTML = "";
+      return;
+    }
+
+    if (empty) empty.classList.add("d-none");
+    list.classList.remove("d-none");
+    list.innerHTML = requests.map((req) => {
+      const isPending = req.status === "pending";
+      const submittedDate = req.submittedAt ? formatDateShort(req.submittedAt) : "-";
+      return `
+        <div style="background:var(--surface-color); border:1px solid var(--border-color); border-radius:var(--site-radius); padding:16px 18px; display:flex; justify-content:space-between; align-items:flex-start; gap:16px; flex-wrap:wrap;">
+          <div style="flex:1; min-width:240px;">
+            <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
+              <strong style="color:var(--text-color); font-size:0.95rem;">${escapeHtml(req.name)}</strong>
+              <span class="status-pill ${isPending ? 'status-semifinal' : 'status-accepted'}" style="font-size:0.68rem;">
+                ${isPending ? 'Laukiama' : 'Patvirtinta'}
+              </span>
+            </div>
+            <div style="font-size:0.84rem; color:var(--accent-light); margin-bottom:6px;">
+              <a href="mailto:${escapeHtml(req.email)}" style="color:inherit; text-decoration:none;">${escapeHtml(req.email)}</a>
+              <span style="color:var(--text-muted); margin-left:8px;">&bull; Pateikta: ${escapeHtml(submittedDate)}</span>
+            </div>
+            <div style="font-size:0.84rem; color:var(--text-muted); background:rgba(5,21,18,0.4); padding:8px 12px; border-radius:4px; border:1px dashed var(--border-color);">
+              <span style="font-weight:600; color:var(--text-color);">Pareigos / Priežastis:</span> ${escapeHtml(req.reason)}
+            </div>
+          </div>
+          ${isPending ? `
+            <div style="display:flex; align-items:center; gap:8px;">
+              <button type="button" class="btn-solid btn-xs btn-approve-request" data-req-email="${escapeHtml(req.email)}" data-req-name="${escapeHtml(req.name)}">
+                Suteikti prieigą
+              </button>
+            </div>
+          ` : `
+            <span style="font-size:0.78rem; color:var(--accent-light);">Prieiga suteikta</span>
+          `}
+        </div>
+      `;
+    }).join("");
+
+    list.querySelectorAll(".btn-approve-request").forEach((btn) => {
+      btn.onclick = async (e) => {
+        e.preventDefault();
+        const email = btn.getAttribute("data-req-email");
+        const name = btn.getAttribute("data-req-name");
+        btn.disabled = true;
+        btn.textContent = "Tvirtinama...";
+
+        try {
+          const grantRes = await fetch("/api/admin/grant-access", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              email,
+              name,
+              role: "admin",
+              adminEmail: (auth && auth.currentUser) ? auth.currentUser.email : PRIMARY_SUPERADMIN_EMAIL
+            })
+          });
+          const grantData = await grantRes.json();
+          if (!grantRes.ok || !grantData.success) {
+            throw new Error(grantData.error || "Nepavyko suteikti prieigos");
+          }
+          showToast("Prieiga sėkmingai suteikta! Pranešimas išsiųstas.");
+          loadAccessRequests();
+          subscribeUsers();
+        } catch (err) {
+          showToast(err.message, "error");
+          btn.disabled = false;
+          btn.textContent = "Suteikti prieigą";
+        }
+      };
+    });
+  } catch (err) {
+    console.warn("loadAccessRequests error:", err);
+    if (loading) loading.classList.add("d-none");
+  }
 }

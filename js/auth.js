@@ -12,10 +12,6 @@ function escapeHtml(str) {
 }
 
 function displayAuthError(targetElement, err, defaultMsg = "Autentifikavimo klaida") {
-  if (!targetElement) return;
-  targetElement.classList.remove("d-none");
-  targetElement.style.display = "block";
-
   let errorCode = "";
   let rawMessage = "";
 
@@ -33,49 +29,53 @@ function displayAuthError(targetElement, err, defaultMsg = "Autentifikavimo klai
     case "auth/invalid-credential":
     case "auth/invalid-login-credentials":
     case "auth/wrong-password":
-      humanExplanation = "Neteisingas slaptažodis arba el. pašto adresas. Jeigu pamiršote arba dar nesukūrėte slaptažodžio, pasinaudokite mygtuku „Nustatyti / Pamiršau slaptažodį“ žemiau arba prisijunkite su Google paskyra.";
+      humanExplanation = "Neteisingas el. paštas arba slaptažodis.";
       break;
     case "auth/user-not-found":
-      humanExplanation = "Paskyra su šiuo el. pašto adresu nerasta Firebase sistemoje. Galite prisijungti su Google paskyra arba paspausti „Nustatyti / Pamiršau slaptažodį“.";
+      humanExplanation = "Vartotojas nerastas. Patikrinkite el. paštą.";
       break;
     case "auth/invalid-email":
-      humanExplanation = "Neteisingas el. pašto adreso formatas. Patikrinkite įvestą adresą.";
+      humanExplanation = "Neteisingas el. pašto adreso formatas.";
       break;
     case "auth/too-many-requests":
-      humanExplanation = "Prieiga laikinai užblokuota dėl per didelio nesėkmingų bandymų skaičiaus. Bandykite vėliau arba atkurkite slaptažodį.";
+      humanExplanation = "Per daug bandymų. Prašome pabandyti vėliau.";
       break;
     case "auth/network-request-failed":
-      humanExplanation = "Tinklo ryšio klaida. Patikrinkite interneto ryšį ir bandykite vėl.";
+      humanExplanation = "Tinklo ryšio sutrikimas. Patikrinkite internetą.";
       break;
     case "auth/popup-blocked":
-      humanExplanation = "Naršyklė užblokavo Google iškylantįjį langą. Leiskite iškylančius langus („Pop-up“) šiam puslapiui arba bandykite dar kartą.";
+      humanExplanation = "Naršyklė užblokavo iškylantįjį langą.";
       break;
     case "auth/popup-closed-by-user":
-      humanExplanation = "Google prisijungimo langas buvo uždarytas prieš užbaigiant veiksmą.";
+      humanExplanation = "Prisijungimo langas buvo uždarytas.";
       break;
     case "auth/cancelled-popup-request":
-      humanExplanation = "Prisijungimo užklausa buvo atšaukta.";
+      humanExplanation = "Prisijungimas atšauktas.";
       break;
     case "auth/user-disabled":
-      humanExplanation = "Ši paskyra yra deaktyvuota administratoriaus.";
+      humanExplanation = "Paskyra yra deaktyvuota administratoriaus.";
       break;
     case "auth/operation-not-allowed":
-      humanExplanation = "Šis prisijungimo būdas nėra įjungtas Firebase Console valdymo skyde.";
+      humanExplanation = "Prisijungimo būdas laikinai nepasiekiamas.";
       break;
     default:
       humanExplanation = rawMessage || defaultMsg;
   }
 
-  targetElement.innerHTML = `
-    <div style="display:flex; align-items:flex-start; gap:8px;">
-      <span style="font-size:1.1rem; line-height:1.2;">⚠️</span>
-      <div style="flex:1;">
-        <div style="font-weight:600; margin-bottom:3px;">${escapeHtml(humanExplanation)}</div>
-        ${errorCode ? `<div style="font-size:0.75rem; opacity:0.85; font-family:monospace; margin-top:3px;">Sistemos kodas: ${escapeHtml(errorCode)}</div>` : ""}
-        ${rawMessage && rawMessage !== humanExplanation ? `<div style="font-size:0.75rem; opacity:0.75; margin-top:2px;">${escapeHtml(rawMessage)}</div>` : ""}
+  // Display short, concise toast popup
+  showToast(humanExplanation, "error");
+
+  // Display clean concise inline alert
+  if (targetElement) {
+    targetElement.classList.remove("d-none");
+    targetElement.style.display = "block";
+    targetElement.innerHTML = `
+      <div style="display:flex; align-items:center; gap:8px; font-weight:500;">
+        <span style="font-size:1rem; line-height:1;">⚠️</span>
+        <span style="flex:1;">${escapeHtml(humanExplanation)}</span>
       </div>
-    </div>
-  `;
+    `;
+  }
 }
 
 function clearAuthError(targetElement) {
@@ -110,12 +110,27 @@ export function initAuth(options = {}) {
 
   const loginFormWrapper = document.getElementById("loginFormWrapper");
   const forgotFormWrapper = document.getElementById("forgotFormWrapper");
+  const accessRequestFormWrapper = document.getElementById("accessRequestFormWrapper");
   const showForgotBtn = document.getElementById("showForgotBtn");
+  const showAccessRequestBtn = document.getElementById("showAccessRequestBtn");
   const backToLoginBtn = document.getElementById("backToLoginBtn");
+  const backFromRequestBtn = document.getElementById("backFromRequestBtn");
   const sendResetLinkBtn = document.getElementById("sendResetLinkBtn");
   const resetEmail = document.getElementById("resetEmail");
   const resetErrMsg = document.getElementById("resetErrMsg");
   const resetSuccessMsg = document.getElementById("resetSuccessMsg");
+
+  const accessRequestForm = document.getElementById("accessRequestForm");
+  const submitAccessRequestBtn = document.getElementById("submitAccessRequestBtn");
+  const reqFullName = document.getElementById("reqFullName");
+  const reqEmail = document.getElementById("reqEmail");
+  const reqReason = document.getElementById("reqReason");
+  const reqErrMsg = document.getElementById("reqErrMsg");
+  const reqSuccessMsg = document.getElementById("reqSuccessMsg");
+
+  const currentUserBadge = document.getElementById("currentUserBadge");
+  const currentUserName = document.getElementById("currentUserName");
+  const currentUserRole = document.getElementById("currentUserRole");
 
   const auth = getFirebaseAuth() || defaultAuth;
 
@@ -188,7 +203,7 @@ export function initAuth(options = {}) {
 
     const activeAuth = getFirebaseAuth() || auth;
     if (!activeAuth) {
-      displayAuthError(authErrMsg, "Autentifikavimo tarnyba kraunasi. Palaukite akimirką ir bandykite vėl.");
+      displayAuthError(authErrMsg, "Autentifikavimo tarnyba kraunasi. Palaukite akimirką.");
       return;
     }
 
@@ -255,6 +270,7 @@ export function initAuth(options = {}) {
     showForgotBtn.onclick = (e) => {
       if (e) e.preventDefault();
       if (loginFormWrapper) loginFormWrapper.classList.add("d-none");
+      if (accessRequestFormWrapper) accessRequestFormWrapper.classList.add("d-none");
       if (forgotFormWrapper) forgotFormWrapper.classList.remove("d-none");
       clearAuthError(resetErrMsg);
       if (resetSuccessMsg) {
@@ -272,12 +288,123 @@ export function initAuth(options = {}) {
     backToLoginBtn.onclick = (e) => {
       if (e) e.preventDefault();
       if (forgotFormWrapper) forgotFormWrapper.classList.add("d-none");
+      if (accessRequestFormWrapper) accessRequestFormWrapper.classList.add("d-none");
       if (loginFormWrapper) loginFormWrapper.classList.remove("d-none");
       clearAuthError(authErrMsg);
     };
   }
 
-  // 5. Send Password Reset Link Handler
+  // 5. Toggle Access Request Views
+  if (showAccessRequestBtn) {
+    showAccessRequestBtn.onclick = (e) => {
+      if (e) e.preventDefault();
+      if (loginFormWrapper) loginFormWrapper.classList.add("d-none");
+      if (forgotFormWrapper) forgotFormWrapper.classList.add("d-none");
+      if (accessRequestFormWrapper) accessRequestFormWrapper.classList.remove("d-none");
+      clearAuthError(reqErrMsg);
+      if (reqSuccessMsg) {
+        reqSuccessMsg.classList.add("d-none");
+        reqSuccessMsg.style.display = "none";
+        reqSuccessMsg.textContent = "";
+      }
+      if (loginEmail && reqEmail && loginEmail.value) {
+        reqEmail.value = loginEmail.value.trim();
+      }
+    };
+  }
+
+  if (backFromRequestBtn) {
+    backFromRequestBtn.onclick = (e) => {
+      if (e) e.preventDefault();
+      if (accessRequestFormWrapper) accessRequestFormWrapper.classList.add("d-none");
+      if (forgotFormWrapper) forgotFormWrapper.classList.add("d-none");
+      if (loginFormWrapper) loginFormWrapper.classList.remove("d-none");
+      clearAuthError(authErrMsg);
+    };
+  }
+
+  // 6. Access Request Submission Handler
+  const doSubmitAccessRequest = async () => {
+    clearAuthError(reqErrMsg);
+    if (reqSuccessMsg) {
+      reqSuccessMsg.classList.add("d-none");
+      reqSuccessMsg.style.display = "none";
+      reqSuccessMsg.textContent = "";
+    }
+
+    const name = (reqFullName ? reqFullName.value : "").trim();
+    const email = (reqEmail ? reqEmail.value : "").trim().toLowerCase();
+    const reason = (reqReason ? reqReason.value : "").trim();
+
+    if (!name || !email || !reason) {
+      displayAuthError(reqErrMsg, "Užpildykite visus privalomus laukelius (vardą, el. paštą ir priežastį).");
+      return;
+    }
+
+    if (!email.includes("@") || !email.includes(".")) {
+      displayAuthError(reqErrMsg, "Nurodykite teisingą el. pašto adresą.");
+      return;
+    }
+
+    const btn = submitAccessRequestBtn;
+    const originalText = btn ? btn.innerHTML : "";
+    if (btn) {
+      btn.disabled = true;
+      btn.innerHTML = `
+        <span style="display:inline-flex; align-items:center; gap:8px;">
+          <span style="display:inline-block; width:16px; height:16px; border:2px solid rgba(255,255,255,0.3); border-top-color:#fff; border-radius:50%; animation:spin 0.8s linear infinite;"></span>
+          <span>Pateikiama užklausa...</span>
+        </span>
+      `;
+    }
+
+    try {
+      const res = await fetch("/api/access-request", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email, reason })
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || "Nepavyko pateikti užklausos.");
+      }
+
+      showToast("Prieigos užklausa sėkmingai pateikta!");
+      if (reqSuccessMsg) {
+        reqSuccessMsg.classList.remove("d-none");
+        reqSuccessMsg.style.display = "block";
+        reqSuccessMsg.textContent = "Užklausa sėkmingai išsiųsta! Kai prieiga bus patvirtinta, gausite pranešimą.";
+      }
+      if (reqFullName) reqFullName.value = "";
+      if (reqEmail) reqEmail.value = "";
+      if (reqReason) reqReason.value = "";
+    } catch (err) {
+      console.error("Access request submission error:", err);
+      displayAuthError(reqErrMsg, err.message || "Nepavyko pateikti užklausos.");
+    } finally {
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = originalText;
+      }
+    }
+  };
+
+  if (submitAccessRequestBtn) {
+    submitAccessRequestBtn.onclick = (e) => {
+      if (e) e.preventDefault();
+      doSubmitAccessRequest();
+    };
+  }
+
+  if (accessRequestForm) {
+    accessRequestForm.onsubmit = (e) => {
+      if (e) e.preventDefault();
+      doSubmitAccessRequest();
+      return false;
+    };
+  }
+
+  // 7. Send Password Reset Link Handler
   if (sendResetLinkBtn) {
     sendResetLinkBtn.onclick = async (e) => {
       if (e) e.preventDefault();
@@ -323,7 +450,7 @@ export function initAuth(options = {}) {
     };
   }
 
-  // 6. Logout Handler
+  // 8. Logout Handler
   if (logoutBtn) {
     logoutBtn.onclick = async (e) => {
       if (e) e.preventDefault();
@@ -337,7 +464,7 @@ export function initAuth(options = {}) {
     };
   }
 
-  // 7. Listen to Auth State Changes
+  // 9. Listen to Auth State Changes
   if (!isAuthStateListenerAttached && auth && typeof auth.onAuthStateChanged === "function") {
     isAuthStateListenerAttached = true;
     auth.onAuthStateChanged(async (user) => {
@@ -365,6 +492,7 @@ export function initAuth(options = {}) {
         // Check if user is blocked / suspended
         if (userDoc && userDoc.status === "suspended" && !isSuperAdmin) {
           auth.signOut();
+          if (currentUserBadge) currentUserBadge.classList.add("d-none");
           if (loginSection) loginSection.classList.remove("d-none");
           if (panelSection) panelSection.classList.add("d-none");
           displayAuthError(authErrMsg, "Prieiga apribota: ši paskyra yra užblokuota administratoriaus.");
@@ -391,17 +519,39 @@ export function initAuth(options = {}) {
               console.warn("UID doc sync notice:", syncErr.message);
             }
           }
+
+          // Update user identity pill in topbar
+          if (currentUserBadge) {
+            currentUserBadge.classList.remove("d-none");
+            if (currentUserName) {
+              if (isSuperAdmin) {
+                currentUserName.textContent = "Pagrindinis Administratorius";
+              } else if (emailLower === "karina.brdar@gmail.com") {
+                currentUserName.textContent = "Karina Brdar";
+              } else if (userDoc && (userDoc.name || userDoc.surname)) {
+                currentUserName.textContent = `${userDoc.name || ""} ${userDoc.surname || ""}`.trim();
+              } else {
+                currentUserName.textContent = user.displayName || emailLower.split("@")[0];
+              }
+            }
+            if (currentUserRole) {
+              currentUserRole.textContent = isSuperAdmin ? "Super Admin" : "Administratorius";
+            }
+          }
+
           if (loginSection) loginSection.classList.add("d-none");
           if (panelSection) panelSection.classList.remove("d-none");
           clearAuthError(authErrMsg);
           currentOnLoginSuccess(user);
         } else {
           auth.signOut();
+          if (currentUserBadge) currentUserBadge.classList.add("d-none");
           if (loginSection) loginSection.classList.remove("d-none");
           if (panelSection) panelSection.classList.add("d-none");
-          displayAuthError(authErrMsg, `Prieiga apribota: vartotojui ${emailLower} nesuteiktos administratoriaus ar komandos teisės.`);
+          displayAuthError(authErrMsg, `Prieiga apribota: vartotojui ${emailLower} nesuteiktos administratoriaus teisės.`);
         }
       } else {
+        if (currentUserBadge) currentUserBadge.classList.add("d-none");
         if (loginSection) loginSection.classList.remove("d-none");
         if (panelSection) panelSection.classList.add("d-none");
         currentOnLogout();
