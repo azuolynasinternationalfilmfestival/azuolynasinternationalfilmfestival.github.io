@@ -21,50 +21,91 @@ if (typeof firebase !== "undefined") {
 
 function getFirestoreInstance() {
   if (typeof firebase === "undefined" || typeof firebase.firestore !== "function") return null;
-  const dbId = firebaseConfig.firestoreDatabaseId;
-  const origFirestore = firebase.firestore;
+  try {
+    const dbId = firebaseConfig.firestoreDatabaseId;
+    const origFirestore = firebase.firestore;
 
-  if (dbId && dbId !== "(default)" && typeof firebase.app === "function") {
-    try {
-      const app = firebase.app();
-      if (app && app._delegate && app._delegate.container) {
-        const modularDb = app._delegate.container.getProvider("firestore").getImmediate({ identifier: dbId });
-        const appCompat = app._delegate.container.getProvider("app-compat").getImmediate();
-        const compatDb = (origFirestore && origFirestore.Firestore)
-          ? new origFirestore.Firestore(appCompat, modularDb)
-          : null;
+    if (dbId && dbId !== "(default)" && typeof firebase.app === "function") {
+      try {
+        const app = firebase.app();
+        if (app && app._delegate && app._delegate.container) {
+          const modularDb = app._delegate.container.getProvider("firestore").getImmediate({ identifier: dbId });
+          const appCompat = app._delegate.container.getProvider("app-compat").getImmediate();
+          const compatDb = (origFirestore && origFirestore.Firestore)
+            ? new origFirestore.Firestore(appCompat, modularDb)
+            : null;
 
-        if (compatDb) {
-          const customFirestore = function(targetApp) {
-            if (targetApp && targetApp !== app && typeof origFirestore === "function") {
-              return origFirestore(targetApp);
-            }
+          if (compatDb) {
+            const customFirestore = function(targetApp) {
+              if (targetApp && targetApp !== app && typeof origFirestore === "function") {
+                return origFirestore(targetApp);
+              }
+              return compatDb;
+            };
+            Object.assign(customFirestore, origFirestore);
+            firebase.firestore = customFirestore;
+
+            app.firestore = function(targetId) {
+              if (targetId && targetId !== dbId && typeof origFirestore === "function") {
+                return origFirestore(app);
+              }
+              return compatDb;
+            };
+
             return compatDb;
-          };
-          Object.assign(customFirestore, origFirestore);
-          firebase.firestore = customFirestore;
-
-          app.firestore = function(targetId) {
-            if (targetId && targetId !== dbId && typeof origFirestore === "function") {
-              return origFirestore(app);
-            }
-            return compatDb;
-          };
-
-          return compatDb;
+          }
         }
+      } catch (e) {
+        console.warn("Custom databaseId initialization notice:", e);
       }
-    } catch (e) {
-      console.warn("Custom databaseId initialization notice:", e);
     }
+    return firebase.firestore();
+  } catch (err) {
+    console.warn("Firestore initialization notice:", err);
+    return null;
   }
-  return firebase.firestore();
 }
 
 export function getFirebaseAuth() {
   if (typeof firebase !== "undefined" && typeof firebase.auth === "function") {
     try {
+      if (!firebase.apps || !firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+      }
       return firebase.auth();
+    } catch (e) {
+      console.warn("Auth initialization notice:", e);
+      return null;
+    }
+  }
+  return null;
+}
+
+export function getFirebaseFirestore() {
+  return getFirestoreInstance();
+}
+
+export function getFirebaseStorage() {
+  if (typeof firebase !== "undefined" && typeof firebase.storage === "function") {
+    try {
+      if (!firebase.apps || !firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+      }
+      return firebase.storage();
+    } catch (e) {
+      return null;
+    }
+  }
+  return null;
+}
+
+export function getFirebaseFunctions() {
+  if (typeof firebase !== "undefined" && typeof firebase.functions === "function") {
+    try {
+      if (!firebase.apps || !firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+      }
+      return firebase.functions("europe-west1");
     } catch (e) {
       return null;
     }
@@ -74,8 +115,8 @@ export function getFirebaseAuth() {
 
 export const auth = getFirebaseAuth();
 export const db = getFirestoreInstance();
-export const storage = (typeof firebase !== "undefined" && typeof firebase.storage === "function") ? firebase.storage() : null;
-export const functions = (typeof firebase !== "undefined" && typeof firebase.functions === "function") ? firebase.functions("europe-west1") : null;
+export const storage = getFirebaseStorage();
+export const functions = getFirebaseFunctions();
 
 export const PRIMARY_SUPERADMIN_EMAIL = "azuolynasfilmfestival@gmail.com";
 

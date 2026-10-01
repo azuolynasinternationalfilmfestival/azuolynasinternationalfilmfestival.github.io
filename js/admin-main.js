@@ -25,14 +25,7 @@ import {
 import { initInviteModal } from "./invite-modal.js";
 
 function bootAdmin() {
-  try { initSubmissions(); } catch (e) { console.error("initSubmissions error:", e); }
-  try { initEditions(); } catch (e) { console.error("initEditions error:", e); }
-  try { initArchive(); } catch (e) { console.error("initArchive error:", e); }
-  try { initUsers(); } catch (e) { console.error("initUsers error:", e); }
-  try { initInviteModal(); } catch (e) { console.error("initInviteModal error:", e); }
-  try { initSettings(); } catch (e) { console.error("initSettings error:", e); }
-  try { initTabNavigation(); } catch (e) { console.error("initTabNavigation error:", e); }
-
+  // 1. Initialize Authentication FIRST so the login interface is immediately responsive
   try {
     initAuth({
       onLoginSuccess: async (user) => {
@@ -61,6 +54,15 @@ function bootAdmin() {
   } catch (authInitErr) {
     console.error("Critical error in initAuth:", authInitErr);
   }
+
+  // 2. Initialize management panel tabs and subsystems
+  try { initSubmissions(); } catch (e) { console.error("initSubmissions error:", e); }
+  try { initEditions(); } catch (e) { console.error("initEditions error:", e); }
+  try { initArchive(); } catch (e) { console.error("initArchive error:", e); }
+  try { initUsers(); } catch (e) { console.error("initUsers error:", e); }
+  try { initInviteModal(); } catch (e) { console.error("initInviteModal error:", e); }
+  try { initSettings(); } catch (e) { console.error("initSettings error:", e); }
+  try { initTabNavigation(); } catch (e) { console.error("initTabNavigation error:", e); }
 }
 
 if (document.readyState === "loading") {

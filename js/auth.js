@@ -1,7 +1,102 @@
 import { auth as defaultAuth, getFirebaseAuth, db, AUTHORIZED_ADMIN_EMAILS, PRIMARY_SUPERADMIN_EMAIL } from "./firebase-init.js";
 import { showToast } from "./ui-feedback.js";
 
-export function initAuth({ onLoginSuccess, onLogout }) {
+function escapeHtml(str) {
+  if (str === null || str === undefined) return "";
+  return String(str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+function displayAuthError(targetElement, err, defaultMsg = "Autentifikavimo klaida") {
+  if (!targetElement) return;
+  targetElement.classList.remove("d-none");
+  targetElement.style.display = "block";
+
+  let errorCode = "";
+  let rawMessage = "";
+
+  if (typeof err === "string") {
+    rawMessage = err;
+  } else if (err && typeof err === "object") {
+    errorCode = err.code || "";
+    rawMessage = err.message || String(err);
+  } else {
+    rawMessage = defaultMsg;
+  }
+
+  let humanExplanation = "";
+  switch (errorCode) {
+    case "auth/invalid-credential":
+    case "auth/invalid-login-credentials":
+    case "auth/wrong-password":
+      humanExplanation = "Neteisingas slaptažodis arba el. pašto adresas. Jeigu pamiršote arba dar nesukūrėte slaptažodžio, pasinaudokite mygtuku „Nustatyti / Pamiršau slaptažodį“ žemiau arba prisijunkite su Google paskyra.";
+      break;
+    case "auth/user-not-found":
+      humanExplanation = "Paskyra su šiuo el. pašto adresu nerasta Firebase sistemoje. Galite prisijungti su Google paskyra arba paspausti „Nustatyti / Pamiršau slaptažodį“.";
+      break;
+    case "auth/invalid-email":
+      humanExplanation = "Neteisingas el. pašto adreso formatas. Patikrinkite įvestą adresą.";
+      break;
+    case "auth/too-many-requests":
+      humanExplanation = "Prieiga laikinai užblokuota dėl per didelio nesėkmingų bandymų skaičiaus. Bandykite vėliau arba atkurkite slaptažodį.";
+      break;
+    case "auth/network-request-failed":
+      humanExplanation = "Tinklo ryšio klaida. Patikrinkite interneto ryšį ir bandykite vėl.";
+      break;
+    case "auth/popup-blocked":
+      humanExplanation = "Naršyklė užblokavo Google iškylantįjį langą. Leiskite iškylančius langus („Pop-up“) šiam puslapiui arba bandykite dar kartą.";
+      break;
+    case "auth/popup-closed-by-user":
+      humanExplanation = "Google prisijungimo langas buvo uždarytas prieš užbaigiant veiksmą.";
+      break;
+    case "auth/cancelled-popup-request":
+      humanExplanation = "Prisijungimo užklausa buvo atšaukta.";
+      break;
+    case "auth/user-disabled":
+      humanExplanation = "Ši paskyra yra deaktyvuota administratoriaus.";
+      break;
+    case "auth/operation-not-allowed":
+      humanExplanation = "Šis prisijungimo būdas nėra įjungtas Firebase Console valdymo skyde.";
+      break;
+    default:
+      humanExplanation = rawMessage || defaultMsg;
+  }
+
+  targetElement.innerHTML = `
+    <div style="display:flex; align-items:flex-start; gap:8px;">
+      <span style="font-size:1.1rem; line-height:1.2;">⚠️</span>
+      <div style="flex:1;">
+        <div style="font-weight:600; margin-bottom:3px;">${escapeHtml(humanExplanation)}</div>
+        ${errorCode ? `<div style="font-size:0.75rem; opacity:0.85; font-family:monospace; margin-top:3px;">Sistemos kodas: ${escapeHtml(errorCode)}</div>` : ""}
+        ${rawMessage && rawMessage !== humanExplanation ? `<div style="font-size:0.75rem; opacity:0.75; margin-top:2px;">${escapeHtml(rawMessage)}</div>` : ""}
+      </div>
+    </div>
+  `;
+}
+
+function clearAuthError(targetElement) {
+  if (!targetElement) return;
+  targetElement.classList.add("d-none");
+  targetElement.style.display = "none";
+  targetElement.innerHTML = "";
+}
+
+let currentOnLoginSuccess = () => {};
+let currentOnLogout = () => {};
+let isAuthStateListenerAttached = false;
+
+export function initAuth(options = {}) {
+  if (typeof options.onLoginSuccess === "function") {
+    currentOnLoginSuccess = options.onLoginSuccess;
+  }
+  if (typeof options.onLogout === "function") {
+    currentOnLogout = options.onLogout;
+  }
+
   const loginSection = document.getElementById("loginSection");
   const panelSection = document.getElementById("panelSection");
   const adminAuthForm = document.getElementById("adminAuthForm");
@@ -24,26 +119,27 @@ export function initAuth({ onLoginSuccess, onLogout }) {
 
   const auth = getFirebaseAuth() || defaultAuth;
 
-  // Toggle Password Visibility
+  // 1. Password Visibility Toggle
   if (togglePassBtn && loginPassword) {
-    togglePassBtn.addEventListener("click", (e) => {
-      e.preventDefault();
+    togglePassBtn.onclick = (e) => {
+      if (e) e.preventDefault();
       const isPassword = loginPassword.type === "password";
       loginPassword.type = isPassword ? "text" : "password";
       togglePassBtn.textContent = isPassword ? "Slėpti slaptažodį" : "Rodyti slaptažodį";
-    });
+    };
   }
 
-  // Google Sign-In Handler
+  // 2. Google Sign-In Handler
   if (googleLoginBtn) {
-    googleLoginBtn.addEventListener("click", async (e) => {
-      e.preventDefault();
-      authErrMsg.classList.add("d-none");
+    googleLoginBtn.onclick = async (e) => {
+      if (e) e.preventDefault();
+      clearAuthError(authErrMsg);
       const originalContent = googleLoginBtn.innerHTML;
       googleLoginBtn.disabled = true;
       googleLoginBtn.innerHTML = `
         <span style="display:inline-flex; align-items:center; gap:8px;">
-          Jungiamasi prie Google...
+          <span style="display:inline-block; width:16px; height:16px; border:2px solid rgba(111,165,138,0.3); border-top-color:var(--accent-light); border-radius:50%; animation:spin 0.8s linear infinite;"></span>
+          <span>Jungiamasi prie Google...</span>
         </span>
       `;
 
@@ -65,25 +161,185 @@ export function initAuth({ onLoginSuccess, onLogout }) {
         }
         showToast("Sėkmingai prisijungta su Google paskyra!");
       } catch (err) {
-        console.error("Google login error:", err);
-        authErrMsg.classList.remove("d-none");
-        if (err.code === "auth/popup-blocked") {
-          authErrMsg.textContent = "Naršyklė užblokavo iškylantįjį langą. Leiskite „Pop-up“ langus šioje naršyklėje ir bandykite vėl.";
-        } else if (err.code === "auth/popup-closed-by-user") {
-          authErrMsg.textContent = "Google prisijungimo langas buvo uždarytas prieš užbaigiant veiksmą.";
-        } else if (err.code === "auth/cancelled-popup-request") {
-          authErrMsg.textContent = "Užklausa buvo atšaukta. Bandykite dar kartą.";
-        } else {
-          authErrMsg.textContent = "Klaida prisijungiant su Google: " + (err.message || err.code);
-        }
+        console.error("Google sign-in error:", err);
+        displayAuthError(authErrMsg, err, "Nepavyko prisijungti su Google");
       } finally {
         googleLoginBtn.disabled = false;
         googleLoginBtn.innerHTML = originalContent;
       }
-    });
+    };
   }
 
-  if (auth && typeof auth.onAuthStateChanged === "function") {
+  // 3. Email & Password Sign-in logic
+  const doLogin = async () => {
+    clearAuthError(authErrMsg);
+
+    const emailElem = loginEmail || document.getElementById("loginEmail");
+    const passElem = loginPassword || document.getElementById("loginPassword");
+    const submitBtn = loginSubmitBtn || document.getElementById("loginSubmitBtn");
+
+    const email = (emailElem ? emailElem.value : "").trim().toLowerCase();
+    const pass = passElem ? passElem.value : "";
+
+    if (!email || !pass) {
+      displayAuthError(authErrMsg, "Įveskite el. pašto adresą ir slaptažodį.");
+      return;
+    }
+
+    const activeAuth = getFirebaseAuth() || auth;
+    if (!activeAuth) {
+      displayAuthError(authErrMsg, "Autentifikavimo tarnyba kraunasi. Palaukite akimirką ir bandykite vėl.");
+      return;
+    }
+
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = `
+        <span style="display:inline-flex; align-items:center; gap:8px;">
+          <span style="display:inline-block; width:16px; height:16px; border:2px solid rgba(255,255,255,0.3); border-top-color:#fff; border-radius:50%; animation:spin 0.8s linear infinite;"></span>
+          <span>Jungiamasi...</span>
+        </span>
+      `;
+    }
+
+    try {
+      await activeAuth.signInWithEmailAndPassword(email, pass);
+      showToast("Sėkmingai prisijungta!");
+    } catch (err) {
+      console.error("Email sign-in error:", err);
+      displayAuthError(authErrMsg, err, "Nepavyko prisijungti prie valdymo skydo");
+    } finally {
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = `<span>Prisijungti</span>`;
+      }
+    }
+  };
+
+  // Bind Submit Button & Enter keys
+  if (loginSubmitBtn) {
+    loginSubmitBtn.onclick = (e) => {
+      if (e) e.preventDefault();
+      doLogin();
+    };
+  }
+
+  if (adminAuthForm) {
+    adminAuthForm.onsubmit = (e) => {
+      if (e) e.preventDefault();
+      doLogin();
+      return false;
+    };
+  }
+
+  if (loginEmail) {
+    loginEmail.onkeydown = (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        doLogin();
+      }
+    };
+  }
+
+  if (loginPassword) {
+    loginPassword.onkeydown = (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        doLogin();
+      }
+    };
+  }
+
+  // 4. Toggle Forgot Password Views
+  if (showForgotBtn) {
+    showForgotBtn.onclick = (e) => {
+      if (e) e.preventDefault();
+      if (loginFormWrapper) loginFormWrapper.classList.add("d-none");
+      if (forgotFormWrapper) forgotFormWrapper.classList.remove("d-none");
+      clearAuthError(resetErrMsg);
+      if (resetSuccessMsg) {
+        resetSuccessMsg.classList.add("d-none");
+        resetSuccessMsg.style.display = "none";
+        resetSuccessMsg.textContent = "";
+      }
+      if (loginEmail && resetEmail && loginEmail.value) {
+        resetEmail.value = loginEmail.value.trim();
+      }
+    };
+  }
+
+  if (backToLoginBtn) {
+    backToLoginBtn.onclick = (e) => {
+      if (e) e.preventDefault();
+      if (forgotFormWrapper) forgotFormWrapper.classList.add("d-none");
+      if (loginFormWrapper) loginFormWrapper.classList.remove("d-none");
+      clearAuthError(authErrMsg);
+    };
+  }
+
+  // 5. Send Password Reset Link Handler
+  if (sendResetLinkBtn) {
+    sendResetLinkBtn.onclick = async (e) => {
+      if (e) e.preventDefault();
+      const email = (resetEmail ? resetEmail.value : document.getElementById("resetEmail")?.value || "").trim().toLowerCase();
+      clearAuthError(resetErrMsg);
+      if (resetSuccessMsg) {
+        resetSuccessMsg.classList.add("d-none");
+        resetSuccessMsg.style.display = "none";
+        resetSuccessMsg.textContent = "";
+      }
+
+      if (!email) {
+        displayAuthError(resetErrMsg, "Įveskite autorizuotą el. pašto adresą.");
+        return;
+      }
+
+      sendResetLinkBtn.disabled = true;
+      const originalResetText = sendResetLinkBtn.innerHTML;
+      sendResetLinkBtn.innerHTML = `
+        <span style="display:inline-flex; align-items:center; gap:8px;">
+          <span style="display:inline-block; width:16px; height:16px; border:2px solid rgba(255,255,255,0.3); border-top-color:#fff; border-radius:50%; animation:spin 0.8s linear infinite;"></span>
+          <span>Siunčiama nuoroda...</span>
+        </span>
+      `;
+
+      try {
+        const activeAuth = getFirebaseAuth() || auth;
+        if (!activeAuth) throw new Error("Firebase Auth tarnyba nepasiekiama.");
+        await activeAuth.sendPasswordResetEmail(email);
+        if (resetSuccessMsg) {
+          resetSuccessMsg.classList.remove("d-none");
+          resetSuccessMsg.style.display = "block";
+          resetSuccessMsg.textContent = `Nuoroda slaptažodžio nustatymui išsiųsta į ${email}. Pasitikrinkite savo pašto dėžutę!`;
+        }
+        showToast("Slaptažodžio atstatymo nuoroda išsiųsta!");
+      } catch (err) {
+        console.error("Password reset error:", err);
+        displayAuthError(resetErrMsg, err, "Nepavyko išsiųsti nuorodos");
+      } finally {
+        sendResetLinkBtn.disabled = false;
+        sendResetLinkBtn.innerHTML = originalResetText;
+      }
+    };
+  }
+
+  // 6. Logout Handler
+  if (logoutBtn) {
+    logoutBtn.onclick = async (e) => {
+      if (e) e.preventDefault();
+      try {
+        const activeAuth = getFirebaseAuth() || auth;
+        if (activeAuth) await activeAuth.signOut();
+        showToast("Sėkmingai atsijungta.");
+      } catch (err) {
+        showToast("Klaida atsijungiant: " + err.message, "error");
+      }
+    };
+  }
+
+  // 7. Listen to Auth State Changes
+  if (!isAuthStateListenerAttached && auth && typeof auth.onAuthStateChanged === "function") {
+    isAuthStateListenerAttached = true;
     auth.onAuthStateChanged(async (user) => {
       if (user) {
         const emailLower = (user.email || "").toLowerCase();
@@ -109,10 +365,9 @@ export function initAuth({ onLoginSuccess, onLogout }) {
         // Check if user is blocked / suspended
         if (userDoc && userDoc.status === "suspended" && !isSuperAdmin) {
           auth.signOut();
-          loginSection.classList.remove("d-none");
-          panelSection.classList.add("d-none");
-          authErrMsg.classList.remove("d-none");
-          authErrMsg.textContent = "Prieiga apribota: ši paskyra yra užblokuota administratoriaus.";
+          if (loginSection) loginSection.classList.remove("d-none");
+          if (panelSection) panelSection.classList.add("d-none");
+          displayAuthError(authErrMsg, "Prieiga apribota: ši paskyra yra užblokuota administratoriaus.");
           return;
         }
 
@@ -136,183 +391,38 @@ export function initAuth({ onLoginSuccess, onLogout }) {
               console.warn("UID doc sync notice:", syncErr.message);
             }
           }
-          loginSection.classList.add("d-none");
-          panelSection.classList.remove("d-none");
-          authErrMsg.classList.add("d-none");
-          onLoginSuccess(user);
+          if (loginSection) loginSection.classList.add("d-none");
+          if (panelSection) panelSection.classList.remove("d-none");
+          clearAuthError(authErrMsg);
+          currentOnLoginSuccess(user);
         } else {
           auth.signOut();
-          loginSection.classList.remove("d-none");
-          panelSection.classList.add("d-none");
-          authErrMsg.classList.remove("d-none");
-          authErrMsg.textContent = `Prieiga apribota: vartotojui ${emailLower} nesuteiktos administratoriaus ar komandos teisės.`;
+          if (loginSection) loginSection.classList.remove("d-none");
+          if (panelSection) panelSection.classList.add("d-none");
+          displayAuthError(authErrMsg, `Prieiga apribota: vartotojui ${emailLower} nesuteiktos administratoriaus ar komandos teisės.`);
         }
       } else {
-        loginSection.classList.remove("d-none");
-        panelSection.classList.add("d-none");
-        onLogout();
-      }
-    });
-  }
-
-  const doLogin = async () => {
-    authErrMsg.classList.add("d-none");
-    
-    const emailElem = loginEmail || document.getElementById("loginEmail");
-    const passElem = loginPassword || document.getElementById("loginPassword");
-    const submitBtn = loginSubmitBtn || document.getElementById("loginSubmitBtn");
-
-    const email = (emailElem ? emailElem.value : "").trim().toLowerCase();
-    const pass = passElem ? passElem.value : "";
-
-    if (!email || !pass) {
-      authErrMsg.classList.remove("d-none");
-      authErrMsg.textContent = "Įveskite el. pašto adresą ir slaptažodį.";
-      return;
-    }
-
-    const activeAuth = getFirebaseAuth() || auth;
-    if (!activeAuth) {
-      authErrMsg.classList.remove("d-none");
-      authErrMsg.textContent = "Autentifikavimo tarnyba kraunasi. Palaukite akimirką ir bandykite vėl.";
-      return;
-    }
-
-    if (submitBtn) {
-      submitBtn.disabled = true;
-      submitBtn.innerHTML = `<span>Jungiamasi...</span>`;
-    }
-
-    try {
-      await activeAuth.signInWithEmailAndPassword(email, pass);
-      showToast("Sėkmingai prisijungta!");
-    } catch (err) {
-      console.error("Sign-in error:", err);
-      authErrMsg.classList.remove("d-none");
-      
-      const code = err.code || "";
-      if (code === "auth/wrong-password" || code === "auth/invalid-login-credentials" || code === "auth/invalid-credential") {
-        authErrMsg.textContent = "Neteisingas slaptažodis arba el. paštas. Jeigu slaptažodžio dar nesate nustatę arba jį pamiršote, paspauskite „Nustatyti / Pamiršau slaptažodį“ žemiau arba prisijunkite su Google paskyra.";
-      } else if (code === "auth/user-not-found") {
-        authErrMsg.textContent = "Paskyra su šiuo el. pašto adresu nerasta. Spauskite „Nustatyti / Pamiršau slaptažodį“ arba prisijunkite su Google paskyra.";
-      } else if (code === "auth/invalid-email") {
-        authErrMsg.textContent = "Neteisingas el. pašto adreso formatas.";
-      } else if (code === "auth/too-many-requests") {
-        authErrMsg.textContent = "Per daug nesėkmingų bandymų. Saugumo sumetimais bandykite vėliau arba atstatykite slaptažodį.";
-      } else if (code === "auth/network-request-failed") {
-        authErrMsg.textContent = "Tinklo ryšio klaida. Patikrinkite interneto ryšį ir bandykite dar kartą.";
-      } else {
-        authErrMsg.textContent = err.message || "Nepavyko prisijungti. Patikrinkite duomenis.";
-      }
-    } finally {
-      if (submitBtn) {
-        submitBtn.disabled = false;
-        submitBtn.innerHTML = `<span>Prisijungti</span>`;
-      }
-    }
-  };
-
-  if (loginSubmitBtn) {
-    loginSubmitBtn.addEventListener("click", (e) => {
-      e.preventDefault();
-      doLogin();
-    });
-  }
-
-  if (adminAuthForm) {
-    adminAuthForm.addEventListener("submit", (e) => {
-      e.preventDefault();
-      doLogin();
-    });
-  }
-
-  if (loginEmail) {
-    loginEmail.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") {
-        e.preventDefault();
-        doLogin();
-      }
-    });
-  }
-
-  if (loginPassword) {
-    loginPassword.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") {
-        e.preventDefault();
-        doLogin();
-      }
-    });
-  }
-
-  if (showForgotBtn && backToLoginBtn) {
-    showForgotBtn.addEventListener("click", () => {
-      loginFormWrapper.classList.add("d-none");
-      forgotFormWrapper.classList.remove("d-none");
-      resetErrMsg.classList.add("d-none");
-      resetSuccessMsg.classList.add("d-none");
-      if (loginEmail && resetEmail && loginEmail.value) {
-        resetEmail.value = loginEmail.value.trim();
-      }
-    });
-
-    backToLoginBtn.addEventListener("click", () => {
-      forgotFormWrapper.classList.add("d-none");
-      loginFormWrapper.classList.remove("d-none");
-    });
-  }
-
-  if (sendResetLinkBtn) {
-    sendResetLinkBtn.addEventListener("click", async () => {
-      const email = resetEmail.value.trim().toLowerCase();
-      resetErrMsg.classList.add("d-none");
-      resetSuccessMsg.classList.add("d-none");
-
-      if (!email) {
-        resetErrMsg.classList.remove("d-none");
-        resetErrMsg.textContent = "Įveskite el. pašto adresą.";
-        return;
-      }
-
-      sendResetLinkBtn.disabled = true;
-      const originalResetText = sendResetLinkBtn.innerHTML;
-      sendResetLinkBtn.innerHTML = "<span>Siunčiama nuoroda...</span>";
-
-      try {
-        const activeAuth = getFirebaseAuth() || auth;
-        if (!activeAuth) throw new Error("Firebase Auth tarnyba nepasiekiama.");
-        await activeAuth.sendPasswordResetEmail(email);
-        resetSuccessMsg.classList.remove("d-none");
-        resetSuccessMsg.textContent = `Nuoroda slaptažodžio nustatymui išsiųsta į ${email}. Pasitikrinkite savo pašto dėžutę!`;
-        showToast("Slaptažodžio atstatymo nuoroda išsiųsta!");
-      } catch (err) {
-        resetErrMsg.classList.remove("d-none");
-        if (err.code === "auth/user-not-found") {
-          resetErrMsg.textContent = "Vartotojas dar nesukurtas Firebase sistemoje. Galite prisijungti su Google paskyra arba kreiptis į administratorių.";
-        } else {
-          resetErrMsg.textContent = "Nepavyko išsiųsti nuorodos: " + (err.message || err.code);
-        }
-      } finally {
-        sendResetLinkBtn.disabled = false;
-        sendResetLinkBtn.innerHTML = originalResetText;
-      }
-    });
-  }
-
-  if (logoutBtn) {
-    logoutBtn.addEventListener("click", async () => {
-      try {
-        const activeAuth = getFirebaseAuth() || auth;
-        if (activeAuth) await activeAuth.signOut();
-        showToast("Sėkmingai atsijungta.");
-      } catch (err) {
-        showToast("Klaida atsijungiant: " + err.message, "error");
+        if (loginSection) loginSection.classList.remove("d-none");
+        if (panelSection) panelSection.classList.add("d-none");
+        currentOnLogout();
       }
     });
   }
 }
 
+// Auto-bind auth triggers as soon as the DOM is available
+if (typeof document !== "undefined") {
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", () => {
+      initAuth();
+    });
+  } else {
+    initAuth();
+  }
+}
+
 export async function sendAdminInviteLink(targetEmail) {
-  const activeAuth = getFirebaseAuth() || auth;
+  const activeAuth = getFirebaseAuth() || defaultAuth;
   const currentUser = activeAuth ? activeAuth.currentUser : null;
   if (!currentUser) {
     throw new Error("Privalote būti prisijungęs.");

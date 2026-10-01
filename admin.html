@@ -24,7 +24,7 @@
         <form id="adminAuthForm" action="javascript:void(0);" onsubmit="event.preventDefault(); return false;">
           <div class="input-cell">
             <label for="loginEmail">Identifikatorius (El. paštas)</label>
-            <input type="email" id="loginEmail" class="field" autocomplete="username" placeholder="vardas@pavyzdys.lt" required>
+            <input type="email" id="loginEmail" class="field" autocomplete="username" placeholder="" required>
           </div>
           <div class="input-cell">
             <div style="display:flex; justify-content:space-between; align-items:center;">
@@ -60,7 +60,7 @@
           <label for="resetEmail">Autorizuotas el. pašto adresas</label>
           <input type="email" id="resetEmail" class="field" placeholder="" required>
         </div>
-        <div id="resetErrMsg" class="auth-error"></div>
+        <div id="resetErrMsg" class="auth-error d-none"></div>
         <div id="resetSuccessMsg" class="drop-alert success d-none" style="margin-bottom:14px;"></div>
         <button type="button" id="sendResetLinkBtn" class="btn-solid btn-full" style="margin-bottom:10px;">Gauti slaptažodžio nustatymo nuorodą</button>
         <button type="button" id="backToLoginBtn" class="btn-outline btn-full btn-sm">Grįžti į prisijungimą</button>
@@ -892,7 +892,7 @@
 
         <div class="input-cell" style="margin-bottom:14px;">
           <label for="inviteUserEmail">El. pašto adresas (Email) *</label>
-          <input type="email" id="inviteUserEmail" class="field" placeholder="vardas.pavarde@gmail.com" required>
+          <input type="email" id="inviteUserEmail" class="field" placeholder="" required>
         </div>
 
         <div class="input-row" style="margin-bottom:16px;">
