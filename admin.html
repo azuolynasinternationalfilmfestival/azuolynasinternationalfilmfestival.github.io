@@ -21,10 +21,10 @@
       <p class="admin-auth-sub">Autorizuota prieiga</p>
 
       <div id="loginFormWrapper">
-        <form id="adminAuthForm">
+        <form id="adminAuthForm" action="javascript:void(0);" onsubmit="event.preventDefault(); return false;">
           <div class="input-cell">
             <label for="loginEmail">Identifikatorius (El. paštas)</label>
-            <input type="email" id="loginEmail" class="field" autocomplete="username" placeholder="azuolynasfilmfestival@gmail.com" required>
+            <input type="email" id="loginEmail" class="field" autocomplete="username" placeholder="vardas@pavyzdys.lt" required>
           </div>
           <div class="input-cell">
             <div style="display:flex; justify-content:space-between; align-items:center;">
@@ -34,7 +34,7 @@
             <input type="password" id="loginPassword" class="field" autocomplete="current-password" placeholder="••••••••" style="margin-top:6px;" required>
           </div>
           <div id="authErrMsg" class="auth-error d-none"></div>
-          <button type="submit" id="loginSubmitBtn" class="btn-solid btn-full" style="display:flex; align-items:center; justify-content:center; gap:8px;">
+          <button type="button" id="loginSubmitBtn" class="btn-solid btn-full" style="display:flex; align-items:center; justify-content:center; gap:8px;">
             <span>Prisijungti</span>
           </button>
         </form>

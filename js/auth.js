@@ -54,7 +54,15 @@ export function initAuth({ onLoginSuccess, onLogout }) {
         }
         const provider = new firebase.auth.GoogleAuthProvider();
         provider.setCustomParameters({ prompt: "select_account" });
-        await activeAuth.signInWithPopup(provider);
+        try {
+          await activeAuth.signInWithPopup(provider);
+        } catch (popupErr) {
+          if (popupErr.code === "auth/popup-blocked") {
+            await activeAuth.signInWithRedirect(provider);
+            return;
+          }
+          throw popupErr;
+        }
         showToast("Sėkmingai prisijungta su Google paskyra!");
       } catch (err) {
         console.error("Google login error:", err);
@@ -147,55 +155,91 @@ export function initAuth({ onLoginSuccess, onLogout }) {
     });
   }
 
-  if (adminAuthForm) {
-    adminAuthForm.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      authErrMsg.classList.add("d-none");
+  const doLogin = async () => {
+    authErrMsg.classList.add("d-none");
+    
+    const emailElem = loginEmail || document.getElementById("loginEmail");
+    const passElem = loginPassword || document.getElementById("loginPassword");
+    const submitBtn = loginSubmitBtn || document.getElementById("loginSubmitBtn");
+
+    const email = (emailElem ? emailElem.value : "").trim().toLowerCase();
+    const pass = passElem ? passElem.value : "";
+
+    if (!email || !pass) {
+      authErrMsg.classList.remove("d-none");
+      authErrMsg.textContent = "Įveskite el. pašto adresą ir slaptažodį.";
+      return;
+    }
+
+    const activeAuth = getFirebaseAuth() || auth;
+    if (!activeAuth) {
+      authErrMsg.classList.remove("d-none");
+      authErrMsg.textContent = "Autentifikavimo tarnyba kraunasi. Palaukite akimirką ir bandykite vėl.";
+      return;
+    }
+
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = `<span>Jungiamasi...</span>`;
+    }
+
+    try {
+      await activeAuth.signInWithEmailAndPassword(email, pass);
+      showToast("Sėkmingai prisijungta!");
+    } catch (err) {
+      console.error("Sign-in error:", err);
+      authErrMsg.classList.remove("d-none");
       
-      const email = (loginEmail ? loginEmail.value : document.getElementById("loginEmail").value || "").trim().toLowerCase();
-      const pass = (loginPassword ? loginPassword.value : document.getElementById("loginPassword").value || "");
-
-      if (!email || !pass) {
-        authErrMsg.classList.remove("d-none");
-        authErrMsg.textContent = "Įveskite el. pašto adresą ir slaptažodį.";
-        return;
+      const code = err.code || "";
+      if (code === "auth/wrong-password" || code === "auth/invalid-login-credentials" || code === "auth/invalid-credential") {
+        authErrMsg.textContent = "Neteisingas slaptažodis arba el. paštas. Jeigu slaptažodžio dar nesate nustatę arba jį pamiršote, paspauskite „Nustatyti / Pamiršau slaptažodį“ žemiau arba prisijunkite su Google paskyra.";
+      } else if (code === "auth/user-not-found") {
+        authErrMsg.textContent = "Paskyra su šiuo el. pašto adresu nerasta. Spauskite „Nustatyti / Pamiršau slaptažodį“ arba prisijunkite su Google paskyra.";
+      } else if (code === "auth/invalid-email") {
+        authErrMsg.textContent = "Neteisingas el. pašto adreso formatas.";
+      } else if (code === "auth/too-many-requests") {
+        authErrMsg.textContent = "Per daug nesėkmingų bandymų. Saugumo sumetimais bandykite vėliau arba atstatykite slaptažodį.";
+      } else if (code === "auth/network-request-failed") {
+        authErrMsg.textContent = "Tinklo ryšio klaida. Patikrinkite interneto ryšį ir bandykite dar kartą.";
+      } else {
+        authErrMsg.textContent = err.message || "Nepavyko prisijungti. Patikrinkite duomenis.";
       }
-
-      const activeAuth = getFirebaseAuth() || auth;
-      if (!activeAuth) {
-        authErrMsg.classList.remove("d-none");
-        authErrMsg.textContent = "Autentifikavimo tarnyba kraunasi. Palaukite akimirką ir bandykite vėl.";
-        return;
+    } finally {
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = `<span>Prisijungti</span>`;
       }
+    }
+  };
 
-      loginSubmitBtn.disabled = true;
-      const originalSubmitText = loginSubmitBtn.innerHTML;
-      loginSubmitBtn.innerHTML = `<span>Jungiamasi...</span>`;
+  if (loginSubmitBtn) {
+    loginSubmitBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      doLogin();
+    });
+  }
 
-      try {
-        await activeAuth.signInWithEmailAndPassword(email, pass);
-        showToast("Sėkmingai prisijungta!");
-      } catch (err) {
-        console.error("Sign-in error:", err);
-        authErrMsg.classList.remove("d-none");
-        
-        const code = err.code || "";
-        if (code === "auth/wrong-password" || code === "auth/invalid-login-credentials" || code === "auth/invalid-credential") {
-          authErrMsg.textContent = "Neteisingas slaptažodis arba el. paštas. Jeigu pamiršote arba dar nenustatėte slaptažodžio, paspauskite „Nustatyti / Pamiršau slaptažodį“ žemiau arba prisijunkite su Google paskyra.";
-        } else if (code === "auth/user-not-found") {
-          authErrMsg.textContent = "Paskyra su šiuo el. pašto adresu nerasta. Spauskite „Nustatyti / Pamiršau slaptažodį“ arba prisijunkite su Google paskyra.";
-        } else if (code === "auth/invalid-email") {
-          authErrMsg.textContent = "Neteisingas el. pašto adreso formatas.";
-        } else if (code === "auth/too-many-requests") {
-          authErrMsg.textContent = "Per daug nesėkmingų bandymų. Saugumo sumetimais bandykite vėliau arba atstatykite slaptažodį.";
-        } else if (code === "auth/network-request-failed") {
-          authErrMsg.textContent = "Tinklo ryšio klaida. Patikrinkite interneto ryšį ir bandykite dar kartą.";
-        } else {
-          authErrMsg.textContent = err.message || "Nepavyko prisijungti. Patikrinkite duomenis.";
-        }
-      } finally {
-        loginSubmitBtn.disabled = false;
-        loginSubmitBtn.innerHTML = originalSubmitText;
+  if (adminAuthForm) {
+    adminAuthForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      doLogin();
+    });
+  }
+
+  if (loginEmail) {
+    loginEmail.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        doLogin();
+      }
+    });
+  }
+
+  if (loginPassword) {
+    loginPassword.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        doLogin();
       }
     });
   }
