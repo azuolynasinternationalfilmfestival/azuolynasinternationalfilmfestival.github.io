@@ -11,6 +11,31 @@
       "invitedBy": "azuolynasfilmfestival@gmail.com",
       "createdAt": "2026-09-30T18:47:33.836Z",
       "expiresAt": "2026-10-07T18:47:33.836Z"
+    },
+    {
+      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InRlc3QuaW52aXRlZUBnbWFpbC5jb20iLCJyb2xlIjoibW9kZXJhdG9yIiwiY29kZSI6Ijg5NzAxNyIsIm5hbWUiOiJ0ZXN0Lmludml0ZWUiLCJzdXJuYW1lIjoiIiwiY2FuTWFuYWdlVXNlcnMiOmZhbHNlLCJpbnZpdGVkQnkiOiJhenVvbHluYXNmaWxtZmVzdGl2YWxAZ21haWwuY29tIiwidHlwZSI6Imludml0ZSIsImlhdCI6MTc5MTIxODM2MSwiZXhwIjoxNzkxODIzMTYxfQ.aw8cL5km7VVk_NC5MkLGpBfPJDoP_rmShKAu3ZHnR_0",
+      "code": "897017",
+      "name": "test.invitee",
+      "surname": "",
+      "email": "test.invitee@gmail.com",
+      "role": "moderator",
+      "status": "pending",
+      "invitedBy": "azuolynasfilmfestival@gmail.com",
+      "createdAt": "2026-10-05T16:39:21.888Z",
+      "expiresAt": "2026-10-12T16:39:21.888Z"
+    },
+    {
+      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImFjdGl2YXRlZC51c2VyQGdtYWlsLmNvbSIsInJvbGUiOiJtb2RlcmF0b3IiLCJjb2RlIjoiNjM2ODE4IiwibmFtZSI6ImFjdGl2YXRlZC51c2VyIiwic3VybmFtZSI6IiIsImNhbk1hbmFnZVVzZXJzIjpmYWxzZSwiaW52aXRlZEJ5IjoiYXp1b2x5bmFzZmlsbWZlc3RpdmFsQGdtYWlsLmNvbSIsInR5cGUiOiJpbnZpdGUiLCJpYXQiOjE3OTEyMTgzNzcsImV4cCI6MTc5MTgyMzE3N30.FIQLCWEYYKo0aTJxWmctFS0u6HALHb5YJG49JA4nZt8",
+      "code": "636818",
+      "name": "activated.user",
+      "surname": "",
+      "email": "activated.user@gmail.com",
+      "role": "moderator",
+      "status": "accepted",
+      "invitedBy": "azuolynasfilmfestival@gmail.com",
+      "createdAt": "2026-10-05T16:39:37.987Z",
+      "expiresAt": "2026-10-12T16:39:37.987Z",
+      "acceptedAt": "2026-10-05T16:39:38.162Z"
     }
   ]
 }

@@ -169,15 +169,20 @@ async function handleInviteSubmit(e) {
     // This creates the invitation and user in server data, syncs to Firestore via admin credentials,
     // and records administrative activity log
     try {
+      const jwtToken = sessionStorage.getItem("admin_jwt_token");
+      const headers = { "Content-Type": "application/json" };
+      if (jwtToken) headers["Authorization"] = `Bearer ${jwtToken}`;
+
       const resp = await fetch("/api/admin/invite", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers,
         body: JSON.stringify({
           name,
           surname,
           email,
           role,
           canManageUsers,
+          lang: emailLang,
           adminEmail: currentAdminEmail
         })
       });
@@ -350,14 +355,13 @@ async function dispatchInvitationViaFirebaseCloudFunctions({
       let htmlContent = "";
 
       if (typeof window !== "undefined" && typeof window.generateInviteEmailHtml === "function") {
-        htmlContent = window.generateInviteEmailHtml({
+        htmlContent = window.generateInviteEmailHtml(lang, {
           name: fullName,
           email,
           role,
           code,
           token,
           inviteUrl,
-          lang,
           invitedBy
         });
       } else {

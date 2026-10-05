@@ -6532,6 +6532,38 @@ svg {
   border-color: var(--accent-light);
 }
 
+/* Minimalist Admin Dashboard Footer */
+.admin-footer {
+  margin-top: 48px;
+  padding: 24px 0 36px 0;
+  border-top: 1px solid rgba(111, 165, 138, 0.2);
+}
+
+.admin-footer-inner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+
+.admin-footer-sub {
+  color: var(--accent-light);
+  font-size: 0.78rem;
+  letter-spacing: 0.02em;
+}
+
+@media (max-width: 768px) {
+  .admin-footer-inner {
+    flex-direction: column;
+    text-align: center;
+    gap: 6px;
+  }
+}
+
+
 
 
 

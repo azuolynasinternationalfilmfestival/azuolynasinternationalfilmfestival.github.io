@@ -1,6 +1,72 @@
 {
   "logs": [
     {
+      "id": "log_1791218388210_8e70e",
+      "action": "WINNER_REVOKED",
+      "category": "submissions",
+      "adminEmail": "azuolynasfilmfestival@gmail.com",
+      "adminName": "azuolynasfilmfestival",
+      "target": "test_film_1",
+      "details": "Atšauktas laureato statusas filmui ID: test_film_1",
+      "timestamp": "2026-10-05T16:39:48.210Z",
+      "status": "success"
+    },
+    {
+      "id": "log_1791218388132_dof25",
+      "action": "WINNER_DECLARED",
+      "category": "submissions",
+      "adminEmail": "azuolynasfilmfestival@gmail.com",
+      "adminName": "azuolynasfilmfestival",
+      "target": "test_film_1",
+      "details": "Paskelbtas nugalėtojas (1-oji vieta (I Kat.)) filmui ID: test_film_1, metai: 2026",
+      "timestamp": "2026-10-05T16:39:48.132Z",
+      "status": "success"
+    },
+    {
+      "id": "log_1791218383254_1icaq",
+      "action": "SETTINGS_UPDATED",
+      "category": "settings",
+      "adminEmail": "azuolynasfilmfestival@gmail.com",
+      "adminName": "azuolynasfilmfestival",
+      "target": "settings/festival",
+      "details": "Atnaujinti nustatymai. Profilaktikos režimas: IŠJUNGTAS, Balsavimas: AKTYVUS",
+      "timestamp": "2026-10-05T16:39:43.254Z",
+      "status": "success"
+    },
+    {
+      "id": "log_1791218383222_j9hzw",
+      "action": "SETTINGS_UPDATED",
+      "category": "settings",
+      "adminEmail": "azuolynasfilmfestival@gmail.com",
+      "adminName": "azuolynasfilmfestival",
+      "target": "settings/festival",
+      "details": "Atnaujinti nustatymai. Profilaktikos režimas: ĮJUNGTAS, Balsavimas: AKTYVUS",
+      "timestamp": "2026-10-05T16:39:43.222Z",
+      "status": "success"
+    },
+    {
+      "id": "log_1791218378145_zutb2",
+      "action": "ACCESS_LINK_SENT",
+      "category": "users",
+      "adminEmail": "azuolynasfilmfestival@gmail.com",
+      "adminName": "azuolynasfilmfestival",
+      "target": "activated.user@gmail.com",
+      "details": "Išsiųsta prieigos nuoroda į activated.user@gmail.com (Rolė: MODERATOR)",
+      "timestamp": "2026-10-05T16:39:38.145Z",
+      "status": "success"
+    },
+    {
+      "id": "log_1791218362046_bufsy",
+      "action": "ACCESS_LINK_SENT",
+      "category": "users",
+      "adminEmail": "azuolynasfilmfestival@gmail.com",
+      "adminName": "azuolynasfilmfestival",
+      "target": "test.invitee@gmail.com",
+      "details": "Išsiųsta prieigos nuoroda į test.invitee@gmail.com (Rolė: MODERATOR)",
+      "timestamp": "2026-10-05T16:39:22.046Z",
+      "status": "success"
+    },
+    {
       "id": "log_1790884155950_7hinq",
       "action": "ACCESS_GRANTED",
       "category": "users",

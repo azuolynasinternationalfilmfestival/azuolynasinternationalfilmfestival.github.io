@@ -110,29 +110,188 @@ export function initAuth(options = {}) {
 
   const loginFormWrapper = document.getElementById("loginFormWrapper");
   const forgotFormWrapper = document.getElementById("forgotFormWrapper");
-  const accessRequestFormWrapper = document.getElementById("accessRequestFormWrapper");
+  const activationFormWrapper = document.getElementById("activationFormWrapper");
   const showForgotBtn = document.getElementById("showForgotBtn");
-  const showAccessRequestBtn = document.getElementById("showAccessRequestBtn");
   const backToLoginBtn = document.getElementById("backToLoginBtn");
-  const backFromRequestBtn = document.getElementById("backFromRequestBtn");
   const sendResetLinkBtn = document.getElementById("sendResetLinkBtn");
   const resetEmail = document.getElementById("resetEmail");
   const resetErrMsg = document.getElementById("resetErrMsg");
   const resetSuccessMsg = document.getElementById("resetSuccessMsg");
 
-  const accessRequestForm = document.getElementById("accessRequestForm");
-  const submitAccessRequestBtn = document.getElementById("submitAccessRequestBtn");
-  const reqFullName = document.getElementById("reqFullName");
-  const reqEmail = document.getElementById("reqEmail");
-  const reqReason = document.getElementById("reqReason");
-  const reqErrMsg = document.getElementById("reqErrMsg");
-  const reqSuccessMsg = document.getElementById("reqSuccessMsg");
+  // Account Activation Elements
+  const activationForm = document.getElementById("activationForm");
+  const actTokenInput = document.getElementById("actToken");
+  const actEmailInput = document.getElementById("actEmail");
+  const actCodeInput = document.getElementById("actCode");
+  const actNameInput = document.getElementById("actName");
+  const actSurnameInput = document.getElementById("actSurname");
+  const actPasswordInput = document.getElementById("actPassword");
+  const actRoleLabel = document.getElementById("actRoleLabel");
+  const actErrMsg = document.getElementById("actErrMsg");
+  const actSuccessMsg = document.getElementById("actSuccessMsg");
+  const submitActivationBtn = document.getElementById("submitActivationBtn");
+  const backToLoginFromActBtn = document.getElementById("backToLoginFromActBtn");
 
   const currentUserBadge = document.getElementById("currentUserBadge");
   const currentUserName = document.getElementById("currentUserName");
   const currentUserRole = document.getElementById("currentUserRole");
 
   const auth = getFirebaseAuth() || defaultAuth;
+
+  // 1. Check for Invitation Token in URL (?invite=... or ?token=...)
+  const checkInviteInUrl = async () => {
+    if (typeof window === "undefined" || !window.location) return;
+    const urlParams = new URLSearchParams(window.location.search);
+    const inviteToken = urlParams.get("invite") || urlParams.get("invite_token") || urlParams.get("token");
+    const prefillCode = urlParams.get("code");
+
+    if (inviteToken && activationFormWrapper) {
+      if (loginFormWrapper) loginFormWrapper.classList.add("d-none");
+      if (forgotFormWrapper) forgotFormWrapper.classList.add("d-none");
+      activationFormWrapper.classList.remove("d-none");
+
+      if (actTokenInput) actTokenInput.value = inviteToken;
+      if (prefillCode && actCodeInput) actCodeInput.value = prefillCode;
+
+      try {
+        const resp = await fetch(`/api/admin/invite-info?token=${encodeURIComponent(inviteToken)}`);
+        const data = await resp.json();
+        if (resp.ok && data.success && data.invitation) {
+          const inv = data.invitation;
+          if (actEmailInput) actEmailInput.value = inv.email || "";
+          if (actNameInput && inv.name) actNameInput.value = inv.name;
+          if (actSurnameInput && inv.surname) actSurnameInput.value = inv.surname;
+          if (inv.code && actCodeInput && !actCodeInput.value) actCodeInput.value = inv.code;
+          if (actRoleLabel) {
+            const roleLabels = {
+              admin: "Administratorius (Pilna prieiga)",
+              moderator: "Moderatorius (Paraiškos ir turinys)",
+              judge: "Teisėjas / Komisijos narys",
+              accountant: "Buhalteris",
+              viewer: "Žiūrovas (Peržiūra)"
+            };
+            actRoleLabel.textContent = `Priskirta rolė: ${roleLabels[inv.role] || inv.role}`;
+          }
+        } else if (data && data.error) {
+          displayAuthError(actErrMsg, data.error);
+        }
+      } catch (err) {
+        console.warn("Could not retrieve invite info:", err);
+      }
+    }
+  };
+
+  checkInviteInUrl();
+
+  // 2. Account Activation Submission
+  const doActivateAccount = async () => {
+    clearAuthError(actErrMsg);
+    if (actSuccessMsg) {
+      actSuccessMsg.classList.add("d-none");
+      actSuccessMsg.textContent = "";
+    }
+
+    const token = (actTokenInput ? actTokenInput.value : "").trim();
+    const code = (actCodeInput ? actCodeInput.value : "").trim();
+    const password = (actPasswordInput ? actPasswordInput.value : "").trim();
+    const name = (actNameInput ? actNameInput.value : "").trim();
+    const surname = (actSurnameInput ? actSurnameInput.value : "").trim();
+    const email = (actEmailInput ? actEmailInput.value : "").trim();
+
+    if (!token) {
+      displayAuthError(actErrMsg, "Trūksta pakvietimo žetono.");
+      return;
+    }
+    if (!code || code.length < 4) {
+      displayAuthError(actErrMsg, "Įveskite 6 skaitmenų patvirtinimo kodą iš el. laiško.");
+      return;
+    }
+    if (!password || password.length < 6) {
+      displayAuthError(actErrMsg, "Slaptažodis turi būti bent 6 simbolių ilgio.");
+      return;
+    }
+
+    const btn = submitActivationBtn;
+    const origHtml = btn ? btn.innerHTML : "";
+    if (btn) {
+      btn.disabled = true;
+      btn.innerHTML = `<span>Aktyvuojama...</span>`;
+    }
+
+    try {
+      const resp = await fetch("/api/admin/activate-invite", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token, code, password, name, surname })
+      });
+      const data = await resp.json();
+      if (!resp.ok || !data.success) {
+        throw new Error(data.error || "Nepavyko aktyvuoti paskyros.");
+      }
+
+      if (data.token) {
+        sessionStorage.setItem("admin_jwt_token", data.token);
+      }
+
+      showToast("Paskyra sėkmingai aktyvuota!", "success");
+      if (actSuccessMsg) {
+        actSuccessMsg.classList.remove("d-none");
+        actSuccessMsg.textContent = "Paskyra sėkmingai aktyvuota! Jungiamasi prie sistemos...";
+      }
+
+      // Try logging in via Firebase Auth if client account exists or prompt login
+      const activeAuth = getFirebaseAuth() || auth;
+      if (activeAuth && email) {
+        try {
+          await activeAuth.signInWithEmailAndPassword(email, password);
+          return;
+        } catch (authErr) {
+          // If Firebase Auth user was just provisioned on backend
+          console.info("Direct Firebase signin note after activation:", authErr.message);
+        }
+      }
+
+      // Switch back to login form with prefilled email
+      setTimeout(() => {
+        if (activationFormWrapper) activationFormWrapper.classList.add("d-none");
+        if (loginFormWrapper) loginFormWrapper.classList.remove("d-none");
+        if (loginEmail) loginEmail.value = email;
+        if (loginPassword) loginPassword.value = password;
+        showToast("Įveskite ką tik sukurtą slaptažodį ir prisijunkite.");
+      }, 1500);
+
+    } catch (err) {
+      console.error("Account activation error:", err);
+      displayAuthError(actErrMsg, err.message || "Nepavyko aktyvuoti paskyros.");
+    } finally {
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = origHtml;
+      }
+    }
+  };
+
+  if (submitActivationBtn) {
+    submitActivationBtn.onclick = (e) => {
+      if (e) e.preventDefault();
+      doActivateAccount();
+    };
+  }
+  if (activationForm) {
+    activationForm.onsubmit = (e) => {
+      if (e) e.preventDefault();
+      doActivateAccount();
+      return false;
+    };
+  }
+  if (backToLoginFromActBtn) {
+    backToLoginFromActBtn.onclick = (e) => {
+      if (e) e.preventDefault();
+      if (activationFormWrapper) activationFormWrapper.classList.add("d-none");
+      if (loginFormWrapper) loginFormWrapper.classList.remove("d-none");
+      clearAuthError(authErrMsg);
+    };
+  }
 
   // 1. Password Visibility Toggle
   if (togglePassBtn && loginPassword) {
@@ -270,7 +429,7 @@ export function initAuth(options = {}) {
     showForgotBtn.onclick = (e) => {
       if (e) e.preventDefault();
       if (loginFormWrapper) loginFormWrapper.classList.add("d-none");
-      if (accessRequestFormWrapper) accessRequestFormWrapper.classList.add("d-none");
+      if (activationFormWrapper) activationFormWrapper.classList.add("d-none");
       if (forgotFormWrapper) forgotFormWrapper.classList.remove("d-none");
       clearAuthError(resetErrMsg);
       if (resetSuccessMsg) {
@@ -288,119 +447,9 @@ export function initAuth(options = {}) {
     backToLoginBtn.onclick = (e) => {
       if (e) e.preventDefault();
       if (forgotFormWrapper) forgotFormWrapper.classList.add("d-none");
-      if (accessRequestFormWrapper) accessRequestFormWrapper.classList.add("d-none");
+      if (activationFormWrapper) activationFormWrapper.classList.add("d-none");
       if (loginFormWrapper) loginFormWrapper.classList.remove("d-none");
       clearAuthError(authErrMsg);
-    };
-  }
-
-  // 5. Toggle Access Request Views
-  if (showAccessRequestBtn) {
-    showAccessRequestBtn.onclick = (e) => {
-      if (e) e.preventDefault();
-      if (loginFormWrapper) loginFormWrapper.classList.add("d-none");
-      if (forgotFormWrapper) forgotFormWrapper.classList.add("d-none");
-      if (accessRequestFormWrapper) accessRequestFormWrapper.classList.remove("d-none");
-      clearAuthError(reqErrMsg);
-      if (reqSuccessMsg) {
-        reqSuccessMsg.classList.add("d-none");
-        reqSuccessMsg.style.display = "none";
-        reqSuccessMsg.textContent = "";
-      }
-      if (loginEmail && reqEmail && loginEmail.value) {
-        reqEmail.value = loginEmail.value.trim();
-      }
-    };
-  }
-
-  if (backFromRequestBtn) {
-    backFromRequestBtn.onclick = (e) => {
-      if (e) e.preventDefault();
-      if (accessRequestFormWrapper) accessRequestFormWrapper.classList.add("d-none");
-      if (forgotFormWrapper) forgotFormWrapper.classList.add("d-none");
-      if (loginFormWrapper) loginFormWrapper.classList.remove("d-none");
-      clearAuthError(authErrMsg);
-    };
-  }
-
-  // 6. Access Request Submission Handler
-  const doSubmitAccessRequest = async () => {
-    clearAuthError(reqErrMsg);
-    if (reqSuccessMsg) {
-      reqSuccessMsg.classList.add("d-none");
-      reqSuccessMsg.style.display = "none";
-      reqSuccessMsg.textContent = "";
-    }
-
-    const name = (reqFullName ? reqFullName.value : "").trim();
-    const email = (reqEmail ? reqEmail.value : "").trim().toLowerCase();
-    const reason = (reqReason ? reqReason.value : "").trim();
-
-    if (!name || !email || !reason) {
-      displayAuthError(reqErrMsg, "Užpildykite visus privalomus laukelius (vardą, el. paštą ir priežastį).");
-      return;
-    }
-
-    if (!email.includes("@") || !email.includes(".")) {
-      displayAuthError(reqErrMsg, "Nurodykite teisingą el. pašto adresą.");
-      return;
-    }
-
-    const btn = submitAccessRequestBtn;
-    const originalText = btn ? btn.innerHTML : "";
-    if (btn) {
-      btn.disabled = true;
-      btn.innerHTML = `
-        <span style="display:inline-flex; align-items:center; gap:8px;">
-          <span style="display:inline-block; width:16px; height:16px; border:2px solid rgba(255,255,255,0.3); border-top-color:#fff; border-radius:50%; animation:spin 0.8s linear infinite;"></span>
-          <span>Pateikiama užklausa...</span>
-        </span>
-      `;
-    }
-
-    try {
-      const res = await fetch("/api/access-request", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, reason })
-      });
-      const data = await res.json();
-      if (!res.ok || !data.success) {
-        throw new Error(data.error || "Nepavyko pateikti užklausos.");
-      }
-
-      showToast("Prieigos užklausa sėkmingai pateikta!");
-      if (reqSuccessMsg) {
-        reqSuccessMsg.classList.remove("d-none");
-        reqSuccessMsg.style.display = "block";
-        reqSuccessMsg.textContent = "Užklausa sėkmingai išsiųsta! Kai prieiga bus patvirtinta, gausite pranešimą.";
-      }
-      if (reqFullName) reqFullName.value = "";
-      if (reqEmail) reqEmail.value = "";
-      if (reqReason) reqReason.value = "";
-    } catch (err) {
-      console.error("Access request submission error:", err);
-      displayAuthError(reqErrMsg, err.message || "Nepavyko pateikti užklausos.");
-    } finally {
-      if (btn) {
-        btn.disabled = false;
-        btn.innerHTML = originalText;
-      }
-    }
-  };
-
-  if (submitAccessRequestBtn) {
-    submitAccessRequestBtn.onclick = (e) => {
-      if (e) e.preventDefault();
-      doSubmitAccessRequest();
-    };
-  }
-
-  if (accessRequestForm) {
-    accessRequestForm.onsubmit = (e) => {
-      if (e) e.preventDefault();
-      doSubmitAccessRequest();
-      return false;
     };
   }
 
@@ -575,11 +624,7 @@ export async function sendAdminInviteLink(targetEmail) {
   const activeAuth = getFirebaseAuth() || defaultAuth;
   const currentUser = activeAuth ? activeAuth.currentUser : null;
   if (!currentUser) {
-    throw new Error("Privalote būti prisijungęs.");
-  }
-
-  if (currentUser.email.toLowerCase() !== PRIMARY_SUPERADMIN_EMAIL) {
-    throw new Error("Tik pagrindinis administratorius turi teisę siųsti prieigos nuorodas.");
+    throw new Error("Privalote būti prisijungęs administratoriaus teisėmis.");
   }
 
   const cleanEmail = targetEmail.trim().toLowerCase();
@@ -587,16 +632,33 @@ export async function sendAdminInviteLink(targetEmail) {
     throw new Error("Nurodykite el. pašto adresą.");
   }
 
+  const jwtToken = sessionStorage.getItem("admin_jwt_token");
+  const headers = {
+    "Content-Type": "application/json",
+    "x-admin-email": currentUser.email
+  };
+  if (jwtToken) {
+    headers["Authorization"] = `Bearer ${jwtToken}`;
+  }
+
+  const res = await fetch("/api/admin/send-access-link", {
+    method: "POST",
+    headers,
+    body: JSON.stringify({
+      email: cleanEmail,
+      role: "admin",
+      adminEmail: currentUser.email
+    })
+  });
+
+  const data = await res.json();
+  if (!res.ok || !data.success) {
+    throw new Error(data.error || "Nepavyko išsiųsti prieigos nuorodos.");
+  }
+
   if (!AUTHORIZED_ADMIN_EMAILS.includes(cleanEmail)) {
     AUTHORIZED_ADMIN_EMAILS.push(cleanEmail);
   }
 
-  try {
-    await activeAuth.sendPasswordResetEmail(cleanEmail);
-  } catch (err) {
-    if (err.code === "auth/user-not-found") {
-      throw new Error("Vartotojas " + cleanEmail + " dar nesukurtas Firebase Authentication skiltyje. Pirmiausia pridėkite jį Firebase Console -> Authentication -> Users.");
-    }
-    throw err;
-  }
+  return data;
 }

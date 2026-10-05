@@ -23,6 +23,17 @@
       "status": "active",
       "createdAt": "2026-01-01T00:00:00.000Z",
       "lastLogin": "2026-09-30T18:47:33.836Z"
+    },
+    {
+      "uid": "usr_70a7401780f63548",
+      "email": "activated.user@gmail.com",
+      "name": "Aktyvuotas",
+      "surname": "Vartotojas",
+      "role": "moderator",
+      "status": "active",
+      "createdAt": "2026-10-05T16:39:38.162Z",
+      "lastLogin": "2026-10-05T16:39:38.162Z",
+      "invitedBy": "azuolynasfilmfestival@gmail.com"
     }
   ]
 }

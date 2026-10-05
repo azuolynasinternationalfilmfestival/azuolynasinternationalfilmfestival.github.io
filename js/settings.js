@@ -134,15 +134,18 @@ async function handleSendAdminInvite() {
   }
 
   btn.disabled = true;
+  const origText = btn.textContent;
+  btn.textContent = "Siunčiama...";
 
   try {
     await sendAdminInviteLink(email);
     input.value = "";
-    showToast(`Prieigos nuoroda išsiųsta į ${email}`);
+    showToast(`Prieigos nuoroda su žetonu sėkmingai išsiųsta į ${email}!`, "success");
   } catch (err) {
     showToast("Klaida: " + err.message, "error");
   } finally {
     btn.disabled = false;
+    btn.textContent = origText;
   }
 }
 
@@ -166,6 +169,15 @@ export function subscribeSettings() {
       if (mElem) mElem.checked = isMaintenance;
       const mBadge = document.getElementById("badgeMaintenanceMode");
       if (mBadge) mBadge.style.display = isMaintenance ? "inline-flex" : "none";
+
+      const mAlert = document.getElementById("maintenanceActiveAlert");
+      if (mAlert) {
+        if (isMaintenance) {
+          mAlert.classList.remove("d-none");
+        } else {
+          mAlert.classList.add("d-none");
+        }
+      }
 
       const vElem = document.getElementById("cfgVotingActive");
       if (vElem) vElem.checked = isVotingActive;

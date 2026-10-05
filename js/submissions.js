@@ -5,6 +5,21 @@ let submissionsList = [];
 let currentEntry = null;
 let unsubscribeSubmissions = null;
 
+export function getSubmissionYear(sub) {
+  if (!sub) return "2026";
+  if (sub.year) return String(sub.year).trim();
+  if (sub.edition) return String(sub.edition).replace(/[^0-9]/g, "");
+  if (sub.awardYear) return String(sub.awardYear).trim();
+  if (sub.submittedAt) {
+    if (sub.submittedAt.toDate) {
+      return String(sub.submittedAt.toDate().getFullYear());
+    }
+    const d = new Date(sub.submittedAt);
+    if (!isNaN(d.getFullYear())) return String(d.getFullYear());
+  }
+  return "2026";
+}
+
 const STATUS_DICTIONARY = {
   submitted: { label: "Pateikta", className: "status-submitted" },
   accepted: { label: "Priimta", className: "status-accepted" },
@@ -16,17 +31,43 @@ const STATUS_DICTIONARY = {
 
 export function initSubmissions() {
   const filterSearch = document.getElementById("filterSearch");
+  const filterYear = document.getElementById("filterYear");
   const filterCategory = document.getElementById("filterCategory");
   const filterStatus = document.getElementById("filterStatus");
   const filterVoting = document.getElementById("filterVoting");
 
   if (filterSearch) filterSearch.addEventListener("input", renderTable);
+  if (filterYear) {
+    filterYear.addEventListener("change", () => {
+      updateMetrics();
+      updateWinnersSelector();
+      renderTable();
+      updateYearBadges();
+    });
+  }
   if (filterCategory) filterCategory.addEventListener("change", renderTable);
   if (filterStatus) filterStatus.addEventListener("change", renderTable);
   if (filterVoting) filterVoting.addEventListener("change", renderTable);
 
   initEntryModal();
   initWinnersManager();
+  updateYearBadges();
+}
+
+function updateYearBadges() {
+  const filterYear = document.getElementById("filterYear");
+  const selYear = filterYear ? filterYear.value : "2026";
+  const badge = document.getElementById("winnerPanelYearBadge");
+  const status = document.getElementById("dashboardSystemStatus");
+
+  if (badge) {
+    badge.textContent = selYear === "all" ? "Visi leidimai" : `FEST ${selYear}`;
+  }
+  if (status) {
+    status.innerHTML = selYear === "all"
+      ? `Sistema paruošta &bull; Visi festivalio metai`
+      : `Sistema paruošta &bull; ${selYear} m. leidimas`;
+  }
 }
 
 export function subscribeSubmissions() {
@@ -44,6 +85,7 @@ export function subscribeSubmissions() {
       updateMetrics();
       updateWinnersSelector();
       renderTable();
+      updateYearBadges();
     }, (err) => {
       showToast("Klaida gaunant paraiškas: " + err.message, "error");
     });
@@ -57,29 +99,40 @@ export function unsubscribeSubmissionsListener() {
 }
 
 function updateMetrics() {
+  const filterYear = document.getElementById("filterYear");
+  const selYear = filterYear ? filterYear.value : "2026";
+
+  const list = (selYear === "all")
+    ? submissionsList
+    : submissionsList.filter(s => getSubmissionYear(s) === selYear);
+
   const totalElem = document.getElementById("statTotal");
   const acceptedElem = document.getElementById("statAccepted");
   const votingElem = document.getElementById("statVoting");
   const finalsElem = document.getElementById("statFinals");
 
-  if (totalElem) totalElem.textContent = submissionsList.length;
-  if (acceptedElem) acceptedElem.textContent = submissionsList.filter(s => s.status === "accepted").length;
-  if (votingElem) votingElem.textContent = submissionsList.filter(s => s.inVoting === true).length;
-  if (finalsElem) finalsElem.textContent = submissionsList.filter(s => ["semifinal", "final", "winner"].includes(s.status)).length;
+  if (totalElem) totalElem.textContent = list.length;
+  if (acceptedElem) acceptedElem.textContent = list.filter(s => s.status === "accepted").length;
+  if (votingElem) votingElem.textContent = list.filter(s => s.inVoting === true).length;
+  if (finalsElem) finalsElem.textContent = list.filter(s => ["semifinal", "final", "winner"].includes(s.status)).length;
 }
 
 function renderTable() {
   const searchInput = document.getElementById("filterSearch");
+  const yearInput = document.getElementById("filterYear");
   const catInput = document.getElementById("filterCategory");
   const statusInput = document.getElementById("filterStatus");
   const votingInput = document.getElementById("filterVoting");
 
   const q = searchInput ? searchInput.value.toLowerCase().trim() : "";
+  const yr = yearInput ? yearInput.value : "2026";
   const cat = catInput ? catInput.value : "all";
   const st = statusInput ? statusInput.value : "all";
   const vt = votingInput ? votingInput.value : "all";
 
   const filtered = submissionsList.filter((item) => {
+    const itemYear = getSubmissionYear(item);
+    const matchYear = yr === "all" || itemYear === yr;
     const matchSearch = !q ||
       (item.name && item.name.toLowerCase().includes(q)) ||
       (item.filmTitle && item.filmTitle.toLowerCase().includes(q)) ||
@@ -90,7 +143,7 @@ function renderTable() {
       vt === "all" || 
       (vt === "inVoting" && item.inVoting === true) || 
       (vt === "notInVoting" && item.inVoting !== true);
-    return matchSearch && matchCat && matchStatus && matchVoting;
+    return matchYear && matchSearch && matchCat && matchStatus && matchVoting;
   });
 
   const tableBody = document.getElementById("tableBody");
@@ -338,9 +391,11 @@ function initWinnersManager() {
     assignWinnerBtn.addEventListener("click", async () => {
       const filmSelect = document.getElementById("adminSelectFilm");
       const titleInput = document.getElementById("adminAwardTitle");
+      const yearInput = document.getElementById("filterYear");
 
       const filmId = filmSelect ? filmSelect.value : "";
       const awardTitle = titleInput ? titleInput.value.trim() : "";
+      const selYear = (yearInput && yearInput.value !== "all") ? yearInput.value : "2026";
 
       if (!filmId || !awardTitle) {
         showToast("Pasirinkite filmą ir įveskite nominaciją!", "error");
@@ -353,10 +408,21 @@ function initWinnersManager() {
         await db.collection("submissions").doc(filmId).update({
           isWinner: true,
           awardTitle: awardTitle,
+          awardYear: selYear,
           status: "winner"
         });
+
+        // Mirror to backend API
+        try {
+          await fetch("/api/admin/declare-winner", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ filmId, awardTitle, year: selYear })
+          });
+        } catch (apiErr) {}
+
         if (titleInput) titleInput.value = "";
-        showToast("Laimėtojas sėkmingai paskelbtas!");
+        showToast(`Laimėtojas sėkmingai paskelbtas (${selYear} m.)!`, "success");
       } catch (err) {
         showToast("Klaida skelbiant laimėtoją: " + err.message, "error");
       } finally {
@@ -377,6 +443,16 @@ function initWinnersManager() {
           isWinner: false,
           awardTitle: firebase.firestore.FieldValue.delete()
         });
+
+        // Mirror to backend API
+        try {
+          await fetch("/api/admin/revoke-winner", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ filmId })
+          });
+        } catch (apiErr) {}
+
         showToast("Laimėtojo statusas atšauktas.");
       } catch (err) {
         showToast("Klaida atšaukiant laimėtoją: " + err.message, "error");
@@ -389,25 +465,31 @@ function initWinnersManager() {
 function updateWinnersSelector() {
   const select = document.getElementById("adminSelectFilm");
   const list = document.getElementById("adminWinnersList");
+  const yearInput = document.getElementById("filterYear");
   if (!select || !list) return;
+
+  const yr = yearInput ? yearInput.value : "2026";
+  const currentYearList = (yr === "all")
+    ? submissionsList
+    : submissionsList.filter(s => getSubmissionYear(s) === yr);
 
   const previousSelected = select.value;
   select.innerHTML = '<option value="" disabled selected>Pasirinkite filmą iš sąrašo...</option>';
 
-  submissionsList.forEach((sub) => {
+  currentYearList.forEach((sub) => {
     const opt = document.createElement("option");
     opt.value = sub.id;
     opt.textContent = `${sub.filmTitle} — ${sub.name} (${sub.category || ''})`;
     select.appendChild(opt);
   });
 
-  if (previousSelected && submissionsList.some(s => s.id === previousSelected)) {
+  if (previousSelected && currentYearList.some(s => s.id === previousSelected)) {
     select.value = previousSelected;
   }
 
-  const winners = submissionsList.filter((s) => s.isWinner === true);
+  const winners = currentYearList.filter((s) => s.isWinner === true);
   if (winners.length === 0) {
-    list.innerHTML = '<p class="text-muted-sm" style="padding:10px 0;">Nėra paskelbtų laimėtojų.</p>';
+    list.innerHTML = `<p class="text-muted-sm" style="padding:10px 0;">Nėra paskelbtų laimėtojų ${yr === 'all' ? 'visose edicijose' : yr + ' m. laidoje'}.</p>`;
     return;
   }
 
@@ -417,6 +499,7 @@ function updateWinnersSelector() {
         <strong style="color:var(--accent-light);">${w.awardTitle || 'Laureatas'}</strong>: 
         <strong style="color:var(--text-color);">${w.filmTitle}</strong> 
         <span class="text-muted-sm">(${w.name})</span>
+        ${yr === 'all' ? `<span class="badge badge-accepted" style="font-size:0.65rem; margin-left:6px;">${getSubmissionYear(w)} m.</span>` : ''}
       </div>
       <button class="btn-delete btn-xs" data-action="revoke" data-id="${w.id}">Atšaukti</button>
     </div>
