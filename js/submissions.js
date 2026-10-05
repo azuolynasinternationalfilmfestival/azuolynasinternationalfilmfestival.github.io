@@ -56,17 +56,17 @@ export function initSubmissions() {
 
 function updateYearBadges() {
   const filterYear = document.getElementById("filterYear");
-  const selYear = filterYear ? filterYear.value : "2026";
+  const selYear = filterYear ? filterYear.value : "all";
   const badge = document.getElementById("winnerPanelYearBadge");
   const status = document.getElementById("dashboardSystemStatus");
 
   if (badge) {
-    badge.textContent = selYear === "all" ? "Visi leidimai" : `FEST ${selYear}`;
+    badge.textContent = selYear === "all" ? "Visi metai" : `FEST ${selYear}`;
   }
   if (status) {
     status.innerHTML = selYear === "all"
-      ? `Sistema paruošta &bull; Visi festivalio metai`
-      : `Sistema paruošta &bull; ${selYear} m. leidimas`;
+      ? `Sistema paruošta`
+      : `${selYear} m. leidimas`;
   }
 }
 
@@ -125,7 +125,7 @@ function renderTable() {
   const votingInput = document.getElementById("filterVoting");
 
   const q = searchInput ? searchInput.value.toLowerCase().trim() : "";
-  const yr = yearInput ? yearInput.value : "2026";
+  const yr = yearInput ? yearInput.value : "all";
   const cat = catInput ? catInput.value : "all";
   const st = statusInput ? statusInput.value : "all";
   const vt = votingInput ? votingInput.value : "all";
@@ -263,6 +263,16 @@ function initEntryModal() {
   const modalCancelBtn = document.getElementById("modalCancelBtn");
   const mDeleteBtn = document.getElementById("mDeleteBtn");
   const mSaveBtn = document.getElementById("mSaveBtn");
+  const mStatusSelect = document.getElementById("mNewStatus");
+
+  if (mStatusSelect) {
+    mStatusSelect.addEventListener("change", (e) => {
+      const wrap = document.getElementById("mAwardTitleWrap");
+      if (wrap) {
+        wrap.style.display = (e.target.value === "winner") ? "block" : "none";
+      }
+    });
+  }
 
   if (entryModal) {
     entryModal.addEventListener("click", (e) => {
@@ -293,13 +303,27 @@ function initEntryModal() {
       const lang = document.getElementById("mEmailLang").value;
       const customMsg = document.getElementById("mCustomText").value.trim();
       const streamLink = document.getElementById("mStreamLink").value.trim();
+      const awardInput = document.getElementById("mAwardTitle");
+      const awardVal = awardInput ? awardInput.value.trim() : "";
+
+      const updateData = {
+        status: newStatus,
+        inVoting: inVotingVal,
+        lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+      };
+
+      if (newStatus === "winner") {
+        updateData.isWinner = true;
+        if (awardVal) {
+          updateData.awardTitle = awardVal;
+        }
+      } else if (currentEntry.isWinner) {
+        updateData.isWinner = false;
+        updateData.awardTitle = firebase.firestore.FieldValue.delete();
+      }
 
       try {
-        await db.collection("submissions").doc(currentEntry.id).update({
-          status: newStatus,
-          inVoting: inVotingVal,
-          lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
-        });
+        await db.collection("submissions").doc(currentEntry.id).update(updateData);
 
         if (tpl !== "none" && typeof generateEmailHtml === "function") {
           const emailData = {
@@ -354,6 +378,12 @@ function openModal(id) {
   document.getElementById("mVotes").textContent = currentEntry.votesCount || 0;
   document.getElementById("mSynopsis").textContent = currentEntry.synopsis || "";
   document.getElementById("mInVoting").checked = currentEntry.inVoting === true;
+
+  const isWinner = currentEntry.status === "winner" || currentEntry.isWinner === true;
+  const awardWrap = document.getElementById("mAwardTitleWrap");
+  const awardField = document.getElementById("mAwardTitle");
+  if (awardWrap) awardWrap.style.display = isWinner ? "block" : "none";
+  if (awardField) awardField.value = currentEntry.awardTitle || "";
 
   const mVideo = document.getElementById("mVideo");
   if (mVideo) {

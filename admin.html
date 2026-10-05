@@ -161,69 +161,18 @@
     </div>
 
     <div class="admin-main container">
-      <div class="dashboard-banner">
-        <div class="dashboard-banner-content">
-          <h2 class="dashboard-banner-title">Festivalio Valdymo Skydas</h2>
-          <p class="dashboard-banner-sub">Sveiki atvykę! Čia galite peržiūrėti paraiškas, valdyti filmus, balsavimo eigą ir festivalio leidinius.</p>
-        </div>
-        <div class="dashboard-banner-meta" id="dashboardBannerMeta">
-          <span class="live-dot"></span>
-          <span id="dashboardSystemStatus">Sistema paruošta &bull; 2026 m. leidimas</span>
-        </div>
-      </div>
-
       <div id="maintenanceActiveAlert" class="drop-alert d-none" style="margin-bottom:18px; background:rgba(212,175,55,0.18); border-color:#D4AF37; color:#F3E5AB;">
         ⚠️ <strong>Profilaktikos režimas yra ĮJUNGTAS:</strong> Vieša svetainės prieiga lankytojams apribota. Lankytojai mato informacinį profilaktikos pranešimą. Tik prisijungę administratoriai gali pasiekti valdymo skydą.
       </div>
 
-        <div class="metrics-row">
-          <div class="metric-card">
-            <div class="metric-label">Viso paraiškų</div>
-            <div class="metric-num" id="statTotal">0</div>
-          </div>
-          <div class="metric-card">
-            <div class="metric-label">Priimti filmai</div>
-            <div class="metric-num" id="statAccepted">0</div>
-          </div>
-          <div class="metric-card">
-            <div class="metric-label">Dalyvauja balsavime</div>
-            <div class="metric-num" id="statVoting">0</div>
-          </div>
-          <div class="metric-card">
-            <div class="metric-label">Pusfinalis / Finalas</div>
-            <div class="metric-num" id="statFinals">0</div>
-          </div>
-        </div>
-
-        <div class="admin-winner-panel">
-          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:12px;">
-            <h3 class="content-card-title" style="margin-bottom:0;">Laimėtojų ir Nominacijų Valdymas</h3>
-            <span id="winnerPanelYearBadge" class="badge badge-accepted" style="font-size:0.75rem;">FEST 2026</span>
-          </div>
-          <div class="input-row">
-            <div class="input-cell">
-              <label for="adminSelectFilm">Pasirinkite filmą</label>
-              <select id="adminSelectFilm" class="field"></select>
-            </div>
-            <div class="input-cell">
-              <label for="adminAwardTitle">Nominacija / Laureato vieta</label>
-              <input type="text" id="adminAwardTitle" class="field" placeholder="pvz. 1-oji vieta (I Kat.) arba Žiūrovų simpatijų prizas">
-            </div>
-          </div>
-          <div style="display:flex; justify-content:flex-end; margin-bottom:20px;">
-            <button id="assignWinnerBtn" class="btn-solid btn-sm">Paskelbti Laimėtoju</button>
-          </div>
-          <h4>Paskelbti Festivalio Laureatai</h4>
-          <div id="adminWinnersList"></div>
-        </div>
-
+      <div id="submissionsTab">
         <div class="table-toolbar">
           <input type="text" id="filterSearch" class="field toolbar-search" placeholder="Ieškoti pagal autorių, filmą...">
-          <select id="filterYear" class="field toolbar-select" style="font-weight:600; border-color:var(--accent-color);">
-            <option value="all">Visi metai (All)</option>
-            <option value="2026" selected>2026 m. (FEST 2026)</option>
-            <option value="2025">2025 m. (FEST 2025)</option>
-            <option value="2024">2024 m. (FEST 2024)</option>
+          <select id="filterYear" class="field toolbar-select">
+            <option value="all" selected>Visi metai</option>
+            <option value="2026">2026 m.</option>
+            <option value="2025">2025 m.</option>
+            <option value="2024">2024 m.</option>
           </select>
           <select id="filterCategory" class="field toolbar-select">
             <option value="all">Visos kategorijos</option>
@@ -457,26 +406,7 @@
       </div>
 
       <div id="usersTab" class="d-none">
-        <div class="metrics-row">
-          <div class="metric-card">
-            <div class="metric-label">Viso vartotojų</div>
-            <div class="metric-num" id="statUsersTotal">0</div>
-          </div>
-          <div class="metric-card">
-            <div class="metric-label">Aktyvūs (Prieiga leista)</div>
-            <div class="metric-num" id="statUsersActive" style="color:var(--accent-light);">0</div>
-          </div>
-          <div class="metric-card">
-            <div class="metric-label">Užblokuoti (Prieiga apribota)</div>
-            <div class="metric-num" id="statUsersBlocked" style="color:#fca5a5;">0</div>
-          </div>
-          <div class="metric-card">
-            <div class="metric-label">Administratoriai</div>
-            <div class="metric-num" id="statUsersAdmins" style="color:#d8b4fe;">0</div>
-          </div>
-        </div>
-
-        <div class="content-card" style="margin-top:20px;">
+        <div class="content-card">
           <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px; margin-bottom:6px;">
             <div>
               <h3 class="content-card-title" style="margin-bottom:4px;">Vartotojų Prieigos ir Rolių Valdymas</h3>
@@ -812,13 +742,6 @@
           <button id="saveSettingsBtn" class="btn-solid">Išsaugoti Pakeitimus</button>
         </div>
       </div>
-
-      <footer class="admin-footer">
-        <div class="admin-footer-inner">
-          <span>&copy; 2026 Ąžuolynas International Students Film Festival &bull; Kauno Tarptautinė Gimnazija</span>
-          <span class="admin-footer-sub">Valdymo Skydas &bull; Autorizuota administratoriaus sesija</span>
-        </div>
-      </footer>
     </div>
   </div>
 
@@ -866,6 +789,10 @@
               <option value="winner">Laureatas (Winner)</option>
               <option value="rejected">Atmesta (Rejected)</option>
             </select>
+          </div>
+          <div class="input-cell" id="mAwardTitleWrap" style="display:none;">
+            <label for="mAwardTitle">Nominacija / Laureato vieta:</label>
+            <input type="text" id="mAwardTitle" class="field" placeholder="pvz. 1-oji vieta arba Žiūrovų simpatijų prizas">
           </div>
           <div class="input-cell">
             <label for="mEmailTemplate">Siunčiamas laiškas:</label>
