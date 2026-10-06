@@ -5,6 +5,10 @@ let submissionsList = [];
 let currentEntry = null;
 let unsubscribeSubmissions = null;
 
+export function getSubmissionsList() {
+  return submissionsList || [];
+}
+
 export function getSubmissionYear(sub) {
   if (!sub) return "2026";
   if (sub.year) return String(sub.year).trim();
@@ -179,7 +183,14 @@ function renderTable() {
       <td data-label="Kūrėjas"><strong>${sub.name || ''}</strong><br><span class="text-muted-sm">${sub.email || ''}</span></td>
       <td data-label="Amžius / Kat.">${sub.age || ''} m.<br><span class="text-muted-sm">${sub.category || ''}</span></td>
       <td data-label="Filmas"><strong style="color:var(--text-color);">${sub.filmTitle || ''}</strong></td>
-      <td data-label="Balsai"><strong style="color:var(--accent-light);">${sub.votesCount || 0}</strong></td>
+      <td data-label="Balsai">
+        <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+          <strong id="voteCountBadge_${sub.id}" style="color:var(--accent-light); font-size:1.05rem;">${sub.votesCount || 0}</strong>
+          <button type="button" class="btn-outline btn-xs" data-action="quick-test-vote" data-id="${sub.id}" data-title="${(sub.filmTitle || '').replace(/"/g, '&quot;')}" title="Atlikti testinį balsą šiam filmui (+1)" style="padding:2px 7px; font-size:0.75rem;">
+            <span>+1 Testas</span>
+          </button>
+        </div>
+      </td>
       <td data-label="Balsavime">
         <button type="button" class="admin-switch-btn ${isVoting ? 'active' : ''}" data-action="toggle-voting" data-id="${sub.id}" data-status="${isVoting}">
           <span class="admin-switch-knob"></span>
@@ -213,7 +224,9 @@ if (tableBodyElem) {
     const action = btn.dataset.action;
     const id = btn.dataset.id;
 
-    if (action === "toggle-voting") {
+    if (action === "quick-test-vote") {
+      await handleQuickTestVote(id, btn.dataset.title || "", btn);
+    } else if (action === "toggle-voting") {
       const current = btn.dataset.status === "true";
       await toggleVoting(id, current, btn);
     } else if (action === "view") {
@@ -222,6 +235,45 @@ if (tableBodyElem) {
       await deleteSubmission(id);
     }
   });
+}
+
+async function handleQuickTestVote(filmId, filmTitle, btn) {
+  if (btn) btn.disabled = true;
+  const startTime = Date.now();
+  try {
+    const res = await fetch("/api/admin/test-vote", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ filmId, count: 1 })
+    });
+    const data = await res.json().catch(() => null);
+    const latency = Date.now() - startTime;
+
+    if (res.ok && data && data.success) {
+      const badge = document.getElementById(`voteCountBadge_${filmId}`);
+      if (badge) {
+        badge.textContent = data.currentVotes;
+        badge.style.transition = "transform 0.25s ease, color 0.25s ease";
+        badge.style.color = "#4ade80";
+        badge.style.transform = "scale(1.3)";
+        setTimeout(() => {
+          badge.style.color = "var(--accent-light)";
+          badge.style.transform = "scale(1)";
+        }, 400);
+      }
+      showToast(`⚡ Testinis balsas užskaitytas per ${data.latencyMs || latency} ms! Nauja suma: ${data.currentVotes} balsų. Sistema veikia sklandžiai, nestringa!`, "success");
+    } else {
+      // Direct Firestore fallback
+      await db.collection("submissions").doc(filmId).update({
+        votesCount: firebase.firestore.FieldValue.increment(1)
+      });
+      showToast("Testinis balsas užskaitytas per Firestore!", "success");
+    }
+  } catch (err) {
+    showToast("Klaida siunčiant testinį balsą: " + err.message, "error");
+  } finally {
+    if (btn) btn.disabled = false;
+  }
 }
 
 async function toggleVoting(id, currentStatus, btn) {

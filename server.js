@@ -957,6 +957,168 @@ app.post('/api/admin/revoke-winner', async (req, res) => {
 });
 
 // ---------------------------------------------------------------------------
+// TEST VOTING & DIAGNOSTICS API (ADMIN PANEL)
+// ---------------------------------------------------------------------------
+
+// API: Check real-time voting subsystem health and responsiveness
+app.get('/api/admin/voting-health', (req, res) => {
+  const pingStart = Date.now();
+  try {
+    const settings = loadSettingsData();
+    const votesData = loadVotesData();
+    const totalVotes = Object.values(votesData.votesByFilm || {}).reduce((s, v) => s + (Number(v) || 0), 0);
+    const latencyMs = Date.now() - pingStart;
+
+    return res.json({
+      success: true,
+      healthy: true,
+      latencyMs,
+      votingActive: settings.votingActive !== false,
+      maintenanceMode: settings.maintenanceMode === true,
+      totalVotesRecorded: totalVotes,
+      serverTime: new Date().toISOString()
+    });
+  } catch (err) {
+    return res.status(500).json({
+      success: false,
+      healthy: false,
+      error: err.message
+    });
+  }
+});
+
+// API: Admin test vote execution (measures latency, increments vote, logs test record)
+app.post('/api/admin/test-vote', async (req, res) => {
+  const startTime = Date.now();
+  try {
+    const { filmId, count = 1, adminEmail } = req.body || {};
+    if (!filmId) {
+      return res.status(400).json({ error: 'filmId is required' });
+    }
+
+    const cleanFilmId = String(filmId).trim();
+    const voteIncrement = Math.max(1, Math.min(Number(count) || 1, 25));
+
+    const votesData = loadVotesData();
+    if (!votesData.votesByFilm) votesData.votesByFilm = {};
+    if (!votesData.auditLog) votesData.auditLog = [];
+
+    const previousVotes = Number(votesData.votesByFilm[cleanFilmId]) || 0;
+    const currentVotes = previousVotes + voteIncrement;
+    votesData.votesByFilm[cleanFilmId] = currentVotes;
+
+    // Record test audit log entries
+    const timestampStr = new Date().toISOString();
+    for (let i = 0; i < voteIncrement; i++) {
+      votesData.auditLog.push({
+        filmId: cleanFilmId,
+        category: 'test_voting',
+        deviceKey: `test_admin_${Date.now()}_${i}`,
+        isTest: true,
+        adminEmail: adminEmail || PRIMARY_SUPERADMIN_EMAIL,
+        timestamp: timestampStr
+      });
+    }
+
+    saveVotesData(votesData);
+
+    // Sync to Firestore submissions
+    let firestoreSyncMs = 0;
+    const syncStart = Date.now();
+    try {
+      await syncToFirestore('submissions', cleanFilmId, {
+        votesCount: { integerValue: String(currentVotes) }
+      });
+      firestoreSyncMs = Date.now() - syncStart;
+    } catch (fsErr) {
+      console.warn('[TestVote] Firestore sync note:', fsErr.message);
+    }
+    const totalLatencyMs = Date.now() - startTime;
+
+    recordActivityLog({
+      action: "TEST_VOTE_CAST",
+      category: "voting",
+      adminEmail: adminEmail || PRIMARY_SUPERADMIN_EMAIL,
+      target: cleanFilmId,
+      details: `Atliktas testinis balsavimas (+${voteIncrement}). Nauja suma: ${currentVotes} (Užtruko: ${totalLatencyMs}ms)`
+    });
+
+    return res.json({
+      success: true,
+      filmId: cleanFilmId,
+      previousVotes,
+      currentVotes,
+      addedVotes: voteIncrement,
+      latencyMs: totalLatencyMs,
+      firestoreSyncMs,
+      serverTimestamp: timestampStr,
+      status: 'smooth'
+    });
+  } catch (err) {
+    console.error('Error in /api/admin/test-vote:', err);
+    return res.status(500).json({ error: 'Failed to execute test vote', details: err.message });
+  }
+});
+
+// API: Admin reset/adjust vote counter for testing
+app.post('/api/admin/reset-votes', async (req, res) => {
+  try {
+    const { filmId, targetVotes = 0, adminEmail } = req.body || {};
+    if (!filmId) {
+      return res.status(400).json({ error: 'filmId is required' });
+    }
+
+    const cleanFilmId = String(filmId).trim();
+    const newVotes = Math.max(0, Number(targetVotes) || 0);
+
+    const votesData = loadVotesData();
+    if (!votesData.votesByFilm) votesData.votesByFilm = {};
+    votesData.votesByFilm[cleanFilmId] = newVotes;
+
+    // Clean device locks for this film so new tests can vote cleanly
+    if (votesData.votersByDevice) {
+      for (const devKey in votesData.votersByDevice) {
+        const categories = votesData.votersByDevice[devKey];
+        for (const cat in categories) {
+          if (categories[cat] && categories[cat].filmId === cleanFilmId) {
+            delete categories[cat];
+          }
+        }
+      }
+    }
+
+    saveVotesData(votesData);
+
+    // Sync to Firestore
+    try {
+      await syncToFirestore('submissions', cleanFilmId, {
+        votesCount: { integerValue: String(newVotes) }
+      });
+    } catch (fsErr) {
+      console.warn('[ResetVotes] Firestore sync note:', fsErr.message);
+    }
+
+    recordActivityLog({
+      action: 'VOTES_RESET',
+      category: 'voting',
+      adminEmail: adminEmail || PRIMARY_SUPERADMIN_EMAIL,
+      target: cleanFilmId,
+      details: `Balsų skaičius filmui ${cleanFilmId} atstatytas į ${newVotes}`
+    });
+
+    return res.json({
+      success: true,
+      filmId: cleanFilmId,
+      votesCount: newVotes,
+      message: `Balsai sėkmingai atstatyti į ${newVotes}.`
+    });
+  } catch (err) {
+    console.error('Error in /api/admin/reset-votes:', err);
+    return res.status(500).json({ error: 'Failed to reset votes', details: err.message });
+  }
+});
+
+// ---------------------------------------------------------------------------
 // USER MANAGEMENT & INVITATIONS API (WITH SIGNED JWT TOKENS)
 // ---------------------------------------------------------------------------
 

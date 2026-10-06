@@ -193,6 +193,10 @@
             <option value="inVoting">Tik dalyvaujantys balsavime</option>
             <option value="notInVoting">Nedalyvaujantys balsavime</option>
           </select>
+          <button type="button" id="btnOpenTestVotingModal" class="btn-solid btn-sm" style="display:inline-flex; align-items:center; gap:6px; background:linear-gradient(135deg, #1f5847, #13392e); border:1px solid var(--accent-light); white-space:nowrap;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
+            <span>Testuoti balsavimą</span>
+          </button>
         </div>
 
         <div class="table-box">
@@ -981,6 +985,84 @@
       <div style="display:flex; justify-content:flex-end; gap:10px;">
         <button type="button" class="btn-outline btn-sm" id="cancelDeleteBtn">Atšaukti</button>
         <button type="button" class="btn-delete btn-sm" id="confirmDeleteBtn">Taip, Pašalinti Vartotoją</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Test Voting Diagnostic Console Modal -->
+  <div id="testVotingModal" class="admin-modal-overlay d-none">
+    <div class="admin-modal-card" style="max-width:560px; width:100%;">
+      <div class="admin-modal-header" style="border-bottom:1px solid var(--border-color); padding-bottom:12px; margin-bottom:16px;">
+        <div style="display:flex; align-items:center; gap:10px;">
+          <div style="width:36px; height:36px; border-radius:50%; background:rgba(111,165,138,0.2); border:1px solid var(--accent-color); display:flex; align-items:center; justify-content:center; color:var(--accent-light);">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
+          </div>
+          <div>
+            <h3 class="admin-modal-title" style="margin:0;">Balsavimo Sistemos Testavimas</h3>
+            <span style="font-size:0.75rem; color:var(--accent-light);">Realiojo laiko diagnostika &bull; Užlaikymo (Latency) tikrinimas</span>
+          </div>
+        </div>
+        <button type="button" id="closeTestVotingModalBtn" style="background:transparent; border:none; color:var(--text-muted); font-size:1.5rem; cursor:pointer; line-height:1;">&times;</button>
+      </div>
+
+      <!-- Health Bar -->
+      <div id="tvHealthStatusBox" style="background:rgba(9, 32, 27, 0.7); border:1px solid rgba(111,165,138,0.3); border-radius:var(--site-radius); padding:10px 14px; margin-bottom:16px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span class="status-dot" id="tvHealthDot" style="background:#4ade80;"></span>
+          <span style="font-size:0.84rem; font-weight:600; color:var(--text-color);" id="tvHealthTitle">Tikrinama sistema...</span>
+        </div>
+        <div style="display:flex; align-items:center; gap:10px;">
+          <span id="tvLatencyBadge" class="badge" style="background:rgba(111,165,138,0.25); color:var(--accent-light); font-size:0.75rem;">Ping: -- ms</span>
+          <button type="button" id="btnRefreshHealthPing" class="btn-outline btn-xs" style="padding:2px 6px;" title="Tikrinti ryšį">🔄</button>
+        </div>
+      </div>
+
+      <!-- Film Selection for Testing -->
+      <div class="input-cell" style="margin-bottom:14px;">
+        <label for="tvSelectFilm" style="display:flex; justify-content:space-between;">
+          <span>Pasirinkite filmą testavimui *</span>
+          <span id="tvSelectedFilmMeta" style="color:var(--accent-light); font-size:0.75rem;"></span>
+        </label>
+        <select id="tvSelectFilm" class="field"></select>
+      </div>
+
+      <!-- Test Actions Grid -->
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:14px;">
+        <button type="button" id="btnRunSingleTestVote" class="btn-solid btn-sm" style="display:flex; align-items:center; justify-content:center; gap:6px;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+          <span>+1 Testinis balsas</span>
+        </button>
+        <button type="button" id="btnRunStressTestVotes" class="btn-outline btn-sm" style="display:flex; align-items:center; justify-content:center; gap:6px;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          <span>Streso testas (+5 balsai)</span>
+        </button>
+      </div>
+
+      <!-- Reset / Custom Count -->
+      <div style="background:rgba(12, 34, 29, 0.5); border:1px solid var(--border-color); border-radius:var(--site-radius); padding:10px 14px; margin-bottom:14px; display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;">
+        <span style="font-size:0.8rem; color:var(--text-muted);">Atstatyti pasirinkto filmo balsus:</span>
+        <div style="display:inline-flex; align-items:center; gap:6px;">
+          <input type="number" id="tvResetTargetCount" class="field" value="0" min="0" max="9999" style="width:70px; padding:4px 8px; font-size:0.85rem; height:32px;">
+          <button type="button" id="btnExecuteResetVotes" class="btn-outline btn-xs" style="height:32px; padding:4px 10px;">Atstatyti</button>
+        </div>
+      </div>
+
+      <!-- Live Terminal / Activity Monitor -->
+      <div style="margin-bottom:16px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+          <span style="font-size:0.75rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px;">Testavimo žurnalas (Diagnostika realiu laiku)</span>
+          <button type="button" id="btnClearTvLogs" style="background:transparent; border:none; color:var(--text-muted); font-size:0.7rem; cursor:pointer;">Išvalyti</button>
+        </div>
+        <div id="tvConsoleOutput" style="background:#030c0a; border:1px solid rgba(111,165,138,0.3); border-radius:var(--site-radius); padding:10px 12px; font-family:monospace; font-size:0.75rem; color:#a7f3d0; max-height:130px; overflow-y:auto; line-height:1.5;">
+          <div>[Sistema paruošta] Pasirinkite filmą ir spustelėkite „+1 Testinis balsas“ arba naudokite streso testą.</div>
+        </div>
+      </div>
+
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <a href="/lt/index.html#voting" target="_blank" class="btn-outline btn-xs" style="display:inline-flex; align-items:center; gap:6px;">
+          <span>🌐 Atverti viešą balsavimo puslapį</span>
+        </a>
+        <button type="button" class="btn-outline btn-sm" id="btnCloseTestVotingModal">Uždaryti</button>
       </div>
     </div>
   </div>

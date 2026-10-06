@@ -1,5 +1,17 @@
 {
-  "votesByFilm": {},
+  "votesByFilm": {
+    "film-test-01": 4
+  },
   "voters": {},
-  "auditLog": []
+  "auditLog": [
+    {
+      "filmId": "film-test-01",
+      "category": "test_voting",
+      "deviceKey": "test_admin_1791271029749_0",
+      "isTest": true,
+      "adminEmail": "azuolynasfilmfestival@gmail.com",
+      "timestamp": "2026-10-06T07:17:09.749Z"
+    }
+  ],
+  "votersByDevice": {}
 }

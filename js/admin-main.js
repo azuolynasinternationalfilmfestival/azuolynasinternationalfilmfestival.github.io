@@ -23,6 +23,7 @@ import {
   evaluateUserManagementAccess
 } from "./users.js";
 import { initInviteModal } from "./invite-modal.js";
+import { initTestVoting } from "./test-voting.js";
 
 function bootAdmin() {
   // 1. Initialize Authentication FIRST so the login interface is immediately responsive
@@ -61,6 +62,7 @@ function bootAdmin() {
   try { initArchive(); } catch (e) { console.error("initArchive error:", e); }
   try { initUsers(); } catch (e) { console.error("initUsers error:", e); }
   try { initInviteModal(); } catch (e) { console.error("initInviteModal error:", e); }
+  try { initTestVoting(); } catch (e) { console.error("initTestVoting error:", e); }
   try { initSettings(); } catch (e) { console.error("initSettings error:", e); }
   try { initTabNavigation(); } catch (e) { console.error("initTabNavigation error:", e); }
 }

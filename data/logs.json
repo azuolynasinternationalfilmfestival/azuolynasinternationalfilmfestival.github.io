@@ -1,6 +1,28 @@
 {
   "logs": [
     {
+      "id": "log_1791271035376_4zu96",
+      "action": "VOTES_RESET",
+      "category": "voting",
+      "adminEmail": "azuolynasfilmfestival@gmail.com",
+      "adminName": "azuolynasfilmfestival",
+      "target": "film-test-01",
+      "details": "Balsų skaičius filmui film-test-01 atstatytas į 4",
+      "timestamp": "2026-10-06T07:17:15.376Z",
+      "status": "success"
+    },
+    {
+      "id": "log_1791271029921_8mrw3",
+      "action": "TEST_VOTE_CAST",
+      "category": "voting",
+      "adminEmail": "azuolynasfilmfestival@gmail.com",
+      "adminName": "azuolynasfilmfestival",
+      "target": "film-test-01",
+      "details": "Atliktas testinis balsavimas (+1). Nauja suma: 1 (Užtruko: 172ms)",
+      "timestamp": "2026-10-06T07:17:09.922Z",
+      "status": "success"
+    },
+    {
       "id": "log_1791218388210_8e70e",
       "action": "WINNER_REVOKED",
       "category": "submissions",
