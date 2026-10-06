@@ -23,7 +23,9 @@ import {
   evaluateUserManagementAccess
 } from "./users.js";
 import { initInviteModal } from "./invite-modal.js";
-import { initTestVoting } from "./test-voting.js";
+import { initVotingAnalytics, loadVotingAnalytics } from "./voting-analytics.js";
+import { initTasks, loadTasks } from "./tasks.js";
+import { initNotificationsLog, loadActivityLogs } from "./notifications-log.js";
 
 function bootAdmin() {
   // 1. Initialize Authentication FIRST so the login interface is immediately responsive
@@ -39,6 +41,9 @@ function bootAdmin() {
         }
         try { subscribeSubmissions(); } catch (e) { console.error("subscribeSubmissions error:", e); }
         try { subscribeEditions(); } catch (e) { console.error("subscribeEditions error:", e); }
+        try { loadVotingAnalytics(); } catch (e) { console.error("loadVotingAnalytics error:", e); }
+        try { loadTasks(); } catch (e) { console.error("loadTasks error:", e); }
+        try { loadActivityLogs(); } catch (e) { console.error("loadActivityLogs error:", e); }
         if (hasUserManagementAccess) {
           try { subscribeUsers(); } catch (e) { console.error("subscribeUsers error:", e); }
         }
@@ -58,13 +63,16 @@ function bootAdmin() {
 
   // 2. Initialize management panel tabs and subsystems
   try { initSubmissions(); } catch (e) { console.error("initSubmissions error:", e); }
+  try { initVotingAnalytics(); } catch (e) { console.error("initVotingAnalytics error:", e); }
   try { initEditions(); } catch (e) { console.error("initEditions error:", e); }
   try { initArchive(); } catch (e) { console.error("initArchive error:", e); }
+  try { initTasks(); } catch (e) { console.error("initTasks error:", e); }
+  try { initNotificationsLog(); } catch (e) { console.error("initNotificationsLog error:", e); }
   try { initUsers(); } catch (e) { console.error("initUsers error:", e); }
   try { initInviteModal(); } catch (e) { console.error("initInviteModal error:", e); }
-  try { initTestVoting(); } catch (e) { console.error("initTestVoting error:", e); }
   try { initSettings(); } catch (e) { console.error("initSettings error:", e); }
   try { initTabNavigation(); } catch (e) { console.error("initTabNavigation error:", e); }
+  try { initMobileSidebarToggle(); } catch (e) { console.error("initMobileSidebarToggle error:", e); }
 }
 
 if (document.readyState === "loading") {
@@ -76,9 +84,12 @@ if (document.readyState === "loading") {
 function initTabNavigation() {
   const tabs = [
     { btn: "tabSubmissionsBtn", content: "submissionsTab" },
+    { btn: "tabVotingBtn", content: "votingTab" },
     { btn: "tabEditionsBtn", content: "editionsTab" },
     { btn: "tabArchiveBtn", content: "archiveTab" },
+    { btn: "tabTasksBtn", content: "tasksTab" },
     { btn: "tabUsersBtn", content: "usersTab" },
+    { btn: "tabNotificationsBtn", content: "notificationsTab" },
     { btn: "tabSettingsBtn", content: "settingsTab" }
   ];
 
@@ -96,8 +107,51 @@ function initTabNavigation() {
         if (contentElem) {
           contentElem.classList.toggle("d-none", !isCurrent);
         }
-        document.getElementById(t.btn).classList.toggle("active", isCurrent);
+        const b = document.getElementById(t.btn);
+        if (b) b.classList.toggle("active", isCurrent);
       });
+
+      // Update header section title breadcrumb if present
+      const titleElem = document.getElementById("adminCurrentSectionTitle");
+      if (titleElem) {
+        const textSpan = btnElem.querySelector("span:not(.badge)");
+        titleElem.textContent = textSpan ? textSpan.textContent.trim() : "Valdymo Skydas";
+      }
+
+      // Close mobile sidebar on selection
+      const sidebar = document.getElementById("adminSidebar");
+      if (sidebar && window.innerWidth <= 1024) {
+        sidebar.classList.remove("sidebar-open");
+      }
     });
   });
+
+  // Top header bell button also opens notifications
+  const topBellBtn = document.getElementById("btnHeaderNotifications");
+  if (topBellBtn) {
+    topBellBtn.addEventListener("click", () => {
+      const notifBtn = document.getElementById("tabNotificationsBtn");
+      if (notifBtn) notifBtn.click();
+    });
+  }
+}
+
+function initMobileSidebarToggle() {
+  const toggleBtn = document.getElementById("adminSidebarMobileToggle");
+  const sidebar = document.getElementById("adminSidebar");
+  const backdrop = document.getElementById("adminSidebarBackdrop");
+
+  if (toggleBtn && sidebar) {
+    toggleBtn.addEventListener("click", () => {
+      sidebar.classList.toggle("sidebar-open");
+      if (backdrop) backdrop.classList.toggle("d-none");
+    });
+  }
+
+  if (backdrop && sidebar) {
+    backdrop.addEventListener("click", () => {
+      sidebar.classList.remove("sidebar-open");
+      backdrop.classList.add("d-none");
+    });
+  }
 }

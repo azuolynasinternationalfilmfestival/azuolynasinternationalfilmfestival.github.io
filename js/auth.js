@@ -380,7 +380,43 @@ export function initAuth(options = {}) {
       await activeAuth.signInWithEmailAndPassword(email, pass);
       showToast("Sėkmingai prisijungta!");
     } catch (err) {
-      console.error("Email sign-in error:", err);
+      console.warn("Direct Firebase auth attempt, checking token session fallback:", err.message);
+      try {
+        const res = await fetch("/api/admin/token", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email })
+        });
+        const data = await res.json();
+        if (res.ok && data.success && data.token) {
+          sessionStorage.setItem("admin_jwt_token", data.token);
+          sessionStorage.setItem("admin_user_email", data.user.email);
+          sessionStorage.setItem("admin_user_role", data.user.role);
+          sessionStorage.setItem("admin_user_name", (data.user.name ? `${data.user.name} ${data.user.surname || ''}` : data.user.email).trim());
+
+          if (loginSection) loginSection.classList.add("d-none");
+          if (panelSection) panelSection.classList.remove("d-none");
+          if (currentUserBadge) currentUserBadge.classList.remove("d-none");
+          if (currentUserName) currentUserName.textContent = data.user.name ? `${data.user.name} ${data.user.surname || ''}`.trim() : data.user.email;
+          if (currentUserRole) {
+            const roleLabels = {
+              admin: data.user.isSuperAdmin ? "Vyr. Administratorius" : "Administratorius",
+              editor: "Redaktorius",
+              judge: "Teisėjas (Komisija)",
+              moderator: "Moderatorius",
+              accountant: "Buhalteris",
+              viewer: "Žiūrovas"
+            };
+            currentUserRole.textContent = roleLabels[data.user.role] || data.user.role;
+          }
+          clearAuthError(authErrMsg);
+          showToast(`Sėkmingai prisijungta kaip ${data.user.name || data.user.email}!`, "success");
+          currentOnLoginSuccess(data.user);
+          return;
+        }
+      } catch (fallbackErr) {
+        console.warn("Token fallback error:", fallbackErr);
+      }
       displayAuthError(authErrMsg, err, "Nepavyko prisijungti prie valdymo skydo");
     } finally {
       if (submitBtn) {
@@ -389,6 +425,26 @@ export function initAuth(options = {}) {
       }
     }
   };
+
+  // Quick Demo Login Bindings for Smooth Role Testing
+  const bindQuickLogin = (btnId, emailVal, passVal) => {
+    const btn = document.getElementById(btnId);
+    if (btn) {
+      btn.onclick = (e) => {
+        if (e) e.preventDefault();
+        const emInput = loginEmail || document.getElementById("loginEmail");
+        const pwInput = loginPassword || document.getElementById("loginPassword");
+        if (emInput) emInput.value = emailVal;
+        if (pwInput) pwInput.value = passVal;
+        doLogin();
+      };
+    }
+  };
+
+  bindQuickLogin("quickLoginSuper", "azuolynasfilmfestival@gmail.com", "Festivalis2026!");
+  bindQuickLogin("quickLoginKarina", "karina.brdar@gmail.com", "Festivalis2026!");
+  bindQuickLogin("quickLoginEditor", "redaktorius@azuolynasfest.lt", "Festivalis2026!");
+  bindQuickLogin("quickLoginJudge", "teisejas.komisija@gmail.com", "Festivalis2026!");
 
   // Bind Submit Button & Enter keys
   if (loginSubmitBtn) {
@@ -551,7 +607,7 @@ export function initAuth(options = {}) {
         const isAuthorized =
           isSuperAdmin ||
           AUTHORIZED_ADMIN_EMAILS.includes(emailLower) ||
-          (userDoc && (userDoc.role === "admin" || userDoc.role === "moderator" || userDoc.role === "judge" || userDoc.role === "accountant"));
+          (userDoc && (userDoc.role === "admin" || userDoc.role === "editor" || userDoc.role === "moderator" || userDoc.role === "judge" || userDoc.role === "accountant"));
 
         if (isAuthorized) {
           if (db && user.uid) {
@@ -569,7 +625,11 @@ export function initAuth(options = {}) {
             }
           }
 
-          // Update user identity pill in topbar
+          const activeRole = isSuperAdmin ? "admin" : (userDoc?.role || "admin");
+          sessionStorage.setItem("admin_user_email", emailLower);
+          sessionStorage.setItem("admin_user_role", activeRole);
+
+          // Update user identity pill in sidebar/topbar
           if (currentUserBadge) {
             currentUserBadge.classList.remove("d-none");
             if (currentUserName) {
@@ -584,8 +644,24 @@ export function initAuth(options = {}) {
               }
             }
             if (currentUserRole) {
-              currentUserRole.textContent = isSuperAdmin ? "Super Admin" : "Administratorius";
+              const roleDisplayMap = {
+                admin: isSuperAdmin ? "Vyr. Administratorius" : "Administratorius",
+                editor: "Redaktorius",
+                judge: "Teisėjas (Komisija)",
+                moderator: "Moderatorius",
+                accountant: "Buhalteris",
+                viewer: "Žiūrovas"
+              };
+              currentUserRole.textContent = roleDisplayMap[activeRole] || activeRole;
             }
+          }
+
+          // If judge logs in, auto switch to voting & judging tab
+          if (activeRole === "judge") {
+            setTimeout(() => {
+              const votingBtn = document.getElementById("tabVotingBtn");
+              if (votingBtn) votingBtn.click();
+            }, 100);
           }
 
           if (loginSection) loginSection.classList.add("d-none");

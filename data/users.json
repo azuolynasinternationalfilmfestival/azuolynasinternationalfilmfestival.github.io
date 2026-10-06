@@ -10,7 +10,7 @@
       "canManageUsers": true,
       "status": "active",
       "createdAt": "2026-01-01T00:00:00.000Z",
-      "lastLogin": "2026-09-30T18:47:33.836Z"
+      "lastLogin": "2026-10-06T08:00:00.000Z"
     },
     {
       "uid": "admin_karina",
@@ -19,10 +19,34 @@
       "surname": "Brdar",
       "role": "admin",
       "isSuperAdmin": false,
-      "canManageUsers": false,
+      "canManageUsers": true,
       "status": "active",
       "createdAt": "2026-01-01T00:00:00.000Z",
-      "lastLogin": "2026-09-30T18:47:33.836Z"
+      "lastLogin": "2026-10-06T08:00:00.000Z"
+    },
+    {
+      "uid": "usr_editor_lukas",
+      "email": "redaktorius@azuolynasfest.lt",
+      "name": "Lukas",
+      "surname": "Morkūnas",
+      "role": "editor",
+      "status": "active",
+      "canManageUsers": false,
+      "createdAt": "2026-10-06T08:00:00.000Z",
+      "lastLogin": "2026-10-06T08:00:00.000Z",
+      "invitedBy": "azuolynasfilmfestival@gmail.com"
+    },
+    {
+      "uid": "usr_judge_elena",
+      "email": "teisejas.komisija@gmail.com",
+      "name": "Elena",
+      "surname": "Dosė-Drelingienė",
+      "role": "judge",
+      "status": "active",
+      "canManageUsers": false,
+      "createdAt": "2026-10-06T08:00:00.000Z",
+      "lastLogin": "2026-10-06T08:00:00.000Z",
+      "invitedBy": "azuolynasfilmfestival@gmail.com"
     },
     {
       "uid": "usr_70a7401780f63548",
@@ -31,6 +55,7 @@
       "surname": "Vartotojas",
       "role": "moderator",
       "status": "active",
+      "canManageUsers": false,
       "createdAt": "2026-10-05T16:39:38.162Z",
       "lastLogin": "2026-10-05T16:39:38.162Z",
       "invitedBy": "azuolynasfilmfestival@gmail.com"

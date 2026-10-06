@@ -33,11 +33,17 @@ let pendingDeleteUserEmail = null;
 
 const ROLE_LABELS = {
   admin: "Administratorius",
+  editor: "Redaktorius",
   moderator: "Moderatorius",
   judge: "Teisėjas (Komisija)",
   accountant: "Buhalteris",
   viewer: "Žiūrovas (Tik peržiūra)",
 };
+
+const TRUSTED_MANAGEMENT_EMAILS = [
+  "azuolynasfilmfestival@gmail.com",
+  "karina.brdar@gmail.com"
+];
 
 const DEFAULT_SEED_USERS = [
   {
@@ -190,36 +196,8 @@ export async function evaluateUserManagementAccess(user) {
   }
 
   const emailLower = (user.email || "").trim().toLowerCase();
-  const isSuperAdmin = emailLower === PRIMARY_SUPERADMIN_EMAIL.toLowerCase();
-
-  let hasAccess = false;
-
-  // 1. Primary superadmin always has access
-  if (isSuperAdmin) {
-    hasAccess = true;
-  } else {
-    // 2. Check if the user document in Firestore has canManageUsers: true
-    const cachedUser = allUsersList.find((u) => (u.email || "").toLowerCase() === emailLower);
-    if (cachedUser && cachedUser.canManageUsers === true) {
-      hasAccess = true;
-    } else if (db) {
-      try {
-        const docId = emailLower.replace(/[^a-zA-Z0-9_-]/g, "_");
-        let docSnap = await db.collection("users").doc(docId).get();
-        if (!docSnap.exists && user.uid) {
-          docSnap = await db.collection("users").doc(user.uid).get();
-        }
-        if (docSnap.exists) {
-          const uData = docSnap.data();
-          if (uData && (uData.canManageUsers === true || uData.userManagementAccess === true)) {
-            hasAccess = true;
-          }
-        }
-      } catch (err) {
-        console.warn("User management permission check notice:", err);
-      }
-    }
-  }
+  // Strictly enforce: access management and invitation rights belong solely to the 1-2 authorized accounts
+  const hasAccess = TRUSTED_MANAGEMENT_EMAILS.map(e => e.toLowerCase()).includes(emailLower);
 
   if (hasAccess) {
     tabUsersBtn.classList.remove("d-none");
@@ -448,6 +426,7 @@ function renderUsersTable() {
           <td>
             <select class="table-role-select" data-user-role-id="${escapeHtml(user.id)}" ${isSuperAdmin ? "disabled title='Vyr. administratoriaus rolė negali būti keičiama'" : ""}>
               <option value="admin" ${user.role === "admin" ? "selected" : ""}>Administratorius</option>
+              <option value="editor" ${user.role === "editor" ? "selected" : ""}>Redaktorius</option>
               <option value="moderator" ${user.role === "moderator" ? "selected" : ""}>Moderatorius</option>
               <option value="judge" ${user.role === "judge" ? "selected" : ""}>Teisėjas / Komisija</option>
               <option value="accountant" ${user.role === "accountant" ? "selected" : ""}>Buhalteris</option>

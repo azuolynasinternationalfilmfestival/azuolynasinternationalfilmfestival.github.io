@@ -38,6 +38,36 @@ const USERS_FILE = path.join(DATA_DIR, 'users.json');
 const INVITATIONS_FILE = path.join(DATA_DIR, 'invitations.json');
 const ACCESS_REQUESTS_FILE = path.join(DATA_DIR, 'access_requests.json');
 const LOGS_FILE = path.join(DATA_DIR, 'logs.json');
+const TASKS_FILE = path.join(DATA_DIR, 'tasks.json');
+const EDITIONS_FILE = path.join(DATA_DIR, 'editions.json');
+const JUDGE_EVALS_FILE = path.join(DATA_DIR, 'judge_evaluations.json');
+
+function isAuthorizedToManageAccess(email) {
+  if (!email) return false;
+  const clean = String(email).trim().toLowerCase();
+  return TRUSTED_ADMIN_EMAILS.map(e => e.toLowerCase()).includes(clean);
+}
+
+function loadTasksData() {
+  return loadJson(TASKS_FILE, { tasks: [] });
+}
+function saveTasksData(data) {
+  saveJson(TASKS_FILE, data);
+}
+
+function loadEditionsData() {
+  return loadJson(EDITIONS_FILE, { editions: [] });
+}
+function saveEditionsData(data) {
+  saveJson(EDITIONS_FILE, data);
+}
+
+function loadJudgeEvalsData() {
+  return loadJson(JUDGE_EVALS_FILE, { evaluations: [] });
+}
+function saveJudgeEvalsData(data) {
+  saveJson(JUDGE_EVALS_FILE, data);
+}
 
 if (!fs.existsSync(DATA_DIR)) {
   fs.mkdirSync(DATA_DIR, { recursive: true });
@@ -1140,13 +1170,14 @@ app.post('/api/admin/token', (req, res) => {
           name: cleanEmail.split('@')[0],
           role: 'admin',
           isSuperAdmin: cleanEmail === PRIMARY_SUPERADMIN_EMAIL,
-          canManageUsers: cleanEmail === PRIMARY_SUPERADMIN_EMAIL
+          canManageUsers: isAuthorizedToManageAccess(cleanEmail)
         };
       } else {
         return res.status(403).json({ error: 'User is not registered or authorized' });
       }
     }
 
+    const canManage = isAuthorizedToManageAccess(user.email);
     const token = createAuthToken(user);
     res.json({
       success: true,
@@ -1157,8 +1188,8 @@ app.post('/api/admin/token', (req, res) => {
         name: user.name,
         surname: user.surname,
         role: user.role,
-        isSuperAdmin: user.isSuperAdmin === true,
-        canManageUsers: user.canManageUsers === true
+        isSuperAdmin: user.isSuperAdmin === true || user.email === PRIMARY_SUPERADMIN_EMAIL,
+        canManageUsers: canManage
       }
     });
   } catch (err) {
@@ -1190,9 +1221,13 @@ app.post('/api/admin/send-access-link', async (req, res) => {
       return res.status(400).json({ error: 'Valid email is required' });
     }
 
+    const callerAdminEmail = String(adminEmail || req.headers['x-admin-email'] || PRIMARY_SUPERADMIN_EMAIL).trim().toLowerCase();
+    if (!isAuthorizedToManageAccess(callerAdminEmail)) {
+      return res.status(403).json({ error: 'Prieiga keisti teises ir siųsti kvietimus suteikta tik Vyr. Administratoriui (1-2 autorizuotiems akauntams).' });
+    }
+
     const cleanEmail = email.trim().toLowerCase();
-    const cleanRole = ['admin', 'moderator', 'judge', 'accountant', 'viewer'].includes(role) ? role : 'admin';
-    const callerAdminEmail = adminEmail || PRIMARY_SUPERADMIN_EMAIL;
+    const cleanRole = ['admin', 'editor', 'moderator', 'judge', 'accountant', 'viewer'].includes(role) ? role : 'admin';
 
     const usersData = loadUsersData();
     const existingUser = (usersData.users || []).find(u => u.email.toLowerCase() === cleanEmail);
@@ -1206,7 +1241,7 @@ app.post('/api/admin/send-access-link', async (req, res) => {
       code,
       name: cleanName,
       surname: cleanSurname,
-      canManageUsers: existingUser ? existingUser.canManageUsers === true : false,
+      canManageUsers: false,
       invitedBy: callerAdminEmail
     });
 
@@ -1304,21 +1339,26 @@ app.post('/api/admin/invite', async (req, res) => {
       return res.status(400).json({ error: 'Valid email is required' });
     }
 
+    const callerAdminEmail = String(adminEmail || req.headers['x-admin-email'] || PRIMARY_SUPERADMIN_EMAIL).trim().toLowerCase();
+    if (!isAuthorizedToManageAccess(callerAdminEmail)) {
+      return res.status(403).json({ error: 'Prieiga keisti teises ir siųsti kvietimus suteikta tik Vyr. Administratoriui (1-2 autorizuotiems akauntams).' });
+    }
+
     const cleanEmail = email.trim().toLowerCase();
-    const cleanRole = ['admin', 'moderator', 'judge', 'accountant', 'viewer'].includes(role) ? role : 'moderator';
+    const cleanRole = ['admin', 'editor', 'moderator', 'judge', 'accountant', 'viewer'].includes(role) ? role : 'moderator';
     const cleanName = (name || '').trim();
     const cleanSurname = (surname || '').trim();
     const emailLang = (lang === 'en' || lang === 'lt') ? lang : 'lt';
-    const callerAdminEmail = adminEmail || PRIMARY_SUPERADMIN_EMAIL;
 
     const code = Math.floor(100000 + Math.random() * 900000).toString();
+    const effectiveCanManageUsers = isAuthorizedToManageAccess(cleanEmail);
     const token = createInviteToken({
       email: cleanEmail,
       role: cleanRole,
       code,
       name: cleanName,
       surname: cleanSurname,
-      canManageUsers: canManageUsers === true,
+      canManageUsers: effectiveCanManageUsers,
       invitedBy: callerAdminEmail
     });
 
@@ -1592,8 +1632,13 @@ app.post('/api/admin/activate-invite', (req, res) => {
 // API: Toggle user status (active / suspended)
 app.post('/api/admin/users/status', (req, res) => {
   try {
-    const { email, status } = req.body || {};
+    const { email, status, adminEmail } = req.body || {};
     if (!email) return res.status(400).json({ error: 'Email is required' });
+
+    const callerEmail = String(adminEmail || req.headers['x-admin-email'] || '').trim().toLowerCase();
+    if (!isAuthorizedToManageAccess(callerEmail)) {
+      return res.status(403).json({ error: 'Prieiga keisti teises suteikta tik Vyr. Administratoriui (1-2 autorizuotiems akauntams).' });
+    }
 
     const usersData = loadUsersData();
     const user = (usersData.users || []).find(u => u.email.toLowerCase() === String(email).trim().toLowerCase());
@@ -1610,7 +1655,7 @@ app.post('/api/admin/users/status', (req, res) => {
     recordActivityLog({
       action: "USER_STATUS_TOGGLED",
       category: "users",
-      adminEmail: req.body.adminEmail || PRIMARY_SUPERADMIN_EMAIL,
+      adminEmail: callerEmail || PRIMARY_SUPERADMIN_EMAIL,
       target: user.email,
       details: `Vartotojo ${user.email} prieiga pakeista į: ${user.status === 'active' ? 'AKTYVUS' : 'UŽBLOKUOTAS'}`
     });
@@ -1624,14 +1669,22 @@ app.post('/api/admin/users/status', (req, res) => {
 // API: Update user role
 app.post('/api/admin/users/role', (req, res) => {
   try {
-    const { email, role } = req.body || {};
+    const { email, role, adminEmail } = req.body || {};
     if (!email || !role) return res.status(400).json({ error: 'Email and role are required' });
+
+    const callerEmail = String(adminEmail || req.headers['x-admin-email'] || '').trim().toLowerCase();
+    if (!isAuthorizedToManageAccess(callerEmail)) {
+      return res.status(403).json({ error: 'Prieiga keisti teises suteikta tik Vyr. Administratoriui (1-2 autorizuotiems akauntams).' });
+    }
+
+    const allowedRoles = ['admin', 'editor', 'moderator', 'judge', 'accountant', 'viewer'];
+    const cleanRole = allowedRoles.includes(role) ? role : 'moderator';
 
     const usersData = loadUsersData();
     const user = (usersData.users || []).find(u => u.email.toLowerCase() === String(email).trim().toLowerCase());
     if (!user) return res.status(404).json({ error: 'User not found' });
 
-    user.role = role;
+    user.role = cleanRole;
     saveJson(USERS_FILE, usersData);
 
     const docId = user.email.toLowerCase().replace(/[^a-zA-Z0-9_-]/g, '_');
@@ -1642,9 +1695,9 @@ app.post('/api/admin/users/role', (req, res) => {
     recordActivityLog({
       action: "USER_ROLE_CHANGED",
       category: "users",
-      adminEmail: req.body.adminEmail || PRIMARY_SUPERADMIN_EMAIL,
+      adminEmail: callerEmail || PRIMARY_SUPERADMIN_EMAIL,
       target: user.email,
-      details: `Vartotojo ${user.email} rolė pakeista į: ${role.toUpperCase()}`
+      details: `Vartotojo ${user.email} rolė pakeista į: ${cleanRole.toUpperCase()}`
     });
 
     res.json({ success: true, user });
@@ -1659,8 +1712,8 @@ app.post('/api/admin/users/permission', (req, res) => {
     const { email, canManageUsers, adminEmail } = req.body || {};
     if (!email) return res.status(400).json({ error: 'Email is required' });
 
-    const callerEmail = String(adminEmail || '').toLowerCase();
-    if (callerEmail !== PRIMARY_SUPERADMIN_EMAIL) {
+    const callerEmail = String(adminEmail || req.headers['x-admin-email'] || '').trim().toLowerCase();
+    if (!isAuthorizedToManageAccess(callerEmail)) {
       return res.status(403).json({ error: 'Tik pagrindinis administratorius gali suteikti prieigą prie vartotojų valdymo skilties' });
     }
 
@@ -1693,12 +1746,17 @@ app.post('/api/admin/users/permission', (req, res) => {
 // API: Delete user account
 app.post('/api/admin/users/delete', async (req, res) => {
   try {
-    const { email, userId } = req.body || {};
+    const { email, userId, adminEmail } = req.body || {};
     if (!email && !userId) return res.status(400).json({ error: 'Email or userId is required' });
 
+    const callerEmail = String(adminEmail || req.headers['x-admin-email'] || '').trim().toLowerCase();
+    if (!isAuthorizedToManageAccess(callerEmail)) {
+      return res.status(403).json({ error: 'Prieiga pašalinti vartotojus suteikta tik Vyr. Administratoriui.' });
+    }
+
     const cleanEmail = String(email || '').trim().toLowerCase();
-    if (cleanEmail === PRIMARY_SUPERADMIN_EMAIL) {
-      return res.status(403).json({ error: 'Super Administrator cannot be deleted' });
+    if (TRUSTED_ADMIN_EMAILS.map(e => e.toLowerCase()).includes(cleanEmail)) {
+      return res.status(403).json({ error: 'Pagrindinis administratorius negali būti pašalintas' });
     }
 
     const usersData = loadUsersData();
@@ -1755,6 +1813,356 @@ app.post('/api/admin/logs', (req, res) => {
     res.json({ success: true, log });
   } catch (err) {
     res.status(500).json({ error: 'Failed to record activity log' });
+  }
+});
+
+// ---------------------------------------------------------------------------
+// TASKS & TEAM ASSIGNMENT API (UŽDUOČIŲ SISTEMA REDAKTORIAMS IR TEISĖJAMS)
+// ---------------------------------------------------------------------------
+
+app.get('/api/admin/tasks', (req, res) => {
+  try {
+    const data = loadTasksData();
+    res.json({ success: true, tasks: data.tasks || [] });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to load tasks' });
+  }
+});
+
+app.post('/api/admin/tasks', (req, res) => {
+  try {
+    const { title, description, assignedTo, assignedName, assignedRole, priority, deadline, adminEmail, adminName } = req.body || {};
+    if (!title) return res.status(400).json({ error: 'Task title is required' });
+
+    const data = loadTasksData();
+    if (!data.tasks) data.tasks = [];
+
+    const taskId = "task_" + Date.now() + "_" + Math.random().toString(36).substring(2, 6);
+    const callerEmail = String(adminEmail || PRIMARY_SUPERADMIN_EMAIL).trim().toLowerCase();
+
+    const newTask = {
+      id: taskId,
+      title: String(title).trim(),
+      description: String(description || '').trim(),
+      assignedTo: String(assignedTo || '').trim().toLowerCase(),
+      assignedName: String(assignedName || assignedTo || 'Komandos narys').trim(),
+      assignedRole: String(assignedRole || 'editor').trim(),
+      priority: ['high', 'medium', 'low'].includes(priority) ? priority : 'medium',
+      status: 'pending',
+      deadline: String(deadline || '').trim(),
+      createdBy: callerEmail,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+
+    data.tasks.unshift(newTask);
+    saveTasksData(data);
+
+    recordActivityLog({
+      action: "TASK_CREATED",
+      category: "tasks",
+      adminEmail: callerEmail,
+      adminName: adminName || callerEmail.split('@')[0],
+      target: newTask.title,
+      details: `Sukurta nauja užduotis: „${newTask.title}“ (Priskirta: ${newTask.assignedName}, Prioritetas: ${newTask.priority.toUpperCase()})`
+    });
+
+    res.json({ success: true, task: newTask });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to create task' });
+  }
+});
+
+app.post('/api/admin/tasks/status', (req, res) => {
+  try {
+    const { taskId, status, adminEmail, adminName } = req.body || {};
+    if (!taskId || !status) return res.status(400).json({ error: 'TaskId and status are required' });
+
+    const data = loadTasksData();
+    const task = (data.tasks || []).find(t => t.id === taskId);
+    if (!task) return res.status(404).json({ error: 'Task not found' });
+
+    const oldStatus = task.status;
+    task.status = ['pending', 'in_progress', 'completed'].includes(status) ? status : task.status;
+    task.updatedAt = new Date().toISOString();
+    saveTasksData(data);
+
+    const callerEmail = String(adminEmail || PRIMARY_SUPERADMIN_EMAIL).trim().toLowerCase();
+    recordActivityLog({
+      action: "TASK_STATUS_UPDATED",
+      category: "tasks",
+      adminEmail: callerEmail,
+      adminName: adminName || callerEmail.split('@')[0],
+      target: task.title,
+      details: `Užduoties „${task.title}“ būsena pakeista: ${oldStatus} ➔ ${task.status.toUpperCase()}`
+    });
+
+    res.json({ success: true, task });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to update task status' });
+  }
+});
+
+app.post('/api/admin/tasks/delete', (req, res) => {
+  try {
+    const { taskId, adminEmail, adminName } = req.body || {};
+    if (!taskId) return res.status(400).json({ error: 'TaskId is required' });
+
+    const data = loadTasksData();
+    const existing = (data.tasks || []).find(t => t.id === taskId);
+    data.tasks = (data.tasks || []).filter(t => t.id !== taskId);
+    saveTasksData(data);
+
+    const callerEmail = String(adminEmail || PRIMARY_SUPERADMIN_EMAIL).trim().toLowerCase();
+    recordActivityLog({
+      action: "TASK_DELETED",
+      category: "tasks",
+      adminEmail: callerEmail,
+      adminName: adminName || callerEmail.split('@')[0],
+      target: existing ? existing.title : taskId,
+      details: `Pašalinta užduotis: „${existing ? existing.title : taskId}“`
+    });
+
+    res.json({ success: true, message: 'Task deleted' });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to delete task' });
+  }
+});
+
+// ---------------------------------------------------------------------------
+// JUDGE EVALUATIONS & VOTING ANALYTICS API (TEISĖJŲ VERTINIMAS IR ANALITIKA)
+// ---------------------------------------------------------------------------
+
+app.get('/api/admin/judge-evaluations', (req, res) => {
+  try {
+    const data = loadJudgeEvalsData();
+    res.json({ success: true, evaluations: data.evaluations || [] });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to load judge evaluations' });
+  }
+});
+
+app.post('/api/admin/judge-evaluation', (req, res) => {
+  try {
+    const { filmId, filmTitle, judgeEmail, judgeName, scores, notes } = req.body || {};
+    if (!filmId) return res.status(400).json({ error: 'filmId is required' });
+
+    const s = scores || {};
+    const creativity = Number(s.creativity) || 5;
+    const directing = Number(s.directing) || 5;
+    const cinematography = Number(s.cinematography) || 5;
+    const sound = Number(s.sound) || 5;
+    const impact = Number(s.impact) || 5;
+    const averageScore = Number(((creativity + directing + cinematography + sound + impact) / 5).toFixed(1));
+
+    const data = loadJudgeEvalsData();
+    if (!data.evaluations) data.evaluations = [];
+
+    const callerEmail = String(judgeEmail || PRIMARY_SUPERADMIN_EMAIL).trim().toLowerCase();
+    const cleanJudgeName = String(judgeName || callerEmail.split('@')[0]).trim();
+
+    const existingIdx = data.evaluations.findIndex(e => e.filmId === filmId && e.judgeEmail.toLowerCase() === callerEmail);
+
+    const evalRecord = {
+      id: existingIdx >= 0 ? data.evaluations[existingIdx].id : ("eval_" + Date.now() + "_" + Math.random().toString(36).substring(2, 6)),
+      filmId,
+      filmTitle: String(filmTitle || filmId).trim(),
+      judgeEmail: callerEmail,
+      judgeName: cleanJudgeName,
+      scores: { creativity, directing, cinematography, sound, impact },
+      averageScore,
+      notes: String(notes || '').trim(),
+      updatedAt: new Date().toISOString()
+    };
+
+    if (existingIdx >= 0) {
+      data.evaluations[existingIdx] = evalRecord;
+    } else {
+      data.evaluations.push(evalRecord);
+    }
+    saveJudgeEvalsData(data);
+
+    recordActivityLog({
+      action: "JUDGE_EVALUATION_SAVED",
+      category: "voting",
+      adminEmail: callerEmail,
+      adminName: cleanJudgeName,
+      target: evalRecord.filmTitle,
+      details: `Teisėjas ${cleanJudgeName} įvertino filmą „${evalRecord.filmTitle}“: ${averageScore}/10 balų`
+    });
+
+    res.json({ success: true, evaluation: evalRecord });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to save judge evaluation' });
+  }
+});
+
+// Aggregated voting analytics for judges & admins
+app.get('/api/admin/voting-analytics', (req, res) => {
+  try {
+    const votesData = loadJson(VOTES_FILE, { totalVotes: 0, films: {} });
+    const evalsData = loadJudgeEvalsData();
+
+    // Group evaluations by filmId
+    const filmEvals = {};
+    (evalsData.evaluations || []).forEach(ev => {
+      if (!filmEvals[ev.filmId]) {
+        filmEvals[ev.filmId] = [];
+      }
+      filmEvals[ev.filmId].push(ev);
+    });
+
+    const judgeSummaries = {};
+    Object.keys(filmEvals).forEach(filmId => {
+      const list = filmEvals[filmId];
+      const sum = list.reduce((acc, curr) => acc + curr.averageScore, 0);
+      judgeSummaries[filmId] = {
+        judgeCount: list.length,
+        averageJudgeScore: Number((sum / list.length).toFixed(1)),
+        evaluations: list
+      };
+    });
+
+    res.json({
+      success: true,
+      totalAudienceVotes: votesData.totalVotes || 0,
+      filmAudienceVotes: votesData.films || {},
+      judgeSummaries,
+      totalEvaluations: (evalsData.evaluations || []).length
+    });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to aggregate voting analytics' });
+  }
+});
+
+// ---------------------------------------------------------------------------
+// EDITIONS API (METŲ LEIDINIAI 2026, 2027 SU LT/EN BILINGUAL PALAIKYMU)
+// ---------------------------------------------------------------------------
+
+app.get('/api/editions', (req, res) => {
+  try {
+    const data = loadEditionsData();
+    res.json({ success: true, editions: data.editions || [] });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to load editions' });
+  }
+});
+
+app.post('/api/admin/editions', (req, res) => {
+  try {
+    const {
+      year,
+      title, titleEn,
+      date, dateEn,
+      subtitle, subtitleEn,
+      story, storyEn,
+      heroImage, videoUrl,
+      pageUrl, pageUrlEn,
+      status, submissionDeadline,
+      votingStartDate, votingEndDate,
+      categories, categoriesEn,
+      adminEmail, adminName
+    } = req.body || {};
+
+    if (!year) return res.status(400).json({ error: 'Year identifier is required' });
+
+    const cleanYear = String(year).trim();
+    const data = loadEditionsData();
+    if (!data.editions) data.editions = [];
+
+    const existingIdx = data.editions.findIndex(e => String(e.year) === cleanYear || e.id === cleanYear);
+
+    const editionRecord = {
+      id: cleanYear,
+      year: cleanYear,
+      status: status || (cleanYear === '2027' ? 'upcoming' : 'completed'),
+      title: String(title || `FEST ${cleanYear}`).trim(),
+      titleEn: String(titleEn || `FEST ${cleanYear}`).trim(),
+      date: String(date || '').trim(),
+      dateEn: String(dateEn || '').trim(),
+      subtitle: String(subtitle || '').trim(),
+      subtitleEn: String(subtitleEn || '').trim(),
+      story: String(story || '').trim(),
+      storyEn: String(storyEn || '').trim(),
+      heroImage: String(heroImage || '').trim(),
+      videoUrl: String(videoUrl || '').trim(),
+      pageUrl: String(pageUrl || `azuolynas-fest-${cleanYear}.html`).trim(),
+      pageUrlEn: String(pageUrlEn || `../en/azuolynas-fest-${cleanYear}.html`).trim(),
+      submissionDeadline: String(submissionDeadline || '').trim(),
+      votingStartDate: String(votingStartDate || '').trim(),
+      votingEndDate: String(votingEndDate || '').trim(),
+      categories: String(categories || 'I Kategorija (10-13 m.), II Kategorija (14-18 m.)').trim(),
+      categoriesEn: String(categoriesEn || 'Category I (10-13 yrs), Category II (14-18 yrs)').trim(),
+      updatedAt: new Date().toISOString(),
+      updatedBy: String(adminEmail || PRIMARY_SUPERADMIN_EMAIL).trim().toLowerCase()
+    };
+
+    if (existingIdx >= 0) {
+      data.editions[existingIdx] = editionRecord;
+    } else {
+      data.editions.unshift(editionRecord);
+    }
+    saveEditionsData(data);
+
+    // Sync to Firestore editions collection
+    syncToFirestore('editions', cleanYear, {
+      year: { stringValue: cleanYear },
+      title: { stringValue: editionRecord.title },
+      titleEn: { stringValue: editionRecord.titleEn },
+      date: { stringValue: editionRecord.date },
+      dateEn: { stringValue: editionRecord.dateEn },
+      subtitle: { stringValue: editionRecord.subtitle },
+      subtitleEn: { stringValue: editionRecord.subtitleEn },
+      story: { stringValue: editionRecord.story },
+      storyEn: { stringValue: editionRecord.storyEn },
+      heroImage: { stringValue: editionRecord.heroImage },
+      videoUrl: { stringValue: editionRecord.videoUrl },
+      pageUrl: { stringValue: editionRecord.pageUrl },
+      pageUrlEn: { stringValue: editionRecord.pageUrlEn },
+      status: { stringValue: editionRecord.status }
+    });
+
+    const callerEmail = String(adminEmail || PRIMARY_SUPERADMIN_EMAIL).trim().toLowerCase();
+    recordActivityLog({
+      action: "EDITION_SAVED",
+      category: "editions",
+      adminEmail: callerEmail,
+      adminName: adminName || callerEmail.split('@')[0],
+      target: `FEST ${cleanYear}`,
+      details: `Išsaugota festivalio leidinio informacija: FEST ${cleanYear} (LT ir EN versijos)`
+    });
+
+    res.json({ success: true, edition: editionRecord });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to save edition' });
+  }
+});
+
+app.post('/api/admin/editions/delete', async (req, res) => {
+  try {
+    const { year, adminEmail, adminName } = req.body || {};
+    if (!year) return res.status(400).json({ error: 'Year is required' });
+
+    const cleanYear = String(year).trim();
+    const data = loadEditionsData();
+    data.editions = (data.editions || []).filter(e => String(e.year) !== cleanYear && e.id !== cleanYear);
+    saveEditionsData(data);
+
+    await deleteFromFirestore('editions', cleanYear);
+
+    const callerEmail = String(adminEmail || PRIMARY_SUPERADMIN_EMAIL).trim().toLowerCase();
+    recordActivityLog({
+      action: "EDITION_DELETED",
+      category: "editions",
+      adminEmail: callerEmail,
+      adminName: adminName || callerEmail.split('@')[0],
+      target: `FEST ${cleanYear}`,
+      details: `Pašalintas festivalio leidinys: FEST ${cleanYear}`
+    });
+
+    res.json({ success: true, message: `Edition ${cleanYear} deleted` });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to delete edition' });
   }
 });
 

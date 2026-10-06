@@ -1,0 +1,21 @@
+{
+  "evaluations": [
+    {
+      "id": "eval_film_test_01",
+      "filmId": "test_film_1",
+      "filmTitle": "Vilties Šviesa",
+      "judgeEmail": "teisejas.komisija@gmail.com",
+      "judgeName": "Elena Dosė-Drelingienė",
+      "scores": {
+        "creativity": 9,
+        "directing": 8,
+        "cinematography": 9,
+        "sound": 8,
+        "impact": 9
+      },
+      "averageScore": 8.6,
+      "notes": "Puikus vizualinis sprendimas, profesionalus šviesos panaudojimas ir jautri istorija.",
+      "updatedAt": "2026-10-06T07:30:00.000Z"
+    }
+  ]
+}

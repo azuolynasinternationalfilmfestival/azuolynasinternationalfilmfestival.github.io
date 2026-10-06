@@ -3,6 +3,7 @@ import { showToast } from "./ui-feedback.js";
 
 const ROLE_LABELS = {
   accountant: { lt: "Buhalteris (Sąskaitos & Finansai)", en: "Accountant (Finance & Awards)" },
+  editor: { lt: "Redaktorius (Metų leidiniai, tekstai & turinys)", en: "Editor (Editions, Texts & Content)" },
   moderator: { lt: "Moderatorius (Paraiškos & Turinys)", en: "Moderator (Submissions & Review)" },
   judge: { lt: "Teisėjas (Vertinimo komisijos narys)", en: "Judge (Jury & Scoring)" },
   admin: { lt: "Administratorius (Pilnos teisės)", en: "Administrator (Full Access)" },
