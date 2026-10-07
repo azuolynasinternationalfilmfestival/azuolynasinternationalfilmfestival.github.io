@@ -2372,6 +2372,12 @@ app.post('/api/live/verify-access', (req, res) => {
           role: foundSub.attendanceType === 'remote' ? 'remote_participant' : 'contestant',
           token: foundSub.liveToken || cleanToken
         };
+        // Record participant connection status
+        foundSub.hasJoinedStream = true;
+        foundSub.firstJoinedAt = foundSub.firstJoinedAt || new Date().toISOString();
+        foundSub.lastJoinedAt = new Date().toISOString();
+        foundSub.joinedCount = (foundSub.joinedCount || 0) + 1;
+        saveSubmissionsData(subsData);
       }
     }
 
@@ -2385,6 +2391,8 @@ app.post('/api/live/verify-access', (req, res) => {
 
       if (foundViewer) {
         matchedUser = foundViewer;
+        foundViewer.hasJoinedStream = true;
+        foundViewer.lastActive = new Date().toISOString();
       }
     }
 
@@ -2454,12 +2462,23 @@ app.post('/api/live/heartbeat', (req, res) => {
     const { token, email } = req.body || {};
     if (!token && !email) return res.json({ ok: true });
 
+    const nowIso = new Date().toISOString();
     const viewersData = loadLiveViewersData();
     const viewer = (viewersData.viewers || []).find(v => (token && v.token === token) || (email && v.email === email));
     if (viewer) {
-      viewer.lastActive = new Date().toISOString();
+      viewer.lastActive = nowIso;
       saveLiveViewersData(viewersData);
     }
+
+    const subsData = loadSubmissionsData();
+    const cleanEmail = email ? String(email).trim().toLowerCase() : '';
+    const sub = (subsData.submissions || []).find(s => (token && s.liveToken === token) || (cleanEmail && s.email && s.email.toLowerCase() === cleanEmail));
+    if (sub) {
+      sub.hasJoinedStream = true;
+      sub.lastJoinedAt = nowIso;
+      saveSubmissionsData(subsData);
+    }
+
     res.json({ ok: true });
   } catch (e) {
     res.json({ ok: true });
@@ -2593,6 +2612,56 @@ app.post('/api/submissions/record', (req, res) => {
       saveLiveViewersData(viewersData);
     }
 
+    // Automatically send confirmation / live pass email
+    try {
+      const emailLang = (record.language === 'en' || (record.location && !record.location.toLowerCase().includes('lietuva') && !record.location.toLowerCase().includes('kaun'))) ? 'en' : 'lt';
+      if (record.attendanceType === 'remote') {
+        const streamEmailHtml = generateEmailHtml('remoteLivePass', emailLang, {
+          name: record.name,
+          filmTitle: record.filmTitle,
+          category: record.category,
+          deviceModel: record.deviceModel,
+          location: record.location || record.institution,
+          attendanceType: 'remote',
+          liveToken: record.liveToken,
+          liveStreamUrl: record.liveStreamUrl,
+          ctaUrl: record.liveStreamUrl
+        });
+        const streamSubject = emailLang === 'en'
+          ? `Ąžuolynas Film Fest | Your Live Stream Pass & Token: ${record.liveToken}`
+          : `Ąžuolynas Film Fest | Jūsų tiesioginės transliacijos prieiga ir žetonas: ${record.liveToken}`;
+        await sendEmail({
+          to: record.email,
+          subject: streamSubject,
+          html: streamEmailHtml,
+          text: `Sveiki, ${record.name}! Jūsų Ąžuolynas Film Fest tiesioginės transliacijos nuoroda: ${record.liveStreamUrl} (Žetonas: ${record.liveToken})`
+        });
+        record.liveTokenSentCount = 1;
+        record.liveTokenLastSentAt = new Date().toISOString();
+        saveSubmissionsData(subsData);
+      } else {
+        const confirmHtml = generateEmailHtml('submissionReceived', emailLang, {
+          name: record.name,
+          filmTitle: record.filmTitle,
+          category: record.category,
+          deviceModel: record.deviceModel,
+          attendanceType: 'in_person',
+          ctaUrl: `http://${req.headers.host || 'localhost:3000'}/lt/index.html`
+        });
+        const confirmSubject = emailLang === 'en'
+          ? `Ąžuolynas Film Fest | Submission Received: "${record.filmTitle}"`
+          : `Ąžuolynas Film Fest | Filmo paraiška sėkmingai gauta: „${record.filmTitle}“`;
+        await sendEmail({
+          to: record.email,
+          subject: confirmSubject,
+          html: confirmHtml,
+          text: `Sveiki, ${record.name}! Jūsų filmo paraiška „${record.filmTitle}“ sėkmingai gauta.`
+        });
+      }
+    } catch (mailErr) {
+      console.warn('[Submission Email] Warning sending initial email:', mailErr.message);
+    }
+
     recordActivityLog({
       action: "SUBMISSION_RECEIVED",
       category: "submissions",
@@ -2630,6 +2699,36 @@ app.post('/api/admin/resend-live-link', async (req, res) => {
 
     sub.liveToken = token;
     sub.liveStreamUrl = liveStreamUrl;
+    sub.liveTokenSentCount = (sub.liveTokenSentCount || 0) + 1;
+    sub.liveTokenLastSentAt = new Date().toISOString();
+
+    // Generate responsive HTML email template
+    const emailLang = (sub.language === 'en' || (sub.location && !sub.location.toLowerCase().includes('lietuva') && !sub.location.toLowerCase().includes('kaun') && !sub.location.toLowerCase().includes('viln'))) ? 'en' : 'lt';
+
+    const emailHtml = generateEmailHtml('remoteLivePass', emailLang, {
+      name: sub.name,
+      filmTitle: sub.filmTitle,
+      category: sub.category,
+      deviceModel: sub.deviceModel,
+      location: sub.location || sub.institution,
+      attendanceType: 'remote',
+      liveToken: token,
+      liveStreamUrl,
+      ctaUrl: liveStreamUrl
+    });
+
+    const subject = emailLang === 'en'
+      ? `Ąžuolynas Film Fest | Your Live Stream Pass & Token: ${token}`
+      : `Ąžuolynas Film Fest | Jūsų tiesioginės transliacijos prieiga ir žetonas: ${token}`;
+
+    const emailResult = await sendEmail({
+      to: sub.email,
+      subject,
+      html: emailHtml,
+      text: `Sveiki, ${sub.name}! Jūsų Ąžuolynas Film Fest tiesioginės transliacijos asmeninė nuoroda: ${liveStreamUrl} (Žetonas: ${token})`
+    });
+
+    sub.liveTokenLastResult = emailResult.success ? 'sent' : (emailResult.firestoreQueued ? 'queued' : 'fallback');
     saveSubmissionsData(subsData);
 
     const callerEmail = String(adminEmail || PRIMARY_SUPERADMIN_EMAIL).trim().toLowerCase();
@@ -2639,17 +2738,42 @@ app.post('/api/admin/resend-live-link', async (req, res) => {
       adminEmail: callerEmail,
       adminName: adminName || callerEmail.split('@')[0],
       target: sub.email,
-      details: `Išsiųsta transliacijos nuoroda su žetonu (${token}) dalyviui: ${sub.name} (${sub.email})`
+      details: `Pakartotinai išsiųstas prieigos laiškas su žetonu (${token}) dalyviui: ${sub.name} (${sub.email}), siuntimas #${sub.liveTokenSentCount}`
     });
 
     res.json({
       success: true,
       token,
       liveStreamUrl,
-      message: `Tiesioginės transliacijos prieigos nuoroda paruošta: ${liveStreamUrl}`
+      sentCount: sub.liveTokenSentCount,
+      lastSentAt: sub.liveTokenLastSentAt,
+      hasJoinedStream: !!sub.hasJoinedStream,
+      lastJoinedAt: sub.lastJoinedAt || null,
+      message: `Prieigos laiškas sėkmingai pakartotinai išsiųstas į ${sub.email}!`,
+      emailResult
     });
   } catch (err) {
-    res.status(500).json({ error: 'Failed to resend live stream link' });
+    console.error('Error in /api/admin/resend-live-link:', err);
+    res.status(500).json({ error: 'Failed to resend live stream link: ' + err.message });
+  }
+});
+
+// API: Record user login / activity from frontend
+app.post('/api/admin/record-login', (req, res) => {
+  try {
+    const { email } = req.body || {};
+    if (!email) return res.status(400).json({ error: 'Email is required' });
+    const cleanEmail = String(email).trim().toLowerCase();
+    const usersData = loadUsersData();
+    const user = (usersData.users || []).find(u => u.email.toLowerCase() === cleanEmail);
+    if (user) {
+      user.lastLogin = new Date().toISOString();
+      user.hasLoggedIn = true;
+      saveUsersData(usersData);
+    }
+    res.json({ success: true });
+  } catch (e) {
+    res.json({ ok: false });
   }
 });
 
