@@ -102,7 +102,7 @@ export function unsubscribeSubmissionsListener() {
   }
 }
 
-function updateMetrics() {
+async function updateMetrics() {
   const filterYear = document.getElementById("filterYear");
   const selYear = filterYear ? filterYear.value : "2026";
 
@@ -114,11 +114,30 @@ function updateMetrics() {
   const acceptedElem = document.getElementById("statAccepted");
   const votingElem = document.getElementById("statVoting");
   const finalsElem = document.getElementById("statFinals");
+  const inPersonElem = document.getElementById("statInPerson");
+  const remoteElem = document.getElementById("statRemote");
+  const liveViewersElem = document.getElementById("statLiveViewers");
+  const badgeYear = document.getElementById("badgeYearSubmissions");
 
+  if (badgeYear) badgeYear.textContent = selYear === "all" ? "Visi metai" : `${selYear} m.`;
   if (totalElem) totalElem.textContent = list.length;
   if (acceptedElem) acceptedElem.textContent = list.filter(s => s.status === "accepted").length;
   if (votingElem) votingElem.textContent = list.filter(s => s.inVoting === true).length;
   if (finalsElem) finalsElem.textContent = list.filter(s => ["semifinal", "final", "winner"].includes(s.status)).length;
+  if (inPersonElem) inPersonElem.textContent = list.filter(s => s.attendanceType === "in_person").length;
+  if (remoteElem) remoteElem.textContent = list.filter(s => s.attendanceType === "remote" || !s.attendanceType).length;
+
+  if (liveViewersElem) {
+    try {
+      const res = await fetch("/api/admin/live/viewers");
+      if (res.ok) {
+        const d = await res.json();
+        liveViewersElem.textContent = d.activeViewers || 0;
+      }
+    } catch {
+      // Keep previous
+    }
+  }
 }
 
 function renderTable() {

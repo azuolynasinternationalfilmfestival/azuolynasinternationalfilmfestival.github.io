@@ -239,6 +239,64 @@
 
         <!-- 1. SUBMISSIONS TAB -->
         <div id="submissionsTab">
+          <!-- Compact Participant & Viewer Statistics Grid -->
+          <div class="stat-grid-compact">
+            <div class="stat-card-compact">
+              <div class="stat-card-compact-header">
+                <span class="stat-card-compact-title">👥 Viso Paraiškų</span>
+                <span class="badge" id="badgeYearSubmissions" style="font-size:0.68rem; padding:1px 6px;">2026 m.</span>
+              </div>
+              <div class="stat-card-compact-body">
+                <div class="stat-card-compact-num" id="statTotal">0</div>
+                <div class="stat-card-compact-sub">Užregistruoti filmai</div>
+              </div>
+            </div>
+
+            <div class="stat-card-compact" style="border-left: 3px solid #4ade80;">
+              <div class="stat-card-compact-header">
+                <span class="stat-card-compact-title">🏛️ Gyvai Vietoje</span>
+                <span class="badge badge-accepted" style="font-size:0.68rem; padding:1px 6px;">RSVP</span>
+              </div>
+              <div class="stat-card-compact-body">
+                <div class="stat-card-compact-num" id="statInPerson" style="color:#4ade80;">0</div>
+                <div class="stat-card-compact-sub">Dalyvaus ceremonijoje</div>
+              </div>
+            </div>
+
+            <div class="stat-card-compact" style="border-left: 3px solid #60a5fa;">
+              <div class="stat-card-compact-header">
+                <span class="stat-card-compact-title">📡 Nuotoliniai</span>
+                <span class="badge" style="background:rgba(59,130,246,0.2); color:#60a5fa; font-size:0.68rem; padding:1px 6px;">Tokenai</span>
+              </div>
+              <div class="stat-card-compact-body">
+                <div class="stat-card-compact-num" id="statRemote" style="color:#60a5fa;">0</div>
+                <div class="stat-card-compact-sub">Žiūrės transliaciją</div>
+              </div>
+            </div>
+
+            <div class="stat-card-compact" style="border-left: 3px solid #f87171;">
+              <div class="stat-card-compact-header">
+                <span class="stat-card-compact-title">🔴 Tiesiogiai</span>
+                <span class="pulse-dot" style="width:6px; height:6px;"></span>
+              </div>
+              <div class="stat-card-compact-body">
+                <div class="stat-card-compact-num" id="statLiveViewers" style="color:#f87171;">0</div>
+                <div class="stat-card-compact-sub">Aktyvūs žiūrovai</div>
+              </div>
+            </div>
+
+            <div class="stat-card-compact" style="border-left: 3px solid #F3E5AB;">
+              <div class="stat-card-compact-header">
+                <span class="stat-card-compact-title">🎬 Priimti / Balsavime</span>
+                <span class="badge" style="background:rgba(212,175,55,0.2); color:#F3E5AB; font-size:0.68rem; padding:1px 6px;">Atranka</span>
+              </div>
+              <div class="stat-card-compact-body">
+                <div class="stat-card-compact-num" id="statVoting" style="color:#F3E5AB;">0</div>
+                <div class="stat-card-compact-sub"><span id="statAccepted">0</span> priimti</div>
+              </div>
+            </div>
+          </div>
+
           <div class="table-toolbar">
             <input type="text" id="filterSearch" class="field toolbar-search" placeholder="Ieškoti pagal autorių, filmą...">
             <select id="filterYear" class="field toolbar-select">
@@ -291,26 +349,49 @@
 
         <!-- 2. VOTING & JURY ANALYTICS TAB -->
         <div id="votingTab" class="d-none">
-          <div class="voting-stat-grid">
-            <div class="metric-card">
-              <div class="metric-label">Žiūrovų Balsai</div>
-              <div class="metric-num" id="statTotalAudienceVotes">0</div>
-              <div style="font-size:0.75rem; color:var(--text-muted); margin-top:4px;">Viešoje svetainėje atiduoti balsai</div>
+          <div class="stat-grid-compact">
+            <div class="stat-card-compact" style="border-left:3px solid var(--accent-color);">
+              <div class="stat-card-compact-header">
+                <span class="stat-card-compact-title">🗳️ Žiūrovų Balsai</span>
+                <span class="badge badge-accepted" style="font-size:0.68rem; padding:1px 6px;">Vieši</span>
+              </div>
+              <div class="stat-card-compact-body">
+                <div class="stat-card-compact-num" id="statTotalAudienceVotes">0</div>
+                <div class="stat-card-compact-sub">Atiduoti balsai</div>
+              </div>
             </div>
-            <div class="metric-card">
-              <div class="metric-label">Teisėjų Įvertinimai</div>
-              <div class="metric-num" id="statTotalJudgeEvals">0</div>
-              <div style="font-size:0.75rem; color:var(--text-muted); margin-top:4px;">Komisijos narių pateikti balai</div>
+
+            <div class="stat-card-compact" style="border-left:3px solid #60a5fa;">
+              <div class="stat-card-compact-header">
+                <span class="stat-card-compact-title">⚖️ Teisėjų Balai</span>
+                <span class="badge" style="background:rgba(59,130,246,0.2); color:#60a5fa; font-size:0.68rem; padding:1px 6px;">Komisija</span>
+              </div>
+              <div class="stat-card-compact-body">
+                <div class="stat-card-compact-num" id="statTotalJudgeEvals">0</div>
+                <div class="stat-card-compact-sub">Pateikti balai</div>
+              </div>
             </div>
-            <div class="metric-card">
-              <div class="metric-label">Vidutinis Komisijos Balas</div>
-              <div class="metric-num" id="statOverallAvgScore" style="color:#F3E5AB;">—</div>
-              <div style="font-size:0.75rem; color:var(--text-muted); margin-top:4px;">Bendras konkursinių filmų vidurkis</div>
+
+            <div class="stat-card-compact" style="border-left:3px solid #F3E5AB;">
+              <div class="stat-card-compact-header">
+                <span class="stat-card-compact-title">⭐ Vidutinis Balas</span>
+                <span class="badge" style="background:rgba(212,175,55,0.2); color:#F3E5AB; font-size:0.68rem; padding:1px 6px;">Iš 10</span>
+              </div>
+              <div class="stat-card-compact-body">
+                <div class="stat-card-compact-num" id="statOverallAvgScore" style="color:#F3E5AB;">—</div>
+                <div class="stat-card-compact-sub">Bendras vidurkis</div>
+              </div>
             </div>
-            <div class="metric-card">
-              <div class="metric-label">Lyderis (Filmas)</div>
-              <div class="metric-num" id="statTopRankedFilm" style="font-size:1.15rem; font-family:var(--font-cinema); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">—</div>
-              <div style="font-size:0.75rem; color:var(--text-muted); margin-top:4px;">Daugiausiai balsų surinkęs filmas</div>
+
+            <div class="stat-card-compact" style="border-left:3px solid #D4AF37;">
+              <div class="stat-card-compact-header">
+                <span class="stat-card-compact-title">🏆 Lyderis</span>
+                <span class="badge" style="background:rgba(212,175,55,0.2); color:#D4AF37; font-size:0.68rem; padding:1px 6px;">1 vieta</span>
+              </div>
+              <div class="stat-card-compact-body">
+                <div class="stat-card-compact-num" id="statTopRankedFilm" style="font-size:1.15rem; font-family:var(--font-cinema); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">—</div>
+                <div class="stat-card-compact-sub">Daugiausia balsų</div>
+              </div>
             </div>
           </div>
 
@@ -356,26 +437,49 @@
         <!-- 3. STREAM & RSVP MANAGEMENT TAB -->
         <div id="streamTab" class="d-none">
           <!-- Top Metric Cards -->
-          <div class="voting-stat-grid">
-            <div class="metric-card">
-              <div class="metric-label">Viso Registracijų</div>
-              <div class="metric-num" id="statStreamTotalRsvp">0</div>
-              <div style="font-size:0.75rem; color:var(--text-muted); margin-top:4px;">Pateiktų paraiškų ir filmų skaičius</div>
+          <div class="stat-grid-compact">
+            <div class="stat-card-compact">
+              <div class="stat-card-compact-header">
+                <span class="stat-card-compact-title">📋 Viso Registracijų</span>
+                <span class="badge" style="font-size:0.68rem; padding:1px 6px;">Bendra</span>
+              </div>
+              <div class="stat-card-compact-body">
+                <div class="stat-card-compact-num" id="statStreamTotalRsvp">0</div>
+                <div class="stat-card-compact-sub">Pateikti filmai</div>
+              </div>
             </div>
-            <div class="metric-card">
-              <div class="metric-label">🏛️ Gyvai Vietoje (RSVP)</div>
-              <div class="metric-num" id="statStreamInPerson" style="color:#4ade80;">0</div>
-              <div style="font-size:0.75rem; color:var(--text-muted); margin-top:4px;">Dalyviai, atvykstantys į gimnaziją</div>
+
+            <div class="stat-card-compact" style="border-left:3px solid #4ade80;">
+              <div class="stat-card-compact-header">
+                <span class="stat-card-compact-title">🏛️ Gyvai Vietoje</span>
+                <span class="badge badge-accepted" style="font-size:0.68rem; padding:1px 6px;">RSVP</span>
+              </div>
+              <div class="stat-card-compact-body">
+                <div class="stat-card-compact-num" id="statStreamInPerson" style="color:#4ade80;">0</div>
+                <div class="stat-card-compact-sub">Gimnazijoje</div>
+              </div>
             </div>
-            <div class="metric-card">
-              <div class="metric-label">📡 Nuotoliniai Dalyviai</div>
-              <div class="metric-num" id="statStreamRemote" style="color:#60a5fa;">0</div>
-              <div style="font-size:0.75rem; color:var(--text-muted); margin-top:4px;">Nuotoliniai žiūrovai su asmeniniais žetonais</div>
+
+            <div class="stat-card-compact" style="border-left:3px solid #60a5fa;">
+              <div class="stat-card-compact-header">
+                <span class="stat-card-compact-title">📡 Nuotoliniai</span>
+                <span class="badge" style="background:rgba(59,130,246,0.2); color:#60a5fa; font-size:0.68rem; padding:1px 6px;">Žetonai</span>
+              </div>
+              <div class="stat-card-compact-body">
+                <div class="stat-card-compact-num" id="statStreamRemote" style="color:#60a5fa;">0</div>
+                <div class="stat-card-compact-sub">Stebi nuotoliu</div>
+              </div>
             </div>
-            <div class="metric-card">
-              <div class="metric-label">🔴 Žiūrovai Tiesiogiai</div>
-              <div class="metric-num" id="statStreamLiveViewers" style="color:#f87171;">0</div>
-              <div style="font-size:0.75rem; color:var(--text-muted); margin-top:4px;">Aktyvus srautas transliacijos puslapyje</div>
+
+            <div class="stat-card-compact" style="border-left:3px solid #f87171;">
+              <div class="stat-card-compact-header">
+                <span class="stat-card-compact-title">🔴 Tiesiogiai</span>
+                <span class="pulse-dot" style="width:6px; height:6px;"></span>
+              </div>
+              <div class="stat-card-compact-body">
+                <div class="stat-card-compact-num" id="statStreamLiveViewers" style="color:#f87171;">0</div>
+                <div class="stat-card-compact-sub">Aktyvūs žiūrovai</div>
+              </div>
             </div>
           </div>
 
