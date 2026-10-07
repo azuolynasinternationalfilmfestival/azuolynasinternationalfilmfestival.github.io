@@ -1,12 +1,11 @@
 const firebaseConfig = {
-  apiKey: "AIzaSyAl-aLSlSHUdrZ4Rr4x23n3bu3QFZSYyB0",
-  authDomain: "azuolynas-film-fest.firebaseapp.com",
-  databaseURL: "https://azuolynas-film-fest-default-rtdb.europe-west1.firebasedatabase.app",
-  projectId: "azuolynas-film-fest",
-  storageBucket: "azuolynas-film-fest.firebasestorage.app",
-  messagingSenderId: "541713316291",
-  appId: "1:541713316291:web:51de85684512c9d7e6a576",
-  measurementId: "G-9Z050BPHJ5"
+  apiKey: "AIzaSyDDKEzn0jN_xUTDw5aXABU79ZEYKIACfdE",
+  authDomain: "filmfest-509606.firebaseapp.com",
+  projectId: "filmfest-509606",
+  storageBucket: "filmfest-509606.firebasestorage.app",
+  messagingSenderId: "230564112771",
+  appId: "1:230564112771:web:a3e4ff9d47bf0ff3fb2eb6",
+  firestoreDatabaseId: "ai-studio-azuolynasinterna-cd7ce36e-5213-4751-8aa0-a7141d397a83"
 };
 
 if (typeof firebase !== "undefined") {

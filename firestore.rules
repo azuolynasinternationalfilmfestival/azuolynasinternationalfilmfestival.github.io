@@ -100,6 +100,24 @@ service cloud.firestore {
       }
     }
 
+    // Stream Configuration (Cloudflare Stream & Status)
+    match /stream_config/{configId} {
+      allow read: if isValidId(configId);
+      allow write: if isAdmin();
+    }
+
+    // Live Stream Viewers / Tokens
+    match /live_viewers/{viewerId} {
+      allow get: if isValidId(viewerId);
+      allow create, update: if isValidId(viewerId);
+      allow list, delete: if isAdmin();
+    }
+
+    // Tasks Management
+    match /tasks/{taskId} {
+      allow read, write: if isStaff() || isAdmin();
+    }
+
     // Global Anti-Fraud Vote Audit: locks 1 vote per category per device
     match /votes_audit/{auditId} {
       allow get: if isValidId(auditId);

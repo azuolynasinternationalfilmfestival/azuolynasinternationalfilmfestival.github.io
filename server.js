@@ -258,8 +258,8 @@ function saveAccessRequestsData(data) {
 // ---------------------------------------------------------------------------
 // Firestore REST Sync Helper
 // ---------------------------------------------------------------------------
-const FIREBASE_API_KEY = 'AIzaSyAl-aLSlSHUdrZ4Rr4x23n3bu3QFZSYyB0';
-const FIREBASE_PROJECT_ID = 'azuolynas-film-fest';
+const FIREBASE_API_KEY = 'AIzaSyDDKEzn0jN_xUTDw5aXABU79ZEYKIACfdE';
+const FIREBASE_PROJECT_ID = 'filmfest-509606';
 
 async function syncToFirestore(collection, docId, fields) {
   try {

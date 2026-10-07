@@ -751,6 +751,29 @@
                 <textarea id="synopsis" class="field" placeholder="Kaip filmas atskleidžia temą?" required></textarea>
               </div>
 
+              <!-- Ceremony Attendance (RSVP) -->
+              <div class="input-cell" style="margin-bottom: 20px;">
+                <label style="font-weight: 700; color: var(--text-color); margin-bottom: 8px; display: block;">
+                  Dalyvavimas ceremonijoje (RSVP) *
+                </label>
+                <div class="rsvp-options-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px;">
+                  <label class="rsvp-card-option" style="cursor: pointer; border: 1px solid rgba(111,165,138,0.3); border-radius: var(--radius-sm); padding: 14px 16px; background: rgba(12,38,32,0.45); display: flex; align-items: flex-start; gap: 12px; transition: all 0.2s ease;">
+                    <input type="radio" name="attendanceType" id="rsvpInPerson" value="in_person" checked required style="margin-top: 3px; accent-color: var(--accent-color);">
+                    <div>
+                      <strong style="color: var(--text-color); font-size: 0.95rem; display: block;">🏛️ Dalyvausiu gyvai (vietoje)</strong>
+                      <span style="font-size: 0.8rem; color: var(--text-muted); line-height: 1.35; display: block; margin-top: 2px;">Atvyksiu į apdovanojimų ceremoniją Kauno tarptautinėje gimnazijoje</span>
+                    </div>
+                  </label>
+                  <label class="rsvp-card-option" style="cursor: pointer; border: 1px solid rgba(111,165,138,0.3); border-radius: var(--radius-sm); padding: 14px 16px; background: rgba(12,38,32,0.45); display: flex; align-items: flex-start; gap: 12px; transition: all 0.2s ease;">
+                    <input type="radio" name="attendanceType" id="rsvpRemote" value="remote" required style="margin-top: 3px; accent-color: var(--accent-color);">
+                    <div>
+                      <strong style="color: var(--text-color); font-size: 0.95rem; display: block;">📡 Negalėsiu atvykti į vietą gyvai</strong>
+                      <span style="font-size: 0.8rem; color: var(--text-muted); line-height: 1.35; display: block; margin-top: 2px;">Konkurso dalyvis / nuotolinis stebėtojas (el. paštu gausiu tiesioginės transliacijos nuorodą su asmeniniu žetonu)</span>
+                    </div>
+                  </label>
+                </div>
+              </div>
+
               <div class="input-cell">
                 <label>Vaizdo įrašo failas (MP4 / MOV / WEBM, iki 3 minučių) *</label>
                 <div class="drop-area" id="uploadZone">
@@ -1628,6 +1651,12 @@
           async () => {
             const videoUrl = await uploadTask.snapshot.ref.getDownloadURL();
 
+            const attendanceInput = document.querySelector('input[name="attendanceType"]:checked');
+            const attendanceType = attendanceInput ? attendanceInput.value : 'in_person';
+            const liveToken = 'live_' + Math.random().toString(36).substring(2, 10) + '_' + Date.now().toString(36);
+            const baseUrl = window.location.origin;
+            const liveStreamUrl = `${baseUrl}/live.html?token=${liveToken}`;
+
             const submissionData = {
               name,
               email,
@@ -1641,6 +1670,9 @@
               videoUrl,
               videoDurationSeconds,
               storagePath,
+              attendanceType,
+              liveToken,
+              liveStreamUrl,
               votesCount: 0,
               inVoting: false,
               status: "submitted",
@@ -1649,22 +1681,63 @@
             };
 
             const targetDb = firestoreDb || (typeof window !== "undefined" && window.db) || (typeof db !== "undefined" ? db : null) || firebase.firestore();
-            await targetDb.collection("submissions").add(submissionData);
+            const docRef = await targetDb.collection("submissions").add(submissionData);
+
+            // Also register remote live viewer token in live_viewers collection
+            if (attendanceType === 'remote') {
+              try {
+                await targetDb.collection("live_viewers").doc(liveToken).set({
+                  token: liveToken,
+                  email: email.toLowerCase(),
+                  name,
+                  filmTitle,
+                  role: "remote_participant",
+                  createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                  status: "authorized"
+                });
+              } catch (viewerErr) {
+                console.warn("live_viewers registration note:", viewerErr);
+              }
+            }
+
+            // Sync with backend local storage and audit log
+            try {
+              await fetch("/api/submissions/record", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  id: docRef.id,
+                  ...submissionData,
+                  submittedAt: new Date().toISOString()
+                })
+              });
+            } catch (syncErr) {
+              console.warn("Backend submission sync note:", syncErr);
+            }
 
             if (typeof generateEmailHtml === "function") {
-              const emailHtml = generateEmailHtml("lt", "submissionReceived", {
+              const emailTemplateKey = (attendanceType === "remote") ? "remoteLivePass" : "submissionReceived";
+              const emailHtml = generateEmailHtml(emailTemplateKey, "lt", {
                 name,
                 filmTitle,
                 category,
                 institution,
                 deviceModel,
-                videoDurationSeconds
+                videoDurationSeconds,
+                attendanceType,
+                liveToken,
+                liveStreamUrl,
+                ctaUrl: (attendanceType === "remote") ? liveStreamUrl : undefined
               });
+
+              const emailSubject = (emailTexts && emailTexts.lt && emailTexts.lt[emailTemplateKey])
+                ? emailTexts.lt[emailTemplateKey].sub
+                : "Ąžuolynas Film Fest | Paraiška gauta!";
 
               await targetDb.collection("mail").add({
                 to: [email],
                 message: {
-                  subject: emailTexts.lt.submissionReceived.sub,
+                  subject: emailSubject,
                   html: emailHtml
                 }
               });
@@ -1676,7 +1749,7 @@
               await targetDb.collection("mail").add({
                 to: ["azuolynasfilmfestival@gmail.com"],
                 message: {
-                  subject: `Nauja paraiška: ${filmTitle} (${name})`,
+                  subject: `Nauja paraiška (${attendanceType === 'remote' ? 'Nuotoliu' : 'Gyvai'}): ${filmTitle} (${name})`,
                   html: adminEmailHtml
                 }
               });

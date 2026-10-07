@@ -97,6 +97,14 @@ const STATUS_BADGES = {
     labelLt: "CEREMONIJOS ĮRAŠAS",
     labelEn: "FESTIVAL BROADCAST"
   },
+  remoteLivePass: {
+    icon: "📡",
+    color: "#4ade80",
+    bg: "rgba(74, 222, 128, 0.18)",
+    border: "#4ade80",
+    labelLt: "TRANSLIACIJOS ŽETONAS",
+    labelEn: "LIVE STREAM PASS"
+  },
   userInvite: {
     icon: "🔑",
     color: "#D4AF37",
@@ -222,6 +230,15 @@ const emailTexts = {
       note: "Kviečiame patogiai peržiūrėti geriausius mokinių darbus ir ceremonijos akimirkas.",
       ctaText: "Žiūrėti Festivalio Įrašą"
     },
+    remoteLivePass: {
+      sub: "Ąžuolynas Film Fest | Jūsų tiesioginės transliacijos prieiga ir žetonas",
+      preheader: "Jūsų asmeninė festivalio ceremonijos tiesioginės transliacijos nuoroda bei balsavimo žetonas.",
+      heading: "Sveiki, {{name}}!",
+      body: "Kadangi pažymėjote, kad negalėsite atvykti į festivalio ceremoniją gyvai, paruošėme jums tiesioginę transliacijos prieigą. Renginio metu galėsite stebėti visus konkursinius filmus bei balsuoti už labiausiai patikusį darbą!",
+      detailsTitle: "Nuotolinio dalyvio prieigos duomenys",
+      note: "Transliacija bus pasiekiama tik su šiuo asmeniniu žetonu arba jūsų registruotu el. paštu.",
+      ctaText: "Atverti Tiesioginę Transliaciją"
+    },
     userInvite: {
       sub: "Ąžuolynas Film Fest | Kvietimas prisijungti prie komandos",
       preheader: "Jums suteikta prieiga prie Ąžuolyno kino festivalio valdymo platformos.",
@@ -321,6 +338,15 @@ const emailTexts = {
       detailsTitle: "Broadcast Information",
       note: "Sit back and enjoy the remarkable films crafted by youth creators from around the world.",
       ctaText: "Watch Festival Broadcast"
+    },
+    remoteLivePass: {
+      sub: "Ąžuolynas Film Fest | Your Live Stream Access & Personal Token",
+      preheader: "Your personal festival ceremony live stream access link and remote voting token.",
+      heading: "Hello, {{name}}!",
+      body: "Since you indicated that you are unable to attend the awards ceremony in person, we have generated your exclusive live broadcast pass. During the event, you can watch the stream and cast your vote remotely!",
+      detailsTitle: "Remote Participant Connection Details",
+      note: "The broadcast is protected and accessible only with this personal token or your registered email.",
+      ctaText: "Open Live Stream Platform"
     },
     userInvite: {
       sub: "Ąžuolynas Film Fest | Staff Team Invitation",
@@ -539,6 +565,18 @@ function generateEmailHtml(templateKey, lang, data = {}) {
   if (duration) {
     metaRows += buildMetaRow(isLt ? "Trukmė:" : "Runtime:", `⏱️ ${escapeHtml(duration)} (griežtai &le; 180 s)`);
   }
+  if (data.attendanceType) {
+    const isRemote = data.attendanceType === 'remote';
+    const rsvpLabel = isRemote
+      ? (isLt ? '📡 Negalėsiu atvykti gyvai (Nuotolinis stebėtojas / balsuotojas)' : '📡 Cannot attend in person (Remote participant & voter)')
+      : (isLt ? '🏛️ Dalyvausiu gyvai (Kauno tarptautinėje gimnazijoje)' : '🏛️ Attending in person (Kaunas International Gymnasium)');
+    metaRows += buildMetaRow(isLt ? "Dalyvavimas (RSVP):" : "Attendance (RSVP):", `<strong style="color:${isRemote ? '#4ade80' : '#F3C969'};">${rsvpLabel}</strong>`);
+  }
+  if (data.liveToken) {
+    metaRows += buildMetaRow(isLt ? "Transliacijos žetonas:" : "Live Stream Token:", `<code style="background:rgba(74,222,128,0.15); color:#4ade80; padding:3px 7px; border-radius:4px; font-weight:700; letter-spacing:1px;">${escapeHtml(data.liveToken)}</code>`);
+    const streamUrl = data.liveStreamUrl || `${EMAIL_THEME.siteUrl}live.html?token=${encodeURIComponent(data.liveToken)}`;
+    metaRows += buildMetaRow(isLt ? "Tiesioginė transliacija:" : "Live Stream Link:", `<a href="${streamUrl}" style="color:#9BC4AE; font-weight:700; text-decoration:underline;" target="_blank">${escapeHtml(streamUrl)}</a>`);
+  }
 
   // Synopsis block if provided
   let synopsisHtml = "";
@@ -642,6 +680,17 @@ function generateAdminNotificationHtml(lang, data = {}) {
   dossierRows += buildMetaRow(isLt ? "Įrenginio modelis:" : "Device Model:", `📱 ${escapeHtml(data.deviceModel || '-')}`);
   dossierRows += buildMetaRow(isLt ? "Vaizdo įrašo trukmė:" : "Video Runtime:", `⏱️ ${escapeHtml(duration)} ${data.videoDurationSeconds <= 180 ? '✅ (Tinka &le; 180s)' : '⚠️ (>180s)'}`);
   
+  if (data.attendanceType) {
+    const isRemote = data.attendanceType === 'remote';
+    const rsvpBadge = isRemote
+      ? '<span style="color:#4ade80; font-weight:700;">📡 Nuotolinis stebėtojas (Negalės atvykti gyvai)</span>'
+      : '<span style="color:#F3C969; font-weight:700;">🏛️ Dalyvaus gyvai (Kaune)</span>';
+    dossierRows += buildMetaRow(isLt ? "Dalyvavimas (RSVP):" : "Attendance (RSVP):", rsvpBadge);
+  }
+  if (data.liveToken) {
+    dossierRows += buildMetaRow(isLt ? "Sugeneruotas žetonas:" : "Generated Token:", `<code style="color:#4ade80; background:rgba(74,222,128,0.15); padding:2px 6px; border-radius:3px;">${escapeHtml(data.liveToken)}</code>`);
+  }
+
   if (data.storagePath) {
     dossierRows += buildMetaRow(isLt ? "Saugyklos kelias:" : "Storage Path:", `<code style="font-size:11px; color:#BAC9C0;">${escapeHtml(data.storagePath)}</code>`);
   }
