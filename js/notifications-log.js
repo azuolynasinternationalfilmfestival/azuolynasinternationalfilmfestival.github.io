@@ -97,6 +97,7 @@ export function renderLogsFeed() {
   }
 
   const categoryIcons = {
+    stream: "📡 Transliacija & RSVP",
     settings: "⚙️ Nustatymai",
     editions: "📅 Metų leidiniai (2027)",
     submissions: "🎬 Paraiškos & Laureatai",

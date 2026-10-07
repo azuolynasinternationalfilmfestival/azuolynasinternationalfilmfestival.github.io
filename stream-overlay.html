@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="lt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OBS Stream Graphics Overlay | Ąžuolynas Film Fest</title>
+  <link rel="icon" type="image/webp" href="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Cinzel:wght@600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --gold: #D4AF37;
+      --gold-light: #F3E5AB;
+      --emerald-dark: #051512;
+      --emerald-card: rgba(12, 36, 31, 0.92);
+      --accent: #6FA58A;
+      --accent-light: #9BC4AE;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      pointer-events: none !important; /* STRICT REQUIREMENT: Viewer CANNOT click anything */
+      user-select: none;
+    }
+
+    body {
+      background: transparent;
+      color: #fff;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: 30px;
+    }
+
+    /* Lower-Third Overlay Banner Container */
+    .overlay-banner-wrapper {
+      background: linear-gradient(135deg, rgba(8, 26, 22, 0.95) 0%, rgba(12, 38, 32, 0.95) 100%);
+      border: 1px solid rgba(212, 175, 55, 0.4);
+      border-left: 6px solid var(--gold);
+      border-radius: 12px;
+      padding: 20px 26px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(12px);
+      width: 100%;
+      max-width: 1100px;
+      margin: 0 auto;
+      animation: slideInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes slideInUp {
+      from { transform: translateY(50px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    .overlay-top-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+      border-bottom: 1px solid rgba(111, 165, 138, 0.25);
+      padding-bottom: 10px;
+    }
+
+    .overlay-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .overlay-brand img {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      border: 1px solid var(--gold);
+    }
+
+    .overlay-title {
+      font-family: 'Cinzel', serif;
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: var(--gold-light);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .overlay-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(239, 68, 68, 0.2);
+      border: 1px solid rgba(239, 68, 68, 0.45);
+      color: #f87171;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .overlay-pulse-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #ef4444;
+      box-shadow: 0 0 8px #ef4444;
+      animation: pulseLive 1.2s infinite;
+    }
+    @keyframes pulseLive {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
+    /* Real-Time Ranking Leaderboard Rows */
+    .leaderboard-items {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .leaderboard-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      background: rgba(5, 21, 18, 0.65);
+      border: 1px solid rgba(111, 165, 138, 0.2);
+      border-radius: 8px;
+      padding: 8px 14px;
+      transition: all 0.4s ease;
+    }
+
+    .leaderboard-row.leader {
+      border-color: rgba(212, 175, 55, 0.6);
+      background: linear-gradient(90deg, rgba(30, 24, 8, 0.75) 0%, rgba(12, 38, 32, 0.6) 100%);
+    }
+
+    .row-rank {
+      font-family: 'Cinzel', serif;
+      font-size: 1.1rem;
+      font-weight: 800;
+      width: 32px;
+      text-align: center;
+      color: var(--gold-light);
+    }
+
+    .row-info {
+      flex: 1;
+      overflow: hidden;
+    }
+
+    .row-title-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 4px;
+    }
+
+    .row-title {
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: #fff;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .row-author {
+      font-size: 0.75rem;
+      color: var(--accent-light);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .row-leader-badge {
+      background: rgba(212, 175, 55, 0.2);
+      border: 1px solid var(--gold);
+      color: var(--gold-light);
+      font-size: 0.65rem;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .row-progress-container {
+      height: 6px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 999px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .row-progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent) 0%, var(--gold) 100%);
+      border-radius: 999px;
+      transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .row-votes-box {
+      min-width: 80px;
+      text-align: right;
+    }
+
+    .row-votes-num {
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: var(--gold-light);
+      font-family: 'Cinzel', serif;
+    }
+
+    .row-votes-percent {
+      font-size: 0.72rem;
+      color: var(--accent-light);
+    }
+
+    .overlay-footer-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 12px;
+      font-size: 0.75rem;
+      color: var(--accent-light);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- OBS Lower-Third / Main Overlay Banner -->
+  <div class="overlay-banner-wrapper">
+    <div class="overlay-top-header">
+      <div class="overlay-brand">
+        <img src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media" alt="Logo">
+        <div>
+          <div class="overlay-title">Ąžuolynas Film Fest &bull; Tiesioginiai Rezultatai</div>
+          <div style="font-size:0.75rem; color:var(--accent-light);">Žiūrovų simpatijų apdovanojimas (Live Voting)</div>
+        </div>
+      </div>
+
+      <div style="display:flex; align-items:center; gap:12px;">
+        <div class="overlay-badge">
+          <span class="overlay-pulse-dot"></span>
+          <span>Tiesiogiai Ekrane</span>
+        </div>
+        <div style="font-size:0.85rem; font-weight:700; color:var(--gold-light);">
+          Balsų suma: <span id="overlayTotalVotes">0</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Real-Time Dynamic Leaderboard Rows -->
+    <div class="leaderboard-items" id="overlayLeaderboardRows">
+      <div style="text-align:center; padding:16px; color:var(--accent-light); font-size:0.88rem;">
+        Kraunami realaus laiko balsavimo duomenys...
+      </div>
+    </div>
+
+    <div class="overlay-footer-row">
+      <span>Balsuokite savo įrenginyje: <strong>azuolynasinternationalfilmfestival.github.io/live</strong></span>
+      <span>Kauno Tarptautinė Gimnazija &bull; Ąžuolynas FEST</span>
+    </div>
+  </div>
+
+  <script>
+    let films = [];
+    let votesMap = {};
+
+    function updateOverlayUI() {
+      const container = document.getElementById("overlayLeaderboardRows");
+      if (!container) return;
+
+      if (!films || films.length === 0) {
+        container.innerHTML = `<div style="text-align:center; padding:12px; color:var(--accent-light);">Laukiama žiūrovų balsų...</div>`;
+        return;
+      }
+
+      // Calculate total votes
+      const totalVotes = films.reduce((acc, f) => acc + (f.votes || 0), 0);
+      document.getElementById("overlayTotalVotes").textContent = totalVotes;
+
+      // Sort films by votes descending
+      const sorted = [...films].sort((a, b) => (b.votes || 0) - (a.votes || 0)).slice(0, 4);
+
+      container.innerHTML = sorted.map((film, index) => {
+        const isLeader = index === 0 && (film.votes || 0) > 0;
+        const votes = film.votes || 0;
+        const percent = totalVotes > 0 ? Math.round((votes / totalVotes) * 100) : 0;
+        const rankIcon = index === 0 ? "🥇 1" : index === 1 ? "🥈 2" : index === 2 ? "🥉 3" : `#${index + 1}`;
+
+        return `
+          <div class="leaderboard-row ${isLeader ? 'leader' : ''}">
+            <div class="row-rank">${rankIcon}</div>
+            <div class="row-info">
+              <div class="row-title-row">
+                <span class="row-title">„${escapeHtml(film.title || film.filmTitle)}“</span>
+                <span class="row-author">${escapeHtml(film.author || film.name || '')}</span>
+                ${isLeader ? `<span class="row-leader-badge">Lyderis</span>` : ''}
+              </div>
+              <div class="row-progress-container">
+                <div class="row-progress-bar" style="width: ${percent}%;"></div>
+              </div>
+            </div>
+            <div class="row-votes-box">
+              <div class="row-votes-num">${votes}</div>
+              <div class="row-votes-percent">${percent}%</div>
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function escapeHtml(str) {
+      if (!str) return "";
+      return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    }
+
+    async function fetchLatestVotes() {
+      try {
+        const res = await fetch("/api/admin/submissions");
+        if (res.ok) {
+          const data = await res.json();
+          const all = data.submissions || [];
+          films = all.filter(s => s.inVoting === true || s.votesCount > 0);
+          if (films.length === 0) films = all.slice(0, 4);
+          films.forEach(f => {
+            f.votes = f.votesCount || f.votes || 0;
+          });
+          updateOverlayUI();
+        }
+      } catch (e) {}
+    }
+
+    // Connect to Server-Sent Events (SSE) for Real-Time Zero Latency Updates
+    function connectSSE() {
+      try {
+        const evtSource = new EventSource("/api/stream/events");
+
+        evtSource.onmessage = (event) => {
+          try {
+            const parsed = JSON.parse(event.data);
+            if (parsed.type === "INIT_SNAPSHOT") {
+              if (parsed.data.films && parsed.data.films.length > 0) {
+                films = parsed.data.films;
+                updateOverlayUI();
+              }
+            } else if (parsed.type === "VOTE_UPDATE") {
+              const target = films.find(f => f.id === parsed.data.filmId);
+              if (target) {
+                target.votes = parsed.data.votesCount;
+              } else {
+                fetchLatestVotes();
+              }
+              updateOverlayUI();
+            }
+          } catch (e) {}
+        };
+
+        evtSource.onerror = () => {
+          // SSE reconnect or fallback
+          setTimeout(fetchLatestVotes, 2500);
+        };
+      } catch (e) {
+        setInterval(fetchLatestVotes, 2500);
+      }
+    }
+
+    fetchLatestVotes();
+    connectSSE();
+    setInterval(fetchLatestVotes, 3000); // Polling safeguard
+  </script>
+</body>
+</html>

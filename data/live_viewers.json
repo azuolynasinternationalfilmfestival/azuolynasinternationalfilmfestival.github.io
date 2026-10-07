@@ -1,0 +1,31 @@
+{
+  "viewers": [
+    {
+      "token": "fest_live_mantas_88a91",
+      "email": "mantas.film@gmail.com",
+      "name": "Mantas Petraitis",
+      "filmTitle": "Vilties Šviesa",
+      "role": "remote_participant",
+      "status": "authorized",
+      "lastActive": "2026-10-07T00:15:00.000Z"
+    },
+    {
+      "token": "fest_live_sofia_77b42",
+      "email": "sofia.rossi@cinema-milano.it",
+      "name": "Sofia Rossi",
+      "filmTitle": "Echoes of Silence",
+      "role": "remote_participant",
+      "status": "authorized",
+      "lastActive": "2026-10-07T00:18:00.000Z"
+    },
+    {
+      "token": "live_guest_intl_99",
+      "email": "guest.international@kino.de",
+      "name": "Lukas Weber",
+      "filmTitle": "Observer",
+      "role": "guest_viewer",
+      "status": "authorized",
+      "lastActive": "2026-10-07T00:20:00.000Z"
+    }
+  ]
+}

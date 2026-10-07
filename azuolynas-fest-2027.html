@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="lt">
+<head>
+  <meta charset="UTF-8">
+  <link rel="preconnect" href="https://firebasestorage.googleapis.com">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FEST 2027 | Ąžuolynas International Film Festival</title>
+  <meta name="description" content="Ateities kadrai – mūsų bendra istorija. 2027 m. Ąžuolyno tarptautinis mokinių trumpametražių filmų festivalis Kauno tarptautinėje gimnazijoje.">
+  <link rel="canonical" href="https://azuolynasinternationalfilmfestival.github.io/azuolynas-fest-2027.html">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Ąžuolynas International Students Film Festival">
+  <meta property="og:title" content="FEST 2027 | Ąžuolynas International Film Festival">
+  <meta property="og:description" content="Ateities kadrai – mūsų bendra istorija. Pasiruoškite 7-ajam tarptautiniam mokinių kino festivaliui.">
+  <meta property="og:image" content="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/IMG_3458.jpeg?alt=media&token=224af1bd-25ff-494e-8136-fbf330d3ad5b">
+  <link rel="icon" type="image/webp" href="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media">
+  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Cinzel:wght@600;700;800;900&display=swap" rel="stylesheet">
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+</head>
+<body class="site-body">
+
+  <header class="site-header">
+    <div class="container nav-bar">
+      <a href="lt/index.html" class="logo-wrap">
+        <img src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media" alt="Ąžuolynas Fest" class="logo-img">
+        <span class="logo-text">FEST 2027</span>
+      </a>
+      <div class="header-actions">
+        <a href="lt/index.html#submit" class="btn-solid btn-nav-cta">Pateikti Filmą</a>
+        <div class="lang-switch">
+          <a href="azuolynas-fest-2027.html" class="lang-btn active">LT</a>
+          <a href="en/azuolynas-fest-2027.html" class="lang-btn">EN</a>
+        </div>
+        <button type="button" class="burger-menu-btn" id="menuBurgerBtn" aria-label="Meniu">
+          <span class="burger-icon" aria-hidden="true">
+            <span class="bar bar-1"></span>
+            <span class="bar bar-2"></span>
+            <span class="bar bar-3"></span>
+          </span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Responsive Burger Menu Backdrop -->
+  <div class="mobile-menu-backdrop" id="mobileMenuBackdrop" aria-hidden="true"></div>
+  <aside class="mobile-menu-drawer" id="mobileMenuDrawer" aria-label="Navigacijos meniu">
+    <div class="drawer-header">
+      <a href="lt/index.html" class="drawer-logo-wrap">
+        <img src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media" alt="Ąžuolynas Fest" class="logo-img">
+        <div>
+          <div class="drawer-logo-title">FEST 2027</div>
+          <div class="drawer-logo-sub">Festivalio Programa</div>
+        </div>
+      </a>
+      <button type="button" class="drawer-close-btn" id="menuBurgerCloseBtn">&times;</button>
+    </div>
+    <div class="drawer-body">
+      <ul class="drawer-nav-list">
+        <li><a href="lt/index.html" class="drawer-nav-link"><span>Pradinis puslapis</span></a></li>
+        <li><a href="#about" class="drawer-nav-link"><span>Apie 2027 m. festivalį</span></a></li>
+        <li><a href="#rules" class="drawer-nav-link"><span>Taisyklės ir Reikalavimai</span></a></li>
+        <li><a href="#gallery" class="drawer-nav-link"><span>Festivalio Galerija</span></a></li>
+        <li><a href="live.html" class="drawer-nav-link highlight"><span>Tiesioginė Transliacija</span></a></li>
+        <li><a href="lt/index.html#submit" class="drawer-nav-link"><span>Pateikti filmą (Registracija)</span></a></li>
+      </ul>
+    </div>
+  </aside>
+
+  <!-- Hero Section (CMS Editable) -->
+  <section class="hero-screen" id="heroAnchor" style="min-height:75vh; display:flex; align-items:center; background-size:cover; background-position:center; position:relative; padding:120px 0 60px 0;">
+    <div class="hero-curtain" style="position:absolute; inset:0; background:radial-gradient(circle at 50% 20%, rgba(12, 38, 32, 0.7) 0%, rgba(5, 21, 18, 0.95) 85%);"></div>
+    <div class="container" style="position:relative; z-index:2; text-align:center;">
+      <div class="section-tag" id="cmsBadge" style="margin-bottom:12px;">7-ASIS TARPTAUTINIS MOKINIŲ KINO FESTIVALIS</div>
+      <h1 id="cmsTitle" style="font-family:var(--font-cinema); font-size:clamp(2rem, 5vw, 3.6rem); color:var(--text-color); margin:0 0 14px 0; text-transform:uppercase; letter-spacing:0.04em;">
+        FEST 2027
+      </h1>
+      <p id="cmsSubtitle" style="font-size:clamp(1.05rem, 2vw, 1.35rem); color:var(--accent-light); max-width:800px; margin:0 auto 16px auto; font-weight:600; line-height:1.45;">
+        Ateities kadrai – mūsų bendra istorija: jaunųjų talentų balsas pasauliui
+      </p>
+      <div style="display:inline-flex; align-items:center; gap:16px; background:rgba(12, 38, 32, 0.65); border:1px solid rgba(111,165,138,0.3); padding:8px 20px; border-radius:999px; font-size:0.92rem; color:#F3E5AB; margin-bottom:28px;">
+        <span>📅 <strong id="cmsDate">2027 m. balandžio 16 d.</strong></span>
+        <span>&bull;</span>
+        <span>📍 Kauno Tarptautinė Gimnazija</span>
+      </div>
+      <div style="display:flex; justify-content:center; gap:14px; flex-wrap:wrap;">
+        <a href="lt/index.html#submit" class="btn-solid">Pateikti Paraišką 2027</a>
+        <a href="live.html" class="btn-outline">Tiesioginė Transliacija (Live)</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Details & Story Section (CMS Editable) -->
+  <section class="section-block" id="about">
+    <div class="container">
+      <div class="two-col-grid" style="align-items:center; gap:40px;">
+        <div>
+          <div class="section-tag">Apie Festivalį</div>
+          <h2 style="font-family:var(--font-cinema); font-size:2rem; color:var(--text-color); margin:8px 0 16px 0;">
+            Kino Šventė ir Kūrybinė Laisvė
+          </h2>
+          <div id="cmsStory" style="color:var(--text-muted); font-size:1rem; line-height:1.75;">
+            <p style="margin-bottom:14px;">
+              Pasiruoškite 7-ajam tarptautiniam mokinių trumpametražių filmų festivaliui <strong>„Ąžuolynas FEST 2027“</strong>! Jau septintus metus iš eilės Kauno tarptautinė gimnazija tampa tarptautiniu jaunimo kino meno centru.
+            </p>
+            <p style="margin-bottom:14px;">
+              Kviečiame moksleivius nuo 10 iki 18 metų kurti trumpametražius filmus iki 3 minučių naudojant tik išmaniuosius telefonus. Pagrindinė 2027 m. tema: <em>„Ateities kadrai – mūsų bendra istorija“</em>.
+            </p>
+            <p>
+              Laukia iškilminga apdovanojimų ceremonija, tarptautinė kino profesionalų žiuri komisija, ąžuolo statulėlės ir vertingi prizai!
+            </p>
+          </div>
+        </div>
+        <div>
+          <div style="border:1px solid rgba(111,165,138,0.3); border-radius:var(--site-radius); overflow:hidden; box-shadow:0 12px 40px rgba(0,0,0,0.5);">
+            <img id="cmsHeroImg" src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/IMG_3458.jpeg?alt=media&token=224af1bd-25ff-494e-8136-fbf330d3ad5b" alt="FEST 2027" style="width:100%; height:auto; display:block;">
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Rules Section -->
+  <section class="section-block" id="rules" style="background:rgba(12, 38, 32, 0.35);">
+    <div class="container">
+      <div class="section-head text-center">
+        <div class="section-tag">Taisyklės ir Sąlygos</div>
+        <h2 class="section-heading">Pagrindiniai Reikalavimai Kūrėjams</h2>
+        <p class="section-sub">Paprastos, aiškios ir visiems lygios galimybės dalyvauti.</p>
+      </div>
+
+      <div class="features-grid" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(260px, 1fr)); gap:20px;">
+        <div class="feature-card" style="background:var(--surface-card); border:1px solid var(--border-color); border-radius:var(--site-radius); padding:24px;">
+          <div style="font-size:2rem; margin-bottom:10px;">📱</div>
+          <h3 style="font-size:1.15rem; color:var(--text-color); margin-bottom:8px;">Tik Telefonu arba Planšete</h3>
+          <p style="font-size:0.88rem; color:var(--text-muted); line-height:1.5;">Visi filmai privalo būti nufilmuoti išmaniuoju telefonu arba planšetiniu kompiuteriu. Profesionali kino technika neleidžiama.</p>
+        </div>
+
+        <div class="feature-card" style="background:var(--surface-card); border:1px solid var(--border-color); border-radius:var(--site-radius); padding:24px;">
+          <div style="font-size:2rem; margin-bottom:10px;">⏱️</div>
+          <h3 style="font-size:1.15rem; color:var(--text-color); margin-bottom:8px;">Iki 3 Minučių (180 s)</h3>
+          <p style="font-size:0.88rem; color:var(--text-muted); line-height:1.5;">Griežtas laiko limitas – iki 3 minučių su titrais. Kūrybiškumas ir gebėjimas glaustai perteikti idėją yra svarbiausia vertybė.</p>
+        </div>
+
+        <div class="feature-card" style="background:var(--surface-card); border:1px solid var(--border-color); border-radius:var(--site-radius); padding:24px;">
+          <div style="font-size:2rem; margin-bottom:10px;">🌍</div>
+          <h3 style="font-size:1.15rem; color:var(--text-color); margin-bottom:8px;">Dvi Amžiaus Kategorijos</h3>
+          <p style="font-size:0.88rem; color:var(--text-muted); line-height:1.5;"><strong>I Kategorija:</strong> 10–13 metų mokiniai.<br><strong>II Kategorija:</strong> 14–18 metų mokiniai iš Lietuvos ir viso pasaulio.</p>
+        </div>
+
+        <div class="feature-card" style="background:var(--surface-card); border:1px solid var(--border-color); border-radius:var(--site-radius); padding:24px;">
+          <div style="font-size:2rem; margin-bottom:10px;">🏆</div>
+          <h3 style="font-size:1.15rem; color:var(--text-color); margin-bottom:8px;">Ąžuolo Statulėlės & Prizai</h3>
+          <p style="font-size:0.88rem; color:var(--text-muted); line-height:1.5;">Grand Prix, 1-osios vietos, Žiūrovų simpatijų diplomas bei rankų darbo natūralaus ąžuolo statulėlės kiekvienam laureatui.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Photo Gallery Showcase -->
+  <section class="section-block" id="gallery">
+    <div class="container">
+      <div class="section-head text-center">
+        <div class="section-tag">Akimirkos & Ceremonijos</div>
+        <h2 class="section-heading">Festivalio Akimirkų Galerija</h2>
+        <p class="section-sub">Pasinerkite į Ąžuolyno kino festivalio iškilmes, apdovanojimus ir nugalėtojų džiaugsmą.</p>
+      </div>
+
+      <div class="ceremony-mosaic-grid">
+        <div class="ceremony-mosaic-hero">
+          <img src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/IMG_3458.jpeg?alt=media&token=224af1bd-25ff-494e-8136-fbf330d3ad5b" alt="Apdovanojimų ceremonija">
+          <span class="ceremony-cell-badge">CEREMONIJA</span>
+        </div>
+        <div class="ceremony-mosaic-cell">
+          <img src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/IMG_3459.jpeg?alt=media&token=dfdda212-9ea6-433f-af80-8c5b5b57f361" alt="Festivalio laureatai">
+          <span class="ceremony-cell-badge">LAUREATAI</span>
+        </div>
+        <div class="ceremony-mosaic-cell">
+          <img src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/IMG_3463.jpeg?alt=media&token=af7892ca-e78e-4198-b686-e0181472e8da" alt="Ąžuolo statulėlės">
+          <span class="ceremony-cell-badge">PRIZAI</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="container">
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px; padding:24px 0;">
+        <div>
+          <span style="font-weight:700; color:var(--text-color);">Ąžuolynas International Students Film Festival &bull; FEST 2027</span>
+          <div style="font-size:0.8rem; color:var(--text-muted); margin-top:2px;">Kauno Tarptautinė Gimnazija, Lietuva</div>
+        </div>
+        <div style="display:flex; gap:16px; font-size:0.85rem;">
+          <a href="privacy-policy.html" style="color:var(--text-muted); text-decoration:none;">Privatumo politika</a>
+          <a href="terms-of-service.html" style="color:var(--text-muted); text-decoration:none;">Naudojimosi taisyklės</a>
+          <a href="live.html" style="color:var(--accent-light); font-weight:700; text-decoration:none;">Tiesioginė transliacija</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="config.js"></script>
+  <script src="js/burger-menu.js"></script>
+  <script type="module">
+    // CMS Dynamic Sync: load latest 2027 data from editions endpoint / Firestore
+    async function syncEditionData() {
+      try {
+        const res = await fetch("/api/editions");
+        if (res.ok) {
+          const data = await res.json();
+          const edition2027 = (data.editions || []).find(e => String(e.year) === "2027" || e.id === "2027");
+          if (edition2027) {
+            if (edition2027.title) document.getElementById("cmsTitle").textContent = edition2027.title;
+            if (edition2027.subtitle) document.getElementById("cmsSubtitle").textContent = edition2027.subtitle;
+            if (edition2027.date) document.getElementById("cmsDate").textContent = edition2027.date;
+            if (edition2027.story) {
+              const storyHtml = edition2027.story.split("\n\n").map(p => `<p style="margin-bottom:14px;">${p}</p>`).join("");
+              document.getElementById("cmsStory").innerHTML = storyHtml;
+            }
+            if (edition2027.heroImage) {
+              document.getElementById("cmsHeroImg").src = edition2027.heroImage;
+            }
+          }
+        }
+      } catch (e) {}
+    }
+    syncEditionData();
+  </script>
+</body>
+</html>

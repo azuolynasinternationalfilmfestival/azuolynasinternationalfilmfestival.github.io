@@ -1,0 +1,10 @@
+{
+  "isLive": true,
+  "streamState": "live",
+  "serverUrl": "rtmps://live.cloudflare.com:443/live/",
+  "streamKey": "6561bd7efd0ad61e9040a08676049c4dk937d1a8b2c545a980c9fabc8502d8af4",
+  "iframeUrl": "https://customer-auu36r7owuzogvfb.cloudflarestream.com/937d1a8b2c545a980c9fabc8502d8af4/iframe",
+  "viewerCount": 14,
+  "votingActive": true,
+  "updatedAt": "2026-10-07T00:00:00.000Z"
+}

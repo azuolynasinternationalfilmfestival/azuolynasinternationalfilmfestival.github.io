@@ -41,6 +41,52 @@ const LOGS_FILE = path.join(DATA_DIR, 'logs.json');
 const TASKS_FILE = path.join(DATA_DIR, 'tasks.json');
 const EDITIONS_FILE = path.join(DATA_DIR, 'editions.json');
 const JUDGE_EVALS_FILE = path.join(DATA_DIR, 'judge_evaluations.json');
+const SUBMISSIONS_FILE = path.join(DATA_DIR, 'submissions.json');
+const LIVE_VIEWERS_FILE = path.join(DATA_DIR, 'live_viewers.json');
+const STREAM_CONFIG_FILE = path.join(DATA_DIR, 'stream_config.json');
+
+// Real-Time SSE Clients list for Stream Overlay and Live Voting
+let sseClients = [];
+
+function broadcastStreamUpdate(eventType, payload) {
+  const data = JSON.stringify({ type: eventType, data: payload, timestamp: new Date().toISOString() });
+  sseClients.forEach(client => {
+    try {
+      client.res.write(`data: ${data}\n\n`);
+    } catch (e) {
+      // client dropped
+    }
+  });
+}
+
+function loadSubmissionsData() {
+  return loadJson(SUBMISSIONS_FILE, { submissions: [] });
+}
+function saveSubmissionsData(data) {
+  saveJson(SUBMISSIONS_FILE, data);
+}
+
+function loadLiveViewersData() {
+  return loadJson(LIVE_VIEWERS_FILE, { viewers: [] });
+}
+function saveLiveViewersData(data) {
+  saveJson(LIVE_VIEWERS_FILE, data);
+}
+
+function loadStreamConfig() {
+  return loadJson(STREAM_CONFIG_FILE, {
+    isLive: true,
+    streamState: 'live',
+    serverUrl: 'rtmps://live.cloudflare.com:443/live/',
+    streamKey: '6561bd7efd0ad61e9040a08676049c4dk937d1a8b2c545a980c9fabc8502d8af4',
+    iframeUrl: 'https://customer-auu36r7owuzogvfb.cloudflarestream.com/937d1a8b2c545a980c9fabc8502d8af4/iframe',
+    viewerCount: 1,
+    votingActive: true
+  });
+}
+function saveStreamConfig(data) {
+  saveJson(STREAM_CONFIG_FILE, data);
+}
 
 function isAuthorizedToManageAccess(email) {
   if (!email) return false;
@@ -781,6 +827,35 @@ app.post('/api/vote', async (req, res) => {
     });
 
     saveVotesData(votesData);
+
+    // Update submissions.json if film exists
+    try {
+      const subsData = loadSubmissionsData();
+      const filmSub = (subsData.submissions || []).find(s => s.id === cleanFilmId);
+      if (filmSub) {
+        filmSub.votesCount = currentVotes;
+        saveSubmissionsData(subsData);
+      }
+    } catch (e) {
+      // non-blocking
+    }
+
+    // Broadcast in real-time to OBS stream overlay and live viewers
+    broadcastStreamUpdate('VOTE_UPDATE', {
+      filmId: cleanFilmId,
+      category: cleanCategory,
+      votesCount: currentVotes,
+      votesByFilm: votesData.votesByFilm || {}
+    });
+
+    recordActivityLog({
+      action: 'VOTE_CAST',
+      category: 'voting',
+      adminEmail: 'ziurovas@balsavimas.local',
+      adminName: 'Žiūrovas (Tiesioginis balsavimas)',
+      target: cleanFilmId,
+      details: `Atiduotas balsas už filmą (${cleanFilmId}). Iš viso balsų: ${currentVotes}.`
+    });
 
     // Sync to Firestore in background
     (async () => {
@@ -2173,6 +2248,440 @@ app.post('/api/access-request', (req, res) => {
     disabled: true,
     message: 'Prieigos užklausų forma yra išjungta. Nauji nariai priimami tiesioginiu administratoriaus pakvietimu.'
   });
+});
+
+// ---------------------------------------------------------------------------
+// LIVE STREAM, RSVP & REAL-TIME OVERLAY API
+// ---------------------------------------------------------------------------
+
+// Real-Time Server-Sent Events (SSE) for Stream Overlay & Live Voting
+app.get('/api/stream/events', (req, res) => {
+  res.writeHead(200, {
+    'Content-Type': 'text/event-stream',
+    'Cache-Control': 'no-cache, no-transform',
+    'Connection': 'keep-alive',
+    'Access-Control-Allow-Origin': '*'
+  });
+
+  const clientId = Date.now() + '_' + Math.random().toString(36).substring(2, 7);
+  const clientObj = { id: clientId, res };
+  sseClients.push(clientObj);
+
+  // Send initial snapshot
+  const config = loadStreamConfig();
+  const votes = loadVotesData();
+  const subs = loadSubmissionsData().submissions || [];
+  const inVotingFilms = subs.filter(s => s.inVoting === true || s.votesCount > 0);
+
+  const initialPayload = JSON.stringify({
+    type: 'INIT_SNAPSHOT',
+    timestamp: new Date().toISOString(),
+    data: {
+      streamConfig: config,
+      votesByFilm: votes.votesByFilm || {},
+      films: inVotingFilms.map(f => ({
+        id: f.id,
+        title: f.filmTitle || f.title,
+        author: f.name || f.author,
+        category: f.category,
+        votes: f.votesCount || (votes.votesByFilm && votes.votesByFilm[f.id]) || 0,
+        status: f.status
+      }))
+    }
+  });
+
+  res.write(`data: ${initialPayload}\n\n`);
+
+  // Keep-alive heartbeat every 20 seconds
+  const heartbeatTimer = setInterval(() => {
+    try {
+      res.write(': keepalive\n\n');
+    } catch (e) {
+      clearInterval(heartbeatTimer);
+    }
+  }, 20000);
+
+  req.on('close', () => {
+    clearInterval(heartbeatTimer);
+    sseClients = sseClients.filter(c => c.id !== clientId);
+  });
+});
+
+// API: Get Live Stream Status & Configuration
+app.get('/api/live/status', (req, res) => {
+  try {
+    const config = loadStreamConfig();
+    const viewersData = loadLiveViewersData();
+    const fiveMinutesAgo = Date.now() - 5 * 60 * 1000;
+    const activeViewers = (viewersData.viewers || []).filter(v => {
+      if (!v.lastActive) return false;
+      return new Date(v.lastActive).getTime() > fiveMinutesAgo;
+    });
+
+    res.json({
+      success: true,
+      ...config,
+      viewerCount: Math.max(config.viewerCount || 0, activeViewers.length, 1)
+    });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to retrieve stream status' });
+  }
+});
+
+// API: Verify Live Stream Access by Token or Registered Email
+app.post('/api/live/verify-access', (req, res) => {
+  try {
+    const { token, email } = req.body || {};
+    const cleanToken = String(token || '').trim();
+    const cleanEmail = String(email || '').trim().toLowerCase();
+
+    if (!cleanToken && !cleanEmail) {
+      return res.status(400).json({ error: 'Nurodykite žetoną arba registruotą el. pašto adresą' });
+    }
+
+    const subsData = loadSubmissionsData();
+    const viewersData = loadLiveViewersData();
+    const usersData = loadUsersData();
+
+    let matchedUser = null;
+
+    // Check trusted admins first
+    if (cleanEmail && (TRUSTED_ADMIN_EMAILS.map(e => e.toLowerCase()).includes(cleanEmail) ||
+        (usersData.users || []).some(u => u.email.toLowerCase() === cleanEmail && u.status === 'active'))) {
+      matchedUser = {
+        name: cleanEmail === PRIMARY_SUPERADMIN_EMAIL ? 'Vyr. Administratorius' : cleanEmail.split('@')[0],
+        email: cleanEmail,
+        role: 'admin',
+        token: cleanToken || 'admin_pass'
+      };
+    }
+
+    // Check submissions by token or email
+    if (!matchedUser) {
+      const foundSub = (subsData.submissions || []).find(s => {
+        if (cleanToken && s.liveToken && s.liveToken === cleanToken) return true;
+        if (cleanEmail && s.email && s.email.toLowerCase() === cleanEmail) return true;
+        return false;
+      });
+
+      if (foundSub) {
+        matchedUser = {
+          name: foundSub.name,
+          email: foundSub.email,
+          filmTitle: foundSub.filmTitle,
+          role: foundSub.attendanceType === 'remote' ? 'remote_participant' : 'contestant',
+          token: foundSub.liveToken || cleanToken
+        };
+      }
+    }
+
+    // Check pre-authorized live_viewers
+    if (!matchedUser) {
+      const foundViewer = (viewersData.viewers || []).find(v => {
+        if (cleanToken && v.token === cleanToken) return true;
+        if (cleanEmail && v.email && v.email.toLowerCase() === cleanEmail) return true;
+        return false;
+      });
+
+      if (foundViewer) {
+        matchedUser = foundViewer;
+      }
+    }
+
+    if (!matchedUser) {
+      return res.status(403).json({
+        authorized: false,
+        error: 'Prieigos žetonas arba el. paštas nerastas. Pasitikrinkite registracijos patvirtinimo laišką arba kreipkitės į organizatorius.'
+      });
+    }
+
+    // Record or update viewer in live_viewers
+    const nowIso = new Date().toISOString();
+    const existingIndex = (viewersData.viewers || []).findIndex(v =>
+      (matchedUser.token && v.token === matchedUser.token) || (matchedUser.email && v.email === matchedUser.email)
+    );
+
+    const viewerEntry = {
+      token: matchedUser.token || cleanToken || 'tok_' + Math.random().toString(36).substring(2, 9),
+      email: matchedUser.email || '',
+      name: matchedUser.name || 'Dalyvis',
+      filmTitle: matchedUser.filmTitle || '',
+      role: matchedUser.role || 'viewer',
+      status: 'authorized',
+      lastActive: nowIso
+    };
+
+    if (existingIndex >= 0) {
+      viewersData.viewers[existingIndex] = { ...viewersData.viewers[existingIndex], ...viewerEntry };
+    } else {
+      if (!viewersData.viewers) viewersData.viewers = [];
+      viewersData.viewers.push(viewerEntry);
+    }
+    saveLiveViewersData(viewersData);
+
+    // Update stream config viewer count
+    const config = loadStreamConfig();
+    config.viewerCount = (config.viewerCount || 0) + 1;
+    saveStreamConfig(config);
+
+    broadcastStreamUpdate('VIEWER_JOIN', {
+      viewerCount: config.viewerCount,
+      viewerName: matchedUser.name
+    });
+
+    recordActivityLog({
+      action: "STREAM_VIEWER_JOIN",
+      category: "stream",
+      adminEmail: matchedUser.email || "ziurovas@transliacija.local",
+      adminName: matchedUser.name || "Žiūrovas",
+      target: matchedUser.token || "Stream Pass",
+      details: `Prie tiesioginės transliacijos prisijungė žiūrovas: ${matchedUser.name} (${matchedUser.email || 'Žetonas: ' + cleanToken})`
+    });
+
+    res.json({
+      success: true,
+      authorized: true,
+      user: matchedUser
+    });
+  } catch (err) {
+    res.status(500).json({ error: 'Klaida tikrinant transliacijos prieigą' });
+  }
+});
+
+// API: Heartbeat ping from live player
+app.post('/api/live/heartbeat', (req, res) => {
+  try {
+    const { token, email } = req.body || {};
+    if (!token && !email) return res.json({ ok: true });
+
+    const viewersData = loadLiveViewersData();
+    const viewer = (viewersData.viewers || []).find(v => (token && v.token === token) || (email && v.email === email));
+    if (viewer) {
+      viewer.lastActive = new Date().toISOString();
+      saveLiveViewersData(viewersData);
+    }
+    res.json({ ok: true });
+  } catch (e) {
+    res.json({ ok: true });
+  }
+});
+
+// API: Admin Update Live Stream State (live / paused / ended)
+app.post('/api/admin/stream/status', (req, res) => {
+  try {
+    const { streamState, isLive, adminEmail, adminName } = req.body || {};
+    const config = loadStreamConfig();
+
+    if (streamState) config.streamState = streamState;
+    if (isLive !== undefined) config.isLive = !!isLive;
+    if (streamState === 'ended') config.isLive = false;
+    if (streamState === 'live') config.isLive = true;
+
+    config.updatedAt = new Date().toISOString();
+    saveStreamConfig(config);
+
+    broadcastStreamUpdate('STREAM_STATE_UPDATE', {
+      streamState: config.streamState,
+      isLive: config.isLive
+    });
+
+    const callerEmail = String(adminEmail || PRIMARY_SUPERADMIN_EMAIL).trim().toLowerCase();
+    recordActivityLog({
+      action: "STREAM_STATE_CHANGED",
+      category: "stream",
+      adminEmail: callerEmail,
+      adminName: adminName || callerEmail.split('@')[0],
+      target: "Cloudflare Stream",
+      details: `Pakeista tiesioginės transliacijos būsena į: ${config.streamState.toUpperCase()} (Aktyvi: ${config.isLive ? 'Taip' : 'Ne'})`
+    });
+
+    res.json({ success: true, config });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to update stream status' });
+  }
+});
+
+// API: Get Submissions with RSVP Breakdown for Dashboard
+app.get('/api/admin/submissions', (req, res) => {
+  try {
+    const subsData = loadSubmissionsData();
+    const subs = subsData.submissions || [];
+
+    const stats = {
+      total: subs.length,
+      inPersonCount: subs.filter(s => s.attendanceType === 'in_person' || !s.attendanceType).length,
+      remoteCount: subs.filter(s => s.attendanceType === 'remote').length,
+      inVotingCount: subs.filter(s => s.inVoting === true).length,
+      acceptedCount: subs.filter(s => s.status === 'accepted').length,
+      finalistsCount: subs.filter(s => s.status === 'final' || s.status === 'winner').length
+    };
+
+    res.json({
+      success: true,
+      submissions: subs,
+      stats
+    });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to retrieve submissions' });
+  }
+});
+
+// API: Record incoming submission and RSVP in local backend store
+app.post('/api/submissions/record', (req, res) => {
+  try {
+    const data = req.body || {};
+    if (!data.name || !data.email || !data.filmTitle) {
+      return res.status(400).json({ error: 'Missing required submission fields' });
+    }
+
+    const subsData = loadSubmissionsData();
+    if (!subsData.submissions) subsData.submissions = [];
+
+    const subId = data.id || 'sub_' + Date.now();
+    const existingIndex = subsData.submissions.findIndex(s => s.id === subId || (s.email === data.email && s.filmTitle === data.filmTitle));
+
+    const record = {
+      id: subId,
+      name: data.name,
+      email: data.email,
+      age: data.age,
+      category: data.category,
+      location: data.location || data.countryCity || '',
+      institution: data.institution || '',
+      filmTitle: data.filmTitle,
+      deviceModel: data.deviceModel || '',
+      synopsis: data.synopsis || '',
+      videoUrl: data.videoUrl || '',
+      videoDurationSeconds: data.videoDurationSeconds || 0,
+      storagePath: data.storagePath || '',
+      attendanceType: data.attendanceType || 'in_person',
+      liveToken: data.liveToken || 'live_' + Math.random().toString(36).substring(2, 9),
+      liveStreamUrl: data.liveStreamUrl || `https://azuolynasinternationalfilmfestival.github.io/live.html?token=${data.liveToken}`,
+      votesCount: data.votesCount || 0,
+      inVoting: data.inVoting || false,
+      status: data.status || 'submitted',
+      submissionLang: data.submissionLang || 'lt',
+      submittedAt: data.submittedAt || new Date().toISOString()
+    };
+
+    if (existingIndex >= 0) {
+      subsData.submissions[existingIndex] = { ...subsData.submissions[existingIndex], ...record };
+    } else {
+      subsData.submissions.unshift(record);
+    }
+    saveSubmissionsData(subsData);
+
+    // If remote attendee, add to live_viewers
+    if (record.attendanceType === 'remote') {
+      const viewersData = loadLiveViewersData();
+      if (!viewersData.viewers) viewersData.viewers = [];
+      const vIdx = viewersData.viewers.findIndex(v => v.token === record.liveToken);
+      const vRecord = {
+        token: record.liveToken,
+        email: record.email.toLowerCase(),
+        name: record.name,
+        filmTitle: record.filmTitle,
+        role: 'remote_participant',
+        status: 'authorized',
+        lastActive: new Date().toISOString()
+      };
+      if (vIdx >= 0) {
+        viewersData.viewers[vIdx] = vRecord;
+      } else {
+        viewersData.viewers.push(vRecord);
+      }
+      saveLiveViewersData(viewersData);
+    }
+
+    recordActivityLog({
+      action: "SUBMISSION_RECEIVED",
+      category: "submissions",
+      adminEmail: record.email,
+      adminName: record.name,
+      target: record.filmTitle,
+      details: `Gauta nauja paraiška: „${record.filmTitle}“ (Autorius: ${record.name}, RSVP: ${record.attendanceType === 'remote' ? 'Nuotolinis stebėtojas' : 'Dalyvaus gyvai'})`
+    });
+
+    broadcastStreamUpdate('NEW_SUBMISSION', {
+      filmTitle: record.filmTitle,
+      author: record.name,
+      category: record.category
+    });
+
+    res.json({ success: true, submission: record });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to record submission' });
+  }
+});
+
+// API: Resend live stream link & token to remote participant
+app.post('/api/admin/resend-live-link', async (req, res) => {
+  try {
+    const { submissionId, adminEmail, adminName } = req.body || {};
+    if (!submissionId) return res.status(400).json({ error: 'submissionId is required' });
+
+    const subsData = loadSubmissionsData();
+    const sub = (subsData.submissions || []).find(s => s.id === submissionId);
+    if (!sub) return res.status(404).json({ error: 'Submission not found' });
+
+    const token = sub.liveToken || ('live_' + Math.random().toString(36).substring(2, 9));
+    const baseUrl = `http://${req.headers.host || 'localhost:3000'}`;
+    const liveStreamUrl = `${baseUrl}/live.html?token=${token}`;
+
+    sub.liveToken = token;
+    sub.liveStreamUrl = liveStreamUrl;
+    saveSubmissionsData(subsData);
+
+    const callerEmail = String(adminEmail || PRIMARY_SUPERADMIN_EMAIL).trim().toLowerCase();
+    recordActivityLog({
+      action: "STREAM_TOKEN_RESENT",
+      category: "stream",
+      adminEmail: callerEmail,
+      adminName: adminName || callerEmail.split('@')[0],
+      target: sub.email,
+      details: `Išsiųsta transliacijos nuoroda su žetonu (${token}) dalyviui: ${sub.name} (${sub.email})`
+    });
+
+    res.json({
+      success: true,
+      token,
+      liveStreamUrl,
+      message: `Tiesioginės transliacijos prieigos nuoroda paruošta: ${liveStreamUrl}`
+    });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to resend live stream link' });
+  }
+});
+
+// API: Get All Live Stream Viewers for Admin Dashboard
+app.get('/api/admin/live/viewers', (req, res) => {
+  try {
+    const viewersData = loadLiveViewersData();
+    const subsData = loadSubmissionsData();
+    const remoteSubs = (subsData.submissions || []).filter(s => s.attendanceType === 'remote');
+
+    res.json({
+      success: true,
+      viewers: viewersData.viewers || [],
+      remoteParticipants: remoteSubs
+    });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to retrieve viewers' });
+  }
+});
+
+// Friendly aliases for Live stream, Stream Overlay & 2027 pages
+app.get('/live', (req, res) => {
+  res.sendFile(path.join(__dirname, 'live.html'));
+});
+app.get('/stream-overlay', (req, res) => {
+  res.sendFile(path.join(__dirname, 'stream-overlay.html'));
+});
+app.get('/azuolynas-fest-2027', (req, res) => {
+  res.sendFile(path.join(__dirname, 'azuolynas-fest-2027.html'));
+});
+app.get('/en/azuolynas-fest-2027', (req, res) => {
+  res.sendFile(path.join(__dirname, 'en', 'azuolynas-fest-2027.html'));
 });
 
 // Friendly aliases for Privacy Policy & Terms of Service

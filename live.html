@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="lt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tiesioginė Transliacija & Balsavimas | Live Stream | Ąžuolynas Film Fest</title>
+  <meta name="description" content="Oficiali Ąžuolynas International Students Film Festival ceremonijos tiesioginė transliacija ir žiūrovų balsavimas realiu laiku.">
+  <link rel="icon" type="image/webp" href="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media">
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Cinzel:wght@600;700;800&display=swap" rel="stylesheet">
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+  <style>
+    .live-stream-hero {
+      padding: 110px 0 30px 0;
+      background: radial-gradient(circle at 50% 10%, rgba(18, 55, 47, 0.45) 0%, rgba(5, 21, 18, 0.98) 75%);
+    }
+    .stream-frame-wrapper {
+      position: relative;
+      background: #020b09;
+      border: 1px solid rgba(111, 165, 138, 0.35);
+      border-radius: var(--site-radius);
+      box-shadow: 0 16px 50px rgba(0, 0, 0, 0.7);
+      overflow: hidden;
+    }
+    .stream-status-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      padding: 12px 18px;
+      background: rgba(12, 36, 31, 0.85);
+      border-bottom: 1px solid rgba(111, 165, 138, 0.25);
+    }
+    .stream-status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      padding: 4px 12px;
+      border-radius: 999px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .stream-status-pill.live {
+      background: rgba(239, 68, 68, 0.2);
+      color: #f87171;
+      border: 1px solid rgba(239, 68, 68, 0.4);
+    }
+    .stream-status-pill.paused {
+      background: rgba(245, 158, 11, 0.2);
+      color: #fbbf24;
+      border: 1px solid rgba(245, 158, 11, 0.4);
+    }
+    .pulse-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #ef4444;
+      box-shadow: 0 0 10px #ef4444;
+      animation: pulseLive 1.5s infinite;
+    }
+    @keyframes pulseLive {
+      0% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(1.3); }
+      100% { opacity: 1; transform: scale(1); }
+    }
+    .stream-paused-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(5, 21, 18, 0.94);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      text-align: center;
+      z-index: 10;
+    }
+    .live-voting-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 18px;
+      margin-top: 20px;
+    }
+    .live-vote-card {
+      background: rgba(12, 38, 32, 0.55);
+      border: 1px solid rgba(111, 165, 138, 0.22);
+      border-radius: var(--site-radius);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: all 0.25s ease;
+    }
+    .live-vote-card:hover {
+      border-color: var(--accent-light);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+    }
+    .live-vote-card.voted {
+      border-color: #4ade80;
+      background: rgba(20, 60, 48, 0.6);
+    }
+    .auth-overlay-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(2, 10, 8, 0.88);
+      backdrop-filter: blur(8px);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+  </style>
+</head>
+<body class="site-body">
+
+  <!-- Header -->
+  <header class="site-header">
+    <div class="container nav-bar">
+      <a href="lt/index.html" class="logo-wrap">
+        <img src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media" alt="Ąžuolynas Fest" class="logo-img">
+        <span class="logo-text">Ąžuolynas Fest</span>
+      </a>
+
+      <div class="header-actions">
+        <a href="stream-overlay.html" target="_blank" class="btn-outline btn-xs" style="display:inline-flex; align-items:center; gap:6px;">
+          <span>📺 OBS Overlay</span>
+        </a>
+        <div class="lang-switch">
+          <button type="button" class="lang-btn active" id="btnLangLt">LT</button>
+          <button type="button" class="lang-btn" id="btnLangEn">EN</button>
+        </div>
+        <button type="button" class="burger-menu-btn" id="menuBurgerBtn" aria-label="Meniu">
+          <span class="burger-icon" aria-hidden="true">
+            <span class="bar bar-1"></span>
+            <span class="bar bar-2"></span>
+            <span class="bar bar-3"></span>
+          </span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Responsive Burger Menu Backdrop & Drawer -->
+  <div class="mobile-menu-backdrop" id="mobileMenuBackdrop" aria-hidden="true"></div>
+  <aside class="mobile-menu-drawer" id="mobileMenuDrawer" aria-label="Navigacijos meniu">
+    <div class="drawer-header">
+      <a href="lt/index.html" class="drawer-logo-wrap">
+        <img src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media" alt="Ąžuolynas Fest" class="logo-img">
+        <div>
+          <div class="drawer-logo-title">Ąžuolynas Fest</div>
+          <div class="drawer-logo-sub">Tiesioginė transliacija</div>
+        </div>
+      </a>
+      <button type="button" class="drawer-close-btn" id="menuBurgerCloseBtn">&times;</button>
+    </div>
+    <div class="drawer-body">
+      <ul class="drawer-nav-list">
+        <li><a href="lt/index.html" class="drawer-nav-link"><span>Pradinis puslapis</span></a></li>
+        <li><a href="azuolynas-fest-2027.html" class="drawer-nav-link"><span>FEST 2027 Leidimas</span></a></li>
+        <li><a href="stream-overlay.html" target="_blank" class="drawer-nav-link"><span>OBS Ekrano Grafika</span></a></li>
+        <li><a href="admin.html" class="drawer-nav-link"><span>Valdymo Skydas</span></a></li>
+      </ul>
+    </div>
+  </aside>
+
+  <!-- Main Live Content -->
+  <main class="live-stream-hero">
+    <div class="container">
+      
+      <!-- Top Title Bar -->
+      <div style="display:flex; justify-content:space-between; align-items:flex-end; flex-wrap:wrap; gap:16px; margin-bottom:20px;">
+        <div>
+          <div class="section-tag" id="liveTag">Tiesioginė Festivalio Transliacija</div>
+          <h1 style="font-family:var(--font-cinema); font-size:clamp(1.5rem, 3.5vw, 2.2rem); color:var(--text-color); margin:4px 0 0 0;" id="liveHeading">
+            Ąžuolynas Film Fest Ceremonija
+          </h1>
+          <p style="font-size:0.92rem; color:var(--text-muted); margin:4px 0 0 0;" id="liveSub">
+            Kauno Tarptautinė Gimnazija &bull; Oficiali laureatų apdovanojimų ceremonija ir filmų peržiūra
+          </p>
+        </div>
+
+        <div style="display:flex; align-items:center; gap:10px;">
+          <div id="userBadge" class="badge badge-accepted d-none" style="font-size:0.8rem; padding:6px 12px;">
+            👤 <span id="userNameLabel">Dalyvis</span>
+          </div>
+          <button type="button" id="logoutLiveBtn" class="btn-outline btn-xs d-none" style="color:#f87171; border-color:rgba(239,68,68,0.3);">
+            Atsijungti
+          </button>
+        </div>
+      </div>
+
+      <!-- Cloudflare Stream Player Box -->
+      <div class="stream-frame-wrapper">
+        <div class="stream-status-bar">
+          <div style="display:flex; align-items:center; gap:12px;">
+            <div id="liveStatusPill" class="stream-status-pill live">
+              <span class="pulse-dot"></span>
+              <span id="liveStatusText">Dabar vyksta transliacija</span>
+            </div>
+            <span style="font-size:0.82rem; color:var(--text-muted);">
+              Žiūrovai tiesiogiai: <strong id="liveViewerCount" style="color:var(--text-color);">1</strong>
+            </span>
+          </div>
+          
+          <div style="display:flex; gap:8px;">
+            <button type="button" id="btnReloadStream" class="btn-outline btn-xs" style="font-size:0.75rem;">
+              🔄 Perkrauti grotuvą
+            </button>
+          </div>
+        </div>
+
+        <!-- Cloudflare Stream Iframe Container -->
+        <div style="position: relative; padding-top: 56.25%; background: #000;">
+          <iframe
+            id="cloudflareStreamIframe"
+            src="https://customer-auu36r7owuzogvfb.cloudflarestream.com/937d1a8b2c545a980c9fabc8502d8af4/iframe"
+            style="border: none; position: absolute; top: 0; left: 0; height: 100%; width: 100%;"
+            allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture;"
+            allowfullscreen="true"
+          ></iframe>
+
+          <!-- Paused / Ended Dynamic State Overlay -->
+          <div id="streamPausedOverlay" class="stream-paused-overlay d-none">
+            <div style="font-size:2.4rem; margin-bottom:12px;">🍿</div>
+            <h3 style="font-family:var(--font-cinema); font-size:1.4rem; color:var(--text-color); margin:0 0 8px 0;" id="overlayStateHeading">
+              Transliacija šiuo metu sustabdyta
+            </h3>
+            <p style="font-size:0.92rem; color:var(--text-muted); max-width:480px; margin:0 auto 20px auto;" id="overlayStateDesc">
+              Apdovanojimų ceremonijos transliacija ruošiama arba laikinai pristabdyta. Paspauskite mygtuką žemiau, norėdami atnaujinti vaizdą.
+            </p>
+            <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
+              <button type="button" id="btnRetryStream" class="btn-solid btn-sm">
+                🔄 Atnaujinti transliaciją
+              </button>
+              <a href="lt/index.html#archive" class="btn-outline btn-sm">
+                🎬 Žiūrėti retrospektyvos archyvą
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Live Audience Voting Section -->
+      <section style="margin-top: 40px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:14px; margin-bottom:14px; border-bottom:1px solid rgba(111,165,138,0.2); padding-bottom:12px;">
+          <div>
+            <div class="section-tag" id="voteTag">Realaus Laiko Balsavimas</div>
+            <h2 style="font-family:var(--font-cinema); font-size:1.4rem; color:var(--text-color); margin:2px 0 0 0;" id="voteHeading">
+              Žiūrovų Simpatijų Balsavimas
+            </h2>
+            <p style="font-size:0.85rem; color:var(--text-muted); margin:4px 0 0 0;" id="voteDesc">
+              Balsuokite už savo favoritą! Balsavimo rezultatai tiesiogiai atsinaujina OBS ekrane.
+            </p>
+          </div>
+
+          <div style="display:flex; align-items:center; gap:12px;">
+            <div id="votingClosedAlert" class="badge badge-rejected d-none" style="font-size:0.75rem;">
+              Balsavimas sustabdytas
+            </div>
+            <span style="font-size:0.82rem; color:var(--accent-light);">
+              Iš viso atiduota balsų: <strong id="totalVotesCount">0</strong>
+            </span>
+          </div>
+        </div>
+
+        <div id="votingFilmsGrid" class="live-voting-grid"></div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- Authorization / Access Verification Modal for Protected Stream -->
+  <div id="liveAuthModal" class="auth-overlay-backdrop d-none">
+    <div style="background:var(--surface-card); border:1px solid var(--accent-light); border-radius:var(--site-radius); max-width:440px; width:100%; padding:26px 28px; text-align:center; box-shadow:0 20px 60px rgba(0,0,0,0.85);">
+      <div style="width:48px; height:48px; border-radius:50%; background:rgba(111,165,138,0.18); border:1px solid var(--accent-color); display:flex; align-items:center; justify-content:center; margin:0 auto 14px auto; font-size:1.4rem;">
+        🔒
+      </div>
+      <h3 style="font-family:var(--font-cinema); font-size:1.35rem; color:var(--text-color); margin:0 0 6px 0;" id="authModalTitle">
+        Transliacijos Prieiga
+      </h3>
+      <p style="font-size:0.85rem; color:var(--text-muted); line-height:1.45; margin:0 0 20px 0;" id="authModalDesc">
+        Tiesioginė transliacija skirta autorizuotiems festivalio dalyviams ir žiūrovams. Įveskite savo asmeninį žetoną (Token) arba registruotą el. paštą:
+      </p>
+
+      <form id="liveAuthForm" action="javascript:void(0);">
+        <div class="input-cell" style="text-align:left; margin-bottom:14px;">
+          <label for="authInputCredential">Asmeninis žetonas arba el. paštas *</label>
+          <input type="text" id="authInputCredential" class="field" placeholder="pvz. live_mantas_... arba vardas@gmail.com" required style="font-size:0.95rem;">
+        </div>
+
+        <div id="authModalError" class="auth-error d-none" style="margin-bottom:14px; text-align:left;"></div>
+
+        <button type="submit" id="btnSubmitAuth" class="btn-solid btn-full" style="display:flex; align-items:center; justify-content:center; gap:8px;">
+          <span>Patvirtinti ir Žiūrėti</span> &rarr;
+        </button>
+      </form>
+
+      <div style="margin-top:16px; font-size:0.78rem; color:var(--text-dim); line-height:1.4;">
+        Neturite žetono? Pasitikrinkite registracijos patvirtinimo el. laišką arba susisiekite: <a href="mailto:azuolynasfilmfestival@gmail.com" style="color:var(--accent-light);">azuolynasfilmfestival@gmail.com</a>
+      </div>
+    </div>
+  </div>
+
+  <div id="toastContainer" class="toast-container"></div>
+
+  <script src="config.js"></script>
+  <script src="js/burger-menu.js"></script>
+  <script type="module">
+    import { showToast } from "./js/ui-feedback.js";
+
+    let currentLang = localStorage.getItem("preferred_lang") || "lt";
+    let authorizedUser = null;
+    let streamConfig = null;
+    let votingFilms = [];
+    let votedFilmIds = JSON.parse(localStorage.getItem("voted_film_ids") || "[]");
+
+    const dict = {
+      lt: {
+        liveTag: "Tiesioginė Festivalio Transliacija",
+        liveHeading: "Ąžuolynas Film Fest Ceremonija",
+        liveSub: "Kauno Tarptautinė Gimnazija • Oficiali laureatų apdovanojimų ceremonija ir filmų peržiūra",
+        liveStatusLive: "Dabar vyksta transliacija",
+        liveStatusPaused: "Transliacija pristabdyta",
+        liveStatusEnded: "Transliacija baigėsi",
+        pausedHeading: "Transliacija šiuo metu sustabdyta",
+        pausedDesc: "Apdovanojimų ceremonijos transliacija ruošiama arba laikinai pristabdyta. Paspauskite mygtuką žemiau, norėdami atnaujinti vaizdą.",
+        voteTag: "Realaus Laiko Balsavimas",
+        voteHeading: "Žiūrovų Simpatijų Balsavimas",
+        voteDesc: "Balsuokite už savo favoritą! Balsavimo rezultatai tiesiogiai atsinaujina OBS ekrane.",
+        voteBtn: "Balsuoti už šį filmą",
+        votedBtn: "Jūsų balsas įskaitytas ✓",
+        authTitle: "Transliacijos Prieiga",
+        authDesc: "Tiesioginė transliacija skirta autorizuotiems festivalio dalyviams ir žiūrovams. Įveskite savo asmeninį žetoną (Token) arba registruotą el. paštą:"
+      },
+      en: {
+        liveTag: "Official Live Broadcast",
+        liveHeading: "Ąžuolynas Film Fest Ceremony",
+        liveSub: "Kaunas International Gymnasium • Gala Awards Ceremony & Competition Screenings",
+        liveStatusLive: "Live Streaming Now",
+        liveStatusPaused: "Stream Paused",
+        liveStatusEnded: "Stream Ended",
+        pausedHeading: "Broadcast Currently Paused",
+        pausedDesc: "The live awards broadcast is either preparing or momentarily paused. Click below to refresh.",
+        voteTag: "Real-Time Audience Choice",
+        voteHeading: "Audience Favorite Voting",
+        voteDesc: "Vote for your favorite film! Voting results update live on stage and OBS overlay.",
+        voteBtn: "Vote for this film",
+        votedBtn: "Vote Recorded ✓",
+        authTitle: "Live Stream Access",
+        authDesc: "The live stream is reserved for authorized festival participants and viewers. Enter your personal pass token or registered email:"
+      }
+    };
+
+    function applyLanguage(lang) {
+      currentLang = lang;
+      localStorage.setItem("preferred_lang", lang);
+      const t = dict[lang] || dict.lt;
+
+      document.getElementById("btnLangLt").classList.toggle("active", lang === "lt");
+      document.getElementById("btnLangEn").classList.toggle("active", lang === "en");
+
+      document.getElementById("liveTag").textContent = t.liveTag;
+      document.getElementById("liveHeading").textContent = t.liveHeading;
+      document.getElementById("liveSub").textContent = t.liveSub;
+      document.getElementById("voteTag").textContent = t.voteTag;
+      document.getElementById("voteHeading").textContent = t.voteHeading;
+      document.getElementById("voteDesc").textContent = t.voteDesc;
+      document.getElementById("authModalTitle").textContent = t.authTitle;
+      document.getElementById("authModalDesc").textContent = t.authDesc;
+      renderVotingCards();
+    }
+
+    document.getElementById("btnLangLt").onclick = () => applyLanguage("lt");
+    document.getElementById("btnLangEn").onclick = () => applyLanguage("en");
+
+    // 1. Check URL parameters (?token=... or ?email=...)
+    const urlParams = new URLSearchParams(window.location.search);
+    const paramToken = urlParams.get("token") || urlParams.get("pass");
+    const paramEmail = urlParams.get("email");
+
+    // 2. Authentication check
+    async function verifyAccess(credential) {
+      try {
+        const isEmail = credential.includes("@");
+        const payload = isEmail ? { email: credential } : { token: credential };
+
+        const res = await fetch("/api/live/verify-access", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await res.json();
+        if (res.ok && data.authorized) {
+          authorizedUser = data.user;
+          sessionStorage.setItem("live_auth_user", JSON.stringify(data.user));
+          document.getElementById("liveAuthModal").classList.add("d-none");
+          document.getElementById("userBadge").classList.remove("d-none");
+          document.getElementById("userNameLabel").textContent = data.user.name || data.user.email;
+          document.getElementById("logoutLiveBtn").classList.remove("d-none");
+          showToast(`Sveiki, ${data.user.name || ''}! Transliacija aktyvuota.`, "success");
+          startHeartbeat();
+          return true;
+        } else {
+          showAuthError(data.error || "Prieiga nesuteikta. Patikrinkite duomenis.");
+          return false;
+        }
+      } catch (err) {
+        showAuthError("Nepavyko susisiekti su serveriu.");
+        return false;
+      }
+    }
+
+    function showAuthError(msg) {
+      const errBox = document.getElementById("authModalError");
+      errBox.textContent = msg;
+      errBox.classList.remove("d-none");
+    }
+
+    // Auto-check stored or parameter credential
+    const storedAuth = sessionStorage.getItem("live_auth_user");
+    if (storedAuth) {
+      try {
+        authorizedUser = JSON.parse(storedAuth);
+        document.getElementById("userBadge").classList.remove("d-none");
+        document.getElementById("userNameLabel").textContent = authorizedUser.name || authorizedUser.email;
+        document.getElementById("logoutLiveBtn").classList.remove("d-none");
+        startHeartbeat();
+      } catch (e) {}
+    } else if (paramToken || paramEmail) {
+      verifyAccess(paramToken || paramEmail);
+    } else {
+      document.getElementById("liveAuthModal").classList.remove("d-none");
+    }
+
+    // Modal submit
+    document.getElementById("liveAuthForm").onsubmit = async (e) => {
+      e.preventDefault();
+      const input = document.getElementById("authInputCredential").value.trim();
+      if (!input) return;
+      document.getElementById("btnSubmitAuth").disabled = true;
+      await verifyAccess(input);
+      document.getElementById("btnSubmitAuth").disabled = false;
+    };
+
+    document.getElementById("logoutLiveBtn").onclick = () => {
+      sessionStorage.removeItem("live_auth_user");
+      window.location.href = "live.html";
+    };
+
+    function startHeartbeat() {
+      setInterval(async () => {
+        if (!authorizedUser) return;
+        try {
+          await fetch("/api/live/heartbeat", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ token: authorizedUser.token, email: authorizedUser.email })
+          });
+        } catch (e) {}
+      }, 30000);
+    }
+
+    // 3. Load Stream Status and Real-time SSE Connection
+    async function loadStreamStatus() {
+      try {
+        const res = await fetch("/api/live/status");
+        if (res.ok) {
+          streamConfig = await res.json();
+          updateStreamUI(streamConfig);
+        }
+      } catch (e) {}
+    }
+
+    function updateStreamUI(cfg) {
+      if (!cfg) return;
+      const pill = document.getElementById("liveStatusPill");
+      const statusText = document.getElementById("liveStatusText");
+      const overlay = document.getElementById("streamPausedOverlay");
+      const viewersElem = document.getElementById("liveViewerCount");
+
+      if (viewersElem) viewersElem.textContent = cfg.viewerCount || 1;
+
+      if (cfg.streamState === "live" && cfg.isLive) {
+        pill.className = "stream-status-pill live";
+        statusText.textContent = dict[currentLang].liveStatusLive;
+        overlay.classList.add("d-none");
+      } else {
+        pill.className = "stream-status-pill paused";
+        statusText.textContent = cfg.streamState === "ended" ? dict[currentLang].liveStatusEnded : dict[currentLang].liveStatusPaused;
+        overlay.classList.remove("d-none");
+        document.getElementById("overlayStateHeading").textContent = cfg.streamState === "ended" ? "Ceremonija baigėsi" : dict[currentLang].pausedHeading;
+      }
+
+      if (cfg.votingActive === false) {
+        document.getElementById("votingClosedAlert").classList.remove("d-none");
+      } else {
+        document.getElementById("votingClosedAlert").classList.add("d-none");
+      }
+    }
+
+    // Reload iframe
+    document.getElementById("btnReloadStream").onclick = () => {
+      const iframe = document.getElementById("cloudflareStreamIframe");
+      if (iframe) iframe.src = iframe.src;
+      showToast("Grotuvas atnaujintas.");
+    };
+    document.getElementById("btnRetryStream").onclick = () => {
+      loadStreamStatus();
+      const iframe = document.getElementById("cloudflareStreamIframe");
+      if (iframe) iframe.src = iframe.src;
+    };
+
+    // 4. Load Films for Voting
+    async function loadFilms() {
+      try {
+        const res = await fetch("/api/admin/submissions");
+        if (res.ok) {
+          const data = await res.json();
+          const all = data.submissions || [];
+          votingFilms = all.filter(s => s.inVoting === true || s.votesCount > 0);
+          if (votingFilms.length === 0) votingFilms = all.slice(0, 6);
+          renderVotingCards();
+          updateTotalVotes();
+        }
+      } catch (e) {}
+    }
+
+    function updateTotalVotes() {
+      const total = votingFilms.reduce((acc, f) => acc + Number(f.votesCount || f.votes || 0), 0);
+      document.getElementById("totalVotesCount").textContent = total;
+    }
+
+    function renderVotingCards() {
+      const container = document.getElementById("votingFilmsGrid");
+      if (!container) return;
+      const t = dict[currentLang] || dict.lt;
+
+      if (votingFilms.length === 0) {
+        container.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:30px; color:var(--text-muted);">Balsavimo atranka ruošiama. Netrukus pasirodys filmai!</div>`;
+        return;
+      }
+
+      container.innerHTML = votingFilms.map(film => {
+        const filmId = film.id;
+        const hasVoted = votedFilmIds.includes(filmId);
+        const votes = film.votesCount || film.votes || 0;
+
+        return `
+          <div class="live-vote-card ${hasVoted ? 'voted' : ''}" data-film-id="${filmId}">
+            <div>
+              <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:8px; margin-bottom:6px;">
+                <span class="badge" style="background:rgba(111,165,138,0.2); color:var(--accent-light); font-size:0.72rem;">
+                  ${film.category || 'Konkursas'}
+                </span>
+                <span style="font-weight:700; color:var(--accent-light); font-size:0.88rem;">
+                  ⭐️ <span class="film-votes-val">${votes}</span>
+                </span>
+              </div>
+              <h4 style="font-family:var(--font-cinema); font-size:1.1rem; color:var(--text-color); margin:0 0 4px 0;">
+                ${film.filmTitle || film.title}
+              </h4>
+              <p style="font-size:0.78rem; color:var(--text-muted); margin:0 0 10px 0;">
+                ${film.name || film.author || ''} &bull; ${film.institution || film.location || ''}
+              </p>
+              ${film.synopsis ? `<p style="font-size:0.8rem; color:var(--text-dim); line-height:1.4; margin:0 0 14px 0; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;">${film.synopsis}</p>` : ''}
+            </div>
+
+            <button type="button" class="btn-solid btn-sm btn-cast-vote" data-id="${filmId}" ${hasVoted ? 'disabled' : ''} style="width:100%; justify-content:center; ${hasVoted ? 'background:#1f5847; border-color:#4ade80;' : ''}">
+              ${hasVoted ? t.votedBtn : t.voteBtn}
+            </button>
+          </div>
+        `;
+      }).join("");
+
+      container.querySelectorAll(".btn-cast-vote").forEach(btn => {
+        btn.onclick = () => castVote(btn.dataset.id);
+      });
+    }
+
+    async function castVote(filmId) {
+      if (votedFilmIds.includes(filmId)) {
+        showToast("Jūs jau balsavote už šį filmą!", "info");
+        return;
+      }
+
+      try {
+        const deviceHash = 'dev_' + Math.random().toString(36).substring(2, 10);
+        const res = await fetch("/api/vote", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ filmId, category: "general", deviceHash })
+        });
+
+        const data = await res.json();
+        if (res.ok && data.success) {
+          votedFilmIds.push(filmId);
+          localStorage.setItem("voted_film_ids", JSON.stringify(votedFilmIds));
+
+          const f = votingFilms.find(x => x.id === filmId);
+          if (f) f.votesCount = data.votesCount;
+
+          renderVotingCards();
+          updateTotalVotes();
+          showToast("Ačiū! Jūsų balsas sėkmingai įskaitytas ir atsinaujino ekrane.", "success");
+        } else {
+          showToast(data.message || "Balsavimas nepavyko.", "error");
+        }
+      } catch (err) {
+        showToast("Klaida siunčiant balsą: " + err.message, "error");
+      }
+    }
+
+    // 5. Connect to Server-Sent Events (SSE) for Real-Time Live Sync
+    function initSSE() {
+      try {
+        const evtSource = new EventSource("/api/stream/events");
+
+        evtSource.onmessage = (event) => {
+          try {
+            const parsed = JSON.parse(event.data);
+            if (parsed.type === "INIT_SNAPSHOT") {
+              if (parsed.data.streamConfig) updateStreamUI(parsed.data.streamConfig);
+              if (parsed.data.films && parsed.data.films.length > 0) {
+                votingFilms = parsed.data.films;
+                renderVotingCards();
+                updateTotalVotes();
+              }
+            } else if (parsed.type === "VOTE_UPDATE") {
+              const target = votingFilms.find(x => x.id === parsed.data.filmId);
+              if (target) {
+                target.votesCount = parsed.data.votesCount;
+                renderVotingCards();
+                updateTotalVotes();
+              }
+            } else if (parsed.type === "STREAM_STATE_UPDATE") {
+              if (streamConfig) {
+                streamConfig.streamState = parsed.data.streamState;
+                streamConfig.isLive = parsed.data.isLive;
+                updateStreamUI(streamConfig);
+              }
+            } else if (parsed.type === "VIEWER_JOIN") {
+              const countElem = document.getElementById("liveViewerCount");
+              if (countElem && parsed.data.viewerCount) countElem.textContent = parsed.data.viewerCount;
+            }
+          } catch (e) {}
+        };
+
+        evtSource.onerror = () => {
+          // Auto fallback polling
+          setTimeout(loadFilms, 3000);
+        };
+      } catch (e) {
+        setInterval(loadFilms, 4000);
+      }
+    }
+
+    applyLanguage(currentLang);
+    loadStreamStatus();
+    loadFilms();
+    initSSE();
+  </script>
+</body>
+</html>

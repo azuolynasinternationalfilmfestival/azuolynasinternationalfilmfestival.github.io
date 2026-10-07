@@ -23,27 +23,6 @@
       <h2 class="admin-auth-title">Valdymo Skydas</h2>
       <p class="admin-auth-sub">Autorizuota prieiga &bull; Kauno Tarptautinė Gimnazija</p>
 
-      <!-- Quick Role Testing Bar -->
-      <div style="background:rgba(12,38,32,0.6); border:1px solid rgba(111,165,138,0.25); border-radius:var(--site-radius); padding:10px 12px; margin-bottom:18px; text-align:left;">
-        <div style="font-size:0.72rem; color:var(--accent-light); text-transform:uppercase; letter-spacing:0.06em; margin-bottom:6px; font-weight:600;">
-          Greitasis vaidmenų testavimas:
-        </div>
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px;">
-          <button type="button" id="quickLoginSuper" class="btn-outline btn-xs" style="text-align:left; font-size:0.74rem; padding:4px 8px;" title="Vyr. Administratorius (Pilna prieiga ir kvietimai)">
-            👑 Vyr. Admin
-          </button>
-          <button type="button" id="quickLoginKarina" class="btn-outline btn-xs" style="text-align:left; font-size:0.74rem; padding:4px 8px;" title="Karina Brdar (Administratorė su kvietimų teise)">
-            🛡️ Karina (Admin)
-          </button>
-          <button type="button" id="quickLoginEditor" class="btn-outline btn-xs" style="text-align:left; font-size:0.74rem; padding:4px 8px;" title="Lukas (Redaktorius - 2027 m. leidimai, tekstai, užduotys)">
-            ✏️ Redaktorius
-          </button>
-          <button type="button" id="quickLoginJudge" class="btn-outline btn-xs" style="text-align:left; font-size:0.74rem; padding:4px 8px;" title="Elena (Teisėja - filmų vertinimas ir analitika)">
-            ⚖️ Teisėja
-          </button>
-        </div>
-      </div>
-
       <div id="loginFormWrapper">
         <form id="adminAuthForm" action="javascript:void(0);" onsubmit="event.preventDefault(); return false;">
           <div class="input-cell">
@@ -178,6 +157,11 @@
           <span>Balsavimas & Teisėjai</span>
         </button>
 
+        <button id="tabStreamBtn" class="admin-sidebar-nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="2"></circle><path d="M16.24 7.76a6 6 0 0 1 0 8.49m-8.48-.01a6 6 0 0 1 0-8.49m11.31-2.82a10 10 0 0 1 0 14.14m-14.14 0a10 10 0 0 1 0-14.14"></path></svg>
+          <span>Transliacija & RSVP</span>
+        </button>
+
         <button id="tabEditionsBtn" class="admin-sidebar-nav-item">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
           <span>Metų Leidiniai & 2027</span>
@@ -211,16 +195,6 @@
           <span>Nustatymai</span>
         </button>
       </nav>
-
-      <!-- SIDEBAR FOOTER -->
-      <div class="admin-sidebar-footer">
-        <a href="/lt/index.html" target="_blank" class="btn-outline btn-xs" style="display:flex; align-items:center; justify-content:center; gap:6px;">
-          <span>🌐 Atverti svetainę</span>
-        </a>
-        <button id="logoutBtn" class="btn-outline btn-xs" style="color:#f87171; border-color:rgba(239,68,68,0.3);">
-          Atsijungti
-        </button>
-      </div>
     </aside>
 
     <div id="adminSidebarBackdrop" class="admin-sidebar-backdrop d-none"></div>
@@ -241,13 +215,19 @@
           </div>
         </div>
 
-        <div style="display:flex; align-items:center; gap:12px;">
+        <div style="display:flex; align-items:center; gap:10px;">
           <div id="maintenanceHeaderIndicator" class="badge badge-rejected d-none" style="font-size:0.72rem;">
             ⚠️ Profilaktika aktyvi
           </div>
           <button type="button" id="btnHeaderNotifications" class="btn-outline btn-xs" style="display:inline-flex; align-items:center; gap:6px; position:relative;" title="Veiklos žurnalas">
             <span>🔔</span>
             <span class="notifications-unread-count" style="display:none;">0</span>
+          </button>
+          <a href="/lt/index.html" target="_blank" class="btn-outline btn-xs" style="display:inline-flex; align-items:center; gap:5px;" title="Atverti viešąją svetainę">
+            <span>🌐 Svetainė</span>
+          </a>
+          <button id="logoutBtn" class="btn-outline btn-xs" style="color:#f87171; border-color:rgba(239,68,68,0.3);" title="Atsijungti iš sistemos">
+            Atsijungti
           </button>
         </div>
       </header>
@@ -373,7 +353,141 @@
           </div>
         </div>
 
-        <!-- 3. EDITIONS (FEST 2027 & ARCHIVE) TAB -->
+        <!-- 3. STREAM & RSVP MANAGEMENT TAB -->
+        <div id="streamTab" class="d-none">
+          <!-- Top Metric Cards -->
+          <div class="voting-stat-grid">
+            <div class="metric-card">
+              <div class="metric-label">Viso Registracijų</div>
+              <div class="metric-num" id="statStreamTotalRsvp">0</div>
+              <div style="font-size:0.75rem; color:var(--text-muted); margin-top:4px;">Pateiktų paraiškų ir filmų skaičius</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-label">🏛️ Gyvai Vietoje (RSVP)</div>
+              <div class="metric-num" id="statStreamInPerson" style="color:#4ade80;">0</div>
+              <div style="font-size:0.75rem; color:var(--text-muted); margin-top:4px;">Dalyviai, atvykstantys į gimnaziją</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-label">📡 Nuotoliniai Dalyviai</div>
+              <div class="metric-num" id="statStreamRemote" style="color:#60a5fa;">0</div>
+              <div style="font-size:0.75rem; color:var(--text-muted); margin-top:4px;">Nuotoliniai žiūrovai su asmeniniais žetonais</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-label">🔴 Žiūrovai Tiesiogiai</div>
+              <div class="metric-num" id="statStreamLiveViewers" style="color:#f87171;">0</div>
+              <div style="font-size:0.75rem; color:var(--text-muted); margin-top:4px;">Aktyvus srautas transliacijos puslapyje</div>
+            </div>
+          </div>
+
+          <!-- Cloudflare Stream & OBS Control -->
+          <div class="content-card" style="margin-bottom:24px; border:1px solid rgba(111,165,138,0.35);">
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:16px; border-bottom:1px solid var(--border-color); padding-bottom:12px;">
+              <div>
+                <div style="display:flex; align-items:center; gap:10px;">
+                  <h3 class="content-card-title" style="margin:0;">Cloudflare Stream & OBS Transliacijos Valdymas</h3>
+                  <span id="streamStateBadge" class="status-pill status-accepted">🔴 LIVE Transliacija Aktyvi</span>
+                </div>
+                <p class="content-card-sub" style="margin:4px 0 0 0;">
+                  Valdykite tiesioginės transliacijos būseną, OBS nustatymus ir Cloudflare grotuvo parametrus.
+                </p>
+              </div>
+              <div style="display:flex; gap:8px; align-items:center;">
+                <button type="button" id="btnRefreshStreamAdmin" class="btn-outline btn-xs">🔄 Atnaujinti</button>
+                <a href="/live.html" target="_blank" class="btn-solid btn-xs" style="display:inline-flex; align-items:center; gap:5px;">
+                  <span>📺 Atverti Transliaciją</span>
+                </a>
+                <a href="/stream-overlay.html" target="_blank" class="btn-outline btn-xs" style="display:inline-flex; align-items:center; gap:5px;">
+                  <span>🖥️ OBS Overlay</span>
+                </a>
+              </div>
+            </div>
+
+            <!-- Stream State Switchers -->
+            <div style="background:rgba(12,38,32,0.45); border:1px solid var(--border-color); border-radius:var(--site-radius); padding:16px; margin-bottom:18px;">
+              <label style="font-size:0.85rem; font-weight:700; color:var(--text-color); display:block; margin-bottom:8px;">
+                Transliacijos Būsena (Realiu laiku matoma visiems žiūrovams):
+              </label>
+              <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                <button type="button" id="btnSetStreamLive" class="btn-solid btn-sm" style="background:#ef4444; border-color:#dc2626; color:#fff;">
+                  🔴 Nustatyti LIVE (Vyksta transliacija)
+                </button>
+                <button type="button" id="btnSetStreamPaused" class="btn-outline btn-sm" style="color:#fbbf24; border-color:rgba(245,158,11,0.5);">
+                  ⏸️ Nustatyti PAUSED (Pristabdyta)
+                </button>
+                <button type="button" id="btnSetStreamEnded" class="btn-outline btn-sm" style="color:#9ca3af; border-color:rgba(156,163,175,0.4);">
+                  ⏹️ Nustatyti ENDED (Baigta)
+                </button>
+              </div>
+            </div>
+
+            <!-- OBS Configuration Credentials Box -->
+            <div class="two-col-grid" style="margin-bottom:12px;">
+              <div class="input-cell">
+                <label for="obsServerUrlInput">OBS Server URL (RTMPS)</label>
+                <div style="display:flex; gap:6px;">
+                  <input type="text" id="obsServerUrlInput" class="field" readonly value="rtmps://live.cloudflare.com:443/live/" style="font-family:monospace; font-size:0.85rem;">
+                  <button type="button" id="btnCopyObsServer" class="btn-outline btn-xs" style="white-space:nowrap;">📋 Kopijuoti</button>
+                </div>
+              </div>
+              <div class="input-cell">
+                <label for="obsStreamKeyInput">OBS Stream Key</label>
+                <div style="display:flex; gap:6px;">
+                  <input type="text" id="obsStreamKeyInput" class="field" readonly value="6561bd7efd0ad61e9040a08676049c4dk937d1a8b2c545a980c9fabc8502d8af4" style="font-family:monospace; font-size:0.85rem;">
+                  <button type="button" id="btnCopyObsKey" class="btn-outline btn-xs" style="white-space:nowrap;">📋 Kopijuoti</button>
+                </div>
+              </div>
+            </div>
+
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-top:8px;">
+              <span style="font-size:0.8rem; color:var(--text-muted);">
+                Cloudflare Stream Iframe: <code>customer-auu36r7owuzogvfb.cloudflarestream.com/.../iframe</code>
+              </span>
+              <button type="button" id="btnCopyStreamIframe" class="btn-outline btn-xs">
+                📋 Kopijuoti Iframe HTML Kodą
+              </button>
+            </div>
+          </div>
+
+          <!-- Participants & Remote Tokens Table -->
+          <div class="content-card">
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:14px;">
+              <div>
+                <h3 class="content-card-title" style="margin:0;">Nuotolinių Dalyvių Žetonai & RSVP Registracija</h3>
+                <p class="content-card-sub" style="margin:4px 0 0 0;">
+                  Unikalių prieigos žetonų ir tiesioginių transliacijos nuorodų suvestinė. Galite persiųsti el. laišką arba nukopijuoti asmeninę nuorodą.
+                </p>
+              </div>
+            </div>
+
+            <div class="table-toolbar" style="margin-bottom:16px;">
+              <input type="text" id="filterStreamRsvpSearch" class="field toolbar-search" placeholder="Ieškoti pagal vardą, el. paštą, filmą ar žetoną...">
+              <select id="filterStreamRsvpType" class="field toolbar-select">
+                <option value="all" selected>Visi dalyviai (RSVP)</option>
+                <option value="remote">📡 Tik nuotoliniai (su žetonais)</option>
+                <option value="in_person">🏛️ Tik atvykstantys gyvai</option>
+              </select>
+            </div>
+
+            <div class="table-box">
+              <table class="clean-table">
+                <thead>
+                  <tr>
+                    <th>Dalyvis</th>
+                    <th>El. Paštas</th>
+                    <th>Filmas</th>
+                    <th>RSVP Statusas</th>
+                    <th>Žetonas (Token)</th>
+                    <th>Asmeninė Nuoroda</th>
+                    <th style="text-align:right;">Veiksmai</th>
+                  </tr>
+                </thead>
+                <tbody id="streamRsvpTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4. EDITIONS (FEST 2027 & ARCHIVE) TAB -->
         <div id="editionsTab" class="d-none">
           <div class="content-card" style="margin-bottom:24px;">
             <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:12px;">
@@ -714,6 +828,7 @@
             <input type="text" id="filterLogSearch" class="field toolbar-search" placeholder="Filtruoti pagal el. paštą, veiksmą ar pakeistą informaciją...">
             <select id="filterLogCategory" class="field toolbar-select">
               <option value="all">Visos kategorijos</option>
+              <option value="stream">Transliacija & RSVP</option>
               <option value="settings">Nustatymai</option>
               <option value="editions">Metų leidiniai (2027)</option>
               <option value="submissions">Paraiškos & Laureatai</option>

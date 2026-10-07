@@ -24,6 +24,7 @@ import {
 } from "./users.js";
 import { initInviteModal } from "./invite-modal.js";
 import { initVotingAnalytics, loadVotingAnalytics } from "./voting-analytics.js";
+import { initStreamAdmin, loadStreamData } from "./stream-admin.js";
 import { initTasks, loadTasks } from "./tasks.js";
 import { initNotificationsLog, loadActivityLogs } from "./notifications-log.js";
 
@@ -42,6 +43,7 @@ function bootAdmin() {
         try { subscribeSubmissions(); } catch (e) { console.error("subscribeSubmissions error:", e); }
         try { subscribeEditions(); } catch (e) { console.error("subscribeEditions error:", e); }
         try { loadVotingAnalytics(); } catch (e) { console.error("loadVotingAnalytics error:", e); }
+        try { loadStreamData(); } catch (e) { console.error("loadStreamData error:", e); }
         try { loadTasks(); } catch (e) { console.error("loadTasks error:", e); }
         try { loadActivityLogs(); } catch (e) { console.error("loadActivityLogs error:", e); }
         if (hasUserManagementAccess) {
@@ -64,6 +66,7 @@ function bootAdmin() {
   // 2. Initialize management panel tabs and subsystems
   try { initSubmissions(); } catch (e) { console.error("initSubmissions error:", e); }
   try { initVotingAnalytics(); } catch (e) { console.error("initVotingAnalytics error:", e); }
+  try { initStreamAdmin(); } catch (e) { console.error("initStreamAdmin error:", e); }
   try { initEditions(); } catch (e) { console.error("initEditions error:", e); }
   try { initArchive(); } catch (e) { console.error("initArchive error:", e); }
   try { initTasks(); } catch (e) { console.error("initTasks error:", e); }
@@ -85,6 +88,7 @@ function initTabNavigation() {
   const tabs = [
     { btn: "tabSubmissionsBtn", content: "submissionsTab" },
     { btn: "tabVotingBtn", content: "votingTab" },
+    { btn: "tabStreamBtn", content: "streamTab" },
     { btn: "tabEditionsBtn", content: "editionsTab" },
     { btn: "tabArchiveBtn", content: "archiveTab" },
     { btn: "tabTasksBtn", content: "tasksTab" },
