@@ -145,8 +145,8 @@ export function renderVotingLeaderboard() {
 
     return `
       <tr>
-        <td style="font-weight:700; color:${index === 0 ? '#F3E5AB' : 'var(--text-muted)'}; width:40px; text-align:center;">
-          ${index === 0 ? '🥇 1' : index === 1 ? '🥈 2' : index === 2 ? '🥉 3' : (index + 1)}
+        <td style="font-weight:700; color:${index === 0 ? '#F3E5AB' : index === 1 ? '#cbd5e1' : index === 2 ? '#fbbf24' : 'var(--text-muted)'}; width:40px; text-align:center;">
+          #${index + 1}
         </td>
         <td>
           <div style="font-weight:600; color:var(--text-color); font-family:var(--font-cinema); font-size:0.96rem;">
@@ -166,7 +166,7 @@ export function renderVotingLeaderboard() {
         <td style="text-align:center;">
           ${jScore !== null ? `
             <span class="badge" style="background:rgba(212,175,55,0.2); color:#F3E5AB; font-weight:700; font-size:0.85rem;">
-              ⭐ ${jScore} / 10
+              ${jScore} / 10
             </span>
             <span style="font-size:0.7rem; color:var(--text-muted); display:block;">(${jCount} teisėjai)</span>
           ` : `
@@ -175,7 +175,7 @@ export function renderVotingLeaderboard() {
         </td>
         <td>
           ${isWinner ? `
-            <span class="badge badge-winner">🏆 ${escapeHtml(film.awardTitle || 'Laureatas')}</span>
+            <span class="badge badge-winner" style="display:inline-flex; align-items:center; gap:4px;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="7"></circle><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline></svg><span>${escapeHtml(film.awardTitle || 'Laureatas')}</span></span>
           ` : `
             <span class="badge badge-accepted">Balsavime</span>
           `}
@@ -183,11 +183,11 @@ export function renderVotingLeaderboard() {
         <td style="text-align:right;">
           <div style="display:inline-flex; gap:6px;">
             <button type="button" class="btn-solid btn-xs btn-judge-eval" data-film-id="${film.id}">
-              ⭐ Vertinti (Komisija)
+              Vertinti (Komisija)
             </button>
             ${!isWinner ? `
               <button type="button" class="btn-outline btn-xs btn-declare-winner" data-film-id="${film.id}" style="color:#F3E5AB; border-color:#D4AF37;">
-                🏆 Paskelbti laimėtoju
+                Paskelbti laimėtoju
               </button>
             ` : ''}
           </div>

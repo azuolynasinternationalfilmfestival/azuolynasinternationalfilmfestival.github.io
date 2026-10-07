@@ -597,7 +597,7 @@
         <!-- Categories Filter for Laureates -->
         <div class="results-filter-bar" id="resultsFilterBar" role="tablist" aria-label="Laureatų kategorijos">
           <button type="button" class="results-filter-btn active" onclick="FestivalLaureates.setCategory('all', this)">Visi laureatai</button>
-          <button type="button" class="results-filter-btn" onclick="FestivalLaureates.setCategory('top', this)">🏆 Grand Prix ir I vietos</button>
+          <button type="button" class="results-filter-btn" onclick="FestivalLaureates.setCategory('top', this)">Grand Prix ir I vietos</button>
           <button type="button" class="results-filter-btn" onclick="FestivalLaureates.setCategory('cat1', this)">I Kategorija (10–13 m.)</button>
           <button type="button" class="results-filter-btn" onclick="FestivalLaureates.setCategory('cat2', this)">II Kategorija (14–18 m.)</button>
           <button type="button" class="results-filter-btn" onclick="FestivalLaureates.setCategory('special', this)">Žiūrovų simpatijos ir specialieji</button>
@@ -636,7 +636,7 @@
               </div>
 
               <select id="votingSortSelect" class="voting-sort-select" onchange="FestivalVoting.setSort(this.value)" aria-label="Rikiuoti filmus">
-                <option value="votes">🏆 Daugiausiai balsų (Lyderiai)</option>
+                <option value="votes">Daugiausiai balsų (Lyderiai)</option>
                 <option value="title">Pagal pavadinimą (A–Z)</option>
                 <option value="default">Numatytoji tvarka</option>
               </select>
@@ -690,8 +690,9 @@
             </div>
 
             <div style="background: rgba(18, 55, 47, 0.35); border: 1px solid rgba(111,165,138,0.25); border-radius: var(--radius-sm); padding: 12px 18px; margin-bottom: 24px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
-              <span style="font-size: 0.88rem; color: var(--text-color);">
-                📱 <strong>Svarbiausia taisyklė:</strong> Filmas turi būti nufilmuotas telefonu/planšete ir griežtai iki 3 min. (180 s).
+              <span style="font-size: 0.88rem; color: var(--text-color); display: flex; align-items: center; gap: 8px;">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--accent-light); flex-shrink:0;"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>
+                <span><strong>Svarbiausia taisyklė:</strong> Filmas turi būti nufilmuotas telefonu/planšete ir griežtai iki 3 min. (180 s).</span>
               </span>
               <a href="faq.html" style="font-size: 0.84rem; color: var(--accent-light); font-weight: 600; text-decoration: underline;">
                 Pilnas DUK &rarr;
@@ -759,16 +760,22 @@
                 <div class="rsvp-options-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px;">
                   <label class="rsvp-card-option" style="cursor: pointer; border: 1px solid rgba(111,165,138,0.3); border-radius: var(--radius-sm); padding: 14px 16px; background: rgba(12,38,32,0.45); display: flex; align-items: flex-start; gap: 12px; transition: all 0.2s ease;">
                     <input type="radio" name="attendanceType" id="rsvpInPerson" value="in_person" checked required style="margin-top: 3px; accent-color: var(--accent-color);">
-                    <div>
-                      <strong style="color: var(--text-color); font-size: 0.95rem; display: block;">🏛️ Dalyvausiu gyvai (vietoje)</strong>
-                      <span style="font-size: 0.8rem; color: var(--text-muted); line-height: 1.35; display: block; margin-top: 2px;">Atvyksiu į apdovanojimų ceremoniją Kauno tarptautinėje gimnazijoje</span>
+                    <div style="flex:1;">
+                      <div style="display:flex; align-items:center; gap:8px; margin-bottom:2px;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--accent-light); flex-shrink:0;"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                        <strong style="color: var(--text-color); font-size: 0.95rem;">Dalyvausiu gyvai (vietoje)</strong>
+                      </div>
+                      <span style="font-size: 0.8rem; color: var(--text-muted); line-height: 1.35; display: block; margin-top: 4px;">Atvyksiu į apdovanojimų ceremoniją Kauno tarptautinėje gimnazijoje</span>
                     </div>
                   </label>
                   <label class="rsvp-card-option" style="cursor: pointer; border: 1px solid rgba(111,165,138,0.3); border-radius: var(--radius-sm); padding: 14px 16px; background: rgba(12,38,32,0.45); display: flex; align-items: flex-start; gap: 12px; transition: all 0.2s ease;">
                     <input type="radio" name="attendanceType" id="rsvpRemote" value="remote" required style="margin-top: 3px; accent-color: var(--accent-color);">
-                    <div>
-                      <strong style="color: var(--text-color); font-size: 0.95rem; display: block;">📡 Negalėsiu atvykti į vietą gyvai</strong>
-                      <span style="font-size: 0.8rem; color: var(--text-muted); line-height: 1.35; display: block; margin-top: 2px;">Konkurso dalyvis / nuotolinis stebėtojas (el. paštu gausiu tiesioginės transliacijos nuorodą su asmeniniu žetonu)</span>
+                    <div style="flex:1;">
+                      <div style="display:flex; align-items:center; gap:8px; margin-bottom:2px;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--accent-light); flex-shrink:0;"><polygon points="23 7 16 12 23 17 23 7"></polygon><rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect></svg>
+                        <strong style="color: var(--text-color); font-size: 0.95rem;">Negalėsiu atvykti į vietą gyvai</strong>
+                      </div>
+                      <span style="font-size: 0.8rem; color: var(--text-muted); line-height: 1.35; display: block; margin-top: 4px;">Konkurso dalyvis / nuotolinis stebėtojas (el. paštu gausiu tiesioginės transliacijos nuorodą su asmeniniu žetonu)</span>
                     </div>
                   </label>
                 </div>
@@ -957,8 +964,9 @@
         <div id="voteConfirmDirector" class="vote-confirm-film-meta"></div>
         <div id="voteConfirmCategory" class="vote-confirm-film-meta" style="color:var(--accent-light); margin-top:2px;"></div>
       </div>
-      <p class="vote-confirm-notice">
-        ⚠️ <strong>Dėmesio:</strong> Kiekvienas festivalio lankytojas gali atiduoti tik <strong>vieną oficialų balsą</strong>. Šio veiksmo atšaukti ar perkelti kitam filmui negalima.
+      <p class="vote-confirm-notice" style="display:flex; align-items:flex-start; gap:8px;">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:#D4AF37; flex-shrink:0; margin-top:2px;"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+        <span><strong>Dėmesio:</strong> Kiekvienas festivalio lankytojas gali atiduoti tik <strong>vieną oficialų balsą</strong>. Šio veiksmo atšaukti ar perkelti kitam filmui negalima.</span>
       </p>
       <div class="vote-confirm-actions">
         <button type="button" class="btn-outline" onclick="FestivalVoting.cancelVote()">Atšaukti</button>

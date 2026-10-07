@@ -19,7 +19,7 @@
       "surname": "Brdar",
       "role": "admin",
       "isSuperAdmin": false,
-      "canManageUsers": true,
+      "canManageUsers": false,
       "status": "active",
       "createdAt": "2026-01-01T00:00:00.000Z",
       "lastLogin": "2026-10-06T08:00:00.000Z"

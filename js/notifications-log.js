@@ -88,7 +88,9 @@ export function renderLogsFeed() {
   if (filtered.length === 0) {
     container.innerHTML = `
       <div style="text-align:center; padding:48px 20px; color:var(--text-muted); background:var(--surface-card); border-radius:var(--site-radius); border:1px solid var(--border-color);">
-        <div style="font-size:2rem; margin-bottom:8px;">🔔</div>
+        <div style="margin-bottom:8px; color:var(--accent-light);">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="margin:0 auto;"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+        </div>
         <strong>Pranešimų nerasta</strong>
         <p style="font-size:0.85rem; margin-top:4px;">Pagal pasirinktą filtrą įrašų žurnale nėra.</p>
       </div>
@@ -97,13 +99,13 @@ export function renderLogsFeed() {
   }
 
   const categoryIcons = {
-    stream: "📡 Transliacija & RSVP",
-    settings: "⚙️ Nustatymai",
-    editions: "📅 Metų leidiniai (2027)",
-    submissions: "🎬 Paraiškos & Laureatai",
-    voting: "🏆 Balsavimas & Teisėjai",
-    tasks: "📋 Užduotys",
-    users: "👥 Vartotojai & Prieiga"
+    stream: "Transliacija & RSVP",
+    settings: "Nustatymai",
+    editions: "Metų leidiniai (2027)",
+    submissions: "Paraiškos & Laureatai",
+    voting: "Balsavimas & Teisėjai",
+    tasks: "Užduotys",
+    users: "Vartotojai & Prieiga"
   };
 
   container.innerHTML = filtered.map(item => {

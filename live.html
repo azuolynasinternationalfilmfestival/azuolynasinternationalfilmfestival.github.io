@@ -118,6 +118,153 @@
       justify-content: center;
       padding: 20px;
     }
+    /* Minimalist Aspect Ratio & Fullscreen Viewer Controls */
+    .stream-view-controls {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+      padding: 10px 16px;
+      background: rgba(8, 24, 20, 0.95);
+      border-top: 1px solid rgba(111, 165, 138, 0.2);
+    }
+    .stream-ratio-buttons {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .stream-controls-label {
+      font-size: 0.74rem;
+      color: var(--text-muted);
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      margin-right: 4px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .ratio-btn {
+      background: rgba(12, 38, 32, 0.6);
+      border: 1px solid rgba(111, 165, 138, 0.25);
+      color: var(--text-muted);
+      font-size: 0.74rem;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      font-family: inherit;
+    }
+    .ratio-btn:hover {
+      color: var(--text-color);
+      border-color: var(--accent-light);
+    }
+    .ratio-btn.active {
+      background: var(--accent-color);
+      color: #fff;
+      border-color: var(--accent-color);
+      box-shadow: 0 0 10px rgba(111, 165, 138, 0.4);
+    }
+    .stream-action-buttons {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .stream-ctrl-btn {
+      background: rgba(12, 38, 32, 0.6);
+      border: 1px solid rgba(111, 165, 138, 0.25);
+      color: var(--text-color);
+      font-size: 0.74rem;
+      font-weight: 500;
+      padding: 4px 10px;
+      border-radius: 6px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      font-family: inherit;
+    }
+    .stream-ctrl-btn:hover {
+      background: rgba(20, 60, 50, 0.8);
+      border-color: var(--accent-light);
+    }
+    .stream-ratio-container {
+      position: relative;
+      width: 100%;
+      background: #000;
+      transition: max-width 0.3s cubic-bezier(0.16, 1, 0.3, 1), padding-top 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      margin: 0 auto;
+      overflow: hidden;
+    }
+    .stream-ratio-container.ratio-16-9 {
+      padding-top: 56.25%;
+      max-width: 100%;
+    }
+    .stream-ratio-container.ratio-9-16 {
+      max-width: 380px;
+      padding-top: calc(380px * 16 / 9);
+      box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+      border-left: 1px solid rgba(111,165,138,0.25);
+      border-right: 1px solid rgba(111,165,138,0.25);
+    }
+    @media (max-width: 480px) {
+      .stream-ratio-container.ratio-9-16 {
+        max-width: 100%;
+        padding-top: 177.77%;
+      }
+    }
+    .stream-ratio-container.ratio-4-3 {
+      padding-top: 75%;
+      max-width: 900px;
+    }
+    .stream-ratio-container.ratio-21-9 {
+      padding-top: 42.85%;
+      max-width: 100%;
+    }
+    .stream-frame-wrapper.theater-mode {
+      max-width: 100vw;
+      margin-left: calc(-50vw + 50%);
+      margin-right: calc(-50vw + 50%);
+      border-radius: 0;
+      border-left: none;
+      border-right: none;
+    }
+    /* Mobile responsive scale polish */
+    @media (max-width: 768px) {
+      .live-stream-hero {
+        padding: 24px 0 48px 0;
+      }
+      .stream-status-bar {
+        padding: 8px 12px;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 6px;
+      }
+      .stream-view-controls {
+        padding: 10px 12px;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+      }
+      .stream-ratio-buttons {
+        flex-wrap: wrap;
+        gap: 6px;
+      }
+      .stream-action-buttons {
+        justify-content: flex-end;
+        flex-wrap: wrap;
+      }
+      .ratio-btn {
+        flex: 1 1 auto;
+        text-align: center;
+        padding: 6px 8px;
+        font-size: 0.72rem;
+      }
+    }
   </style>
 </head>
 <body class="site-body">
@@ -132,7 +279,8 @@
 
       <div class="header-actions">
         <a href="stream-overlay.html" target="_blank" class="btn-outline btn-xs" style="display:inline-flex; align-items:center; gap:6px;">
-          <span>📺 OBS Overlay</span>
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
+          <span>OBS Overlay</span>
         </a>
         <div class="lang-switch">
           <button type="button" class="lang-btn active" id="btnLangLt">LT</button>
@@ -189,8 +337,9 @@
         </div>
 
         <div style="display:flex; align-items:center; gap:10px;">
-          <div id="userBadge" class="badge badge-accepted d-none" style="font-size:0.8rem; padding:6px 12px;">
-            👤 <span id="userNameLabel">Dalyvis</span>
+          <div id="userBadge" class="badge badge-accepted d-none" style="font-size:0.8rem; padding:6px 12px; display:inline-flex; align-items:center; gap:6px;">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+            <span id="userNameLabel">Dalyvis</span>
           </div>
           <button type="button" id="logoutLiveBtn" class="btn-outline btn-xs d-none" style="color:#f87171; border-color:rgba(239,68,68,0.3);">
             Atsijungti
@@ -199,27 +348,26 @@
       </div>
 
       <!-- Cloudflare Stream Player Box -->
-      <div class="stream-frame-wrapper">
+      <div class="stream-frame-wrapper" id="streamFrameWrapper">
         <div class="stream-status-bar">
           <div style="display:flex; align-items:center; gap:12px;">
             <div id="liveStatusPill" class="stream-status-pill live">
               <span class="pulse-dot"></span>
               <span id="liveStatusText">Dabar vyksta transliacija</span>
             </div>
-            <span style="font-size:0.82rem; color:var(--text-muted);">
-              Žiūrovai tiesiogiai: <strong id="liveViewerCount" style="color:var(--text-color);">1</strong>
+            <span style="font-size:0.82rem; color:var(--text-muted); display:inline-flex; align-items:center; gap:6px;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+              <span>Žiūrovai: <strong id="liveViewerCount" style="color:var(--text-color);">1</strong></span>
             </span>
           </div>
           
-          <div style="display:flex; gap:8px;">
-            <button type="button" id="btnReloadStream" class="btn-outline btn-xs" style="font-size:0.75rem;">
-              🔄 Perkrauti grotuvą
-            </button>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <span style="font-size:0.75rem; color:var(--accent-light); font-family:monospace;">Cloudflare Ultra-Low Latency</span>
           </div>
         </div>
 
         <!-- Cloudflare Stream Iframe Container -->
-        <div style="position: relative; padding-top: 56.25%; background: #000;">
+        <div class="stream-ratio-container ratio-16-9" id="streamRatioContainer">
           <iframe
             id="cloudflareStreamIframe"
             src="https://customer-auu36r7owuzogvfb.cloudflarestream.com/937d1a8b2c545a980c9fabc8502d8af4/iframe"
@@ -230,7 +378,7 @@
 
           <!-- Paused / Ended Dynamic State Overlay -->
           <div id="streamPausedOverlay" class="stream-paused-overlay d-none">
-            <div style="font-size:2.4rem; margin-bottom:12px;">🍿</div>
+            <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" style="color:var(--accent-light); margin-bottom:12px;"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect><line x1="7" y1="2" x2="7" y2="22"></line><line x1="17" y1="2" x2="17" y2="22"></line><line x1="2" y1="12" x2="22" y2="12"></line><line x1="2" y1="7" x2="7" y2="7"></line><line x1="2" y1="17" x2="7" y2="17"></line><line x1="17" y1="17" x2="22" y2="17"></line><line x1="17" y1="7" x2="22" y2="7"></line></svg>
             <h3 style="font-family:var(--font-cinema); font-size:1.4rem; color:var(--text-color); margin:0 0 8px 0;" id="overlayStateHeading">
               Transliacija šiuo metu sustabdyta
             </h3>
@@ -238,13 +386,52 @@
               Apdovanojimų ceremonijos transliacija ruošiama arba laikinai pristabdyta. Paspauskite mygtuką žemiau, norėdami atnaujinti vaizdą.
             </p>
             <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
-              <button type="button" id="btnRetryStream" class="btn-solid btn-sm">
-                🔄 Atnaujinti transliaciją
+              <button type="button" id="btnRetryStream" class="btn-solid btn-sm" style="display:inline-flex; align-items:center; gap:6px;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
+                <span>Atnaujinti transliaciją</span>
               </button>
-              <a href="lt/index.html#archive" class="btn-outline btn-sm">
-                🎬 Žiūrėti retrospektyvos archyvą
+              <a href="lt/index.html#archive" class="btn-outline btn-sm" style="display:inline-flex; align-items:center; gap:6px;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                <span>Žiūrėti retrospektyvos archyvą</span>
               </a>
             </div>
+          </div>
+        </div>
+
+        <!-- Minimalist Stream Controls: Aspect Ratio & Fullscreen Viewer Mode -->
+        <div class="stream-view-controls">
+          <div class="stream-ratio-buttons" role="group" aria-label="Kraštinių santykis">
+            <span class="stream-controls-label">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
+              <span>Formatas:</span>
+            </span>
+            <button type="button" class="ratio-btn active" data-ratio="16:9" title="Standartinis kino formatas 16:9">
+              16:9
+            </button>
+            <button type="button" class="ratio-btn" data-ratio="9:16" title="Vertikalus formatas 9:16 (Mobilus kinas / Reels)">
+              9:16 Vertikalus
+            </button>
+            <button type="button" class="ratio-btn" data-ratio="4:3" title="Klasikinis formatas 4:3">
+              4:3
+            </button>
+            <button type="button" class="ratio-btn" data-ratio="21:9" title="Platus formatas 21:9">
+              21:9
+            </button>
+          </div>
+
+          <div class="stream-action-buttons">
+            <button type="button" id="btnTheaterMode" class="stream-ctrl-btn" title="Kino teatro režimas (Išplėsti)">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h6v6"></path><path d="M9 21H3v-6"></path><path d="M21 3l-7 7"></path><path d="M3 21l7-7"></path></svg>
+              <span>Teatras</span>
+            </button>
+            <button type="button" id="btnFullscreenStream" class="stream-ctrl-btn" title="Visas ekranas (Fullscreen)">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 3 21 3 21 9"></polyline><polyline points="9 21 3 21 3 15"></polyline><line x1="21" y1="3" x2="14" y2="10"></line><line x1="3" y1="21" x2="10" y2="14"></line></svg>
+              <span>Visas ekranas</span>
+            </button>
+            <button type="button" id="btnReloadStream" class="stream-ctrl-btn" title="Perkrauti grotuvą">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
+              <span>Atnaujinti</span>
+            </button>
           </div>
         </div>
       </div>
@@ -281,8 +468,8 @@
   <!-- Authorization / Access Verification Modal for Protected Stream -->
   <div id="liveAuthModal" class="auth-overlay-backdrop d-none">
     <div style="background:var(--surface-card); border:1px solid var(--accent-light); border-radius:var(--site-radius); max-width:440px; width:100%; padding:26px 28px; text-align:center; box-shadow:0 20px 60px rgba(0,0,0,0.85);">
-      <div style="width:48px; height:48px; border-radius:50%; background:rgba(111,165,138,0.18); border:1px solid var(--accent-color); display:flex; align-items:center; justify-content:center; margin:0 auto 14px auto; font-size:1.4rem;">
-        🔒
+      <div style="width:48px; height:48px; border-radius:50%; background:rgba(111,165,138,0.18); border:1px solid var(--accent-color); display:flex; align-items:center; justify-content:center; margin:0 auto 14px auto;">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--accent-light);"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
       </div>
       <h3 style="font-family:var(--font-cinema); font-size:1.35rem; color:var(--text-color); margin:0 0 6px 0;" id="authModalTitle">
         Transliacijos Prieiga
@@ -519,6 +706,60 @@
       const iframe = document.getElementById("cloudflareStreamIframe");
       if (iframe) iframe.src = iframe.src;
     };
+
+    // Aspect Ratio Modes (16:9, 9:16, 4:3, 21:9)
+    const ratioBtns = document.querySelectorAll(".ratio-btn");
+    const ratioContainer = document.getElementById("streamRatioContainer");
+    ratioBtns.forEach(btn => {
+      btn.onclick = () => {
+        const ratio = btn.getAttribute("data-ratio");
+        ratioBtns.forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        
+        ratioContainer.className = "stream-ratio-container";
+        if (ratio === "9:16") {
+          ratioContainer.classList.add("ratio-9-16");
+          showToast("Perjungta į 9:16 vertikalaus kino formatą");
+        } else if (ratio === "4:3") {
+          ratioContainer.classList.add("ratio-4-3");
+          showToast("Perjungta į 4:3 klasikinį formatą");
+        } else if (ratio === "21:9") {
+          ratioContainer.classList.add("ratio-21-9");
+          showToast("Perjungta į 21:9 plataus ekrano formatą");
+        } else {
+          ratioContainer.classList.add("ratio-16-9");
+          showToast("Perjungta į 16:9 standartinį formatą");
+        }
+      };
+    });
+
+    // Theater Mode
+    const btnTheater = document.getElementById("btnTheaterMode");
+    const frameWrapper = document.getElementById("streamFrameWrapper");
+    if (btnTheater && frameWrapper) {
+      btnTheater.onclick = () => {
+        const isTheater = frameWrapper.classList.toggle("theater-mode");
+        btnTheater.classList.toggle("active", isTheater);
+        showToast(isTheater ? "Kino teatro režimas įjungtas" : "Kino teatro režimas išjungtas");
+      };
+    }
+
+    // Fullscreen Mode
+    const btnFullscreen = document.getElementById("btnFullscreenStream");
+    if (btnFullscreen && frameWrapper) {
+      btnFullscreen.onclick = () => {
+        if (!document.fullscreenElement) {
+          if (frameWrapper.requestFullscreen) {
+            frameWrapper.requestFullscreen().catch(() => {
+              const iframe = document.getElementById("cloudflareStreamIframe");
+              if (iframe && iframe.requestFullscreen) iframe.requestFullscreen();
+            });
+          }
+        } else {
+          if (document.exitFullscreen) document.exitFullscreen();
+        }
+      };
+    }
 
     // 4. Load Films for Voting
     async function loadFilms() {

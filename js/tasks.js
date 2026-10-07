@@ -172,7 +172,9 @@ export function renderTasksList() {
   if (filtered.length === 0) {
     container.innerHTML = `
       <div style="text-align:center; padding:48px 20px; color:var(--text-muted); background:var(--surface-card); border-radius:var(--site-radius); border:1px solid var(--border-color);">
-        <div style="font-size:2rem; margin-bottom:8px;">📋</div>
+        <div style="margin-bottom:8px; color:var(--accent-light);">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="margin:0 auto;"><path d="M9 11l3 3L22 4"></path><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
+        </div>
         <strong>Užduočių nerasta</strong>
         <p style="font-size:0.85rem; margin-top:4px;">Pagal pasirinktus filtrus užduočių nėra arba galite sukurti naują.</p>
       </div>

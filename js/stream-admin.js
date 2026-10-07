@@ -124,16 +124,16 @@ function renderStreamControls() {
   if (badge) {
     if (state === "live") {
       badge.className = "status-pill status-accepted";
-      badge.textContent = "🔴 LIVE Transliacija Aktyvi";
+      badge.innerHTML = `<span class="pulse-dot" style="width:6px; height:6px;"></span><span>LIVE Transliacija Aktyvi</span>`;
     } else if (state === "paused") {
       badge.className = "status-pill";
       badge.style.background = "rgba(245, 158, 11, 0.2)";
       badge.style.color = "#fbbf24";
       badge.style.border = "1px solid rgba(245, 158, 11, 0.4)";
-      badge.textContent = "⏸️ PAUSED Pristabdyta";
+      badge.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg><span>PAUSED Pristabdyta</span>`;
     } else {
       badge.className = "status-pill status-rejected";
-      badge.textContent = "⏹️ ENDED Pasibaigusi";
+      badge.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><rect x="4" y="4" width="16" height="16" rx="2"></rect></svg><span>ENDED Pasibaigusi</span>`;
     }
   }
 
@@ -207,8 +207,8 @@ export function renderRsvpTable() {
   tableBody.innerHTML = filtered.map(sub => {
     const isRemote = sub.attendanceType === "remote";
     const rsvpBadge = isRemote
-      ? `<span class="badge" style="background:rgba(59,130,246,0.2); color:#60a5fa; border:1px solid rgba(59,130,246,0.4);">📡 Nuotoliniu būdu</span>`
-      : `<span class="badge" style="background:rgba(34,197,94,0.2); color:#4ade80; border:1px solid rgba(34,197,94,0.4);">🏛️ Gyvai vietoje</span>`;
+      ? `<span class="badge" style="background:rgba(59,130,246,0.18); color:#60a5fa; border:1px solid rgba(59,130,246,0.35); display:inline-flex; align-items:center; gap:5px;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="2"></circle><path d="M16.24 7.76a6 6 0 0 1 0 8.49m-8.48-.01a6 6 0 0 1 0-8.49m11.31-2.82a10 10 0 0 1 0 14.14m-14.14 0a10 10 0 0 1 0-14.14"></path></svg><span>Nuotolinis</span></span>`
+      : `<span class="badge" style="background:rgba(34,197,94,0.18); color:#4ade80; border:1px solid rgba(34,197,94,0.35); display:inline-flex; align-items:center; gap:5px;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg><span>Gyvai vietoje</span></span>`;
 
     const token = sub.liveToken || "—";
     const liveLink = sub.liveStreamUrl || `https://azuolynasinternationalfilmfestival.github.io/live.html?token=${encodeURIComponent(token)}`;
@@ -239,14 +239,16 @@ export function renderRsvpTable() {
         <td>
           <div style="display:flex; align-items:center; gap:6px;">
             <input type="text" readonly value="${escapeHtml(liveLink)}" style="background:rgba(0,0,0,0.3); border:1px solid var(--border-color); color:var(--text-muted); padding:3px 6px; font-size:0.75rem; width:150px; border-radius:4px;" title="${escapeHtml(liveLink)}">
-            <button type="button" class="btn-outline btn-xs btn-copy-link" data-link="${escapeHtml(liveLink)}" title="Kopijuoti nuorodą">
-              📋 Kopijuoti
+            <button type="button" class="btn-outline btn-xs btn-copy-link" data-link="${escapeHtml(liveLink)}" title="Kopijuoti nuorodą" style="display:inline-flex; align-items:center; gap:4px;">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+              <span>Kopijuoti</span>
             </button>
           </div>
         </td>
         <td>
-          <button type="button" class="btn-solid btn-xs btn-resend-token" data-sub-id="${escapeHtml(sub.id)}" title="Išsiųsti el. laišką su žetonu ir nuoroda">
-            ✉️ Siųsti el. laišką
+          <button type="button" class="btn-solid btn-xs btn-resend-token" data-sub-id="${escapeHtml(sub.id)}" title="Išsiųsti el. laišką su žetonu ir nuoroda" style="display:inline-flex; align-items:center; gap:5px;">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+            <span>Siųsti el. laišką</span>
           </button>
         </td>
       </tr>

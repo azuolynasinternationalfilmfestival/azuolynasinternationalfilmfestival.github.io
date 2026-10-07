@@ -596,7 +596,7 @@
         <!-- Categories Filter for Laureates -->
         <div class="results-filter-bar" id="resultsFilterBar" role="tablist" aria-label="Winner categories">
           <button type="button" class="results-filter-btn active" onclick="FestivalLaureates.setCategory('all', this)">All Laureates</button>
-          <button type="button" class="results-filter-btn" onclick="FestivalLaureates.setCategory('top', this)">🏆 Grand Prix & 1st Places</button>
+          <button type="button" class="results-filter-btn" onclick="FestivalLaureates.setCategory('top', this)">Grand Prix & 1st Places</button>
           <button type="button" class="results-filter-btn" onclick="FestivalLaureates.setCategory('cat1', this)">Category I (10–13)</button>
           <button type="button" class="results-filter-btn" onclick="FestivalLaureates.setCategory('cat2', this)">Category II (14–18)</button>
           <button type="button" class="results-filter-btn" onclick="FestivalLaureates.setCategory('special', this)">Audience & Special Mentions</button>
@@ -635,7 +635,7 @@
               </div>
 
               <select id="votingSortSelect" class="voting-sort-select" onchange="FestivalVoting.setSort(this.value)" aria-label="Sort films">
-                <option value="votes">🏆 Live Leaderboard (Most Votes)</option>
+                <option value="votes">Live Leaderboard (Most Votes)</option>
                 <option value="title">Film Title (A–Z)</option>
                 <option value="default">Showcase Order</option>
               </select>
@@ -657,7 +657,9 @@
         <div class="player-card">
           <div class="player-screen" id="screeningPlayerContainer">
             <div class="player-idle" id="screeningPlaceholder">
-              <div class="player-idle-icon">🎬</div>
+              <div class="player-idle-icon">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" style="color:var(--accent-light); margin:0 auto;"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect><line x1="7" y1="2" x2="7" y2="22"></line><line x1="17" y1="2" x2="17" y2="22"></line><line x1="2" y1="12" x2="22" y2="12"></line><line x1="2" y1="7" x2="7" y2="7"></line><line x1="2" y1="17" x2="7" y2="17"></line><line x1="17" y1="17" x2="22" y2="17"></line><line x1="17" y1="7" x2="22" y2="7"></line></svg>
+              </div>
               <div class="player-idle-title" id="dynRecordingPlaceholder">The official festival recording will be published here on April 17th, 2026.</div>
               <div class="player-idle-sub">All submitted works and jury results will be viewable right here.</div>
             </div>
@@ -688,8 +690,9 @@
               <button type="button" class="btn-outline btn-sm" onclick="resetFormView()">Submit Another Film</button>
             </div>
             <div style="background: rgba(18, 55, 47, 0.35); border: 1px solid rgba(111,165,138,0.25); border-radius: var(--radius-sm); padding: 12px 18px; margin-bottom: 24px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
-              <span style="font-size: 0.88rem; color: var(--text-color);">
-                📱 <strong>Key Submission Rule:</strong> Films must be shot on a phone/tablet and strictly up to 3 mins (180s).
+              <span style="font-size: 0.88rem; color: var(--text-color); display: flex; align-items: center; gap: 8px;">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--accent-light); flex-shrink:0;"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>
+                <span><strong>Key Submission Rule:</strong> Films must be shot on a phone/tablet and strictly up to 3 mins (180s).</span>
               </span>
               <a href="faq.html" style="font-size: 0.84rem; color: var(--accent-light); font-weight: 600; text-decoration: underline;">
                 Full FAQ &rarr;
@@ -756,16 +759,22 @@
                 <div class="rsvp-options-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px;">
                   <label class="rsvp-card-option" style="cursor: pointer; border: 1px solid rgba(111,165,138,0.3); border-radius: var(--radius-sm); padding: 14px 16px; background: rgba(12,38,32,0.45); display: flex; align-items: flex-start; gap: 12px; transition: all 0.2s ease;">
                     <input type="radio" name="attendanceType" id="rsvpInPersonEn" value="in_person" checked required style="margin-top: 3px; accent-color: var(--accent-color);">
-                    <div>
-                      <strong style="color: var(--text-color); font-size: 0.95rem; display: block;">🏛️ Attending in person (on site)</strong>
-                      <span style="font-size: 0.8rem; color: var(--text-muted); line-height: 1.35; display: block; margin-top: 2px;">I will attend the award ceremony at Kaunas International Gymnasium</span>
+                    <div style="flex:1;">
+                      <div style="display:flex; align-items:center; gap:8px; margin-bottom:2px;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--accent-light); flex-shrink:0;"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                        <strong style="color: var(--text-color); font-size: 0.95rem;">Attending in person (on site)</strong>
+                      </div>
+                      <span style="font-size: 0.8rem; color: var(--text-muted); line-height: 1.35; display: block; margin-top: 4px;">I will attend the award ceremony at Kaunas International Gymnasium</span>
                     </div>
                   </label>
                   <label class="rsvp-card-option" style="cursor: pointer; border: 1px solid rgba(111,165,138,0.3); border-radius: var(--radius-sm); padding: 14px 16px; background: rgba(12,38,32,0.45); display: flex; align-items: flex-start; gap: 12px; transition: all 0.2s ease;">
                     <input type="radio" name="attendanceType" id="rsvpRemoteEn" value="remote" required style="margin-top: 3px; accent-color: var(--accent-color);">
-                    <div>
-                      <strong style="color: var(--text-color); font-size: 0.95rem; display: block;">📡 Cannot attend in person</strong>
-                      <span style="font-size: 0.8rem; color: var(--text-muted); line-height: 1.35; display: block; margin-top: 2px;">Contestant / remote viewer (I will receive a live stream link with a personal token)</span>
+                    <div style="flex:1;">
+                      <div style="display:flex; align-items:center; gap:8px; margin-bottom:2px;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--accent-light); flex-shrink:0;"><polygon points="23 7 16 12 23 17 23 7"></polygon><rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect></svg>
+                        <strong style="color: var(--text-color); font-size: 0.95rem;">Cannot attend in person</strong>
+                      </div>
+                      <span style="font-size: 0.8rem; color: var(--text-muted); line-height: 1.35; display: block; margin-top: 4px;">Contestant / remote viewer (I will receive a live stream link with a personal token)</span>
                     </div>
                   </label>
                 </div>
@@ -774,7 +783,7 @@
               <div class="input-cell">
                 <label>Film Video File (MP4 / MOV / WEBM, strictly up to 3 mins) *</label>
                 <div class="drop-area" id="uploadZone">
-                  <div class="drop-icon">🎬</div>
+                  <svg class="drop-icon-svg" viewBox="0 0 24 24"><polygon points="23 7 16 12 23 17 23 7"></polygon><rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect></svg>
                   <div class="drop-title">Select or drag video file here</div>
                   <div class="drop-sub">Duration automatically checked (strictly max 180s)</div>
                   <input type="file" id="videoFileInput" accept="video/mp4,video/quicktime,video/webm" required>
@@ -954,8 +963,9 @@
         <div id="voteConfirmDirector" class="vote-confirm-film-meta"></div>
         <div id="voteConfirmCategory" class="vote-confirm-film-meta" style="color:var(--accent-light); margin-top:2px;"></div>
       </div>
-      <p class="vote-confirm-notice">
-        ⚠️ <strong>Note:</strong> Each festival visitor can only cast <strong>one official vote</strong>. This action cannot be undone or transferred.
+      <p class="vote-confirm-notice" style="display:flex; align-items:flex-start; gap:8px;">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:#D4AF37; flex-shrink:0; margin-top:2px;"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+        <span><strong>Note:</strong> Each festival visitor can only cast <strong>one official vote</strong>. This action cannot be undone or transferred.</span>
       </p>
       <div class="vote-confirm-actions">
         <button type="button" class="btn-outline" onclick="FestivalVoting.cancelVote()">Cancel</button>

@@ -41,8 +41,7 @@ const ROLE_LABELS = {
 };
 
 const TRUSTED_MANAGEMENT_EMAILS = [
-  "azuolynasfilmfestival@gmail.com",
-  "karina.brdar@gmail.com"
+  "azuolynasfilmfestival@gmail.com"
 ];
 
 const DEFAULT_SEED_USERS = [
