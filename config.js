@@ -76,11 +76,11 @@ var AUTHORIZED_ADMIN_EMAILS = [
 
 const DEFAULT_CONTENT = {
   lt: {
-    heroBadge: "Tarptautinis Mokinių Filmų Festivalis",
-    topic: "Neįprastas žvilgsnis į įprastus dalykus",
-    aboutText: "„Ąžuolyno“ filmų festivalis pavadintas vieno iš Kauno lankytinų vietų – Ąžuolyno parko – garbei, kurio papėdėje yra įsikūrusi mūsų studija.",
-    datesSubmissions: "Iki 2026 m. balandžio 2 d.",
-    dateEvent: "2026 m. balandžio 17 d. (Atidarymo ceremonija)",
+    heroBadge: "7-asis Tarptautinis Mokinių Filmų Festivalis",
+    topic: "Mano pašaukimas",
+    aboutText: "„Ąžuolyno“ filmų festivalis pavadintas vieno iš Kauno lankytinų vietų – Ąžuolyno parko – garbei, kurio papėdėje yra įsikūrusi mūsų studija. 2027 m. balandžio 23 d. kviečiame moksleivius atskleisti savo talentą.",
+    datesSubmissions: "Iki 2027 m. balandžio 9 d.",
+    dateEvent: "2027 m. balandžio 23 d. (Atidarymo ceremonija)",
     targetAudience: "Mokiniai (10–18 m.)",
     rule1: "Filmas privalo būti nufilmuotas išmaniuoju telefonu arba planšete.",
     rule2: "Maksimali filmo trukmė – griežtai iki 3 minučių.",
@@ -90,14 +90,14 @@ const DEFAULT_CONTENT = {
     cat1Desc: "Pradedančiųjų kino kūrėjų vizualiniai ieškojimai ir autorinis pasakojimas.",
     cat2Age: "Nuo 14 iki 18 metų amžiaus",
     cat2Desc: "Vyresniųjų moksleivių kinematografinė kalba, gilesnė dramaturgija ir savitas braižas.",
-    recordingPlaceholder: "Festivalio atidarymo vaizdo įrašas bus patalpintas 2026 m. balandžio 17 d."
+    recordingPlaceholder: "Festivalio atidarymo vaizdo įrašas bus patalpintas 2027 m. balandžio 23 d."
   },
   en: {
-    heroBadge: "International Students Film Festival",
-    topic: "An unusual view at ordinary things",
-    aboutText: "The «Ažuolynas» Film Festival is named after one of the sights of Kaunas, at the foot of which our studio is located.",
-    datesSubmissions: "Until April 2nd, 2026",
-    dateEvent: "April 17th, 2026 (Opening Ceremony)",
+    heroBadge: "The 7th International Students Film Festival",
+    topic: "My Purpose (My Fate)",
+    aboutText: "The «Ažuolynas» Film Festival is named after one of the sights of Kaunas, at the foot of which our studio is located. On April 23, 2027, young directors from around the world gather to showcase their voice.",
+    datesSubmissions: "Until April 9th, 2027",
+    dateEvent: "April 23rd, 2027 (Opening Ceremony)",
     targetAudience: "Students (10–18 yrs)",
     rule1: "The film must be shot on a phone/tablet;",
     rule2: "The film must be strictly up to 3 minutes;",
@@ -107,7 +107,7 @@ const DEFAULT_CONTENT = {
     cat1Desc: "For budding visual artists beginning their cinematic storytelling journey.",
     cat2Age: "From 14 to 18 years old",
     cat2Desc: "For youth directors exploring bold perspectives and nuanced compositions.",
-    recordingPlaceholder: "The official festival recording will be published here on April 17th, 2026."
+    recordingPlaceholder: "The official festival recording will be published here on April 23rd, 2027."
   },
   showAbout: true,
   showTerms: true,

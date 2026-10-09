@@ -1,6 +1,39 @@
 {
   "logs": [
     {
+      "id": "log_1791554344658_44b23",
+      "action": "EDITION_SAVED",
+      "category": "editions",
+      "adminEmail": "azuolynasfilmfestival@gmail.com",
+      "adminName": "azuolynasfilmfestival",
+      "target": "FEST 2027",
+      "details": "Išsaugota festivalio leidinio informacija: FEST 2027 (LT ir EN versijos)",
+      "timestamp": "2026-10-09T13:59:04.658Z",
+      "status": "success"
+    },
+    {
+      "id": "log_1791554243441_up1r1",
+      "action": "SETTINGS_UPDATED",
+      "category": "settings",
+      "adminEmail": "azuolynasfilmfestival@gmail.com",
+      "adminName": "azuolynasfilmfestival",
+      "target": "settings/festival",
+      "details": "Atnaujinti nustatymai. Profilaktikos režimas: IŠJUNGTAS, Balsavimas: AKTYVUS",
+      "timestamp": "2026-10-09T13:57:23.441Z",
+      "status": "success"
+    },
+    {
+      "id": "log_1791554243419_kqf23",
+      "action": "GENERAL_ACTION",
+      "category": "users",
+      "adminEmail": "azuolynasfilmfestival@gmail.com",
+      "adminName": "Administratorius",
+      "target": "system",
+      "details": "",
+      "timestamp": "2026-10-09T13:57:23.419Z",
+      "status": "success"
+    },
+    {
       "id": "log_1791551200448_s6qnp",
       "action": "SYSTEM_HEALTH_VERIFIED",
       "category": "settings",

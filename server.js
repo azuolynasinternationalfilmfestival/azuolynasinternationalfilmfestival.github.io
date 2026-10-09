@@ -400,10 +400,11 @@ function saveAccessRequestsData(data) {
 // ---------------------------------------------------------------------------
 const FIREBASE_API_KEY = 'AIzaSyDDKEzn0jN_xUTDw5aXABU79ZEYKIACfdE';
 const FIREBASE_PROJECT_ID = 'filmfest-509606';
+const FIREBASE_DATABASE_ID = 'ai-studio-azuolynasinterna-cd7ce36e-5213-4751-8aa0-a7141d397a83';
 
 async function syncToFirestore(collection, docId, fields) {
   try {
-    const patchUrl = `https://firestore.googleapis.com/v1/projects/${FIREBASE_PROJECT_ID}/databases/(default)/documents/${collection}/${docId}?key=${FIREBASE_API_KEY}`;
+    const patchUrl = `https://firestore.googleapis.com/v1/projects/${FIREBASE_PROJECT_ID}/databases/${FIREBASE_DATABASE_ID}/documents/${collection}/${docId}?key=${FIREBASE_API_KEY}`;
     await fetch(patchUrl, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
@@ -416,7 +417,7 @@ async function syncToFirestore(collection, docId, fields) {
 
 async function deleteFromFirestore(collection, docId) {
   try {
-    const delUrl = `https://firestore.googleapis.com/v1/projects/${FIREBASE_PROJECT_ID}/databases/(default)/documents/${collection}/${docId}?key=${FIREBASE_API_KEY}`;
+    const delUrl = `https://firestore.googleapis.com/v1/projects/${FIREBASE_PROJECT_ID}/databases/${FIREBASE_DATABASE_ID}/documents/${collection}/${docId}?key=${FIREBASE_API_KEY}`;
     await fetch(delUrl, {
       method: 'DELETE'
     });
@@ -1069,18 +1070,31 @@ app.post('/api/admin/settings', (req, res) => {
   try {
     const current = loadSettingsData();
     const updates = req.body || {};
-    const updated = { ...current, ...updates };
+    const updated = {
+      ...current,
+      ...updates,
+      lt: updates.lt ? { ...(current.lt || {}), ...updates.lt } : current.lt,
+      en: updates.en ? { ...(current.en || {}), ...updates.en } : current.en
+    };
     saveJson(SETTINGS_FILE, updated);
 
     // Background sync to Firestore settings/festival and settings/global
-    syncToFirestore('settings', 'festival', {
+    const firestoreSyncFields = {
       votingActive: { booleanValue: updated.votingActive !== false },
       maintenanceMode: { booleanValue: updated.maintenanceMode === true },
       publicWinners: { booleanValue: updated.publicWinners !== false },
       submissionsOpen: { booleanValue: updated.submissionsOpen !== false },
-      selectedYear: { stringValue: updated.selectedYear || "2026" },
+      selectedYear: { stringValue: updated.selectedYear || "2027" },
       updatedAt: { timestampValue: new Date().toISOString() }
-    });
+    };
+    if (updated.lt && updated.lt.topic) {
+      firestoreSyncFields.topicLt = { stringValue: updated.lt.topic };
+    }
+    if (updated.en && updated.en.topic) {
+      firestoreSyncFields.topicEn = { stringValue: updated.en.topic };
+    }
+
+    syncToFirestore('settings', 'festival', firestoreSyncFields);
 
     recordActivityLog({
       action: "SETTINGS_UPDATED",
@@ -1093,6 +1107,34 @@ app.post('/api/admin/settings', (req, res) => {
     res.json({ success: true, settings: updated });
   } catch (e) {
     res.status(500).json({ error: 'Failed to save settings' });
+  }
+});
+
+// Resilient API Aliases for Public & Subsystem Clients
+app.get('/api/tasks', (req, res) => {
+  try {
+    const data = loadTasksData();
+    res.json({ success: true, tasks: data.tasks || [] });
+  } catch (e) {
+    res.status(500).json({ error: 'Failed to read tasks' });
+  }
+});
+
+app.get('/api/logs', (req, res) => {
+  try {
+    const logsData = loadLogsData();
+    res.json({ success: true, logs: logsData.logs || [] });
+  } catch (e) {
+    res.status(500).json({ error: 'Failed to read logs' });
+  }
+});
+
+app.get('/api/submissions', (req, res) => {
+  try {
+    const data = loadSubmissionsData();
+    res.json({ success: true, submissions: data.submissions || [] });
+  } catch (e) {
+    res.status(500).json({ error: 'Failed to read submissions' });
   }
 });
 
@@ -3167,28 +3209,29 @@ app.post('/api/admin/editions', (req, res) => {
     if (!data.editions) data.editions = [];
 
     const existingIdx = data.editions.findIndex(e => String(e.year) === cleanYear || e.id === cleanYear);
+    const existing = existingIdx >= 0 ? data.editions[existingIdx] : {};
 
     const editionRecord = {
       id: cleanYear,
       year: cleanYear,
-      status: status || (cleanYear === '2027' ? 'upcoming' : 'completed'),
-      title: String(title || `FEST ${cleanYear}`).trim(),
-      titleEn: String(titleEn || `FEST ${cleanYear}`).trim(),
-      date: String(date || '').trim(),
-      dateEn: String(dateEn || '').trim(),
-      subtitle: String(subtitle || '').trim(),
-      subtitleEn: String(subtitleEn || '').trim(),
-      story: String(story || '').trim(),
-      storyEn: String(storyEn || '').trim(),
-      heroImage: String(heroImage || '').trim(),
-      videoUrl: String(videoUrl || '').trim(),
-      pageUrl: String(pageUrl || `azuolynas-fest-${cleanYear}.html`).trim(),
-      pageUrlEn: String(pageUrlEn || `../en/azuolynas-fest-${cleanYear}.html`).trim(),
-      submissionDeadline: String(submissionDeadline || '').trim(),
-      votingStartDate: String(votingStartDate || '').trim(),
-      votingEndDate: String(votingEndDate || '').trim(),
-      categories: String(categories || 'I Kategorija (10-13 m.), II Kategorija (14-18 m.)').trim(),
-      categoriesEn: String(categoriesEn || 'Category I (10-13 yrs), Category II (14-18 yrs)').trim(),
+      status: status || existing.status || (cleanYear === '2027' ? 'upcoming' : 'completed'),
+      title: title !== undefined && String(title).trim() ? String(title).trim() : (existing.title || `FEST ${cleanYear}`),
+      titleEn: titleEn !== undefined && String(titleEn).trim() ? String(titleEn).trim() : (existing.titleEn || `FEST ${cleanYear}`),
+      date: date !== undefined && String(date).trim() ? String(date).trim() : (existing.date || ''),
+      dateEn: dateEn !== undefined && String(dateEn).trim() ? String(dateEn).trim() : (existing.dateEn || ''),
+      subtitle: subtitle !== undefined && String(subtitle).trim() ? String(subtitle).trim() : (existing.subtitle || ''),
+      subtitleEn: subtitleEn !== undefined && String(subtitleEn).trim() ? String(subtitleEn).trim() : (existing.subtitleEn || ''),
+      story: story !== undefined && String(story).trim() ? String(story).trim() : (existing.story || ''),
+      storyEn: storyEn !== undefined && String(storyEn).trim() ? String(storyEn).trim() : (existing.storyEn || ''),
+      heroImage: heroImage !== undefined && String(heroImage).trim() ? String(heroImage).trim() : (existing.heroImage || ''),
+      videoUrl: videoUrl !== undefined && String(videoUrl).trim() ? String(videoUrl).trim() : (existing.videoUrl || ''),
+      pageUrl: pageUrl !== undefined && String(pageUrl).trim() ? String(pageUrl).trim() : (existing.pageUrl || `azuolynas-fest-${cleanYear}.html`),
+      pageUrlEn: pageUrlEn !== undefined && String(pageUrlEn).trim() ? String(pageUrlEn).trim() : (existing.pageUrlEn || `../en/azuolynas-fest-${cleanYear}.html`),
+      submissionDeadline: submissionDeadline !== undefined && String(submissionDeadline).trim() ? String(submissionDeadline).trim() : (existing.submissionDeadline || ''),
+      votingStartDate: votingStartDate !== undefined && String(votingStartDate).trim() ? String(votingStartDate).trim() : (existing.votingStartDate || ''),
+      votingEndDate: votingEndDate !== undefined && String(votingEndDate).trim() ? String(votingEndDate).trim() : (existing.votingEndDate || ''),
+      categories: categories !== undefined && String(categories).trim() ? String(categories).trim() : (existing.categories || 'I Kategorija (10-13 m.), II Kategorija (14-18 m.)'),
+      categoriesEn: categoriesEn !== undefined && String(categoriesEn).trim() ? String(categoriesEn).trim() : (existing.categoriesEn || 'Category I (10-13 yrs), Category II (14-18 yrs)'),
       updatedAt: new Date().toISOString(),
       updatedBy: String(adminEmail || PRIMARY_SUPERADMIN_EMAIL).trim().toLowerCase()
     };
@@ -3506,16 +3549,27 @@ app.post('/api/live/heartbeat', (req, res) => {
   }
 });
 
+// API: Get Live Stream Config & Status for Admin
+app.get('/api/admin/stream/status', (req, res) => {
+  try {
+    const config = loadStreamConfig();
+    res.json({ success: true, streamConfig: config, config });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to read stream status' });
+  }
+});
+
 // API: Admin Update Live Stream State (live / paused / ended)
 app.post('/api/admin/stream/status', (req, res) => {
   try {
-    const { streamState, isLive, adminEmail, adminName } = req.body || {};
+    const { state, streamState, isLive, adminEmail, adminName } = req.body || {};
     const config = loadStreamConfig();
 
-    if (streamState) config.streamState = streamState;
+    const targetState = state || streamState;
+    if (targetState) config.streamState = targetState;
     if (isLive !== undefined) config.isLive = !!isLive;
-    if (streamState === 'ended') config.isLive = false;
-    if (streamState === 'live') config.isLive = true;
+    if (targetState === 'ended') config.isLive = false;
+    if (targetState === 'live') config.isLive = true;
 
     config.updatedAt = new Date().toISOString();
     saveStreamConfig(config);
@@ -3532,12 +3586,12 @@ app.post('/api/admin/stream/status', (req, res) => {
       adminEmail: callerEmail,
       adminName: adminName || callerEmail.split('@')[0],
       target: "Cloudflare Stream",
-      details: `Pakeista tiesioginės transliacijos būsena į: ${config.streamState.toUpperCase()} (Aktyvi: ${config.isLive ? 'Taip' : 'Ne'})`
+      details: `Pakeista tiesioginės transliacijos būsena į: ${(config.streamState || 'LIVE').toUpperCase()} (Aktyvi: ${config.isLive ? 'Taip' : 'Ne'})`
     });
 
-    res.json({ success: true, config });
+    res.json({ success: true, streamConfig: config, config });
   } catch (err) {
-    res.status(500).json({ error: 'Failed to update stream status' });
+    res.status(500).json({ error: 'Failed to update stream state' });
   }
 });
 

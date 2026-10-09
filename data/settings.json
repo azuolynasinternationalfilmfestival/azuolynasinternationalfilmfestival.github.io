@@ -4,7 +4,37 @@
   "publicWinners": true,
   "submissionsOpen": true,
   "autoRankings": true,
-  "selectedYear": "2026",
+  "selectedYear": "2027",
   "institutionNameLt": "Kauno Tarptautinė Gimnazija",
-  "institutionNameEn": "Kaunas International Gymnasium"
+  "institutionNameEn": "Kaunas International Gymnasium",
+  "showAbout": true,
+  "showTerms": true,
+  "showFaq": true,
+  "showCategories": true,
+  "showEditions": true,
+  "showArchive": true,
+  "showCurrentEdition": true,
+  "showResults": false,
+  "showVoting": false,
+  "showScreening": true,
+  "showSubmit": true,
+  "recordingVideoUrl": "",
+  "lt": {
+    "heroBadge": "7-asis Tarptautinis Mokinių Filmų Festivalis",
+    "topic": "Mano pašaukimas",
+    "aboutText": "„Ąžuolyno“ filmų festivalis pavadintas vieno iš Kauno lankytinų vietų – Ąžuolyno parko – garbei, kurio papėdėje yra įsikūrusi mūsų studija. 2027 m. balandžio 23 d. kviečiame moksleivius atskleisti savo talentą.",
+    "datesSubmissions": "Iki 2027 m. balandžio 9 d.",
+    "dateEvent": "2027 m. balandžio 23 d. (Atidarymo ceremonija)",
+    "targetAudience": "Mokiniai (10–18 m.)",
+    "recordingPlaceholder": "Festivalio atidarymo vaizdo įrašas bus patalpintas 2027 m. balandžio 23 d."
+  },
+  "en": {
+    "heroBadge": "The 7th International Students Film Festival",
+    "topic": "My Purpose (My Fate)",
+    "aboutText": "The «Ažuolynas» Film Festival is named after one of the sights of Kaunas, at the foot of which our studio is located. On April 23, 2027, young directors from around the world gather to showcase their voice.",
+    "datesSubmissions": "Until April 9th, 2027",
+    "dateEvent": "April 23rd, 2027 (Opening Ceremony)",
+    "targetAudience": "Students (10–18 yrs)",
+    "recordingPlaceholder": "The official festival recording will be published here on April 23rd, 2027."
+  }
 }

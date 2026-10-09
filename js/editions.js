@@ -15,19 +15,19 @@ const DEFAULT_2027_EDITION = {
   status: "upcoming",
   title: "FEST 2027",
   titleEn: "FEST 2027",
-  date: "2027 m. balandžio 16 d.",
-  dateEn: "April 16, 2027",
-  subtitle: "Kino horizontai Kauno tarptautinėje gimnazijoje: jaunųjų talentų balsas pasauliui",
-  subtitleEn: "Cinematic Horizons at Kaunas International Gymnasium: Youth Talents to the World",
-  story: "Pasiruoškite 7-ajam tarptautiniam mokinių trumpametražių filmų festivaliui „Ąžuolynas FEST 2027“! Kviečiame moksleivius nuo 10 iki 18 metų kurti trumpametražius filmus iki 3 minučių naudojant tik išmaniuosius telefonus. Pagrindinė 2027 m. tema: „Ateities kadrai – mūsų bendra istorija“. Laukia iškilminga apdovanojimų ceremonija, tarptautinė kino profesionalų žiuri ir vertingi prizai bei statulėlės.",
-  storyEn: "Prepare for the 7th International Youth Short Film Festival 'Ąžuolynas FEST 2027'! We invite students aged 10-18 to create short films up to 3 minutes using smartphone cameras only. The main theme for 2027 is 'Future Frames – Our Shared Story'. Experience a grand award ceremony, international jury evaluation, and prestigious festival trophies.",
+  date: "2027 m. balandžio 23 d.",
+  dateEn: "April 23, 2027",
+  subtitle: "Kino šventė Kauno tarptautinėje gimnazijoje. Tema: „Mano pašaukimas“ (My Purpose / My Fate)",
+  subtitleEn: "Cinema Celebration at Kaunas International Gymnasium. Theme: 'My Purpose' (Mano pašaukimas / My Fate)",
+  story: "Pasiruoškite 7-ajam tarptautiniam mokinių trumpametražių filmų festivaliui „Ąžuolynas FEST 2027“! Kviečiame moksleivius nuo 10 iki 18 metų kurti trumpametražius filmus iki 3 minučių naudojant tik išmaniuosius telefonus.\n\nPagrindinė 2027 m. tema: „Mano pašaukimas“ (angl. My Purpose / My Fate). Kas mane įkvepia? Koks mano gyvenimo kelias, aistra ir pašaukimas? Renginys vyks 2027 m. balandžio 23 d. Kauno tarptautinėje gimnazijoje. Laukia iškilminga apdovanojimų ceremonija, tarptautinė kino profesionalų žiuri ir vertingi prizai bei statulėlės.",
+  storyEn: "Prepare for the 7th International Youth Short Film Festival 'Ąžuolynas FEST 2027'! We invite students aged 10-18 to create short films up to 3 minutes using smartphone cameras only.\n\nThe main theme for 2027 is 'My Purpose' (Mano pašaukimas / My Fate). What inspires me? What is my life's calling, passion, and direction? The festival will take place on April 23, 2027 at Kaunas International Gymnasium. Experience a grand award ceremony, international jury evaluation, and prestigious festival trophies.",
   heroImage: "https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/IMG_3458.jpeg?alt=media&token=224af1bd-25ff-494e-8136-fbf330d3ad5b",
   videoUrl: "https://www.youtube.com/watch?v=INGtv",
   pageUrl: "azuolynas-fest-2027.html",
   pageUrlEn: "../en/azuolynas-fest-2027.html",
-  submissionDeadline: "2027-03-20",
-  votingStartDate: "2027-04-01",
-  votingEndDate: "2027-04-14",
+  submissionDeadline: "2027-04-09",
+  votingStartDate: "2027-04-12",
+  votingEndDate: "2027-04-22",
   categories: "I Kategorija (10-13 m.), II Kategorija (14-18 m.)",
   categoriesEn: "Category I (10-13 yrs), Category II (14-18 yrs)"
 };
@@ -290,6 +290,11 @@ async function saveCurrentEdition() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload)
     });
+
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      throw new Error(errData.error || "Serverio klaida išsaugant leidinį");
+    }
 
     // 2. Also sync to Firestore if db is available
     if (db && typeof db.collection === "function") {
