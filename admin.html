@@ -118,6 +118,42 @@
           </button>
         </form>
       </div>
+
+      <!-- Password Reset Confirmation Wrapper (when user visits with ?reset=TOKEN) -->
+      <div id="passwordResetConfirmWrapper" class="d-none">
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px;">
+          <div style="width:36px; height:36px; border-radius:50%; background:rgba(212,175,55,0.2); border:1px solid #D4AF37; display:flex; align-items:center; justify-content:center; color:#D4AF37;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+          </div>
+          <div>
+            <h3 style="font-size:1.15rem; font-weight:700; margin:0; color:var(--text-color);">Slaptažodžio Keitimas</h3>
+            <span style="font-size:0.75rem; color:var(--accent-light);" id="pwdResetConfirmTargetEmailLabel">Vienkartinė saugi nuoroda</span>
+          </div>
+        </div>
+        <p style="font-size:0.84rem; color:var(--text-muted); margin-bottom:16px;">
+          Įveskite naują norimą slaptažodį savo festivalio administratoriaus paskyrai.
+        </p>
+
+        <form id="passwordResetConfirmForm" action="javascript:void(0);" onsubmit="event.preventDefault(); return false;">
+          <input type="hidden" id="pwdResetConfirmToken">
+          <div class="input-cell">
+            <label for="pwdResetNewPassword">Naujas slaptažodis *</label>
+            <input type="password" id="pwdResetNewPassword" class="field" placeholder="••••••••" minlength="6" required>
+          </div>
+          <div class="input-cell">
+            <label for="pwdResetNewPasswordRepeat">Pakartokite naują slaptažodį *</label>
+            <input type="password" id="pwdResetNewPasswordRepeat" class="field" placeholder="••••••••" minlength="6" required>
+          </div>
+          <div id="pwdResetConfirmErrMsg" class="auth-error d-none"></div>
+          <div id="pwdResetConfirmSuccessMsg" class="drop-alert success d-none" style="margin-bottom:14px;"></div>
+          <button type="button" id="submitPasswordResetConfirmBtn" class="btn-solid btn-full" style="margin-bottom:10px;">
+            <span>Išsaugoti Naują Slaptažodį</span>
+          </button>
+          <button type="button" id="backToLoginFromResetBtn" class="btn-outline btn-full btn-sm">
+            <span>Grįžti į prisijungimą</span>
+          </button>
+        </form>
+      </div>
     </div>
   </div>
 
@@ -190,6 +226,11 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
           <span style="flex:1;">Pranešimai (Auditas)</span>
           <span class="notifications-unread-count" style="display:none;">0</span>
+        </button>
+
+        <button id="tabDiagnosticsBtn" class="admin-sidebar-nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+          <span>Serverio Diagnostika</span>
         </button>
 
         <button id="tabSettingsBtn" class="admin-sidebar-nav-item">
@@ -528,6 +569,44 @@
             </div>
           </div>
 
+          <!-- Cloudflare Stream Live Preview Window -->
+          <div class="content-card" style="margin-bottom:24px; border:1px solid rgba(212,175,55,0.45); background:rgba(8, 27, 23, 0.75);">
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:14px;">
+              <div style="display:flex; align-items:center; gap:10px;">
+                <h3 class="content-card-title" style="margin:0;">Tiesioginė Cloudflare Stream Transliacija (Live Preview)</h3>
+                <span class="status-pill status-accepted">
+                  <span class="pulse-dot" style="width:6px; height:6px;"></span>
+                  <span>Tiesioginis Vaizdas</span>
+                </span>
+              </div>
+              <div style="display:flex; align-items:center; gap:8px;">
+                <a href="/live.html" target="_blank" class="btn-solid btn-xs" style="display:inline-flex; align-items:center; gap:5px;">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                  <span>Atverti Naujame Lange</span>
+                </a>
+              </div>
+            </div>
+
+            <div class="stream-live-container" id="adminStreamLiveIframeContainer">
+              <iframe
+                id="adminStreamLiveIframe"
+                class="stream-live-iframe"
+                src="https://customer-auu36r7owuzogvfb.cloudflarestream.com/937d1a8b2c545a980c9fabc8502d8af4/iframe"
+                allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture;"
+                allowfullscreen="true">
+              </iframe>
+            </div>
+
+            <div class="stream-live-overlay-bar">
+              <span style="font-size:0.82rem; color:var(--text-muted);">
+                📺 Administratorių ir redaktorių tiesioginis stebėjimo langas realiu laiku. Grotuvas rodo Cloudflare Stream transliaciją.
+              </span>
+              <span style="font-size:0.8rem; color:#4ade80; font-weight:600;">
+                ● Srautas aktyvus (Low-Latency HLS/DASH)
+              </span>
+            </div>
+          </div>
+
           <!-- Cloudflare Stream & OBS Control -->
           <div class="content-card" style="margin-bottom:24px; border:1px solid rgba(111,165,138,0.35);">
             <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:16px; border-bottom:1px solid var(--border-color); padding-bottom:12px;">
@@ -612,6 +691,93 @@
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
                 <span>Kopijuoti Iframe HTML Kodą</span>
               </button>
+            </div>
+          </div>
+
+          <!-- Cloudflare Stream Authorized Viewers & Signed Tokens Card -->
+          <div class="content-card" style="margin-bottom:24px; border:1px solid rgba(111,165,138,0.35);">
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:14px; border-bottom:1px solid var(--border-color); padding-bottom:12px;">
+              <div>
+                <h3 class="content-card-title" style="margin:0;">Žiūrovų Prieigos Valdymas & Cloudflare Signed Tokenai</h3>
+                <p class="content-card-sub" style="margin:4px 0 0 0;">
+                  Atskiras sąrašas žiūrovams, gaunantiems prieigos tokenus. Įveskite Gmail/el. pašto adresą ir automatiškai sugeneruokite bei išsiųskite saugų Cloudflare Signed Token.
+                </p>
+              </div>
+              <span class="badge badge-winner" style="font-size:0.75rem; padding:4px 10px;">
+                Iš viso autorizuota: <span id="statStreamTotalViewers">0</span>
+              </span>
+            </div>
+
+            <!-- Add Viewer / Generate Token Form -->
+            <form id="formAddStreamViewer" style="background:rgba(12, 38, 31, 0.5); border:1px solid var(--border-color); border-radius:var(--site-radius); padding:16px; margin-bottom:18px;">
+              <h4 style="font-size:0.9rem; color:#D4AF37; margin:0 0 12px 0;">+ Priskirti Žiūrovą & Sugeneruoti Cloudflare Signed Token</h4>
+              <div class="two-col-grid" style="margin-bottom:12px;">
+                <div class="input-cell">
+                  <label for="newViewerEmail">Žiūrovo Gmail / El. Pašto Adresas *</label>
+                  <input type="email" id="newViewerEmail" class="field" placeholder="ziurovas@gmail.com" required>
+                </div>
+                <div class="input-cell">
+                  <label for="newViewerName">Žiūrovo Vardas / Pavardė</label>
+                  <input type="text" id="newViewerName" class="field" placeholder="pvz. Jonas Kazlauskas">
+                </div>
+              </div>
+              <div class="two-col-grid" style="margin-bottom:12px;">
+                <div class="input-cell">
+                  <label for="newViewerCustomToken">Custom Token Pavadinimas (Neprivaloma, tuščias = automatinis signed token)</label>
+                  <input type="text" id="newViewerCustomToken" class="field" placeholder="pvz. fest_vip_2026 (arba palikite tuščią)">
+                </div>
+                <div class="input-row">
+                  <div class="input-cell">
+                    <label for="newViewerRole">Prieigos Rolė</label>
+                    <select id="newViewerRole" class="field">
+                      <option value="guest_viewer" selected>Žiūrovas (Auditorija)</option>
+                      <option value="remote_participant">Nuotolinis dalyvis</option>
+                      <option value="vip">VIP Svečias</option>
+                      <option value="press">Žiniasklaida (Press)</option>
+                    </select>
+                  </div>
+                  <div class="input-cell">
+                    <label for="newViewerExpires">Galiojimo Trukmė</label>
+                    <select id="newViewerExpires" class="field">
+                      <option value="24">24 valandos</option>
+                      <option value="48" selected>48 valandos (Rekomenduojama)</option>
+                      <option value="168">7 dienos</option>
+                      <option value="720">30 dienų</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+              <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+                <label style="cursor:pointer; display:flex; align-items:center; gap:8px; margin:0; font-size:0.84rem; color:var(--text-color);">
+                  <input type="checkbox" id="newViewerSendEmail" checked style="accent-color:var(--accent-color); width:16px; height:16px;">
+                  <span>Automatiškai išsiųsti kvietimo el. laišką su sugeneruotu žetonu ir tiesiogine nuoroda</span>
+                </label>
+                <button type="submit" id="btnAddStreamViewerSubmit" class="btn-solid btn-sm" style="display:inline-flex; align-items:center; gap:6px;">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                  <span>Sugeneruoti Prieigos Žetoną ir Išsiųsti</span>
+                </button>
+              </div>
+            </form>
+
+            <!-- Authorized Viewers List Toolbar & Table -->
+            <div class="table-toolbar" style="margin-bottom:14px;">
+              <input type="text" id="filterSignedViewersSearch" class="field toolbar-search" placeholder="Ieškoti autorizuotų žiūrovų pagal el. paštą, vardą ar žetoną...">
+            </div>
+
+            <div class="table-box">
+              <table class="clean-table">
+                <thead>
+                  <tr>
+                    <th>Žiūrovas</th>
+                    <th>El. Paštas (Gmail)</th>
+                    <th>Cloudflare Signed Token</th>
+                    <th>Statusas</th>
+                    <th>Asmeninė Nuoroda</th>
+                    <th style="text-align:right;">Veiksmai</th>
+                  </tr>
+                </thead>
+                <tbody id="streamAuthorizedViewersTableBody"></tbody>
+              </table>
             </div>
           </div>
 
@@ -961,13 +1127,12 @@
             <table class="clean-table" id="usersTable">
               <thead>
                 <tr>
-                  <th>Vardas, Pavardė</th>
+                  <th>Vardas, Pavardė & Kontaktai</th>
                   <th>El. paštas</th>
-                  <th>Rolė</th>
-                  <th>Statusas</th>
+                  <th>Rolė & Teisės</th>
+                  <th>El. paštas (Statusas)</th>
                   <th>Prieiga</th>
-                  <th>Valdymo Skiltis</th>
-                  <th>Veiksmai</th>
+                  <th style="text-align:right;">Veiksmai</th>
                 </tr>
               </thead>
               <tbody id="usersTableBody"></tbody>
@@ -1009,7 +1174,90 @@
           <div id="activityLogsFeed"></div>
         </div>
 
-        <!-- 8. SETTINGS TAB -->
+        <!-- 8. SERVER DIAGNOSTICS & ERROR LOGS TAB -->
+        <div id="diagnosticsTab" class="d-none">
+          <div class="content-card" style="margin-bottom:20px; border:1px solid rgba(111,165,138,0.35);">
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:14px;">
+              <div>
+                <h3 class="content-card-title" style="margin-bottom:4px;">Serverio Klaidų Šalinimo Planas & Diagnostika</h3>
+                <p class="content-card-sub" style="margin-bottom:0;">
+                  Serverio logų (error.log, Nginx, Node) analizė, katalogų teisių sutvarkymas, atminties ribų (memory_limit) ir Cloudflare Stream CORS parametrų verifikacija.
+                </p>
+              </div>
+              <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                <button type="button" id="btnRefreshDiagLogs" class="btn-outline btn-xs" style="display:inline-flex; align-items:center; gap:5px;">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
+                  <span>Atnaujinti Žurnalus</span>
+                </button>
+                <button type="button" id="btnFixPermissions" class="btn-outline btn-xs" style="color:#F3E5AB; border-color:rgba(212,175,55,0.4); display:inline-flex; align-items:center; gap:5px;">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                  <span>Sutvarkyti Katalogų Teises</span>
+                </button>
+                <button type="button" id="btnRunVerification" class="btn-solid btn-xs" style="background:#4ade80; color:#051512; font-weight:700; display:inline-flex; align-items:center; gap:5px;">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                  <span>Paleisti Sistemos Verifikacijos Testą</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Diagnostic Metrics Cards -->
+          <div class="voting-stat-grid" style="margin-bottom:20px;">
+            <div class="metric-card">
+              <div class="metric-label">Heap Atmintis (Node/PHP)</div>
+              <div class="metric-num" id="diagMetricHeap" style="color:#60a5fa;">0 MB</div>
+              <div style="font-size:0.75rem; color:var(--text-muted); margin-top:4px;">Optimalus limitas: 512MB</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-label">RSS Atminties Rezervas</div>
+              <div class="metric-num" id="diagMetricTotal" style="color:#F3E5AB;">0 MB</div>
+              <div style="font-size:0.75rem; color:var(--text-muted); margin-top:4px;">Rezervuotas limitas</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-label">Katalogų Leidimai (data/)</div>
+              <div class="metric-num" id="diagMetricPermissions" style="color:#4ade80;">0775 (Aktyvus)</div>
+              <div style="font-size:0.75rem; color:var(--text-muted); margin-top:4px;">Pilnas skaitymas/rašymas</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-label">Cloudflare Stream CORS</div>
+              <div class="metric-num" id="diagMetricCors" style="color:#4ade80;">Aktyvus</div>
+              <div style="font-size:0.75rem; color:var(--text-muted); margin-top:4px;">Cross-Origin suderinta</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-label">Serverio Būklė (500/502)</div>
+              <div class="metric-num" id="diagMetricHttpErrors" style="color:#4ade80;">0 klaidų</div>
+              <div style="font-size:0.75rem; color:var(--text-muted); margin-top:4px;">Visi maršrutai atsako 200 OK</div>
+            </div>
+          </div>
+
+          <!-- Verification Test Results Container -->
+          <div id="diagVerificationResults" class="d-none" style="margin-bottom:24px;"></div>
+
+          <!-- Error Logs Analysis Terminal -->
+          <div class="content-card" style="margin-bottom:24px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:12px;">
+              <div>
+                <h4 style="margin:0; font-size:1rem; color:var(--text-color);">Serverio Klaidų Žurnalų (Error Logs) Analizatorius</h4>
+                <p style="margin:2px 0 0 0; font-size:0.8rem; color:var(--text-muted);">
+                  Tikslus Nginx/Apache, PHP, Node.js vykdymo ir aplikacijos klaidų sekimas
+                </p>
+              </div>
+              <div style="display:flex; gap:8px;">
+                <select id="filterDiagLogLevel" class="field toolbar-select" style="min-width:140px;">
+                  <option value="all" selected>Visi lygiai (ALL)</option>
+                  <option value="error">Tik klaidos (ERROR)</option>
+                  <option value="warn">Įspėjimai (WARN)</option>
+                  <option value="info">Informaciniai (INFO)</option>
+                </select>
+              </div>
+            </div>
+            <div class="diag-terminal" id="diagLogsTerminal">
+              <div style="text-align:center; padding:20px; color:#7A9689;">Kraunami klaidų žurnalai...</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 9. SETTINGS TAB -->
         <div id="settingsTab" class="d-none">
           <div class="content-card" style="border:1px solid var(--accent-light); margin-bottom:24px;">
             <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:14px; border-bottom:1px solid var(--border-color); padding-bottom:12px;">
@@ -1455,6 +1703,217 @@
       <div style="display:flex; justify-content:flex-end; gap:10px;">
         <button type="button" class="btn-outline btn-sm" id="adminPhotoModalCancelBtn">Atšaukti</button>
         <button type="button" class="btn-solid btn-sm" id="saveEditedPhotoBtn">Išsaugoti pakeitimus</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 7. USER PROFILE EDIT & GRANULAR RBAC PERMISSIONS MODAL -->
+  <div id="userEditModal" class="admin-modal-overlay d-none">
+    <div class="admin-modal-card" style="max-width:680px; max-height:90vh; overflow-y:auto;">
+      <div class="admin-modal-header">
+        <div>
+          <h3 class="admin-modal-title" style="margin:0;">👤 Redaguoti Vartotojo Profilį & Teises</h3>
+          <span style="font-size:0.75rem; color:var(--accent-light);">Prieigos lygių (RBAC) ir profilio valdymo modulis</span>
+        </div>
+        <button type="button" id="closeUserEditModalBtn" style="background:transparent; border:none; color:var(--text-muted); font-size:1.5rem; cursor:pointer;">&times;</button>
+      </div>
+
+      <form id="userEditForm">
+        <input type="hidden" id="editUserUid">
+        <input type="hidden" id="editUserOldEmail">
+
+        <!-- User Credentials and Contact info -->
+        <div class="input-row">
+          <div class="input-cell">
+            <label for="editUserName">Vardas *</label>
+            <input type="text" id="editUserName" class="field" required>
+          </div>
+          <div class="input-cell">
+            <label for="editUserSurname">Pavardė</label>
+            <input type="text" id="editUserSurname" class="field">
+          </div>
+        </div>
+
+        <div class="input-row">
+          <div class="input-cell">
+            <label for="editUserEmail">El. Pašto Adresas (Prisijungimas) *</label>
+            <input type="email" id="editUserEmail" class="field" required>
+          </div>
+          <div class="input-cell">
+            <label for="editUserPhone">Telefono Numeris / Kontaktai</label>
+            <input type="tel" id="editUserPhone" class="field" placeholder="+370 600 00000">
+          </div>
+        </div>
+
+        <div class="input-row" style="margin-bottom:14px;">
+          <div class="input-cell">
+            <label for="editUserRole">Prieigos Rolė (Pagrindinis šablonas) *</label>
+            <select id="editUserRole" class="field" required>
+              <option value="admin">Administratorius (Pilna prieiga)</option>
+              <option value="editor">Turinio redaktorius (Metų puslapiai & užduotys)</option>
+              <option value="judge">Komisijos narys / Teisėjas (Vertinimai & balsavimas)</option>
+              <option value="moderator">Žiūrovų prižiūrėtojas / Moderatorius (Paraiškos & transliacija)</option>
+              <option value="accountant">Buhalteris (Finansai & Prizai)</option>
+              <option value="viewer">Žiūrovas (Tik peržiūra)</option>
+            </select>
+          </div>
+          <div class="input-cell" style="display:flex; flex-direction:column; justify-content:flex-end;">
+            <label class="table-toggle-switch" style="padding:10px 0;">
+              <input type="checkbox" id="editUserEmailVerified" class="toggle-status-input">
+              <span class="table-toggle-track"></span>
+              <span class="table-toggle-text">El. paštas patvirtintas (Verified)</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Granular Role-Based Access Control (RBAC) Permissions Box -->
+        <div class="rbac-permissions-box">
+          <div class="rbac-section-title">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+            <span>Granuliarios Teisės (Permissions) pagal Modulius:</span>
+          </div>
+
+          <div class="rbac-grid">
+            <!-- Submissions Module -->
+            <div class="rbac-module-card">
+              <div class="rbac-module-header">
+                <span>Paraiškos (Submissions)</span>
+              </div>
+              <div class="rbac-checkboxes">
+                <label class="rbac-check-item"><input type="checkbox" id="perm_subs_read"> Skaityti</label>
+                <label class="rbac-check-item"><input type="checkbox" id="perm_subs_edit"> Redaguoti</label>
+                <label class="rbac-check-item"><input type="checkbox" id="perm_subs_delete"> Trinti</label>
+              </div>
+            </div>
+
+            <!-- Voting & Judges Module -->
+            <div class="rbac-module-card">
+              <div class="rbac-module-header">
+                <span>Balsavimas & Teisėjai</span>
+              </div>
+              <div class="rbac-checkboxes">
+                <label class="rbac-check-item"><input type="checkbox" id="perm_vote_read"> Skaityti</label>
+                <label class="rbac-check-item"><input type="checkbox" id="perm_vote_edit"> Vertinti/Redaguoti</label>
+                <label class="rbac-check-item"><input type="checkbox" id="perm_vote_delete"> Trinti</label>
+              </div>
+            </div>
+
+            <!-- Editions Module -->
+            <div class="rbac-module-card">
+              <div class="rbac-module-header">
+                <span>Metų Leidiniai (2026/2027)</span>
+              </div>
+              <div class="rbac-checkboxes">
+                <label class="rbac-check-item"><input type="checkbox" id="perm_editions_read"> Skaityti</label>
+                <label class="rbac-check-item"><input type="checkbox" id="perm_editions_edit"> Redaguoti</label>
+                <label class="rbac-check-item"><input type="checkbox" id="perm_editions_delete"> Trinti</label>
+              </div>
+            </div>
+
+            <!-- Archive Module -->
+            <div class="rbac-module-card">
+              <div class="rbac-module-header">
+                <span>Archyvas & Medija</span>
+              </div>
+              <div class="rbac-checkboxes">
+                <label class="rbac-check-item"><input type="checkbox" id="perm_archive_read"> Skaityti</label>
+                <label class="rbac-check-item"><input type="checkbox" id="perm_archive_edit"> Redaguoti</label>
+                <label class="rbac-check-item"><input type="checkbox" id="perm_archive_delete"> Trinti</label>
+              </div>
+            </div>
+
+            <!-- Tasks Module -->
+            <div class="rbac-module-card">
+              <div class="rbac-module-header">
+                <span>Užduotys (Tasks)</span>
+              </div>
+              <div class="rbac-checkboxes">
+                <label class="rbac-check-item"><input type="checkbox" id="perm_tasks_read"> Skaityti</label>
+                <label class="rbac-check-item"><input type="checkbox" id="perm_tasks_edit"> Redaguoti</label>
+                <label class="rbac-check-item"><input type="checkbox" id="perm_tasks_delete"> Trinti</label>
+              </div>
+            </div>
+
+            <!-- Settings & Logs Module -->
+            <div class="rbac-module-card">
+              <div class="rbac-module-header">
+                <span>Nustatymai & Auditas</span>
+              </div>
+              <div class="rbac-checkboxes">
+                <label class="rbac-check-item"><input type="checkbox" id="perm_settings_read"> Matyti nustatymus</label>
+                <label class="rbac-check-item"><input type="checkbox" id="perm_settings_edit"> Keisti nustatymus</label>
+                <label class="rbac-check-item"><input type="checkbox" id="perm_logs_read"> Žurnalai</label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Special System Permissions -->
+          <div style="margin-top:14px; padding-top:10px; border-top:1px solid rgba(111,165,138,0.2); display:flex; gap:16px; flex-wrap:wrap;">
+            <label class="rbac-check-item" style="color:var(--text-color); font-weight:600;">
+              <input type="checkbox" id="perm_manage_stream"> Valdyti Cloudflare transliacijos parametrus (OBS & RTMPS)
+            </label>
+            <label class="rbac-check-item" style="color:var(--text-color); font-weight:600;">
+              <input type="checkbox" id="perm_manage_users"> Valdyti kitų vartotojų paskyras ir siųsti kvietimus
+            </label>
+          </div>
+        </div>
+
+        <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:18px;">
+          <button type="button" class="btn-outline btn-sm" id="cancelUserEditBtn">Atšaukti</button>
+          <button type="submit" class="btn-solid btn-sm" id="saveUserEditBtn">Išsaugoti Pakeitimus</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 8. PASSWORD RESET & DIRECT LINK GENERATOR MODAL -->
+  <div id="passwordResetModal" class="admin-modal-overlay d-none">
+    <div class="admin-modal-card" style="max-width:540px;">
+      <div class="admin-modal-header">
+        <div>
+          <h3 class="admin-modal-title" style="margin:0;">🔑 Slaptažodžio Atstatymas</h3>
+          <span style="font-size:0.75rem; color:var(--accent-light);">Vienkartinių nuorodų ir el. laiškų valdymo modulis</span>
+        </div>
+        <button type="button" id="closePasswordResetModalBtn" style="background:transparent; border:none; color:var(--text-muted); font-size:1.5rem; cursor:pointer;">&times;</button>
+      </div>
+
+      <div style="margin-bottom:16px;">
+        <input type="hidden" id="pwdResetTargetEmail">
+        <div style="background:var(--surface-color); border:1px solid var(--border-color); border-radius:var(--site-radius); padding:10px 14px; margin-bottom:14px;">
+          <div style="font-size:0.75rem; color:var(--text-muted); text-transform:uppercase;">Pasirinktas naudotojas:</div>
+          <div style="font-weight:700; color:var(--text-color); font-size:1rem;" id="pwdResetTargetUserLabel">user@example.com</div>
+        </div>
+
+        <p style="font-size:0.86rem; color:var(--text-muted); line-height:1.5; margin-bottom:14px;">
+          Galite tiesiogiai išsiųsti slaptažodžio atstatymo laišką į vartotojo paštą arba sugeneruoti vienkartinį saugų linką ir nukopijuoti jį į iškarpinę.
+        </p>
+
+        <div style="display:flex; gap:10px; flex-direction:column; margin-bottom:16px;">
+          <button type="button" id="btnSendResetEmailAction" class="btn-solid btn-full" style="display:flex; align-items:center; justify-content:center; gap:8px;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+            <span>Atsiųsti Slaptažodžio Atstatymo Nuorodą Į El. Paštą</span>
+          </button>
+
+          <button type="button" id="btnGenerateDirectLinkAction" class="btn-outline btn-full" style="display:flex; align-items:center; justify-content:center; gap:8px;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+            <span>Generuoti Vienkartinį Slaptažodžio Keitimo Linką Tiesiogiai</span>
+          </button>
+        </div>
+
+        <!-- Generated Link Container -->
+        <div id="pwdResetDirectLinkContainer" class="d-none" style="background:rgba(0,0,0,0.35); border:1px solid rgba(212,175,55,0.35); border-radius:var(--site-radius); padding:14px; margin-top:14px;">
+          <label style="font-size:0.75rem; color:#D4AF37; text-transform:uppercase; font-weight:700; display:block; margin-bottom:6px;">
+            Sugeneruotas Vienkartinis Linkas (Galioja 24 val.):
+          </label>
+          <div style="display:flex; gap:8px;">
+            <input type="text" id="pwdResetDirectLinkInput" class="field" readonly style="font-family:monospace; font-size:0.8rem;">
+            <button type="button" id="btnCopyDirectResetLink" class="btn-solid btn-sm" style="white-space:nowrap;">Kopijuoti Linką</button>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex; justify-content:flex-end;">
+        <button type="button" class="btn-outline btn-sm" id="cancelPasswordResetBtn">Uždaryti</button>
       </div>
     </div>
   </div>

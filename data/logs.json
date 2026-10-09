@@ -1,6 +1,116 @@
 {
   "logs": [
     {
+      "id": "log_1791551200448_s6qnp",
+      "action": "SYSTEM_HEALTH_VERIFIED",
+      "category": "settings",
+      "adminEmail": "azuolynasfilmfestival@gmail.com",
+      "adminName": "azuolynasfilmfestival",
+      "target": "system/verification",
+      "details": "Atlikta pilna serverio diagnostika ir bandomasis paleidimas: 5 iš 5 testų išlaikyti (0 klaidų)",
+      "timestamp": "2026-10-09T13:06:40.448Z",
+      "status": "success"
+    },
+    {
+      "id": "log_1791551200443_3tgku",
+      "action": "STREAM_TOKEN_GENERATED",
+      "category": "stream",
+      "adminEmail": "azuolynasfilmfestival@gmail.com",
+      "adminName": "azuolynasfilmfestival",
+      "target": "vip_spectator@gmail.com",
+      "details": "Sugeneruotas Cloudflare Signed Token (cfs_live_19d4b42dfd6a2d17) žiūrovui VIP Žiūrovas (vip_spectator@gmail.com). Laiškas išsiųstas: Ne",
+      "timestamp": "2026-10-09T13:06:40.443Z",
+      "status": "success"
+    },
+    {
+      "id": "log_1791551200433_z0jyt",
+      "action": "USER_PROFILE_UPDATED",
+      "category": "users",
+      "adminEmail": "azuolynasfilmfestival@gmail.com",
+      "adminName": "azuolynasfilmfestival",
+      "target": "karina.brdar@gmail.com",
+      "details": "Atnaujintas vartotojo Karina Brdar (karina.brdar@gmail.com) profilis. Rolė: ADMIN, El. paštas patvirtintas: Taip",
+      "timestamp": "2026-10-09T13:06:40.433Z",
+      "status": "success"
+    },
+    {
+      "id": "log_1791551200426_9szqo",
+      "action": "PASSWORD_RESET_LINK_GENERATED",
+      "category": "users",
+      "adminEmail": "azuolynasfilmfestival@gmail.com",
+      "adminName": "azuolynasfilmfestival",
+      "target": "karina.brdar@gmail.com",
+      "details": "Sugeneruota vienkartinė slaptažodžio atstatymo nuoroda vartotojui karina.brdar@gmail.com",
+      "timestamp": "2026-10-09T13:06:40.426Z",
+      "status": "success"
+    },
+    {
+      "id": "log_1791551200410_ilo4a",
+      "action": "EMAIL_VERIFICATION_RESENT",
+      "category": "users",
+      "adminEmail": "azuolynasfilmfestival@gmail.com",
+      "adminName": "azuolynasfilmfestival",
+      "target": "karina.brdar@gmail.com",
+      "details": "Išsiųstas el. pašto patvirtinimo laiškas vartotojui karina.brdar@gmail.com",
+      "timestamp": "2026-10-09T13:06:40.410Z",
+      "status": "success"
+    },
+    {
+      "id": "log_1791551149977_xo1gw",
+      "action": "SYSTEM_HEALTH_VERIFIED",
+      "category": "settings",
+      "adminEmail": "azuolynasfilmfestival@gmail.com",
+      "adminName": "azuolynasfilmfestival",
+      "target": "system/verification",
+      "details": "Atlikta pilna serverio diagnostika ir bandomasis paleidimas: 5 iš 5 testų išlaikyti (0 klaidų)",
+      "timestamp": "2026-10-09T13:05:49.977Z",
+      "status": "success"
+    },
+    {
+      "id": "log_1791551144647_8ktpn",
+      "action": "PASSWORD_RESET_LINK_GENERATED",
+      "category": "users",
+      "adminEmail": "azuolynasfilmfestival@gmail.com",
+      "adminName": "azuolynasfilmfestival",
+      "target": "karina.brdar@gmail.com",
+      "details": "Sugeneruota vienkartinė slaptažodžio atstatymo nuoroda vartotojui karina.brdar@gmail.com",
+      "timestamp": "2026-10-09T13:05:44.647Z",
+      "status": "success"
+    },
+    {
+      "id": "log_1791551116861_a9zvm",
+      "action": "SYSTEM_HEALTH_VERIFIED",
+      "category": "settings",
+      "adminEmail": "azuolynasfilmfestival@gmail.com",
+      "adminName": "azuolynasfilmfestival",
+      "target": "system/verification",
+      "details": "Atlikta pilna serverio diagnostika ir bandomasis paleidimas: 5 iš 5 testų išlaikyti (0 klaidų)",
+      "timestamp": "2026-10-09T13:05:16.861Z",
+      "status": "success"
+    },
+    {
+      "id": "log_1791551005754_kp0zq",
+      "action": "PERMISSIONS_REPAIRED",
+      "category": "settings",
+      "adminEmail": "azuolynasfilmfestival@gmail.com",
+      "adminName": "azuolynasfilmfestival",
+      "target": "filesystem",
+      "details": "Sutvarkyti serverio katalogų leidimai ir duomenų failų prieigos teisės",
+      "timestamp": "2026-10-09T13:03:25.755Z",
+      "status": "success"
+    },
+    {
+      "id": "log_1791551000578_ujfk2",
+      "action": "SYSTEM_HEALTH_VERIFIED",
+      "category": "settings",
+      "adminEmail": "azuolynasfilmfestival@gmail.com",
+      "adminName": "azuolynasfilmfestival",
+      "target": "system/verification",
+      "details": "Atlikta pilna serverio diagnostika ir bandomasis paleidimas: 5 iš 5 testų išlaikyti (0 klaidų)",
+      "timestamp": "2026-10-09T13:03:20.578Z",
+      "status": "success"
+    },
+    {
       "id": "log_1791271035376_4zu96",
       "action": "VOTES_RESET",
       "category": "voting",

@@ -6,9 +6,47 @@
       "name": "Festivalio",
       "surname": "Administratorius",
       "role": "admin",
+      "phone": "+370 600 12345",
+      "emailVerified": true,
       "isSuperAdmin": true,
       "canManageUsers": true,
       "status": "active",
+      "permissions": {
+        "submissions": {
+          "read": true,
+          "edit": true,
+          "delete": true
+        },
+        "voting": {
+          "read": true,
+          "edit": true,
+          "delete": true
+        },
+        "editions": {
+          "read": true,
+          "edit": true,
+          "delete": true
+        },
+        "archive": {
+          "read": true,
+          "edit": true,
+          "delete": true
+        },
+        "tasks": {
+          "read": true,
+          "edit": true,
+          "delete": true
+        },
+        "settings": {
+          "read": true,
+          "edit": true
+        },
+        "logs": {
+          "read": true
+        },
+        "manageStream": true,
+        "manageUsers": true
+      },
       "createdAt": "2026-01-01T00:00:00.000Z",
       "lastLogin": "2026-10-06T08:00:00.000Z"
     },
@@ -18,11 +56,50 @@
       "name": "Karina",
       "surname": "Brdar",
       "role": "admin",
+      "phone": "+370 611 23456",
+      "emailVerified": true,
       "isSuperAdmin": false,
-      "canManageUsers": false,
+      "canManageUsers": true,
       "status": "active",
+      "permissions": {
+        "submissions": {
+          "read": true,
+          "edit": true,
+          "delete": true
+        },
+        "voting": {
+          "read": true,
+          "edit": true,
+          "delete": true
+        },
+        "editions": {
+          "read": true,
+          "edit": true,
+          "delete": true
+        },
+        "archive": {
+          "read": true,
+          "edit": true,
+          "delete": true
+        },
+        "tasks": {
+          "read": true,
+          "edit": true,
+          "delete": true
+        },
+        "settings": {
+          "read": true,
+          "edit": true
+        },
+        "logs": {
+          "read": true
+        },
+        "manageStream": true,
+        "manageUsers": true
+      },
       "createdAt": "2026-01-01T00:00:00.000Z",
-      "lastLogin": "2026-10-06T08:00:00.000Z"
+      "lastLogin": "2026-10-06T08:00:00.000Z",
+      "updatedAt": "2026-10-09T13:06:40.432Z"
     },
     {
       "uid": "usr_editor_lukas",
@@ -30,8 +107,46 @@
       "name": "Lukas",
       "surname": "Morkūnas",
       "role": "editor",
+      "phone": "+370 622 34567",
+      "emailVerified": true,
       "status": "active",
       "canManageUsers": false,
+      "permissions": {
+        "submissions": {
+          "read": true,
+          "edit": true,
+          "delete": false
+        },
+        "voting": {
+          "read": true,
+          "edit": false,
+          "delete": false
+        },
+        "editions": {
+          "read": true,
+          "edit": true,
+          "delete": false
+        },
+        "archive": {
+          "read": true,
+          "edit": true,
+          "delete": false
+        },
+        "tasks": {
+          "read": true,
+          "edit": true,
+          "delete": false
+        },
+        "settings": {
+          "read": false,
+          "edit": false
+        },
+        "logs": {
+          "read": false
+        },
+        "manageStream": false,
+        "manageUsers": false
+      },
       "createdAt": "2026-10-06T08:00:00.000Z",
       "lastLogin": "2026-10-06T08:00:00.000Z",
       "invitedBy": "azuolynasfilmfestival@gmail.com"
@@ -42,8 +157,46 @@
       "name": "Elena",
       "surname": "Dosė-Drelingienė",
       "role": "judge",
+      "phone": "+370 633 45678",
+      "emailVerified": true,
       "status": "active",
       "canManageUsers": false,
+      "permissions": {
+        "submissions": {
+          "read": true,
+          "edit": false,
+          "delete": false
+        },
+        "voting": {
+          "read": true,
+          "edit": true,
+          "delete": false
+        },
+        "editions": {
+          "read": true,
+          "edit": false,
+          "delete": false
+        },
+        "archive": {
+          "read": true,
+          "edit": false,
+          "delete": false
+        },
+        "tasks": {
+          "read": true,
+          "edit": true,
+          "delete": false
+        },
+        "settings": {
+          "read": false,
+          "edit": false
+        },
+        "logs": {
+          "read": false
+        },
+        "manageStream": false,
+        "manageUsers": false
+      },
       "createdAt": "2026-10-06T08:00:00.000Z",
       "lastLogin": "2026-10-06T08:00:00.000Z",
       "invitedBy": "azuolynasfilmfestival@gmail.com"
@@ -54,8 +207,46 @@
       "name": "Aktyvuotas",
       "surname": "Vartotojas",
       "role": "moderator",
+      "phone": "+370 644 56789",
+      "emailVerified": false,
       "status": "active",
       "canManageUsers": false,
+      "permissions": {
+        "submissions": {
+          "read": true,
+          "edit": true,
+          "delete": false
+        },
+        "voting": {
+          "read": true,
+          "edit": false,
+          "delete": false
+        },
+        "editions": {
+          "read": false,
+          "edit": false,
+          "delete": false
+        },
+        "archive": {
+          "read": false,
+          "edit": false,
+          "delete": false
+        },
+        "tasks": {
+          "read": true,
+          "edit": true,
+          "delete": false
+        },
+        "settings": {
+          "read": false,
+          "edit": false
+        },
+        "logs": {
+          "read": false
+        },
+        "manageStream": true,
+        "manageUsers": false
+      },
       "createdAt": "2026-10-05T16:39:38.162Z",
       "lastLogin": "2026-10-05T16:39:38.162Z",
       "invitedBy": "azuolynasfilmfestival@gmail.com"

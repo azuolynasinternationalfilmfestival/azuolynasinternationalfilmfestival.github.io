@@ -27,6 +27,7 @@ import { initVotingAnalytics, loadVotingAnalytics } from "./voting-analytics.js"
 import { initStreamAdmin, loadStreamData } from "./stream-admin.js";
 import { initTasks, loadTasks } from "./tasks.js";
 import { initNotificationsLog, loadActivityLogs } from "./notifications-log.js";
+import { initDiagnostics, loadDiagnosticsData } from "./diagnostics.js";
 
 function bootAdmin() {
   // 1. Initialize Authentication FIRST so the login interface is immediately responsive
@@ -49,6 +50,7 @@ function bootAdmin() {
         if (hasUserManagementAccess) {
           try { subscribeUsers(); } catch (e) { console.error("subscribeUsers error:", e); }
         }
+        try { loadDiagnosticsData(); } catch (e) { console.error("loadDiagnosticsData error:", e); }
         try { subscribeSettings(); } catch (e) { console.error("subscribeSettings error:", e); }
       },
       onLogout: () => {
@@ -71,6 +73,7 @@ function bootAdmin() {
   try { initArchive(); } catch (e) { console.error("initArchive error:", e); }
   try { initTasks(); } catch (e) { console.error("initTasks error:", e); }
   try { initNotificationsLog(); } catch (e) { console.error("initNotificationsLog error:", e); }
+  try { initDiagnostics(); } catch (e) { console.error("initDiagnostics error:", e); }
   try { initUsers(); } catch (e) { console.error("initUsers error:", e); }
   try { initInviteModal(); } catch (e) { console.error("initInviteModal error:", e); }
   try { initSettings(); } catch (e) { console.error("initSettings error:", e); }
@@ -94,6 +97,7 @@ function initTabNavigation() {
     { btn: "tabTasksBtn", content: "tasksTab" },
     { btn: "tabUsersBtn", content: "usersTab" },
     { btn: "tabNotificationsBtn", content: "notificationsTab" },
+    { btn: "tabDiagnosticsBtn", content: "diagnosticsTab" },
     { btn: "tabSettingsBtn", content: "settingsTab" }
   ];
 

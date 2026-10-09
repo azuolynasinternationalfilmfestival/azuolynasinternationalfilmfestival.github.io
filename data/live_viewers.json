@@ -1,6 +1,18 @@
 {
   "viewers": [
     {
+      "token": "cfs_live_19d4b42dfd6a2d17",
+      "email": "vip_spectator@gmail.com",
+      "name": "VIP Žiūrovas",
+      "filmTitle": "Žiūrovas (Auditorija)",
+      "role": "vip",
+      "status": "authorized",
+      "createdAt": "2026-10-09T13:06:40.443Z",
+      "expiresAt": "2026-10-11T13:06:40.443Z",
+      "lastActive": "2026-10-09T13:06:40.443Z",
+      "liveStreamUrl": "http://localhost:3000/live.html?token=cfs_live_19d4b42dfd6a2d17"
+    },
+    {
       "token": "fest_live_mantas_88a91",
       "email": "mantas.film@gmail.com",
       "name": "Mantas Petraitis",

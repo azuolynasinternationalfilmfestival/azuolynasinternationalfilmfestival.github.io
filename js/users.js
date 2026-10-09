@@ -31,42 +31,87 @@ let allUsersList = [];
 let pendingDeleteUserId = null;
 let pendingDeleteUserEmail = null;
 
-const ROLE_LABELS = {
-  admin: "Administratorius",
-  editor: "Redaktorius",
-  moderator: "Moderatorius",
-  judge: "Teisėjas (Komisija)",
-  accountant: "Buhalteris",
+export const ROLE_LABELS = {
+  admin: "Administratorius (Pilna prieiga)",
+  editor: "Turinio redaktorius",
+  judge: "Komisijos narys (Teisėjas)",
+  moderator: "Žiūrovų prižiūrėtojas / Moderatorius",
+  accountant: "Buhalteris (Finansai & Prizai)",
   viewer: "Žiūrovas (Tik peržiūra)",
 };
 
-const TRUSTED_MANAGEMENT_EMAILS = [
-  "azuolynasfilmfestival@gmail.com"
-];
+export const ROLE_PERMISSION_DEFAULTS = {
+  admin: {
+    submissions: { read: true, edit: true, delete: true },
+    voting: { read: true, edit: true, delete: true },
+    editions: { read: true, edit: true, delete: true },
+    archive: { read: true, edit: true, delete: true },
+    tasks: { read: true, edit: true, delete: true },
+    settings: { read: true, edit: true },
+    logs: { read: true },
+    manageStream: true,
+    manageUsers: true
+  },
+  editor: {
+    submissions: { read: true, edit: true, delete: false },
+    voting: { read: true, edit: false, delete: false },
+    editions: { read: true, edit: true, delete: false },
+    archive: { read: true, edit: true, delete: false },
+    tasks: { read: true, edit: true, delete: false },
+    settings: { read: false, edit: false },
+    logs: { read: false },
+    manageStream: false,
+    manageUsers: false
+  },
+  judge: {
+    submissions: { read: true, edit: false, delete: false },
+    voting: { read: true, edit: true, delete: false },
+    editions: { read: true, edit: false, delete: false },
+    archive: { read: true, edit: false, delete: false },
+    tasks: { read: true, edit: true, delete: false },
+    settings: { read: false, edit: false },
+    logs: { read: false },
+    manageStream: false,
+    manageUsers: false
+  },
+  moderator: {
+    submissions: { read: true, edit: true, delete: false },
+    voting: { read: true, edit: false, delete: false },
+    editions: { read: false, edit: false, delete: false },
+    archive: { read: false, edit: false, delete: false },
+    tasks: { read: true, edit: true, delete: false },
+    settings: { read: false, edit: false },
+    logs: { read: false },
+    manageStream: true,
+    manageUsers: false
+  },
+  accountant: {
+    submissions: { read: true, edit: false, delete: false },
+    voting: { read: true, edit: false, delete: false },
+    editions: { read: true, edit: false, delete: false },
+    archive: { read: true, edit: false, delete: false },
+    tasks: { read: true, edit: true, delete: false },
+    settings: { read: false, edit: false },
+    logs: { read: false },
+    manageStream: false,
+    manageUsers: false
+  },
+  viewer: {
+    submissions: { read: true, edit: false, delete: false },
+    voting: { read: true, edit: false, delete: false },
+    editions: { read: true, edit: false, delete: false },
+    archive: { read: true, edit: false, delete: false },
+    tasks: { read: false, edit: false, delete: false },
+    settings: { read: false, edit: false },
+    logs: { read: false },
+    manageStream: false,
+    manageUsers: false
+  }
+};
 
-const DEFAULT_SEED_USERS = [
-  {
-    email: "azuolynasfilmfestival@gmail.com",
-    name: "Festivalio",
-    surname: "Administratorius",
-    role: "admin",
-    isSuperAdmin: true,
-    canManageUsers: true,
-    status: "active",
-    createdAt: "2026-01-01T00:00:00.000Z",
-    invitedBy: "Sistemos Pagrindas",
-  },
-  {
-    email: "karina.brdar@gmail.com",
-    name: "Karina",
-    surname: "Brdar",
-    role: "admin",
-    isSuperAdmin: false,
-    canManageUsers: false,
-    status: "active",
-    createdAt: "2026-01-01T00:00:00.000Z",
-    invitedBy: "azuolynasfilmfestival@gmail.com",
-  },
+const TRUSTED_MANAGEMENT_EMAILS = [
+  "azuolynasfilmfestival@gmail.com",
+  "karina.brdar@gmail.com"
 ];
 
 export function initUsers() {
@@ -81,15 +126,10 @@ export function initUsers() {
   const cancelDeleteBtn = document.getElementById("cancelDeleteBtn");
   const confirmDeleteBtn = document.getElementById("confirmDeleteBtn");
 
-  if (searchInput) {
-    searchInput.addEventListener("input", renderUsersTable);
-  }
-  if (roleSelect) {
-    roleSelect.addEventListener("change", renderUsersTable);
-  }
-  if (statusSelect) {
-    statusSelect.addEventListener("change", renderUsersTable);
-  }
+  if (searchInput) searchInput.addEventListener("input", renderUsersTable);
+  if (roleSelect) roleSelect.addEventListener("change", renderUsersTable);
+  if (statusSelect) statusSelect.addEventListener("change", renderUsersTable);
+
   if (refreshBtn) {
     refreshBtn.addEventListener("click", () => {
       showToast("Atnaujinamas vartotojų sąrašas...");
@@ -97,13 +137,18 @@ export function initUsers() {
     });
   }
 
-  // Specific click handler for 'Invite' button
   if (openInviteModalBtn) {
     openInviteModalBtn.onclick = (e) => {
       e.preventDefault();
       openInviteModal({ defaultRole: "moderator" });
     };
   }
+
+  // Setup user edit modal
+  initUserEditModal();
+
+  // Setup password reset modal
+  initPasswordResetModal();
 
   // Listen to user-invited event from invite-modal.js
   window.addEventListener("user-invited", (e) => {
@@ -119,9 +164,12 @@ export function initUsers() {
       name: newUser.name || "",
       surname: newUser.surname || "",
       email: newUser.email,
+      phone: newUser.phone || "",
       role: newUser.role || "moderator",
       status: "active",
+      emailVerified: true,
       canManageUsers: newUser.canManageUsers === true,
+      permissions: ROLE_PERMISSION_DEFAULTS[newUser.role] || ROLE_PERMISSION_DEFAULTS.moderator,
       createdAt: newUser.createdAt || new Date().toISOString(),
       invitedBy: (auth && auth.currentUser) ? auth.currentUser.email : PRIMARY_SUPERADMIN_EMAIL
     };
@@ -160,13 +208,12 @@ export function initUsers() {
     }
   });
 
-  // Specific click handler for confirm 'Delete' button
   if (confirmDeleteBtn) {
     confirmDeleteBtn.onclick = async (e) => {
       e.preventDefault();
       if (!pendingDeleteUserId && !pendingDeleteUserEmail) return;
       confirmDeleteBtn.disabled = true;
-      confirmDeleteBtn.textContent = "Šalinama per Firestore...";
+      confirmDeleteBtn.textContent = "Šalinama...";
       try {
         await executeDeleteUser(pendingDeleteUserId, pendingDeleteUserEmail);
         hideDeleteModal();
@@ -178,11 +225,6 @@ export function initUsers() {
   }
 }
 
-/**
- * Access Control Evaluator: Ensures that 'Vartotojai & Prieiga' tab
- * is strictly visible only to azuolynasfilmfestival@gmail.com
- * or users explicitly granted 'canManageUsers' permission.
- */
 export async function evaluateUserManagementAccess(user) {
   const tabUsersBtn = document.getElementById("tabUsersBtn");
   const usersTab = document.getElementById("usersTab");
@@ -195,7 +237,6 @@ export async function evaluateUserManagementAccess(user) {
   }
 
   const emailLower = (user.email || "").trim().toLowerCase();
-  // Strictly enforce: access management and invitation rights belong solely to the 1-2 authorized accounts
   const hasAccess = TRUSTED_MANAGEMENT_EMAILS.map(e => e.toLowerCase()).includes(emailLower);
 
   if (hasAccess) {
@@ -223,6 +264,8 @@ export async function loadUsersFallback() {
       if (data && Array.isArray(data.users) && data.users.length) {
         allUsersList = data.users.map((u) => ({
           id: u.uid || u.id || (u.email ? u.email.replace(/[^a-zA-Z0-9_-]/g, "_") : "usr_" + Math.random().toString(36).substring(2)),
+          emailVerified: u.emailVerified !== undefined ? u.emailVerified : true,
+          permissions: u.permissions || ROLE_PERMISSION_DEFAULTS[u.role] || ROLE_PERMISSION_DEFAULTS.viewer,
           ...u,
         }));
 
@@ -247,7 +290,6 @@ export function subscribeUsers() {
   const loadingElem = document.getElementById("usersLoadingState");
   if (loadingElem) loadingElem.classList.remove("d-none");
 
-  // Always attempt fallback load in parallel so users show immediately
   loadUsersFallback();
 
   if (!db) {
@@ -264,22 +306,21 @@ export function subscribeUsers() {
       async (snapshot) => {
         if (loadingElem) loadingElem.classList.add("d-none");
 
-        // If collection is completely empty, bootstrap initial accounts to guarantee data presence
         if (snapshot.empty) {
-          console.info("Users collection empty. Initializing baseline staff accounts in Firestore...");
-          await bootstrapDefaultUsers();
           return;
         }
 
         allUsersList = [];
         snapshot.forEach((doc) => {
+          const d = doc.data();
           allUsersList.push({
             id: doc.id,
-            ...doc.data(),
+            emailVerified: d.emailVerified !== undefined ? d.emailVerified : true,
+            permissions: d.permissions || ROLE_PERMISSION_DEFAULTS[d.role] || ROLE_PERMISSION_DEFAULTS.viewer,
+            ...d,
           });
         });
 
-        // Sort by role (admins first) and then createdAt
         allUsersList.sort((a, b) => {
           if (a.role === "admin" && b.role !== "admin") return -1;
           if (b.role === "admin" && a.role !== "admin") return 1;
@@ -311,31 +352,6 @@ export function unsubscribeUsersListener() {
   }
 }
 
-async function bootstrapDefaultUsers() {
-  const batch = db.batch();
-  DEFAULT_SEED_USERS.forEach((usr) => {
-    const docId = sanitizeEmailToDocId(usr.email);
-    const ref = db.collection("users").doc(docId);
-    batch.set(ref, {
-      ...usr,
-      uid: docId,
-      createdAt: usr.createdAt || new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    });
-  });
-
-  try {
-    await batch.commit();
-    showToast("Pradiniai vartotojai sėkmingai sukurti Firestore duomenų bazėje!");
-  } catch (err) {
-    handleFirestoreError(err, OperationType.CREATE, "users");
-  }
-}
-
-function sanitizeEmailToDocId(email) {
-  return email.trim().toLowerCase().replace(/[^a-zA-Z0-9_-]/g, "_");
-}
-
 function updateUserMetrics() {
   const total = allUsersList.length;
   const active = allUsersList.filter((u) => u.status === "active").length;
@@ -365,7 +381,8 @@ function renderUsersTable() {
   const filtered = allUsersList.filter((user) => {
     const fullName = `${user.name || ""} ${user.surname || ""}`.toLowerCase();
     const email = (user.email || "").toLowerCase();
-    const matchesSearch = !searchVal || fullName.includes(searchVal) || email.includes(searchVal);
+    const phone = (user.phone || "").toLowerCase();
+    const matchesSearch = !searchVal || fullName.includes(searchVal) || email.includes(searchVal) || phone.includes(searchVal);
     const matchesRole = roleVal === "all" || user.role === roleVal;
     const matchesStatus = statusVal === "all" || user.status === statusVal;
     return matchesSearch && matchesRole && matchesStatus;
@@ -379,9 +396,6 @@ function renderUsersTable() {
 
   if (emptyState) emptyState.classList.add("d-none");
 
-  const currentAdminEmail = (auth && auth.currentUser && auth.currentUser.email ? auth.currentUser.email.toLowerCase() : "");
-  const isViewerSuperAdmin = currentAdminEmail === PRIMARY_SUPERADMIN_EMAIL.toLowerCase();
-
   tbody.innerHTML = filtered
     .map((user) => {
       const isSuperAdmin = (user.email || "").toLowerCase() === PRIMARY_SUPERADMIN_EMAIL.toLowerCase();
@@ -389,16 +403,29 @@ function renderUsersTable() {
       const initials = getInitials(user.name, user.surname, user.email);
       const formattedDate = user.createdAt ? formatDateShort(user.createdAt) : "—";
       const userFullName = escapeHtml(`${user.name || ""} ${user.surname || ""}`.trim() || "Nenurodytas");
+      const userPhone = user.phone ? escapeHtml(user.phone) : "";
 
-      // Status pill configuration
-      let statusClass = "status-accepted";
-      let statusLabel = "Aktyvus";
-      if (user.status === "suspended") {
-        statusClass = "status-rejected";
-        statusLabel = "Blokuotas";
-      } else if (user.status === "pending") {
-        statusClass = "status-semifinal";
-        statusLabel = "Laukiama";
+      // Email verification badge
+      const isVerified = user.emailVerified === true;
+      const verifiedBadge = isVerified
+        ? `<span class="badge-verified" title="El. paštas patvirtintas">
+             <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+             <span>Patvirtintas</span>
+           </span>`
+        : `<span class="badge-unverified" title="El. paštas nepatvirtintas">
+             <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+             <span>Nepatvirtintas</span>
+           </span>`;
+
+      // Permissions overview text
+      const perms = user.permissions || ROLE_PERMISSION_DEFAULTS[user.role] || {};
+      let permSummary = "Standartinė";
+      if (user.role === "admin" || isSuperAdmin) {
+        permSummary = "Pilna prieiga (Visi moduliai)";
+      } else {
+        const canStream = perms.manageStream ? "+ Transliacija" : "";
+        const canUsers = perms.manageUsers ? "+ Vartotojai" : "";
+        permSummary = `${ROLE_LABELS[user.role] || user.role} ${canStream} ${canUsers}`.trim();
       }
 
       return `
@@ -409,8 +436,13 @@ function renderUsersTable() {
                 ${initials}
               </div>
               <div>
-                <div class="user-name-title">${userFullName} ${isSuperAdmin ? `<span class="badge badge-winner" style="font-size:0.68rem; margin-left:4px;">Vyr. Admin</span>` : ""}</div>
-                <div class="user-name-sub">Sukurta: ${formattedDate} ${user.invitedBy ? `&bull; Pakvietė: ${escapeHtml(user.invitedBy)}` : ""}</div>
+                <div class="user-name-title">
+                  ${userFullName} 
+                  ${isSuperAdmin ? `<span class="badge badge-winner" style="font-size:0.68rem; margin-left:4px;">Vyr. Admin</span>` : ""}
+                </div>
+                <div class="user-name-sub">
+                  ${userPhone ? `📞 ${userPhone} &bull; ` : ""}Sukurta: ${formattedDate}
+                </div>
               </div>
             </div>
           </td>
@@ -418,54 +450,50 @@ function renderUsersTable() {
             <div class="user-email-wrap">
               <a href="mailto:${escapeHtml(user.email)}" title="Rašyti laišką">${escapeHtml(user.email)}</a>
               <button type="button" class="btn-icon-copy" title="Kopijuoti el. paštą" data-copy-email="${escapeHtml(user.email)}">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
               </button>
             </div>
           </td>
           <td>
-            <select class="table-role-select" data-user-role-id="${escapeHtml(user.id)}" ${isSuperAdmin ? "disabled title='Vyr. administratoriaus rolė negali būti keičiama'" : ""}>
-              <option value="admin" ${user.role === "admin" ? "selected" : ""}>Administratorius</option>
-              <option value="editor" ${user.role === "editor" ? "selected" : ""}>Redaktorius</option>
-              <option value="moderator" ${user.role === "moderator" ? "selected" : ""}>Moderatorius</option>
-              <option value="judge" ${user.role === "judge" ? "selected" : ""}>Teisėjas / Komisija</option>
-              <option value="accountant" ${user.role === "accountant" ? "selected" : ""}>Buhalteris</option>
-              <option value="viewer" ${user.role === "viewer" ? "selected" : ""}>Žiūrovas</option>
-            </select>
+            <div style="font-size:0.85rem; font-weight:600; color:var(--text-color);">
+              ${ROLE_LABELS[user.role] || user.role}
+            </div>
+            <div style="font-size:0.73rem; color:var(--text-muted); margin-top:2px;">
+              ${escapeHtml(permSummary)}
+            </div>
           </td>
           <td>
-            <span class="status-pill ${statusClass}">
-              <span class="status-dot"></span>
-              ${statusLabel}
-            </span>
+            <div style="display:flex; align-items:center; gap:6px;">
+              ${verifiedBadge}
+              <button type="button" class="btn-icon-copy btn-resend-verify" data-user-email="${escapeHtml(user.email)}" title="Atsiųsti el. pašto patvirtinimo laišką iš naujo" style="color:var(--accent-light);">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+              </button>
+            </div>
           </td>
           <td>
             <label class="table-toggle-switch" title="${isSuperAdmin ? "Pagrindinis administratorius negali būti blokuojamas" : isActive ? "Spustelėkite, norėdami užblokuoti prieigą" : "Spustelėkite, norėdami atblokuoti prieigą"}">
               <input type="checkbox" class="toggle-status-input" data-user-id="${escapeHtml(user.id)}" data-user-email="${escapeHtml(user.email)}" ${isActive ? "checked" : ""} ${isSuperAdmin ? "disabled" : ""}>
               <span class="table-toggle-track"></span>
-              <span class="table-toggle-text">${isActive ? "Prieiga leista" : "Užblokuotas"}</span>
+              <span class="table-toggle-text">${isActive ? "Aktyvus" : "Užblokuotas"}</span>
             </label>
           </td>
           <td>
-            ${isSuperAdmin ? `
-              <span class="badge badge-winner" style="font-size:0.68rem; padding:4px 8px;">Vyr. Admin (Nuolatinė)</span>
-            ` : isViewerSuperAdmin ? `
-              <label class="table-toggle-switch" title="Suteikti arba atšaukti prieigą prie skilties 'Vartotojai & Prieiga'">
-                <input type="checkbox" class="toggle-manage-access-input" data-user-id="${escapeHtml(user.id)}" data-user-email="${escapeHtml(user.email)}" ${user.canManageUsers === true ? "checked" : ""}>
-                <span class="table-toggle-track"></span>
-                <span class="table-toggle-text">${user.canManageUsers === true ? "Suteikta" : "Nėra"}</span>
-              </label>
-            ` : `
-              <span class="status-pill ${user.canManageUsers === true ? "status-accepted" : "status-rejected"}">
-                <span class="status-dot"></span>
-                ${user.canManageUsers === true ? "Suteikta" : "Nėra"}
-              </span>
-            `}
-          </td>
-          <td>
-            <div style="display:flex; align-items:center; gap:8px;">
+            <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
+              <!-- Edit Profile & RBAC Permissions Button -->
+              <button type="button" class="btn-action-edit btn-open-user-edit" data-user-email="${escapeHtml(user.email)}" title="Redaguoti el. paštą, vardą, kontaktus ir prieigos teises">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                <span>Redaguoti</span>
+              </button>
+
+              <!-- Password Reset Options Button -->
+              <button type="button" class="btn-action-reset btn-open-pwd-reset" data-user-email="${escapeHtml(user.email)}" title="Atsiųsti slaptažodžio atstatymo nuorodą arba sugeneruoti vienkartinį linką">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                <span>Slaptažodis</span>
+              </button>
+
+              <!-- Delete Button -->
               <button type="button" class="btn-action-delete" data-delete-user-id="${escapeHtml(user.id)}" data-delete-email="${escapeHtml(user.email)}" ${isSuperAdmin ? "disabled title='Pagrindinis vyr. administratorius negali būti pašalintas'" : "title='Ištrinti paskyrą ir atšaukti teises'"}>
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
-                Ištrinti
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
               </button>
             </div>
           </td>
@@ -489,182 +517,81 @@ function attachTableEventHandlers() {
 
       input.disabled = true;
 
-      let updated = false;
-
-      // 1. Update in Firestore
-      if (db && userId) {
-        try {
-          await db.collection("users").doc(userId).update({
+      try {
+        const resp = await fetch("/api/admin/users/status", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            email: userEmail,
             status: newStatus,
-            updatedAt: new Date().toISOString(),
-          });
-          updated = true;
-        } catch (fErr) {
-          console.warn("Firestore status update notice:", fErr.message);
-        }
-      }
+            adminEmail: (auth && auth.currentUser) ? auth.currentUser.email : PRIMARY_SUPERADMIN_EMAIL
+          })
+        });
 
-      // 2. Sync via backend API
-      if (userEmail) {
-        try {
-          const resp = await fetch("/api/admin/users/status", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              email: userEmail,
-              status: newStatus,
-              adminEmail: (auth && auth.currentUser) ? auth.currentUser.email : PRIMARY_SUPERADMIN_EMAIL
-            })
-          });
-          if (resp.ok) {
-            updated = true;
-          }
-        } catch (apiErr) {
-          console.warn("Backend status update notice:", apiErr.message);
-        }
-      }
-
-      if (updated) {
-        const u = allUsersList.find((x) => x.id === userId || (userEmail && (x.email || "").toLowerCase() === userEmail.toLowerCase()));
-        if (u) u.status = newStatus;
-        updateUserMetrics();
-        renderUsersTable();
-
-        if (newActive) {
-          showToast(`Vartotojas ${userEmail || userId} atblokuotas (Prieiga aktyvi).`, "success");
+        if (resp.ok) {
+          const u = allUsersList.find((x) => x.id === userId || (userEmail && (x.email || "").toLowerCase() === userEmail.toLowerCase()));
+          if (u) u.status = newStatus;
+          updateUserMetrics();
+          renderUsersTable();
+          showToast(`Vartotojas ${userEmail} ${newActive ? 'atblokuotas' : 'užblokuotas'}.`, "success");
         } else {
-          showToast(`Vartotojas ${userEmail || userId} užblokuotas (Prieiga sustabdyta).`, "warning");
+          input.checked = !newActive;
+          showToast("Nepavyko pakeisti prieigos būsenos", "error");
         }
-      } else {
-        input.checked = !newActive; // revert
-        showToast("Nepavyko pakeisti prieigos būsenos.", "error");
+      } catch (err) {
+        input.checked = !newActive;
+        showToast("Ryšio klaida", "error");
+      } finally {
         input.disabled = false;
       }
     };
   });
 
-  // Toggle User Management Permission (canManageUsers) - only available to superadmin
-  document.querySelectorAll(".toggle-manage-access-input").forEach((checkbox) => {
-    checkbox.onchange = async (e) => {
-      const input = e.target;
-      const userId = input.dataset.userId;
-      const userEmail = input.dataset.userEmail;
-      const isGranted = input.checked;
+  // Open Edit Profile & RBAC Modal
+  document.querySelectorAll(".btn-open-user-edit").forEach((btn) => {
+    btn.onclick = () => {
+      const email = btn.dataset.userEmail;
+      const user = allUsersList.find(u => (u.email || "").toLowerCase() === (email || "").toLowerCase());
+      if (user) openUserEditModal(user);
+    };
+  });
 
-      input.disabled = true;
+  // Open Password Reset Modal
+  document.querySelectorAll(".btn-open-pwd-reset").forEach((btn) => {
+    btn.onclick = () => {
+      const email = btn.dataset.userEmail;
+      const user = allUsersList.find(u => (u.email || "").toLowerCase() === (email || "").toLowerCase());
+      if (user) openPasswordResetModal(user);
+    };
+  });
 
-      let updated = false;
-
-      // 1. Update in Firestore
-      if (db && userId) {
-        try {
-          await db.collection("users").doc(userId).update({
-            canManageUsers: isGranted,
-            updatedAt: new Date().toISOString()
-          });
-          updated = true;
-        } catch (fErr) {
-          console.warn("Firestore canManageUsers update notice:", fErr.message);
-        }
-      }
-
-      // 2. Sync via backend API
-      if (userEmail) {
-        try {
-          const resp = await fetch("/api/admin/users/permission", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              email: userEmail,
-              canManageUsers: isGranted,
-              adminEmail: PRIMARY_SUPERADMIN_EMAIL
-            })
-          });
-          if (resp.ok) {
-            updated = true;
-          }
-        } catch (apiErr) {
-          console.warn("Backend permission update notice:", apiErr.message);
-        }
-      }
-
-      if (updated) {
-        const u = allUsersList.find((x) => x.id === userId || (userEmail && (x.email || "").toLowerCase() === userEmail.toLowerCase()));
-        if (u) u.canManageUsers = isGranted;
-        renderUsersTable();
-
-        if (isGranted) {
-          showToast(`Vartotojui ${userEmail} suteikta prieiga prie „Vartotojai & Prieiga“ skilties.`, "success");
+  // Resend email verification
+  document.querySelectorAll(".btn-resend-verify").forEach((btn) => {
+    btn.onclick = async () => {
+      const email = btn.dataset.userEmail;
+      if (!email) return;
+      btn.disabled = true;
+      try {
+        showToast("Siunčiamas el. pašto patvirtinimo laiškas...");
+        const res = await fetch("/api/admin/users/resend-verification", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email })
+        });
+        if (res.ok) {
+          showToast(`Patvirtinimo laiškas sėkmingai išsiųstas į ${email}!`, "success");
         } else {
-          showToast(`Vartotojui ${userEmail} prieiga prie „Vartotojai & Prieiga“ skilties panaikinta.`, "warning");
+          showToast("Nepavyko išsiųsti patvirtinimo laiško", "error");
         }
-      } else {
-        input.checked = !isGranted;
-        showToast("Nepavyko pakeisti prieigos teisių.", "error");
-        input.disabled = false;
+      } catch (err) {
+        showToast("Ryšio klaida", "error");
+      } finally {
+        btn.disabled = false;
       }
     };
   });
 
-  // Change Role Dropdown
-  document.querySelectorAll(".table-role-select").forEach((select) => {
-    select.onchange = async (e) => {
-      const target = e.target;
-      const userId = target.dataset.userRoleId;
-      const newRole = target.value;
-      const roleName = ROLE_LABELS[newRole] || newRole;
-
-      target.disabled = true;
-
-      const userObj = allUsersList.find((x) => x.id === userId);
-      const userEmail = userObj ? userObj.email : null;
-
-      let updated = false;
-
-      // 1. Update in Firestore
-      if (db && userId) {
-        try {
-          await db.collection("users").doc(userId).update({
-            role: newRole,
-            updatedAt: new Date().toISOString(),
-          });
-          updated = true;
-        } catch (fErr) {
-          console.warn("Firestore role update notice:", fErr.message);
-        }
-      }
-
-      // 2. Sync via backend API
-      if (userEmail) {
-        try {
-          const resp = await fetch("/api/admin/users/role", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              email: userEmail,
-              role: newRole,
-              adminEmail: (auth && auth.currentUser) ? auth.currentUser.email : PRIMARY_SUPERADMIN_EMAIL
-            })
-          });
-          if (resp.ok) {
-            updated = true;
-          }
-        } catch (apiErr) {
-          console.warn("Backend role update notice:", apiErr.message);
-        }
-      }
-
-      if (updated) {
-        if (userObj) userObj.role = newRole;
-        showToast(`Rolė sėkmingai pakeista į: ${roleName}`, "success");
-      } else {
-        showToast("Nepavyko atnaujinti rolės.", "error");
-      }
-      target.disabled = false;
-    };
-  });
-
-  // Specific click handler for 'Delete' buttons in table rows
+  // Delete user buttons
   document.querySelectorAll(".btn-action-delete").forEach((btn) => {
     btn.onclick = (e) => {
       e.preventDefault();
@@ -675,7 +602,7 @@ function attachTableEventHandlers() {
   });
 
   // Copy email button
-  document.querySelectorAll(".btn-icon-copy").forEach((btn) => {
+  document.querySelectorAll(".btn-icon-copy:not(.btn-resend-verify)").forEach((btn) => {
     btn.addEventListener("click", () => {
       const email = btn.dataset.copyEmail;
       if (email && navigator.clipboard) {
@@ -706,19 +633,6 @@ function promptDeleteUser(userId, email) {
 }
 
 async function executeDeleteUser(userId, email) {
-  let deleted = false;
-
-  // 1. Try deleting via Firestore client SDK
-  if (db && userId) {
-    try {
-      await db.collection("users").doc(userId).delete();
-      deleted = true;
-    } catch (fErr) {
-      console.warn("Firestore client delete user notice:", fErr.message);
-    }
-  }
-
-  // 2. Also call backend API /api/admin/users/delete
   try {
     const resp = await fetch("/api/admin/users/delete", {
       method: "POST",
@@ -730,21 +644,337 @@ async function executeDeleteUser(userId, email) {
       })
     });
     if (resp.ok) {
-      deleted = true;
+      allUsersList = allUsersList.filter((u) => u.id !== userId && (!email || (u.email || "").toLowerCase() !== email.toLowerCase()));
+      updateUserMetrics();
+      renderUsersTable();
+      showToast(`Vartotojas ${email || userId} sėkmingai pašalintas iš sistemos.`, "success");
+    } else {
+      showToast("Nepavyko pašalinti vartotojo.", "error");
     }
   } catch (apiErr) {
-    console.warn("Backend API delete user notice:", apiErr.message);
+    showToast("Ryšio klaida šalinant vartotoją.", "error");
+  }
+}
+
+// ============================================================================
+// USER EDIT & RBAC PERMISSIONS MODAL LOGIC
+// ============================================================================
+function initUserEditModal() {
+  const modal = document.getElementById("userEditModal");
+  const closeBtn = document.getElementById("closeUserEditModalBtn");
+  const cancelBtn = document.getElementById("cancelUserEditBtn");
+  const form = document.getElementById("userEditForm");
+  const roleSelect = document.getElementById("editUserRole");
+
+  const hideModal = () => {
+    if (modal) {
+      modal.classList.remove("active");
+      modal.classList.add("d-none");
+    }
+  };
+
+  if (closeBtn) closeBtn.onclick = hideModal;
+  if (cancelBtn) cancelBtn.onclick = hideModal;
+
+  if (roleSelect) {
+    roleSelect.onchange = () => {
+      const selectedRole = roleSelect.value;
+      const defaults = ROLE_PERMISSION_DEFAULTS[selectedRole] || ROLE_PERMISSION_DEFAULTS.viewer;
+      applyPermissionsToCheckboxes(defaults);
+    };
   }
 
-  if (deleted) {
-    // Remove from in-memory list and update UI instantly
-    allUsersList = allUsersList.filter((u) => u.id !== userId && (!email || (u.email || "").toLowerCase() !== email.toLowerCase()));
-    updateUserMetrics();
-    renderUsersTable();
-    showToast(`Vartotojas ${email || userId} sėkmingai pašalintas iš sistemos.`, "success");
-  } else {
-    showToast("Nepavyko pašalinti vartotojo. Patikrinkite interneto ryšį arba teises.", "error");
+  if (form) {
+    form.onsubmit = async (e) => {
+      e.preventDefault();
+      const saveBtn = document.getElementById("saveUserEditBtn");
+      if (saveBtn) {
+        saveBtn.disabled = true;
+        saveBtn.textContent = "Išsaugoma...";
+      }
+
+      try {
+        const uid = document.getElementById("editUserUid")?.value;
+        const oldEmail = document.getElementById("editUserOldEmail")?.value;
+        const email = document.getElementById("editUserEmail")?.value.trim();
+        const name = document.getElementById("editUserName")?.value.trim();
+        const surname = document.getElementById("editUserSurname")?.value.trim();
+        const phone = document.getElementById("editUserPhone")?.value.trim();
+        const role = document.getElementById("editUserRole")?.value;
+        const emailVerified = document.getElementById("editUserEmailVerified")?.checked === true;
+
+        const permissions = extractPermissionsFromCheckboxes();
+
+        const res = await fetch("/api/admin/users/update-profile", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            uid,
+            oldEmail,
+            email,
+            name,
+            surname,
+            phone,
+            role,
+            permissions,
+            emailVerified,
+            adminEmail: (auth && auth.currentUser) ? auth.currentUser.email : PRIMARY_SUPERADMIN_EMAIL
+          })
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          showToast("Vartotojo profilis ir teisės sėkmingai atnaujinti!", "success");
+          hideModal();
+          await loadUsersFallback();
+        } else {
+          const err = await res.json();
+          showToast(err.error || "Nepavyko išsaugoti profilio", "error");
+        }
+      } catch (err) {
+        showToast("Ryšio klaida", "error");
+      } finally {
+        if (saveBtn) {
+          saveBtn.disabled = false;
+          saveBtn.textContent = "Išsaugoti Pakeitimus";
+        }
+      }
+    };
   }
+}
+
+function openUserEditModal(user) {
+  const modal = document.getElementById("userEditModal");
+  if (!modal) return;
+
+  document.getElementById("editUserUid").value = user.uid || user.id || "";
+  document.getElementById("editUserOldEmail").value = user.email || "";
+  document.getElementById("editUserEmail").value = user.email || "";
+  document.getElementById("editUserName").value = user.name || "";
+  document.getElementById("editUserSurname").value = user.surname || "";
+  document.getElementById("editUserPhone").value = user.phone || "";
+  
+  const roleSelect = document.getElementById("editUserRole");
+  if (roleSelect) roleSelect.value = user.role || "moderator";
+
+  const verifyCheckbox = document.getElementById("editUserEmailVerified");
+  if (verifyCheckbox) verifyCheckbox.checked = user.emailVerified === true;
+
+  const perms = user.permissions || ROLE_PERMISSION_DEFAULTS[user.role] || ROLE_PERMISSION_DEFAULTS.viewer;
+  applyPermissionsToCheckboxes(perms);
+
+  modal.classList.remove("d-none");
+  modal.classList.add("active");
+}
+
+function applyPermissionsToCheckboxes(p) {
+  setCheck("perm_subs_read", p?.submissions?.read);
+  setCheck("perm_subs_edit", p?.submissions?.edit);
+  setCheck("perm_subs_delete", p?.submissions?.delete);
+
+  setCheck("perm_vote_read", p?.voting?.read);
+  setCheck("perm_vote_edit", p?.voting?.edit);
+  setCheck("perm_vote_delete", p?.voting?.delete);
+
+  setCheck("perm_editions_read", p?.editions?.read);
+  setCheck("perm_editions_edit", p?.editions?.edit);
+  setCheck("perm_editions_delete", p?.editions?.delete);
+
+  setCheck("perm_archive_read", p?.archive?.read);
+  setCheck("perm_archive_edit", p?.archive?.edit);
+  setCheck("perm_archive_delete", p?.archive?.delete);
+
+  setCheck("perm_tasks_read", p?.tasks?.read);
+  setCheck("perm_tasks_edit", p?.tasks?.edit);
+  setCheck("perm_tasks_delete", p?.tasks?.delete);
+
+  setCheck("perm_settings_read", p?.settings?.read);
+  setCheck("perm_settings_edit", p?.settings?.edit);
+
+  setCheck("perm_logs_read", p?.logs?.read);
+
+  setCheck("perm_manage_stream", p?.manageStream === true);
+  setCheck("perm_manage_users", p?.manageUsers === true);
+}
+
+function extractPermissionsFromCheckboxes() {
+  return {
+    submissions: {
+      read: getCheck("perm_subs_read"),
+      edit: getCheck("perm_subs_edit"),
+      delete: getCheck("perm_subs_delete")
+    },
+    voting: {
+      read: getCheck("perm_vote_read"),
+      edit: getCheck("perm_vote_edit"),
+      delete: getCheck("perm_vote_delete")
+    },
+    editions: {
+      read: getCheck("perm_editions_read"),
+      edit: getCheck("perm_editions_edit"),
+      delete: getCheck("perm_editions_delete")
+    },
+    archive: {
+      read: getCheck("perm_archive_read"),
+      edit: getCheck("perm_archive_edit"),
+      delete: getCheck("perm_archive_delete")
+    },
+    tasks: {
+      read: getCheck("perm_tasks_read"),
+      edit: getCheck("perm_tasks_edit"),
+      delete: getCheck("perm_tasks_delete")
+    },
+    settings: {
+      read: getCheck("perm_settings_read"),
+      edit: getCheck("perm_settings_edit")
+    },
+    logs: {
+      read: getCheck("perm_logs_read")
+    },
+    manageStream: getCheck("perm_manage_stream"),
+    manageUsers: getCheck("perm_manage_users")
+  };
+}
+
+function setCheck(id, val) {
+  const el = document.getElementById(id);
+  if (el) el.checked = val === true;
+}
+
+function getCheck(id) {
+  const el = document.getElementById(id);
+  return el ? el.checked === true : false;
+}
+
+// ============================================================================
+// PASSWORD RESET MODAL LOGIC
+// ============================================================================
+function initPasswordResetModal() {
+  const modal = document.getElementById("passwordResetModal");
+  const closeBtn = document.getElementById("closePasswordResetModalBtn");
+  const cancelBtn = document.getElementById("cancelPasswordResetBtn");
+  const btnSendEmail = document.getElementById("btnSendResetEmailAction");
+  const btnGenerateDirect = document.getElementById("btnGenerateDirectLinkAction");
+  const btnCopyResetLink = document.getElementById("btnCopyDirectResetLink");
+
+  const hideModal = () => {
+    if (modal) {
+      modal.classList.remove("active");
+      modal.classList.add("d-none");
+    }
+  };
+
+  if (closeBtn) closeBtn.onclick = hideModal;
+  if (cancelBtn) cancelBtn.onclick = hideModal;
+
+  if (btnSendEmail) {
+    btnSendEmail.onclick = async () => {
+      const email = document.getElementById("pwdResetTargetEmail")?.value;
+      if (!email) return;
+
+      btnSendEmail.disabled = true;
+      btnSendEmail.textContent = "Siunčiama...";
+
+      try {
+        const res = await fetch("/api/admin/users/send-password-reset", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            email,
+            adminEmail: (auth && auth.currentUser) ? auth.currentUser.email : PRIMARY_SUPERADMIN_EMAIL
+          })
+        });
+        if (res.ok) {
+          const data = await res.json();
+          showToast(`Slaptažodžio atstatymo nuoroda sėkmingai išsiųsta į ${email}!`, "success");
+          if (data.resetUrl) {
+            const container = document.getElementById("pwdResetDirectLinkContainer");
+            const input = document.getElementById("pwdResetDirectLinkInput");
+            if (container && input) {
+              input.value = data.resetUrl;
+              container.classList.remove("d-none");
+            }
+          }
+        } else {
+          const err = await res.json();
+          showToast(err.error || "Nepavyko išsiųsti nuorodos", "error");
+        }
+      } catch (err) {
+        showToast("Ryšio klaida", "error");
+      } finally {
+        btnSendEmail.disabled = false;
+        btnSendEmail.textContent = "Atsiųsti Nuorodą El. Paštu";
+      }
+    };
+  }
+
+  if (btnGenerateDirect) {
+    btnGenerateDirect.onclick = async () => {
+      const email = document.getElementById("pwdResetTargetEmail")?.value;
+      if (!email) return;
+
+      btnGenerateDirect.disabled = true;
+      btnGenerateDirect.textContent = "Generuojama...";
+
+      try {
+        const res = await fetch("/api/admin/users/generate-reset-link", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            email,
+            adminEmail: (auth && auth.currentUser) ? auth.currentUser.email : PRIMARY_SUPERADMIN_EMAIL
+          })
+        });
+        if (res.ok) {
+          const data = await res.json();
+          const container = document.getElementById("pwdResetDirectLinkContainer");
+          const input = document.getElementById("pwdResetDirectLinkInput");
+          if (container && input) {
+            input.value = data.resetUrl;
+            container.classList.remove("d-none");
+          }
+          showToast("Vienkartinė slaptažodžio keitimo nuoroda sėkmingai sugeneruota!", "success");
+        } else {
+          const err = await res.json();
+          showToast(err.error || "Klaida generuojant nuorodą", "error");
+        }
+      } catch (err) {
+        showToast("Ryšio klaida", "error");
+      } finally {
+        btnGenerateDirect.disabled = false;
+        btnGenerateDirect.textContent = "Generuoti Vienkartinį Linką Tiesiogiai";
+      }
+    };
+  }
+
+  if (btnCopyResetLink) {
+    btnCopyResetLink.onclick = () => {
+      const input = document.getElementById("pwdResetDirectLinkInput");
+      if (input && input.value) {
+        navigator.clipboard.writeText(input.value).then(() => {
+          showToast("Slaptažodžio atstatymo nuoroda nukopijuota į iškarpinę!", "success");
+        });
+      }
+    };
+  }
+}
+
+function openPasswordResetModal(user) {
+  const modal = document.getElementById("passwordResetModal");
+  if (!modal) return;
+
+  const emailField = document.getElementById("pwdResetTargetEmail");
+  const userLabel = document.getElementById("pwdResetTargetUserLabel");
+  const container = document.getElementById("pwdResetDirectLinkContainer");
+  const input = document.getElementById("pwdResetDirectLinkInput");
+
+  if (emailField) emailField.value = user.email || "";
+  if (userLabel) userLabel.textContent = `${user.name || ''} ${user.surname || ''} (${user.email})`.trim();
+  if (container) container.classList.add("d-none");
+  if (input) input.value = "";
+
+  modal.classList.remove("d-none");
+  modal.classList.add("active");
 }
 
 function getInitials(name, surname, email) {
@@ -773,19 +1003,6 @@ function formatDateShort(isoString) {
   }
 }
 
-function generateSecureToken() {
-  const chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-  let token = "inv_";
-  for (let i = 0; i < 24; i++) {
-    token += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
-  return token;
-}
-
-function generateVerificationCode() {
-  return String(Math.floor(100000 + Math.random() * 900000));
-}
-
 function escapeHtml(str) {
   if (str === null || str === undefined) return "";
   return String(str)
@@ -794,9 +1011,4 @@ function escapeHtml(str) {
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#039;");
-}
-
-export async function loadAccessRequests() {
-  // Deprecated: access requests form and queue have been removed
-  return;
 }

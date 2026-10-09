@@ -1,6 +1,6 @@
 /**
  * js/stream-admin.js
- * Cloudflare Stream, OBS, RSVP & Remote Participant Token Management
+ * Cloudflare Stream Live Preview, OBS Parameters, Viewer Signed Tokens & RSVP
  * Ąžuolynas International Film Festival Admin
  */
 
@@ -8,6 +8,7 @@ import { showToast } from "./ui-feedback.js";
 
 let streamConfig = null;
 let allSubmissions = [];
+let authorizedViewers = [];
 let activeViewerCount = 0;
 
 export function initStreamAdmin() {
@@ -16,35 +17,32 @@ export function initStreamAdmin() {
   const btnSetPaused = document.getElementById("btnSetStreamPaused");
   const btnSetEnded = document.getElementById("btnSetStreamEnded");
 
-  if (btnSetLive) {
-    btnSetLive.addEventListener("click", () => updateStreamState("live"));
-  }
-  if (btnSetPaused) {
-    btnSetPaused.addEventListener("click", () => updateStreamState("paused"));
-  }
-  if (btnSetEnded) {
-    btnSetEnded.addEventListener("click", () => updateStreamState("ended"));
-  }
+  if (btnSetLive) btnSetLive.addEventListener("click", () => updateStreamState("live"));
+  if (btnSetPaused) btnSetPaused.addEventListener("click", () => updateStreamState("paused"));
+  if (btnSetEnded) btnSetEnded.addEventListener("click", () => updateStreamState("ended"));
 
-  // 2. Copy helper buttons for OBS parameters
+  // 2. Setup OBS copy buttons
   setupCopyButtons();
 
   // 3. Search and filter for participants
   const searchInput = document.getElementById("filterStreamRsvpSearch");
-  if (searchInput) {
-    searchInput.addEventListener("input", renderRsvpTable);
-  }
+  if (searchInput) searchInput.addEventListener("input", renderRsvpTable);
 
   const typeFilter = document.getElementById("filterStreamRsvpType");
-  if (typeFilter) {
-    typeFilter.addEventListener("change", renderRsvpTable);
-  }
+  if (typeFilter) typeFilter.addEventListener("change", renderRsvpTable);
 
-  // 4. Refresh button
+  // 4. Search and filter for authorized signed viewers
+  const viewerSearchInput = document.getElementById("filterSignedViewersSearch");
+  if (viewerSearchInput) viewerSearchInput.addEventListener("input", renderAuthorizedViewersTable);
+
+  // 5. Add Viewer & Generate Signed Token Form
+  initViewerTokenForm();
+
+  // 6. Refresh button
   const refreshBtn = document.getElementById("btnRefreshStreamAdmin");
   if (refreshBtn) {
     refreshBtn.addEventListener("click", () => {
-      showToast("Atnaujinama transliacijos ir RSVP informacija...");
+      showToast("Atnaujinama transliacijos ir žiūrovų informacija...");
       loadStreamData();
     });
   }
@@ -60,9 +58,12 @@ export async function loadStreamData() {
   await Promise.all([
     fetchStreamStatus(),
     fetchSubmissionsList(),
+    fetchAuthorizedViewers(),
     fetchViewerCount()
   ]);
   renderStreamControls();
+  renderLivePreviewIframe();
+  renderAuthorizedViewersTable();
   renderRsvpTable();
 }
 
@@ -89,6 +90,18 @@ async function fetchSubmissionsList() {
   }
 }
 
+async function fetchAuthorizedViewers() {
+  try {
+    const res = await fetch("/api/admin/stream/viewers");
+    if (res.ok) {
+      const data = await res.json();
+      authorizedViewers = data.viewers || [];
+    }
+  } catch (err) {
+    console.warn("Klaida gaunant autorizuotų žiūrovų sąrašą:", err);
+  }
+}
+
 async function fetchViewerCount() {
   try {
     const res = await fetch("/api/admin/live/viewers");
@@ -112,6 +125,19 @@ async function pollStreamStats() {
     }
   } catch {
     // Silent polling
+  }
+}
+
+function renderLivePreviewIframe() {
+  const iframeContainer = document.getElementById("adminStreamLiveIframeContainer");
+  const iframeEl = document.getElementById("adminStreamLiveIframe");
+  if (!iframeContainer || !streamConfig) return;
+
+  const defaultIframeUrl = "https://customer-auu36r7owuzogvfb.cloudflarestream.com/937d1a8b2c545a980c9fabc8502d8af4/iframe";
+  const url = streamConfig.iframeUrl || defaultIframeUrl;
+
+  if (iframeEl && iframeEl.getAttribute("src") !== url) {
+    iframeEl.setAttribute("src", url);
   }
 }
 
@@ -149,6 +175,223 @@ function renderStreamControls() {
   if (viewerElem) viewerElem.textContent = activeViewerCount;
 }
 
+// ============================================================================
+// AUTHORIZED VIEWERS & CLOUDFLARE SIGNED TOKENS LIST
+// ============================================================================
+export function renderAuthorizedViewersTable() {
+  const tableBody = document.getElementById("streamAuthorizedViewersTableBody");
+  if (!tableBody) return;
+
+  const searchVal = (document.getElementById("filterSignedViewersSearch")?.value || "").toLowerCase().trim();
+
+  // Metrics
+  const totalViewersElem = document.getElementById("statStreamTotalViewers");
+  if (totalViewersElem) totalViewersElem.textContent = authorizedViewers.length;
+
+  const filtered = authorizedViewers.filter(v => {
+    if (!searchVal) return true;
+    const matchEmail = (v.email || "").toLowerCase().includes(searchVal);
+    const matchName = (v.name || "").toLowerCase().includes(searchVal);
+    const matchToken = (v.token || "").toLowerCase().includes(searchVal);
+    const matchRole = (v.role || "").toLowerCase().includes(searchVal);
+    return matchEmail || matchName || matchToken || matchRole;
+  });
+
+  if (filtered.length === 0) {
+    tableBody.innerHTML = `
+      <tr>
+        <td colspan="6" style="text-align:center; padding:32px 16px; color:var(--text-muted);">
+          Autorizuotų žiūrovų su Cloudflare Signed Tokens nerasta. Pasinaudokite žemiau esančia forma naujam žiūrovui pridėti.
+        </td>
+      </tr>
+    `;
+    return;
+  }
+
+  tableBody.innerHTML = filtered.map(viewer => {
+    const liveLink = viewer.liveStreamUrl || `${window.location.origin}/live.html?token=${encodeURIComponent(viewer.token)}`;
+    const roleLabel = viewer.role === "vip" ? "VIP Svečias" : viewer.role === "press" ? "Žiniasklaida (Press)" : viewer.role === "remote_participant" ? "Nuotolinis dalyvis" : "Žiūrovas (Auditorija)";
+    const dateFormatted = viewer.createdAt ? new Date(viewer.createdAt).toLocaleDateString("lt-LT") : "—";
+
+    return `
+      <tr>
+        <td>
+          <strong style="color:var(--text-color);">${escapeHtml(viewer.name || viewer.email)}</strong>
+          <div style="font-size:0.75rem; color:var(--text-muted);">${escapeHtml(roleLabel)} &bull; Sukurta: ${dateFormatted}</div>
+        </td>
+        <td>
+          <a href="mailto:${escapeHtml(viewer.email)}" style="color:var(--accent-light); font-size:0.85rem;">
+            ${escapeHtml(viewer.email)}
+          </a>
+        </td>
+        <td>
+          <div style="display:flex; align-items:center; gap:6px;">
+            <code style="background:rgba(0,0,0,0.35); padding:3px 8px; border-radius:4px; color:#F3E5AB; font-size:0.8rem; border:1px solid rgba(212,175,55,0.3);">
+              ${escapeHtml(viewer.token)}
+            </code>
+            <button type="button" class="btn-icon-copy btn-copy-raw-token" data-token="${escapeHtml(viewer.token)}" title="Kopijuoti žetoną">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+            </button>
+          </div>
+        </td>
+        <td>
+          <span class="badge" style="background:rgba(34,197,94,0.18); color:#4ade80; border:1px solid rgba(34,197,94,0.35); font-size:0.75rem;">
+            Autorizuotas
+          </span>
+        </td>
+        <td>
+          <div style="display:flex; align-items:center; gap:6px;">
+            <input type="text" readonly value="${escapeHtml(liveLink)}" style="background:rgba(0,0,0,0.3); border:1px solid var(--border-color); color:var(--text-muted); padding:3px 6px; font-size:0.75rem; width:140px; border-radius:4px;" title="${escapeHtml(liveLink)}">
+            <button type="button" class="btn-outline btn-xs btn-copy-viewer-link" data-link="${escapeHtml(liveLink)}" title="Kopijuoti nuorodą">
+              <span>Kopijuoti</span>
+            </button>
+          </div>
+        </td>
+        <td style="text-align:right;">
+          <div style="display:inline-flex; align-items:center; gap:6px;">
+            <button type="button" class="btn-solid btn-xs btn-resend-viewer-token" data-token="${escapeHtml(viewer.token)}" title="Išsiųsti el. laišką su žetonu">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+              <span>Siųsti</span>
+            </button>
+            <button type="button" class="btn-outline btn-xs btn-delete-viewer" data-token="${escapeHtml(viewer.token)}" style="color:#f87171; border-color:rgba(239,68,68,0.3);" title="Pašalinti prieigą">
+              &times;
+            </button>
+          </div>
+        </td>
+      </tr>
+    `;
+  }).join("");
+
+  // Attach event handlers
+  tableBody.querySelectorAll(".btn-copy-raw-token").forEach(btn => {
+    btn.onclick = () => {
+      const tok = btn.getAttribute("data-token");
+      if (tok) {
+        navigator.clipboard.writeText(tok).then(() => showToast(`Signed Token nukopijuotas: ${tok}`, "success"));
+      }
+    };
+  });
+
+  tableBody.querySelectorAll(".btn-copy-viewer-link").forEach(btn => {
+    btn.onclick = () => {
+      const link = btn.getAttribute("data-link");
+      if (link) {
+        navigator.clipboard.writeText(link).then(() => showToast("Transliacijos nuoroda nukopijuota į iškarpinę!", "success"));
+      }
+    };
+  });
+
+  tableBody.querySelectorAll(".btn-resend-viewer-token").forEach(btn => {
+    btn.onclick = async () => {
+      const token = btn.getAttribute("data-token");
+      if (!token) return;
+      btn.disabled = true;
+      try {
+        showToast("Siunčiamas transliacijos žetono laiškas...");
+        const res = await fetch("/api/admin/stream/viewers/resend", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ token })
+        });
+        if (res.ok) {
+          showToast("El. laiškas sėkmingai išsiųstas žiūrovui!", "success");
+        } else {
+          showToast("Klaida siunčiant laišką", "error");
+        }
+      } catch (err) {
+        showToast("Ryšio klaida", "error");
+      } finally {
+        btn.disabled = false;
+      }
+    };
+  });
+
+  tableBody.querySelectorAll(".btn-delete-viewer").forEach(btn => {
+    btn.onclick = async () => {
+      const token = btn.getAttribute("data-token");
+      if (!token || !confirm("Ar tikrai norite atšaukti šį žiūrovo prieigos žetoną?")) return;
+      try {
+        const res = await fetch("/api/admin/stream/viewers/delete", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ token })
+        });
+        if (res.ok) {
+          authorizedViewers = authorizedViewers.filter(v => v.token !== token);
+          renderAuthorizedViewersTable();
+          showToast("Žiūrovo prieiga sėkmingai pašalinta.", "success");
+        } else {
+          showToast("Nepavyko pašalinti prieigos", "error");
+        }
+      } catch (err) {
+        showToast("Ryšio klaida", "error");
+      }
+    };
+  });
+}
+
+function initViewerTokenForm() {
+  const form = document.getElementById("formAddStreamViewer");
+  if (!form) return;
+
+  form.onsubmit = async (e) => {
+    e.preventDefault();
+    const btn = document.getElementById("btnAddStreamViewerSubmit");
+    if (btn) {
+      btn.disabled = true;
+      btn.textContent = "Generuojama...";
+    }
+
+    try {
+      const email = document.getElementById("newViewerEmail")?.value.trim();
+      const name = document.getElementById("newViewerName")?.value.trim();
+      const customToken = document.getElementById("newViewerCustomToken")?.value.trim();
+      const role = document.getElementById("newViewerRole")?.value || "guest_viewer";
+      const expiresInHours = document.getElementById("newViewerExpires")?.value || "48";
+      const sendEmail = document.getElementById("newViewerSendEmail")?.checked === true;
+
+      const res = await fetch("/api/admin/stream/viewers/create", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email,
+          name,
+          customToken,
+          role,
+          expiresInHours,
+          sendEmail
+        })
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        showToast(`Cloudflare Signed Token sėkmingai sugeneruotas žiūrovui ${email}!`, "success");
+        form.reset();
+        await fetchAuthorizedViewers();
+        renderAuthorizedViewersTable();
+
+        // Prompt or show generated token link
+        if (data.liveLink) {
+          navigator.clipboard?.writeText(data.liveLink).catch(() => {});
+        }
+      } else {
+        const err = await res.json();
+        showToast(err.error || "Nepavyko sugeneruoti žetono", "error");
+      }
+    } catch (err) {
+      showToast("Ryšio klaida", "error");
+    } finally {
+      if (btn) {
+        btn.disabled = false;
+        btn.textContent = "Sugeneruoti Prieigos Žetoną ir Išsiųsti";
+      }
+    }
+  };
+}
+
+// ============================================================================
+// RSVP & REMOTE PARTICIPANTS SUBMISSIONS TABLE
+// ============================================================================
 export function renderRsvpTable() {
   const tableBody = document.getElementById("streamRsvpTableBody");
   if (!tableBody) return;
@@ -211,7 +454,7 @@ export function renderRsvpTable() {
       : `<span class="badge" style="background:rgba(34,197,94,0.18); color:#4ade80; border:1px solid rgba(34,197,94,0.35); display:inline-flex; align-items:center; gap:5px;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg><span>Gyvai vietoje</span></span>`;
 
     const token = sub.liveToken || "—";
-    const liveLink = sub.liveStreamUrl || `https://azuolynasinternationalfilmfestival.github.io/live.html?token=${encodeURIComponent(token)}`;
+    const liveLink = sub.liveStreamUrl || `${window.location.origin}/live.html?token=${encodeURIComponent(token)}`;
 
     return `
       <tr>
@@ -239,14 +482,13 @@ export function renderRsvpTable() {
         <td>
           <div style="display:flex; align-items:center; gap:6px;">
             <input type="text" readonly value="${escapeHtml(liveLink)}" style="background:rgba(0,0,0,0.3); border:1px solid var(--border-color); color:var(--text-muted); padding:3px 6px; font-size:0.75rem; width:150px; border-radius:4px;" title="${escapeHtml(liveLink)}">
-            <button type="button" class="btn-outline btn-xs btn-copy-link" data-link="${escapeHtml(liveLink)}" title="Kopijuoti nuorodą" style="display:inline-flex; align-items:center; gap:4px;">
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+            <button type="button" class="btn-outline btn-xs btn-copy-link" data-link="${escapeHtml(liveLink)}" title="Kopijuoti nuorodą">
               <span>Kopijuoti</span>
             </button>
           </div>
         </td>
         <td>
-          <button type="button" class="btn-solid btn-xs btn-resend-token" data-sub-id="${escapeHtml(sub.id)}" title="Išsiųsti el. laišką su žetonu ir nuoroda" style="display:inline-flex; align-items:center; gap:5px;">
+          <button type="button" class="btn-solid btn-xs btn-resend-token" data-sub-id="${escapeHtml(sub.id)}" title="Išsiųsti el. laišką su žetonu ir nuoroda">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
             <span>Siųsti el. laišką</span>
           </button>
@@ -261,7 +503,7 @@ export function renderRsvpTable() {
       const link = btn.getAttribute("data-link");
       if (link) {
         navigator.clipboard.writeText(link).then(() => {
-          showToast("Nuoroda nukopijuota į iškarpinę!");
+          showToast("Nuoroda nukopijuota į iškarpinę!", "success");
         }).catch(() => {
           prompt("Nukopijuokite tiesioginės transliacijos nuorodą:", link);
         });
@@ -289,7 +531,8 @@ async function updateStreamState(newState) {
       const data = await res.json();
       streamConfig = data.streamConfig;
       renderStreamControls();
-      showToast(`Transliacijos būsena sėkmingai atnaujinta į ${newState.toUpperCase()}`);
+      renderLivePreviewIframe();
+      showToast(`Transliacijos būsena sėkmingai atnaujinta į ${newState.toUpperCase()}`, "success");
       window.dispatchEvent(new CustomEvent("refresh-notifications"));
     } else {
       const err = await res.json();
@@ -309,7 +552,7 @@ async function resendLiveTokenEmail(submissionId) {
       body: JSON.stringify({ submissionId })
     });
     if (res.ok) {
-      showToast("El. laiškas su žetonu ir transliacijos nuoroda sėkmingai išsiųstas!");
+      showToast("El. laiškas su žetonu ir transliacijos nuoroda sėkmingai išsiųstas!", "success");
       window.dispatchEvent(new CustomEvent("refresh-notifications"));
     } else {
       const err = await res.json();
@@ -325,7 +568,7 @@ function setupCopyButtons() {
   if (copyServerBtn) {
     copyServerBtn.addEventListener("click", () => {
       const val = document.getElementById("obsServerUrlInput")?.value || "rtmps://live.cloudflare.com:443/live/";
-      navigator.clipboard.writeText(val).then(() => showToast("OBS Server URL nukopijuotas!"));
+      navigator.clipboard.writeText(val).then(() => showToast("OBS Server URL nukopijuotas!", "success"));
     });
   }
 
@@ -333,7 +576,7 @@ function setupCopyButtons() {
   if (copyKeyBtn) {
     copyKeyBtn.addEventListener("click", () => {
       const val = document.getElementById("obsStreamKeyInput")?.value || "6561bd7efd0ad61e9040a08676049c4dk937d1a8b2c545a980c9fabc8502d8af4";
-      navigator.clipboard.writeText(val).then(() => showToast("OBS Stream Key nukopijuotas!"));
+      navigator.clipboard.writeText(val).then(() => showToast("OBS Stream Key nukopijuotas!", "success"));
     });
   }
 
@@ -348,7 +591,7 @@ function setupCopyButtons() {
     allowfullscreen="true"
   ></iframe>
 </div>`;
-      navigator.clipboard.writeText(code).then(() => showToast("Cloudflare Stream iframe kodas nukopijuotas!"));
+      navigator.clipboard.writeText(code).then(() => showToast("Cloudflare Stream iframe kodas nukopijuotas!", "success"));
     });
   }
 }
