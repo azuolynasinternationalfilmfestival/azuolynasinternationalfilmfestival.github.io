@@ -74,25 +74,53 @@ function updateYearBadges() {
   }
 }
 
-export function subscribeSubmissions() {
-  if (unsubscribeSubmissions) {
-    unsubscribeSubmissions();
-  }
-
-  unsubscribeSubmissions = db.collection("submissions")
-    .orderBy("submittedAt", "desc")
-    .onSnapshot((snap) => {
-      submissionsList = [];
-      snap.forEach((doc) => {
-        submissionsList.push({ id: doc.id, ...doc.data() });
-      });
+export async function loadSubmissionsFromApi() {
+  try {
+    const res = await fetch("/api/admin/submissions");
+    if (res.ok) {
+      const data = await res.json();
+      submissionsList = data.submissions || [];
       updateMetrics();
       updateWinnersSelector();
       renderTable();
       updateYearBadges();
-    }, (err) => {
-      showToast("Klaida gaunant paraiškas: " + err.message, "error");
-    });
+    }
+  } catch (err) {
+    console.warn("Could not load submissions from API:", err);
+  }
+}
+
+export function subscribeSubmissions() {
+  if (unsubscribeSubmissions) {
+    unsubscribeSubmissions();
+    unsubscribeSubmissions = null;
+  }
+
+  // Always load from local server API first so table is populated immediately
+  loadSubmissionsFromApi();
+
+  if (db && typeof db.collection === "function") {
+    try {
+      unsubscribeSubmissions = db.collection("submissions")
+        .orderBy("submittedAt", "desc")
+        .onSnapshot((snap) => {
+          submissionsList = [];
+          snap.forEach((doc) => {
+            submissionsList.push({ id: doc.id, ...doc.data() });
+          });
+          updateMetrics();
+          updateWinnersSelector();
+          renderTable();
+          updateYearBadges();
+        }, (err) => {
+          console.warn("Firestore submissions listener notice:", err.message);
+          loadSubmissionsFromApi();
+        });
+    } catch (fsErr) {
+      console.warn("Firestore subscribe error:", fsErr);
+      loadSubmissionsFromApi();
+    }
+  }
 }
 
 export function unsubscribeSubmissionsListener() {
@@ -298,10 +326,31 @@ async function handleQuickTestVote(filmId, filmTitle, btn) {
 async function toggleVoting(id, currentStatus, btn) {
   btn.disabled = true;
   try {
-    await db.collection("submissions").doc(id).update({
-      inVoting: !currentStatus
+    const callerEmail = sessionStorage.getItem("admin_user_email") || "azuolynasfilmfestival@gmail.com";
+    const res = await fetch("/api/admin/submissions/toggle-voting", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id, inVoting: !currentStatus, adminEmail: callerEmail })
     });
-    showToast(currentStatus ? "Filmas paslėptas nuo balsavimo." : "Filmas aktyvuotas balsavimui!");
+
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      throw new Error(errData.error || "Nepavyko pakeisti balsavimo būsenos serveryje");
+    }
+
+    if (db && typeof db.collection === "function") {
+      try {
+        await db.collection("submissions").doc(id).update({
+          inVoting: !currentStatus
+        });
+      } catch (fsErr) {
+        console.warn("Firestore toggleVoting sync notice:", fsErr.message);
+      }
+    }
+
+    showToast(currentStatus ? "Filmas paslėptas nuo balsavimo." : "Filmas aktyvuotas balsavimui!", "success");
+    await loadSubmissionsFromApi();
+    window.dispatchEvent(new CustomEvent("refresh-notifications"));
   } catch (err) {
     showToast("Klaida keičiant balsavimo būseną: " + err.message, "error");
     btn.disabled = false;
@@ -316,13 +365,35 @@ async function deleteSubmission(id) {
   if (!confirmed) return;
 
   try {
+    const callerEmail = sessionStorage.getItem("admin_user_email") || "azuolynasfilmfestival@gmail.com";
     if (entry.storagePath) {
       try {
         await storage.ref(entry.storagePath).delete();
       } catch (err) {}
     }
-    await db.collection("submissions").doc(id).delete();
-    showToast("Paraiška sėkmingai pašalinta.");
+
+    const res = await fetch("/api/admin/submissions/delete", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id, adminEmail: callerEmail })
+    });
+
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      throw new Error(errData.error || "Nepavyko pašalinti paraiškos serveryje");
+    }
+
+    if (db && typeof db.collection === "function") {
+      try {
+        await db.collection("submissions").doc(id).delete();
+      } catch (fsErr) {
+        console.warn("Firestore delete submission notice:", fsErr.message);
+      }
+    }
+
+    showToast("Paraiška sėkmingai pašalinta.", "success");
+    await loadSubmissionsFromApi();
+    window.dispatchEvent(new CustomEvent("refresh-notifications"));
   } catch (err) {
     showToast("Klaida trinant paraišką: " + err.message, "error");
   }
@@ -394,7 +465,28 @@ function initEntryModal() {
       }
 
       try {
-        await db.collection("submissions").doc(currentEntry.id).update(updateData);
+        const callerEmail = sessionStorage.getItem("admin_user_email") || "azuolynasfilmfestival@gmail.com";
+
+        // 1. Primary: Save via backend API
+        const res = await fetch("/api/admin/submissions/update", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id: currentEntry.id, updates: updateData, adminEmail: callerEmail })
+        });
+
+        if (!res.ok) {
+          const errData = await res.json().catch(() => ({}));
+          throw new Error(errData.error || "Nepavyko atnaujinti paraiškos serveryje");
+        }
+
+        // 2. Secondary: Mirror to Firestore if available
+        if (db && typeof db.collection === "function") {
+          try {
+            await db.collection("submissions").doc(currentEntry.id).update(updateData);
+          } catch (fsErr) {
+            console.warn("Firestore submission update notice:", fsErr.message);
+          }
+        }
 
         if (tpl !== "none" && typeof generateEmailHtml === "function") {
           const emailData = {
@@ -413,19 +505,27 @@ function initEntryModal() {
             ? getEmailSubject(lang, tpl, emailData)
             : emailTexts[lang][tpl].sub;
 
-          await db.collection("mail").add({
-            to: [currentEntry.email],
-            message: {
-              subject: emailSubject,
-              html: emailHtml
+          if (db && typeof db.collection === "function") {
+            try {
+              await db.collection("mail").add({
+                to: [currentEntry.email],
+                message: {
+                  subject: emailSubject,
+                  html: emailHtml
+                }
+              });
+            } catch (mailErr) {
+              console.warn("Mail queue notice:", mailErr.message);
             }
-          });
-          showToast("Statusas atnaujintas ir el. laiškas išsiųstas!");
+          }
+          showToast("Statusas atnaujintas ir el. laiškas paruoštas!", "success");
         } else {
-          showToast("Statusas sėkmingai atnaujintas.");
+          showToast("Statusas sėkmingai atnaujintas.", "success");
         }
 
         closeModal();
+        await loadSubmissionsFromApi();
+        window.dispatchEvent(new CustomEvent("refresh-notifications"));
       } catch (err) {
         showToast("Klaida atnaujinant paraišką: " + err.message, "error");
       } finally {
@@ -506,24 +606,37 @@ function initWinnersManager() {
       assignWinnerBtn.disabled = true;
 
       try {
-        await db.collection("submissions").doc(filmId).update({
-          isWinner: true,
-          awardTitle: awardTitle,
-          awardYear: selYear,
-          status: "winner"
+        const callerEmail = sessionStorage.getItem("admin_user_email") || "azuolynasfilmfestival@gmail.com";
+        // 1. Primary: Declare via backend API
+        const res = await fetch("/api/admin/declare-winner", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ filmId, awardTitle, year: selYear, adminEmail: callerEmail })
         });
 
-        // Mirror to backend API
-        try {
-          await fetch("/api/admin/declare-winner", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ filmId, awardTitle, year: selYear })
-          });
-        } catch (apiErr) {}
+        if (!res.ok) {
+          const errData = await res.json().catch(() => ({}));
+          throw new Error(errData.error || "Nepavyko paskelbti laimėtojo serveryje");
+        }
+
+        // 2. Secondary: Mirror to Firestore if available
+        if (db && typeof db.collection === "function") {
+          try {
+            await db.collection("submissions").doc(filmId).update({
+              isWinner: true,
+              awardTitle: awardTitle,
+              awardYear: selYear,
+              status: "winner"
+            });
+          } catch (fsErr) {
+            console.warn("Firestore declare-winner notice:", fsErr.message);
+          }
+        }
 
         if (titleInput) titleInput.value = "";
         showToast(`Laimėtojas sėkmingai paskelbtas (${selYear} m.)!`, "success");
+        await loadSubmissionsFromApi();
+        window.dispatchEvent(new CustomEvent("refresh-notifications"));
       } catch (err) {
         showToast("Klaida skelbiant laimėtoją: " + err.message, "error");
       } finally {
@@ -540,21 +653,34 @@ function initWinnersManager() {
       const filmId = btn.dataset.id;
       btn.disabled = true;
       try {
-        await db.collection("submissions").doc(filmId).update({
-          isWinner: false,
-          awardTitle: firebase.firestore.FieldValue.delete()
+        const callerEmail = sessionStorage.getItem("admin_user_email") || "azuolynasfilmfestival@gmail.com";
+        // 1. Primary: Revoke via backend API
+        const res = await fetch("/api/admin/revoke-winner", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ filmId, adminEmail: callerEmail })
         });
 
-        // Mirror to backend API
-        try {
-          await fetch("/api/admin/revoke-winner", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ filmId })
-          });
-        } catch (apiErr) {}
+        if (!res.ok) {
+          const errData = await res.json().catch(() => ({}));
+          throw new Error(errData.error || "Nepavyko atšaukti laimėtojo serveryje");
+        }
 
-        showToast("Laimėtojo statusas atšauktas.");
+        // 2. Secondary: Mirror to Firestore if available
+        if (db && typeof db.collection === "function") {
+          try {
+            await db.collection("submissions").doc(filmId).update({
+              isWinner: false,
+              awardTitle: firebase.firestore.FieldValue.delete()
+            });
+          } catch (fsErr) {
+            console.warn("Firestore revoke-winner notice:", fsErr.message);
+          }
+        }
+
+        showToast("Laimėtojo statusas atšauktas.", "success");
+        await loadSubmissionsFromApi();
+        window.dispatchEvent(new CustomEvent("refresh-notifications"));
       } catch (err) {
         showToast("Klaida atšaukiant laimėtoją: " + err.message, "error");
         btn.disabled = false;

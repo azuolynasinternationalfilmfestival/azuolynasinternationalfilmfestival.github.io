@@ -16,7 +16,9 @@ service cloud.firestore {
         'email' in request.auth.token &&
         request.auth.token.email != null && (
           request.auth.token.email.lower() == 'azuolynasfilmfestival@gmail.com' ||
-          request.auth.token.email.lower() == 'karina.brdar@gmail.com'
+          request.auth.token.email.lower() == 'karina.brdar@gmail.com' ||
+          request.auth.token.email.lower() == 'dominikphotofficial.t@gmail.com' ||
+          request.auth.token.email.lower() == 'dominikphotofficial.lt@gmail.com'
         );
     }
 

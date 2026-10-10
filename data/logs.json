@@ -1,6 +1,50 @@
 {
   "logs": [
     {
+      "id": "log_1791646203881_sfppg",
+      "action": "EDITION_SAVED",
+      "category": "editions",
+      "adminEmail": "azuolynasfilmfestival@gmail.com",
+      "adminName": "azuolynasfilmfestival",
+      "target": "FEST 2027",
+      "details": "Išsaugota festivalio leidinio informacija: FEST 2027 (LT ir EN versijos)",
+      "timestamp": "2026-10-10T15:30:03.881Z",
+      "status": "success"
+    },
+    {
+      "id": "log_1791646081853_eirrn",
+      "action": "SYSTEM_HEALTH_VERIFIED",
+      "category": "settings",
+      "adminEmail": "azuolynasfilmfestival@gmail.com",
+      "adminName": "azuolynasfilmfestival",
+      "target": "system/verification",
+      "details": "Atlikta pilna serverio diagnostika ir bandomasis paleidimas: 5 iš 5 testų išlaikyti (0 klaidų)",
+      "timestamp": "2026-10-10T15:28:01.853Z",
+      "status": "success"
+    },
+    {
+      "id": "log_1791646081848_wmfsb",
+      "action": "PERMISSIONS_REPAIRED",
+      "category": "settings",
+      "adminEmail": "azuolynasfilmfestival@gmail.com",
+      "adminName": "azuolynasfilmfestival",
+      "target": "filesystem",
+      "details": "Sutvarkyti serverio katalogų leidimai ir duomenų failų prieigos teisės",
+      "timestamp": "2026-10-10T15:28:01.848Z",
+      "status": "success"
+    },
+    {
+      "id": "log_1791646081826_1404y",
+      "action": "STREAM_STATE_CHANGED",
+      "category": "stream",
+      "adminEmail": "azuolynasfilmfestival@gmail.com",
+      "adminName": "azuolynasfilmfestival",
+      "target": "Cloudflare Stream",
+      "details": "Pakeista tiesioginės transliacijos būsena į: LIVE (Aktyvi: Taip)",
+      "timestamp": "2026-10-10T15:28:01.826Z",
+      "status": "success"
+    },
+    {
       "id": "log_1791554344658_44b23",
       "action": "EDITION_SAVED",
       "category": "editions",

@@ -3620,6 +3620,109 @@ app.get('/api/admin/submissions', (req, res) => {
   }
 });
 
+// API: Update submission fields or status
+app.post('/api/admin/submissions/update', async (req, res) => {
+  try {
+    const { id, updates, adminEmail } = req.body || {};
+    if (!id) return res.status(400).json({ error: 'Submission ID is required' });
+
+    const subsData = loadSubmissionsData();
+    if (!subsData.submissions) subsData.submissions = [];
+    const idx = subsData.submissions.findIndex(s => s.id === id);
+    if (idx === -1) return res.status(404).json({ error: 'Submission not found' });
+
+    subsData.submissions[idx] = {
+      ...subsData.submissions[idx],
+      ...(updates || {}),
+      updatedAt: new Date().toISOString()
+    };
+    saveSubmissionsData(subsData);
+
+    // Sync to Firestore
+    const fsFields = {};
+    if (updates && updates.status !== undefined) fsFields.status = { stringValue: String(updates.status) };
+    if (updates && updates.inVoting !== undefined) fsFields.inVoting = { booleanValue: Boolean(updates.inVoting) };
+    if (updates && updates.category !== undefined) fsFields.category = { stringValue: String(updates.category) };
+    if (updates && updates.isWinner !== undefined) fsFields.isWinner = { booleanValue: Boolean(updates.isWinner) };
+    if (updates && updates.awardTitle !== undefined) fsFields.awardTitle = { stringValue: String(updates.awardTitle) };
+    if (Object.keys(fsFields).length > 0) {
+      await syncToFirestore('submissions', id, fsFields);
+    }
+
+    recordActivityLog({
+      action: "SUBMISSION_UPDATED",
+      category: "submissions",
+      adminEmail: adminEmail || PRIMARY_SUPERADMIN_EMAIL,
+      target: id,
+      details: `Atnaujinta paraiška ID: ${id} (${subsData.submissions[idx].filmTitle || ''})`
+    });
+
+    res.json({ success: true, submission: subsData.submissions[idx] });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to update submission' });
+  }
+});
+
+// API: Toggle inVoting state
+app.post('/api/admin/submissions/toggle-voting', async (req, res) => {
+  try {
+    const { id, inVoting, adminEmail } = req.body || {};
+    if (!id) return res.status(400).json({ error: 'Submission ID is required' });
+
+    const subsData = loadSubmissionsData();
+    if (!subsData.submissions) subsData.submissions = [];
+    const idx = subsData.submissions.findIndex(s => s.id === id);
+    if (idx === -1) return res.status(404).json({ error: 'Submission not found' });
+
+    const targetVoting = inVoting !== undefined ? Boolean(inVoting) : !subsData.submissions[idx].inVoting;
+    subsData.submissions[idx].inVoting = targetVoting;
+    saveSubmissionsData(subsData);
+
+    await syncToFirestore('submissions', id, {
+      inVoting: { booleanValue: targetVoting }
+    });
+
+    recordActivityLog({
+      action: "VOTING_TOGGLED",
+      category: "submissions",
+      adminEmail: adminEmail || PRIMARY_SUPERADMIN_EMAIL,
+      target: id,
+      details: `Pakeista filmo „${subsData.submissions[idx].filmTitle}“ balsavimo būsena į: ${targetVoting ? 'AKTYVUS' : 'IŠJUNGTAS'}`
+    });
+
+    res.json({ success: true, id, inVoting: targetVoting });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to toggle voting state' });
+  }
+});
+
+// API: Delete submission
+app.post('/api/admin/submissions/delete', async (req, res) => {
+  try {
+    const { id, adminEmail } = req.body || {};
+    if (!id) return res.status(400).json({ error: 'Submission ID is required' });
+
+    const subsData = loadSubmissionsData();
+    const target = (subsData.submissions || []).find(s => s.id === id);
+    subsData.submissions = (subsData.submissions || []).filter(s => s.id !== id);
+    saveSubmissionsData(subsData);
+
+    await deleteFromFirestore('submissions', id);
+
+    recordActivityLog({
+      action: "SUBMISSION_DELETED",
+      category: "submissions",
+      adminEmail: adminEmail || PRIMARY_SUPERADMIN_EMAIL,
+      target: id,
+      details: `Pašalinta paraiška ID: ${id} (${target ? target.filmTitle : ''})`
+    });
+
+    res.json({ success: true, id });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to delete submission' });
+  }
+});
+
 // API: Record incoming submission and RSVP in local backend store
 app.post('/api/submissions/record', async (req, res) => {
   try {

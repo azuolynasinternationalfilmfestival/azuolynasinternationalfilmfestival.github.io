@@ -128,28 +128,36 @@ async function updateGlobalTumbler(patchData, successMsg, toggleInput) {
   if (toggleInput) toggleInput.disabled = true;
 
   try {
+    const callerEmail = sessionStorage.getItem("admin_user_email") || "azuolynasfilmfestival@gmail.com";
     const payload = {
       ...patchData,
+      adminEmail: callerEmail,
       updatedAt: new Date().toISOString()
     };
 
-    // 1. Update single Firestore document: settings/festival
-    if (db) {
-      await db.collection("settings").doc("festival").set(payload, { merge: true });
+    // 1. Primary: Save to local server backend API (always reliable and instant)
+    const res = await fetch("/api/admin/settings", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      throw new Error(errData.error || "Nepavyko išsaugoti serverio nustatymo");
     }
 
-    // 2. Sync to local backend settings API for mirror consistency
-    try {
-      await fetch("/api/admin/settings", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(patchData)
-      });
-    } catch (apiErr) {
-      console.warn("Backend settings sync notice:", apiErr.message);
+    // 2. Secondary: Safely mirror to Firestore if db is available
+    if (db && typeof db.collection === "function") {
+      try {
+        await db.collection("settings").doc("festival").set(payload, { merge: true });
+      } catch (fsErr) {
+        console.warn("Firestore settings tumbler direct sync notice:", fsErr.message);
+      }
     }
 
     showToast(successMsg, "success");
+    window.dispatchEvent(new CustomEvent("refresh-notifications"));
   } catch (err) {
     console.error("Error updating settings/festival tumbler:", err);
     if (toggleInput) toggleInput.checked = !toggleInput.checked; // Revert switch state on error
