@@ -688,6 +688,13 @@
         document.getElementById("overlayStateHeading").textContent = cfg.streamState === "ended" ? "Ceremonija baigėsi" : dict[currentLang].pausedHeading;
       }
 
+      if (cfg.iframeUrl) {
+        const iframe = document.getElementById("cloudflareStreamIframe");
+        if (iframe && iframe.getAttribute("src") !== cfg.iframeUrl) {
+          iframe.setAttribute("src", cfg.iframeUrl);
+        }
+      }
+
       if (cfg.votingActive === false) {
         document.getElementById("votingClosedAlert").classList.remove("d-none");
       } else {

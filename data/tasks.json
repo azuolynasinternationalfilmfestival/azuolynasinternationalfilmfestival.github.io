@@ -1,6 +1,34 @@
 {
   "tasks": [
     {
+      "id": "task_1791648564913_vmpw",
+      "title": "Test",
+      "description": "",
+      "assignedTo": "admin",
+      "assignedName": "admin",
+      "assignedRole": "editor",
+      "priority": "medium",
+      "status": "pending",
+      "deadline": "",
+      "createdBy": "azuolynasfilmfestival@gmail.com",
+      "createdAt": "2026-10-10T16:09:24.913Z",
+      "updatedAt": "2026-10-10T16:09:24.913Z"
+    },
+    {
+      "id": "task_1791647617604_8wab",
+      "title": "Test",
+      "description": "",
+      "assignedTo": "admin",
+      "assignedName": "admin",
+      "assignedRole": "editor",
+      "priority": "medium",
+      "status": "pending",
+      "deadline": "",
+      "createdBy": "azuolynasfilmfestival@gmail.com",
+      "createdAt": "2026-10-10T15:53:37.604Z",
+      "updatedAt": "2026-10-10T15:53:37.604Z"
+    },
+    {
       "id": "task_2027_prep",
       "title": "Paruošti 2027 m. festivalio (FEST 2027) anonsą ir aprašymą LT/EN kalbomis",
       "description": "Užpildyti Metų leidinių skiltyje 2027 m. temas, paraiškų terminus, taisykles bei renginio datą lietuviškai ir angliškai.",
@@ -12,7 +40,7 @@
       "deadline": "2026-11-15",
       "createdBy": "azuolynasfilmfestival@gmail.com",
       "createdAt": "2026-10-06T08:00:00.000Z",
-      "updatedAt": "2026-10-06T08:30:00.000Z"
+      "updatedAt": "2026-10-10T16:09:24.920Z"
     },
     {
       "id": "task_judge_eval",
@@ -22,11 +50,11 @@
       "assignedName": "Elena (Teisėja)",
       "assignedRole": "judge",
       "priority": "high",
-      "status": "pending",
+      "status": "in_progress",
       "deadline": "2026-10-25",
       "createdBy": "azuolynasfilmfestival@gmail.com",
       "createdAt": "2026-10-06T08:15:00.000Z",
-      "updatedAt": "2026-10-06T08:15:00.000Z"
+      "updatedAt": "2026-10-10T15:53:19.959Z"
     },
     {
       "id": "task_archive_photos",

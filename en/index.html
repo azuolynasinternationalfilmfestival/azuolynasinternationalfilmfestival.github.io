@@ -168,9 +168,9 @@
             </a>
           </li>
           <li id="drawerNavLinkCurrentEdition">
-            <a href="azuolynas-fest-2027.html" class="drawer-nav-link highlight">
-              <span class="drawer-nav-text">FEST 2027 (Upcoming Edition)</span>
-              <span class="drawer-nav-badge">2027</span>
+            <a href="azuolynas-fest-2026.html" class="drawer-nav-link highlight">
+              <span class="drawer-nav-text">FEST 2026 (Annual Chronicle)</span>
+              <span class="drawer-nav-badge">2026</span>
             </a>
           </li>
           <li id="drawerNavLinkEditions">
@@ -270,18 +270,18 @@
         <div class="hero-badge" id="dynHeroBadge">International Students Film Festival</div>
         <h1 class="hero-title">Ąžuolynas Film Festival</h1>
         <p class="hero-about-text" id="dynAboutText">
-          The «Ažuolynas» Film Festival is named after one of the sights of Kaunas, at the foot of which our studio is located.
+          What do you want to do with your life, and how do you find your true calling? We are looking for stories about discovering your path, making career choices, and overcoming self-doubt. Tell us what it takes to follow your passion when the people around you expect something different—whether it is family pressure to pursue a 'serious' career like medicine or law, or your own fear of stepping into the arts, music, or creative fields. Show the reality of this journey, the obstacles along the way, and the exact moment you or your characters realized what you were meant to do. Films accepted until March 26th.
         </p>
 
         <div class="hero-topic-card">
           <span class="hero-topic-label">Festival Topic:</span>
-          <span class="hero-topic-val" id="dynTopic">“My Purpose” (Mano pašaukimas / My Fate)</span>
+          <span class="hero-topic-val" id="dynTopic">My purpose</span>
         </div>
 
         <div class="meta-row">
           <div class="meta-box">
             <div class="meta-box-label">Submissions Deadline</div>
-            <div class="meta-box-value" id="dynDates">Until April 9th, 2027</div>
+            <div class="meta-box-value" id="dynDates">Until March 26th</div>
           </div>
           <div class="meta-box">
             <div class="meta-box-label">Opening Ceremony</div>
@@ -325,8 +325,8 @@
         </div>
 
         <div class="editions-showcase-grid" id="editionsContainer">
-          <!-- 2027 Upcoming Edition Card -->
-          <div class="edition-card-item" style="border:1px solid rgba(212,175,55,0.4);">
+          <!-- 2027 Upcoming Edition Card (hidden from home screen as requested) -->
+          <div class="edition-card-item" style="border:1px solid rgba(212,175,55,0.4); display: none;">
             <div class="edition-card-bg" style="background-image: url('https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/IMG_3458.jpeg?alt=media&token=224af1bd-25ff-494e-8136-fbf330d3ad5b');"></div>
             <div class="edition-card-overlay"></div>
             <div class="edition-card-details">
@@ -1648,140 +1648,198 @@
         const ext = verifiedVideoFile.name.split(".").pop();
         const safeName = name.replace(/[^a-zA-Z0-9]/g, "_");
         const storagePath = `submissions/${Date.now()}_${safeName}.${ext}`;
-        const activeStorage = storage || (typeof firebase !== "undefined" && typeof firebase.storage === "function" ? firebase.storage() : null);
-        if (!activeStorage) {
-          throw new Error("Storage service is currently unavailable.");
-        }
-        const storageRef = activeStorage.ref(storagePath);
-        const uploadTask = storageRef.put(verifiedVideoFile);
+        const completeSubmissionWithUrl = async (videoUrl, storagePath) => {
+          const attendanceInput = document.querySelector('input[name="attendanceType"]:checked');
+          const attendanceType = attendanceInput ? attendanceInput.value : 'in_person';
+          const liveToken = 'live_' + Math.random().toString(36).substring(2, 10) + '_' + Date.now().toString(36);
+          const baseUrl = window.location.origin;
+          const liveStreamUrl = `${baseUrl}/live.html?token=${liveToken}`;
 
-        uploadTask.on("state_changed",
-          (snap) => {
-            const pct = Math.round((snap.bytesTransferred / snap.totalBytes) * 100);
-            progressFill.style.width = pct + "%";
-            progressStatus.textContent = `Uploading... ${pct}%`;
-          },
-          (err) => {
-            console.error(err);
-            showToast("Upload failed: " + err.message, "error");
-            submitBtn.disabled = false;
-          },
-          async () => {
-            const videoUrl = await uploadTask.snapshot.ref.getDownloadURL();
+          const submissionData = {
+            name,
+            email,
+            age,
+            category,
+            location,
+            institution,
+            filmTitle,
+            deviceModel,
+            synopsis,
+            videoUrl,
+            videoDurationSeconds,
+            storagePath: storagePath || videoUrl,
+            attendanceType,
+            liveToken,
+            liveStreamUrl,
+            votesCount: 0,
+            inVoting: false,
+            status: "submitted",
+            submissionLang: "en",
+            submittedAt: firebase.firestore.FieldValue.serverTimestamp()
+          };
 
-            const attendanceInput = document.querySelector('input[name="attendanceType"]:checked');
-            const attendanceType = attendanceInput ? attendanceInput.value : 'in_person';
-            const liveToken = 'live_' + Math.random().toString(36).substring(2, 10) + '_' + Date.now().toString(36);
-            const baseUrl = window.location.origin;
-            const liveStreamUrl = `${baseUrl}/live.html?token=${liveToken}`;
+          let docId = 'sub_' + Date.now().toString(36) + '_' + Math.random().toString(36).substring(2, 6);
+          const targetDb = firestoreDb || (typeof window !== "undefined" && window.db) || (typeof db !== "undefined" ? db : null) || (typeof firebase !== "undefined" && firebase.firestore ? firebase.firestore() : null);
 
-            const submissionData = {
+          if (targetDb && typeof targetDb.collection === "function") {
+            try {
+              const docRef = await targetDb.collection("submissions").add(submissionData);
+              if (docRef && docRef.id) docId = docRef.id;
+            } catch (dbErr) {
+              console.warn("Firestore submission note (fallback to server record):", dbErr.message);
+            }
+          }
+
+          // Also register remote live viewer token in live_viewers collection
+          if (attendanceType === 'remote' && targetDb && typeof targetDb.collection === "function") {
+            try {
+              await targetDb.collection("live_viewers").doc(liveToken).set({
+                token: liveToken,
+                email: email.toLowerCase(),
+                name,
+                filmTitle,
+                role: "remote_participant",
+                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                status: "authorized"
+              });
+            } catch (viewerErr) {
+              console.warn("live_viewers registration note:", viewerErr.message);
+            }
+          }
+
+          // Sync with backend local storage and audit log
+          try {
+            await fetch("/api/submissions/record", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                id: docId,
+                ...submissionData,
+                submittedAt: new Date().toISOString()
+              })
+            });
+          } catch (syncErr) {
+            console.warn("Backend submission sync note:", syncErr);
+          }
+
+          if (typeof generateEmailHtml === "function") {
+            const emailTemplateKey = (attendanceType === "remote") ? "remoteLivePass" : "submissionReceived";
+            const emailHtml = generateEmailHtml(emailTemplateKey, "en", {
               name,
-              email,
-              age,
-              category,
-              location,
-              institution,
               filmTitle,
+              category,
+              institution,
               deviceModel,
-              synopsis,
-              videoUrl,
               videoDurationSeconds,
-              storagePath,
               attendanceType,
               liveToken,
               liveStreamUrl,
-              votesCount: 0,
-              inVoting: false,
-              status: "submitted",
-              submissionLang: "en",
-              submittedAt: firebase.firestore.FieldValue.serverTimestamp()
-            };
+              ctaUrl: (attendanceType === "remote") ? liveStreamUrl : undefined
+            });
 
-            const targetDb = firestoreDb || (typeof window !== "undefined" && window.db) || (typeof db !== "undefined" ? db : null) || firebase.firestore();
-            const docRef = await targetDb.collection("submissions").add(submissionData);
+            const emailSubject = (emailTexts && emailTexts.en && emailTexts.en[emailTemplateKey])
+              ? emailTexts.en[emailTemplateKey].sub
+              : "Ąžuolynas Film Fest | Submission Received!";
 
-            // Also register remote live viewer token in live_viewers collection
-            if (attendanceType === 'remote') {
+            if (targetDb && typeof targetDb.collection === "function") {
               try {
-                await targetDb.collection("live_viewers").doc(liveToken).set({
-                  token: liveToken,
-                  email: email.toLowerCase(),
-                  name,
-                  filmTitle,
-                  role: "remote_participant",
-                  createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                  status: "authorized"
+                await targetDb.collection("mail").add({
+                  to: [email],
+                  message: {
+                    subject: emailSubject,
+                    html: emailHtml
+                  }
                 });
-              } catch (viewerErr) {
-                console.warn("live_viewers registration note:", viewerErr);
+              } catch (mailErr) {
+                console.warn("Mail queue note:", mailErr.message);
               }
             }
-
-            // Sync with backend local storage and audit log
-            try {
-              await fetch("/api/submissions/record", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                  id: docRef.id,
-                  ...submissionData,
-                  submittedAt: new Date().toISOString()
-                })
-              });
-            } catch (syncErr) {
-              console.warn("Backend submission sync note:", syncErr);
-            }
-
-            if (typeof generateEmailHtml === "function") {
-              const emailTemplateKey = (attendanceType === "remote") ? "remoteLivePass" : "submissionReceived";
-              const emailHtml = generateEmailHtml(emailTemplateKey, "en", {
-                name,
-                filmTitle,
-                category,
-                institution,
-                deviceModel,
-                videoDurationSeconds,
-                attendanceType,
-                liveToken,
-                liveStreamUrl,
-                ctaUrl: (attendanceType === "remote") ? liveStreamUrl : undefined
-              });
-
-              const emailSubject = (emailTexts && emailTexts.en && emailTexts.en[emailTemplateKey])
-                ? emailTexts.en[emailTemplateKey].sub
-                : "Ąžuolynas Film Fest | Entry Received!";
-
-              await targetDb.collection("mail").add({
-                to: [email],
-                message: {
-                  subject: emailSubject,
-                  html: emailHtml
-                }
-              });
-            }
-
-            if (typeof generateAdminNotificationHtml === "function") {
-              const adminEmailHtml = generateAdminNotificationHtml("en", submissionData);
-
-              await targetDb.collection("mail").add({
-                to: ["azuolynasfilmfestival@gmail.com"],
-                message: {
-                  subject: `New Submission (${attendanceType === 'remote' ? 'Remote' : 'In-Person'}): ${filmTitle} (${name})`,
-                  html: adminEmailHtml
-                }
-              });
-            }
-
-            showToast("Thank you! Your entry has been submitted successfully.");
-            form.reset();
-            verifiedVideoFile = null;
-            feedback.textContent = "";
-            progressContainer.classList.remove("active");
-            progressFill.style.width = "0%";
-            submitBtn.disabled = false;
           }
-        );
+
+          progressFill.style.width = "100%";
+          progressStatus.textContent = "Submission successfully registered!";
+          showToast("Your film has been successfully submitted to the festival!", "success");
+          setTimeout(() => {
+            uploadProgressCard.classList.add("d-none");
+            form.reset();
+            submitBtn.disabled = false;
+            location.hash = "#screening";
+          }, 1500);
+        };
+
+        const uploadViaServerApi = () => {
+          progressStatus.textContent = "Uploading directly to festival server...";
+          const formData = new FormData();
+          formData.append("video", verifiedVideoFile);
+
+          const xhr = new XMLHttpRequest();
+          xhr.open("POST", "/api/submissions/upload", true);
+          xhr.upload.onprogress = (e) => {
+            if (e.lengthComputable) {
+              const pct = Math.round((e.loaded / e.total) * 100);
+              progressFill.style.width = pct + "%";
+              progressStatus.textContent = `Uploading to server... ${pct}%`;
+            }
+          };
+          xhr.onload = async () => {
+            if (xhr.status >= 200 && xhr.status < 300) {
+              try {
+                const res = JSON.parse(xhr.responseText);
+                if (res.success && res.videoUrl) {
+                  await completeSubmissionWithUrl(res.videoUrl, res.videoUrl);
+                } else {
+                  throw new Error(res.error || "Server upload error");
+                }
+              } catch (err) {
+                showToast("Upload failed: " + err.message, "error");
+                submitBtn.disabled = false;
+              }
+            } else {
+              showToast("Server error: " + xhr.status, "error");
+              submitBtn.disabled = false;
+            }
+          };
+          xhr.onerror = () => {
+            showToast("Network error uploading video", "error");
+            submitBtn.disabled = false;
+          };
+          xhr.send(formData);
+        };
+
+        const activeStorage = storage || (typeof firebase !== "undefined" && typeof firebase.storage === "function" ? firebase.storage() : null);
+        if (!activeStorage) {
+          uploadViaServerApi();
+          return;
+        }
+
+        try {
+          const storageRef = activeStorage.ref(storagePath);
+          const uploadTask = storageRef.put(verifiedVideoFile);
+
+          uploadTask.on("state_changed",
+            (snap) => {
+              const pct = Math.round((snap.bytesTransferred / snap.totalBytes) * 100);
+              progressFill.style.width = pct + "%";
+              progressStatus.textContent = `Uploading... ${pct}%`;
+            },
+            (err) => {
+              console.warn("Storage upload error, switching to server upload:", err.message);
+              uploadViaServerApi();
+            },
+            async () => {
+              try {
+                const videoUrl = await uploadTask.snapshot.ref.getDownloadURL();
+                await completeSubmissionWithUrl(videoUrl, storagePath);
+              } catch (urlErr) {
+                console.warn("getDownloadURL notice, falling back to server upload:", urlErr.message);
+                uploadViaServerApi();
+              }
+            }
+          );
+        } catch (storageErr) {
+          console.warn("Storage exception, fallback to server:", storageErr.message);
+          uploadViaServerApi();
+        }
       } catch (error) {
         console.error(error);
         showToast("An error occurred during submission.", "error");

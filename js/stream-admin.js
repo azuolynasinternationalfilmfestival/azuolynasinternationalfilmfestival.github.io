@@ -38,7 +38,10 @@ export function initStreamAdmin() {
   // 5. Add Viewer & Generate Signed Token Form
   initViewerTokenForm();
 
-  // 6. Refresh button
+  // 6. Iframe URL edit & save handlers
+  initStreamIframeUrlControls();
+
+  // 7. Refresh button
   const refreshBtn = document.getElementById("btnRefreshStreamAdmin");
   if (refreshBtn) {
     refreshBtn.addEventListener("click", () => {
@@ -138,6 +141,60 @@ function renderLivePreviewIframe() {
 
   if (iframeEl && iframeEl.getAttribute("src") !== url) {
     iframeEl.setAttribute("src", url);
+  }
+
+  const inputEl = document.getElementById("adminStreamIframeUrlInput");
+  if (inputEl && document.activeElement !== inputEl) {
+    inputEl.value = url;
+  }
+
+  const displayEl = document.getElementById("lblCurrentIframeUrlDisplay");
+  if (displayEl) {
+    displayEl.textContent = url.length > 60 ? (url.slice(0, 57) + "...") : url;
+    displayEl.title = url;
+  }
+}
+
+function initStreamIframeUrlControls() {
+  const btnSaveIframe = document.getElementById("btnSaveStreamIframeUrl");
+  const btnResetIframe = document.getElementById("btnResetStreamIframeUrl");
+  const inputIframe = document.getElementById("adminStreamIframeUrlInput");
+
+  if (btnSaveIframe && inputIframe) {
+    btnSaveIframe.addEventListener("click", async () => {
+      const newUrl = inputIframe.value.trim();
+      if (!newUrl) {
+        showToast("Įveskite galiojančią iframe nuorodą", "error");
+        return;
+      }
+      btnSaveIframe.disabled = true;
+      try {
+        const callerEmail = sessionStorage.getItem("admin_user_email") || "azuolynasfilmfestival@gmail.com";
+        const res = await fetch("/api/admin/stream/iframe-url", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ iframeUrl: newUrl, adminEmail: callerEmail })
+        });
+        const data = await res.json();
+        if (res.ok && data.success) {
+          showToast("Iframe nuoroda sėkmingai išsaugota ir atnaujinta!", "success");
+          if (streamConfig) streamConfig.iframeUrl = newUrl;
+          renderLivePreviewIframe();
+        } else {
+          showToast("Klaida saugant iframe nuorodą: " + (data.error || "Serverio klaida"), "error");
+        }
+      } catch (err) {
+        showToast("Tinklo klaida: " + err.message, "error");
+      } finally {
+        btnSaveIframe.disabled = false;
+      }
+    });
+  }
+
+  if (btnResetIframe && inputIframe) {
+    btnResetIframe.addEventListener("click", () => {
+      inputIframe.value = "https://customer-auu36r7owuzogvfb.cloudflarestream.com/937d1a8b2c545a980c9fabc8502d8af4/iframe";
+    });
   }
 }
 

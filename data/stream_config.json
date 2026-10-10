@@ -1,10 +1,10 @@
 {
   "isLive": true,
-  "streamState": "live",
+  "streamState": "paused",
   "serverUrl": "rtmps://live.cloudflare.com:443/live/",
   "streamKey": "6561bd7efd0ad61e9040a08676049c4dk937d1a8b2c545a980c9fabc8502d8af4",
-  "iframeUrl": "https://customer-auu36r7owuzogvfb.cloudflarestream.com/937d1a8b2c545a980c9fabc8502d8af4/iframe",
-  "viewerCount": 14,
+  "iframeUrl": "https://youtube.com/embed/test",
+  "viewerCount": 16,
   "votingActive": true,
-  "updatedAt": "2026-10-10T15:28:01.826Z"
+  "updatedAt": "2026-10-10T16:09:24.931Z"
 }

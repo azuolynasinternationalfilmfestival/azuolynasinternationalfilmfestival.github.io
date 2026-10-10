@@ -5,231 +5,284 @@
   <link rel="preconnect" href="https://firebasestorage.googleapis.com">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>FEST 2027 | Ąžuolynas International Film Festival</title>
-  <meta name="description" content="Theme: 'My Purpose' (Mano pašaukimas / My Fate). April 23, 2027 at Kaunas International Gymnasium. The 7th International Youth Smartphone Short Film Festival.">
-  <link rel="canonical" href="https://azuolynasinternationalfilmfestival.github.io/en/azuolynas-fest-2027.html">
-  <meta property="og:type" content="article">
-  <meta property="og:site_name" content="Ąžuolynas International Students Film Festival">
-  <meta property="og:title" content="FEST 2027 | Ąžuolynas International Film Festival">
-  <meta property="og:description" content="Theme: 'My Purpose' (Mano pašaukimas / My Fate). Festival ceremony on April 23, 2027. International youth film competition.">
-  <meta property="og:image" content="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/IMG_3458.jpeg?alt=media&token=224af1bd-25ff-494e-8136-fbf330d3ad5b">
+  <meta name="description" content="7th International Students Film Festival FEST 2027 at Kaunas International Gymnasium. Theme: My Purpose. Submissions deadline: March 26th.">
   <link rel="icon" type="image/webp" href="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media">
   <link rel="stylesheet" href="../style.css">
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Cinzel:wght@600;700;800;900&display=swap" rel="stylesheet">
-  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 </head>
-<body class="site-body">
+<body class="edition-page">
+  <div class="cinema-grain"></div>
 
-  <header class="site-header">
-    <div class="container nav-bar">
-      <a href="index.html" class="logo-wrap">
-        <img src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media" alt="Ąžuolynas Fest" class="logo-img">
-        <span class="logo-text">FEST 2027</span>
-      </a>
-      <div class="header-actions">
-        <a href="index.html#submit" class="btn-solid btn-nav-cta">Submit Film</a>
-        <div class="lang-switch">
-          <a href="../azuolynas-fest-2027.html" class="lang-btn">LT</a>
-          <a href="azuolynas-fest-2027.html" class="lang-btn active">EN</a>
+  <!-- Header -->
+  <header class="header">
+    <div class="container header-content">
+      <a href="index.html" class="brand">
+        <img src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media" alt="Ąžuolynas Fest" class="brand-logo-img">
+        <div class="brand-titles">
+          <span class="brand-name">Ąžuolynas Fest</span>
+          <span class="brand-edition" id="topNavEditionYear">FEST 2027</span>
         </div>
-        <button type="button" class="burger-menu-btn" id="menuBurgerBtn" aria-label="Menu">
-          <span class="burger-icon" aria-hidden="true">
-            <span class="bar bar-1"></span>
-            <span class="bar bar-2"></span>
-            <span class="bar bar-3"></span>
-          </span>
-        </button>
-      </div>
+      </a>
+
+      <nav class="desktop-nav">
+        <a href="index.html" class="nav-link">Home</a>
+        <a href="#about" class="nav-link">About 2027</a>
+        <a href="#rules" class="nav-link">Rules</a>
+        <a href="#categories" class="nav-link">Categories</a>
+        <a href="#recording" class="nav-link">Broadcast</a>
+        <a href="#gallery" class="nav-link">Gallery</a>
+        <a href="index.html#submit" class="nav-cta">Submit Film</a>
+      </nav>
+
+      <button type="button" class="burger-menu-btn" id="menuBurgerOpenBtn" aria-label="Open menu">
+        <span class="burger-line"></span>
+        <span class="burger-line"></span>
+        <span class="burger-line"></span>
+      </button>
     </div>
   </header>
 
-  <!-- Responsive Burger Menu Backdrop -->
-  <div class="mobile-menu-backdrop" id="mobileMenuBackdrop" aria-hidden="true"></div>
-  <aside class="mobile-menu-drawer" id="mobileMenuDrawer" aria-label="Navigation menu">
+  <!-- Mobile Drawer -->
+  <div class="drawer-overlay" id="menuDrawerOverlay"></div>
+  <aside class="drawer-sidebar" id="menuDrawerSidebar">
     <div class="drawer-header">
-      <a href="index.html" class="drawer-logo-wrap">
-        <img src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media" alt="Ąžuolynas Fest" class="logo-img">
+      <a href="index.html" class="drawer-logo">
+        <img src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media" alt="Logo" class="logo-img">
         <div>
           <div class="drawer-logo-title">FEST 2027</div>
-          <div class="drawer-logo-sub">Festival Edition</div>
+          <div class="drawer-logo-sub">New Edition</div>
         </div>
       </a>
-      <button type="button" class="drawer-close-btn" id="menuBurgerCloseBtn">&times;</button>
+      <button type="button" class="drawer-close-btn" id="menuBurgerCloseBtn" aria-label="Close menu">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
     </div>
+
     <div class="drawer-body">
-      <ul class="drawer-nav-list">
-        <li><a href="index.html" class="drawer-nav-link"><span>Home</span></a></li>
-        <li><a href="#about" class="drawer-nav-link"><span>About FEST 2027</span></a></li>
-        <li><a href="#rules" class="drawer-nav-link"><span>Rules & Eligibility</span></a></li>
-        <li><a href="#gallery" class="drawer-nav-link"><span>Photo Gallery</span></a></li>
-        <li><a href="../live.html" class="drawer-nav-link highlight"><span>Live Broadcast & Voting</span></a></li>
-        <li><a href="index.html#submit" class="drawer-nav-link"><span>Submit Film</span></a></li>
-      </ul>
+      <a href="index.html#submit" class="drawer-cta-btn">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 10l5 5-5 5"/><path d="M4 4v7a4 4 0 0 0 4 4h12"/></svg>
+        <span>Submit Your Film</span>
+      </a>
+
+      <div class="drawer-group">
+        <div class="drawer-section-title">Navigation</div>
+        <ul class="drawer-nav-list">
+          <li><a href="index.html" class="drawer-nav-link"><span>Home page</span></a></li>
+          <li><a href="#about" class="drawer-nav-link"><span>About FEST 2027</span></a></li>
+          <li><a href="#rules" class="drawer-nav-link"><span>Rules & Regulations</span></a></li>
+          <li><a href="#categories" class="drawer-nav-link"><span>Categories & Prizes</span></a></li>
+          <li><a href="#recording" class="drawer-nav-link"><span>Ceremony Broadcast</span></a></li>
+          <li><a href="#gallery" class="drawer-nav-link"><span>Photo Gallery</span></a></li>
+          <li><a href="../live.html" class="drawer-nav-link highlight"><span>Live Stream</span></a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="drawer-footer">
+      <div class="drawer-lang-row">
+        <span class="drawer-lang-label">Language:</span>
+        <div class="lang-switch">
+          <a href="../lt/azuolynas-fest-2027.html" class="lang-btn">LT</a>
+          <a href="azuolynas-fest-2027.html" class="lang-btn active">EN</a>
+        </div>
+      </div>
+      <div class="drawer-info-note">
+        <span>Kaunas International Gymnasium Film Studio</span>
+      </div>
     </div>
   </aside>
 
-  <!-- Hero Section (CMS Editable) -->
-  <section class="hero-screen" id="heroAnchor" style="min-height:75vh; display:flex; align-items:center; background-size:cover; background-position:center; position:relative; padding:120px 0 60px 0;">
-    <div class="hero-curtain" style="position:absolute; inset:0; background:radial-gradient(circle at 50% 20%, rgba(12, 38, 32, 0.7) 0%, rgba(5, 21, 18, 0.95) 85%);"></div>
-    <div class="container" style="position:relative; z-index:2; text-align:center;">
-      <div class="section-tag" id="cmsBadge" style="margin-bottom:12px;">7TH INTERNATIONAL YOUTH FILM FESTIVAL</div>
-      <h1 id="cmsTitle" style="font-family:var(--font-cinema); font-size:clamp(2rem, 5vw, 3.6rem); color:var(--text-color); margin:0 0 14px 0; text-transform:uppercase; letter-spacing:0.04em;">
-        FEST 2027
-      </h1>
-      <p id="cmsSubtitle" style="font-size:clamp(1.05rem, 2vw, 1.35rem); color:var(--accent-light); max-width:800px; margin:0 auto 16px auto; font-weight:600; line-height:1.45;">
-        Theme: “My Purpose” (Mano pašaukimas / My Fate) &bull; Youth Voices to the World
-      </p>
-      <div style="display:inline-flex; align-items:center; gap:16px; background:rgba(12, 38, 32, 0.65); border:1px solid rgba(111,165,138,0.3); padding:8px 20px; border-radius:999px; font-size:0.92rem; color:#F3E5AB; margin-bottom:28px;">
-        <span>📅 <strong id="cmsDate">April 23, 2027</strong></span>
-        <span>&bull;</span>
-        <span>📍 Kaunas International Gymnasium, Lithuania</span>
+  <main>
+    <!-- Hero Section (Identical style to FEST 2026) -->
+    <section class="edition-hero" id="editionHeroSection" style="background-image: url('https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/IMG_3458.jpeg?alt=media&token=224af1bd-25ff-494e-8136-fbf330d3ad5b');">
+      <div class="edition-hero-overlay"></div>
+      <div class="edition-hero-content">
+        <span class="edition-card-badge" id="dynBadge">7th International Students Film Festival</span>
+        <h1 class="edition-hero-title" id="dynTitle">FEST 2027</h1>
+        <div class="edition-hero-date" id="dynDate">April 23rd, 2027</div>
+        <p class="edition-hero-sub" id="dynSub">
+          Theme: “My Purpose” &bull; Films accepted until March 26th
+        </p>
       </div>
-      <div style="display:flex; justify-content:center; gap:14px; flex-wrap:wrap;">
-        <a href="index.html#submit" class="btn-solid">Submit Film Entry</a>
-        <a href="../live.html" class="btn-outline">Watch Live Broadcast</a>
-      </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- Details & Story Section (CMS Editable) -->
-  <section class="section-block" id="about">
-    <div class="container">
-      <div class="two-col-grid" style="align-items:center; gap:40px;">
-        <div>
-          <div class="section-tag">About The Festival</div>
-          <h2 style="font-family:var(--font-cinema); font-size:2rem; color:var(--text-color); margin:8px 0 16px 0;">
-            Celebration of Youth Filmmaking
-          </h2>
-          <div id="cmsStory" style="color:var(--text-muted); font-size:1rem; line-height:1.75;">
-            <p style="margin-bottom:14px;">
-              Get ready for the 7th International Youth Short Film Festival <strong>"Ąžuolynas FEST 2027"</strong>! For seven consecutive years, Kaunas International Gymnasium has stood at the crossroads of international student cinematic art.
-            </p>
-            <p style="margin-bottom:14px;">
-              We invite students aged 10 to 18 to create short films up to 3 minutes using smartphone cameras only. The official 2027 theme is <em>"My Purpose"</em> (Mano pašaukimas / <em>My Fate</em>). What inspires me? What is my life's calling, passion, and direction?
-            </p>
-            <p>
-              The gala festival ceremony takes place on <strong>April 23, 2027</strong> at Kaunas International Gymnasium. Experience an international jury evaluation, handmade oak trophies, gala screening, and worldwide live broadcast!
+    <!-- About Section -->
+    <section id="about" class="section-block">
+      <div class="container">
+        <div class="section-head">
+          <div class="section-tag">Festival Theme & Concept</div>
+          <h2 class="section-heading">Cinematic Celebration of Finding Your Calling</h2>
+        </div>
+
+        <div class="content-card">
+          <p id="dynStory" style="font-size:1.05rem; line-height:1.8; color:var(--text-color); margin-bottom:20px;">
+            What do you want to do with your life, and how do you find your true calling? We are looking for stories about discovering your path, making career choices, and overcoming self-doubt. Tell us what it takes to follow your passion when the people around you expect something different—whether it is family pressure to pursue a "serious" career like medicine or law, or your own fear of stepping into the arts, music, or creative fields. Show the reality of this journey, the obstacles along the way, and the exact moment you or your characters realized what you were meant to do.
+          </p>
+
+          <div class="highlight-box" style="margin-top:16px; margin-bottom:24px; background:rgba(17,57,57,0.4); border-left:4px solid #6FA58A; padding:18px;">
+            <h4 style="color:#D4AF37; margin-bottom:8px; font-size:1.05rem;">📅 Key Festival Dates:</h4>
+            <p style="color:var(--text-color); margin:0; font-size:0.98rem; line-height:1.6;">
+              Films accepted until <strong>March 26th</strong>.<br>
+              Gala Opening and Awards Ceremony takes place on <strong>April 23rd, 2027</strong> at Kaunas International Gymnasium.
             </p>
           </div>
-        </div>
-        <div>
-          <div style="border:1px solid rgba(111,165,138,0.3); border-radius:var(--site-radius); overflow:hidden; box-shadow:0 12px 40px rgba(0,0,0,0.5);">
-            <img id="cmsHeroImg" src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/IMG_3458.jpeg?alt=media&token=224af1bd-25ff-494e-8136-fbf330d3ad5b" alt="FEST 2027" style="width:100%; height:auto; display:block;">
+
+          <div class="countries-cloud">
+            <span class="country-pill"><span class="country-flag">🎬</span> Theme: My Purpose</span>
+            <span class="country-pill"><span class="country-flag">📱</span> Smartphones only</span>
+            <span class="country-pill"><span class="country-flag">⏱️</span> Strictly up to 3 mins</span>
+            <span class="country-pill"><span class="country-flag">📅</span> Deadline: March 26th</span>
+            <span class="country-pill"><span class="country-flag">🏆</span> Oak Statuettes</span>
+            <span class="country-pill"><span class="country-flag">🇱🇹</span> Kaunas, Lithuania</span>
           </div>
         </div>
       </div>
+    </section>
+
+    <!-- Rules Section -->
+    <section id="rules" class="section-block">
+      <div class="container">
+        <div class="section-head">
+          <div class="section-tag">Regulations</div>
+          <h2 class="section-heading">Submission Rules & Criteria</h2>
+        </div>
+
+        <div class="content-card">
+          <ul class="rule-items">
+            <li>
+              <span class="rule-idx">1</span>
+              <span><strong>Smartphones/tablets only:</strong> The film must be shot strictly on a mobile phone or tablet. Professional cinema cameras are prohibited.</span>
+            </li>
+            <li>
+              <span class="rule-idx">2</span>
+              <span><strong>Maximum runtime:</strong> Strictly up to 3 minutes (180 s) including credits.</span>
+            </li>
+            <li>
+              <span class="rule-idx">3</span>
+              <span><strong>Submission deadline:</strong> All entries must be registered by <strong>March 26th</strong> via the festival portal.</span>
+            </li>
+            <li>
+              <span class="rule-idx">4</span>
+              <span><strong>Student authorship:</strong> One entry per participant. The creative vision must belong genuinely to the youth creators themselves.</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- Categories Section -->
+    <section id="categories" class="section-block">
+      <div class="container">
+        <div class="section-head">
+          <div class="section-tag">Age Categories</div>
+          <h2 class="section-heading">Competition Sections</h2>
+        </div>
+
+        <div class="two-col-grid">
+          <div class="content-card cat-border">
+            <div class="cat-label">CATEGORY I</div>
+            <div class="cat-title">Junior Category (10–13 years)</div>
+            <div class="cat-desc">Dedicated to budding visual artists and middle school students. Evaluates creative storytelling, imagination, and authentic ideas.</div>
+          </div>
+
+          <div class="content-card cat-border">
+            <div class="cat-label">CATEGORY II</div>
+            <div class="cat-title">Senior Category (14–18 years)</div>
+            <div class="cat-desc">Dedicated to high school students and young directors. Evaluates cinematic language, depth, composition, and bold vision.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Recording / Live Section -->
+    <section id="recording" class="section-block">
+      <div class="container">
+        <div class="section-head">
+          <div class="section-tag">Ceremony & Broadcast</div>
+          <h2 class="section-heading">Gala Ceremony & INGtv Streaming</h2>
+        </div>
+
+        <div class="player-card">
+          <p style="text-align:center; color:var(--text-muted); margin-bottom:18px; font-size:0.94rem;">
+            The awards ceremony will take place on April 23rd, 2027. Watch live on our festival streaming room or on INGtv YouTube channel:
+          </p>
+          <div style="display:flex; justify-content:center; gap:14px; margin-bottom:20px; flex-wrap:wrap;">
+            <a href="../live.html" class="btn-solid">Open Live Stream Room</a>
+            <a href="index.html#submit" class="btn-outline">Submit Your Film</a>
+          </div>
+          <div class="player-screen" id="editionPlayerWrap">
+            <iframe src="https://www.youtube.com/embed?listType=search&list=Kauno%20tarptautine%20gimnazija%20INGtv" allowfullscreen class="embed-media"></iframe>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Gallery Section -->
+    <section id="gallery" class="section-block">
+      <div class="container">
+        <div class="section-head">
+          <div class="section-tag">Moments</div>
+          <h2 class="section-heading">Festival Atmosphere</h2>
+        </div>
+
+        <div class="gallery-grid" id="editionGalleryGrid">
+          <div class="gallery-item" onclick="openLightboxFromSrc('https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/IMG_3463.jpeg?alt=media&token=af7892ca-e78e-4198-b686-e0181472e8da', 'Official Oak trophies and awards')">
+            <div class="gallery-item-media">
+              <img src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/IMG_3463.jpeg?alt=media&token=af7892ca-e78e-4198-b686-e0181472e8da" alt="Awards" loading="lazy">
+              <div class="gallery-overlay-hint"><span>View</span></div>
+            </div>
+            <div class="gallery-caption">Official oak trophies and laureates awards</div>
+          </div>
+
+          <div class="gallery-item" onclick="openLightboxFromSrc('https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/IMG_3458.jpeg?alt=media&token=224af1bd-25ff-494e-8136-fbf330d3ad5b', 'Youth film festival at Kaunas International Gymnasium')">
+            <div class="gallery-item-media">
+              <img src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/IMG_3458.jpeg?alt=media&token=224af1bd-25ff-494e-8136-fbf330d3ad5b" alt="Ceremony" loading="lazy">
+              <div class="gallery-overlay-hint"><span>View</span></div>
+            </div>
+            <div class="gallery-caption">Ceremony highlights and festival participants</div>
+          </div>
+
+          <div class="gallery-item" onclick="openLightboxFromSrc('https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/IMG_3459.jpeg?alt=media&token=dfdda212-9ea6-433f-af80-8c5b5b57f361', 'International jury congratulations')">
+            <div class="gallery-item-media">
+              <img src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/IMG_3459.jpeg?alt=media&token=dfdda212-9ea6-433f-af80-8c5b5b57f361" alt="Jury" loading="lazy">
+              <div class="gallery-overlay-hint"><span>View</span></div>
+            </div>
+            <div class="gallery-caption">International jury and laureates congratulations</div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Photo Lightbox Modal -->
+  <div class="lightbox-overlay" id="photoLightbox" role="dialog" aria-hidden="true">
+    <div class="lightbox-dialog">
+      <button type="button" class="lightbox-close" id="lightboxCloseBtn" aria-label="Close">&times;</button>
+      <div class="lightbox-image-wrap">
+        <img src="" alt="" id="lightboxImg" class="lightbox-img">
+      </div>
+      <div class="lightbox-caption" id="lightboxCaption"></div>
     </div>
-  </section>
+  </div>
 
-  <!-- Rules Section -->
-  <section class="section-block" id="rules" style="background:rgba(12, 38, 32, 0.35);">
-    <div class="container">
-      <div class="section-head text-center">
-        <div class="section-tag">Rules & Guidelines</div>
-        <h2 class="section-heading">Key Participant Requirements</h2>
-        <p class="section-sub">Simple, transparent, and fair rules for all young creators worldwide.</p>
-      </div>
-
-      <div class="features-grid" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(260px, 1fr)); gap:20px;">
-        <div class="feature-card" style="background:var(--surface-card); border:1px solid var(--border-color); border-radius:var(--site-radius); padding:24px;">
-          <div style="font-size:2rem; margin-bottom:10px;">📱</div>
-          <h3 style="font-size:1.15rem; color:var(--text-color); margin-bottom:8px;">Phone or Tablet Only</h3>
-          <p style="font-size:0.88rem; color:var(--text-muted); line-height:1.5;">All entries must be captured on a smartphone or tablet camera. Professional cinema equipment is strictly forbidden.</p>
-        </div>
-
-        <div class="feature-card" style="background:var(--surface-card); border:1px solid var(--border-color); border-radius:var(--site-radius); padding:24px;">
-          <div style="font-size:2rem; margin-bottom:10px;">⏱️</div>
-          <h3 style="font-size:1.15rem; color:var(--text-color); margin-bottom:8px;">Up to 3 Minutes (180s)</h3>
-          <p style="font-size:0.88rem; color:var(--text-muted); line-height:1.5;">Strict runtime limit – up to 3 minutes including credits. Concise storytelling and creative framing are prized.</p>
-        </div>
-
-        <div class="feature-card" style="background:var(--surface-card); border:1px solid var(--border-color); border-radius:var(--site-radius); padding:24px;">
-          <div style="font-size:2rem; margin-bottom:10px;">🌍</div>
-          <h3 style="font-size:1.15rem; color:var(--text-color); margin-bottom:8px;">Two Age Categories</h3>
-          <p style="font-size:0.88rem; color:var(--text-muted); line-height:1.5;"><strong>Category I:</strong> Students aged 10–13.<br><strong>Category II:</strong> Students aged 14–18 from all countries.</p>
-        </div>
-
-        <div class="feature-card" style="background:var(--surface-card); border:1px solid var(--border-color); border-radius:var(--site-radius); padding:24px;">
-          <div style="font-size:2rem; margin-bottom:10px;">🏆</div>
-          <h3 style="font-size:1.15rem; color:var(--text-color); margin-bottom:8px;">Oak Trophies & Awards</h3>
-          <p style="font-size:0.88rem; color:var(--text-muted); line-height:1.5;">Grand Prix, 1st place prizes, Audience Favorite diplomas, and custom artisan oak statuettes for laureates.</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Photo Gallery Showcase -->
-  <section class="section-block" id="gallery">
-    <div class="container">
-      <div class="section-head text-center">
-        <div class="section-tag">Moments & Gala</div>
-        <h2 class="section-heading">Festival Moments Gallery</h2>
-        <p class="section-sub">Experience the atmosphere, awards ceremony, and celebration at Kaunas International Gymnasium.</p>
-      </div>
-
-      <div class="ceremony-mosaic-grid">
-        <div class="ceremony-mosaic-hero">
-          <img src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/IMG_3458.jpeg?alt=media&token=224af1bd-25ff-494e-8136-fbf330d3ad5b" alt="Awards Gala">
-          <span class="ceremony-cell-badge">CEREMONY</span>
-        </div>
-        <div class="ceremony-mosaic-cell">
-          <img src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/IMG_3459.jpeg?alt=media&token=dfdda212-9ea6-433f-af80-8c5b5b57f361" alt="Festival laureates">
-          <span class="ceremony-cell-badge">LAUREATES</span>
-        </div>
-        <div class="ceremony-mosaic-cell">
-          <img src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/IMG_3463.jpeg?alt=media&token=af7892ca-e78e-4198-b686-e0181472e8da" alt="Oak statuettes">
-          <span class="ceremony-cell-badge">TROPHIES</span>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Footer -->
-  <footer class="site-footer">
-    <div class="container">
-      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px; padding:24px 0;">
-        <div>
-          <span style="font-weight:700; color:var(--text-color);">Ąžuolynas International Students Film Festival &bull; FEST 2027</span>
-          <div style="font-size:0.8rem; color:var(--text-muted); margin-top:2px;">Kaunas International Gymnasium, Lithuania</div>
-        </div>
-        <div style="display:flex; gap:16px; font-size:0.85rem;">
-          <a href="../privacy-policy.html" style="color:var(--text-muted); text-decoration:none;">Privacy Policy</a>
-          <a href="../terms-of-service.html" style="color:var(--text-muted); text-decoration:none;">Terms of Service</a>
-          <a href="../live.html" style="color:var(--accent-light); font-weight:700; text-decoration:none;">Live Stream</a>
-        </div>
+  <footer class="footer">
+    <div class="container footer-content">
+      <p class="footer-copy">&copy; 2026–2027 Ąžuolynas Film Festival. Kaunas International Gymnasium.</p>
+      <div class="footer-links">
+        <a href="index.html">Home</a>
+        <a href="azuolynas-fest-2026.html">FEST 2026</a>
+        <a href="../privacy-policy.html">Privacy Policy</a>
+        <a href="../terms-of-service.html">Terms</a>
       </div>
     </div>
   </footer>
 
-  <script src="../config.js"></script>
   <script src="../js/burger-menu.js"></script>
-  <script type="module">
-    // CMS Dynamic Sync: load latest 2027 English data from editions endpoint / Firestore
-    async function syncEditionData() {
-      try {
-        const res = await fetch("/api/editions");
-        if (res.ok) {
-          const data = await res.json();
-          const edition2027 = (data.editions || []).find(e => String(e.year) === "2027" || e.id === "2027");
-          if (edition2027) {
-            if (edition2027.titleEn) document.getElementById("cmsTitle").textContent = edition2027.titleEn;
-            if (edition2027.subtitleEn) document.getElementById("cmsSubtitle").textContent = edition2027.subtitleEn;
-            if (edition2027.dateEn) document.getElementById("cmsDate").textContent = edition2027.dateEn;
-            if (edition2027.storyEn) {
-              const storyHtml = edition2027.storyEn.split("\n\n").map(p => `<p style="margin-bottom:14px;">${p}</p>`).join("");
-              document.getElementById("cmsStory").innerHTML = storyHtml;
-            }
-            if (edition2027.heroImage) {
-              document.getElementById("cmsHeroImg").src = edition2027.heroImage;
-            }
-          }
-        }
-      } catch (e) {}
-    }
-    syncEditionData();
-  </script>
+  <script src="../js/photo-lightbox.js"></script>
 </body>
 </html>

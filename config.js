@@ -76,10 +76,10 @@ var AUTHORIZED_ADMIN_EMAILS = [
 
 const DEFAULT_CONTENT = {
   lt: {
-    heroBadge: "7-asis Tarptautinis Mokinių Filmų Festivalis",
-    topic: "Mano pašaukimas",
-    aboutText: "„Ąžuolyno“ filmų festivalis pavadintas vieno iš Kauno lankytinų vietų – Ąžuolyno parko – garbei, kurio papėdėje yra įsikūrusi mūsų studija. 2027 m. balandžio 23 d. kviečiame moksleivius atskleisti savo talentą.",
-    datesSubmissions: "Iki 2027 m. balandžio 9 d.",
+    heroBadge: "Tarptautinis Mokinių Filmų Festivalis",
+    topic: "Mano pašaukimas (My purpose)",
+    aboutText: "Ką norite veikti savo gyvenime ir kaip atrasti tikrąjį pašaukimą? Ieškome istorijų apie savo kelio atradimą, karjeros pasirinkimus ir vidinių abejonių įveikimą. Papasakokite, ko reikia, kad sektumėte savo aistra, kai aplinkiniai tikisi kažko kito – ar tai būtų šeimos spaudimas rinktis „rimtą“ profesiją, pvz., mediciną ar teisę, ar jūsų pačių baimė žengti į meną, muziką ar kūrybines sritis. Parodykite šios kelionės tikrovę, kliūtis kelyje ir tą akimirką, kai jūs ar jūsų herojai suprato, ką iš tiesų privalo daryti.",
+    datesSubmissions: "Iki kovo 26 d.",
     dateEvent: "2027 m. balandžio 23 d. (Atidarymo ceremonija)",
     targetAudience: "Mokiniai (10–18 m.)",
     rule1: "Filmas privalo būti nufilmuotas išmaniuoju telefonu arba planšete.",
@@ -93,10 +93,10 @@ const DEFAULT_CONTENT = {
     recordingPlaceholder: "Festivalio atidarymo vaizdo įrašas bus patalpintas 2027 m. balandžio 23 d."
   },
   en: {
-    heroBadge: "The 7th International Students Film Festival",
-    topic: "My Purpose (My Fate)",
-    aboutText: "The «Ažuolynas» Film Festival is named after one of the sights of Kaunas, at the foot of which our studio is located. On April 23, 2027, young directors from around the world gather to showcase their voice.",
-    datesSubmissions: "Until April 9th, 2027",
+    heroBadge: "International Students Film Festival",
+    topic: "My purpose",
+    aboutText: "What do you want to do with your life, and how do you find your true calling? We are looking for stories about discovering your path, making career choices, and overcoming self-doubt. Tell us what it takes to follow your passion when the people around you expect something different—whether it is family pressure to pursue a 'serious' career like medicine or law, or your own fear of stepping into the arts, music, or creative fields. Show the reality of this journey, the obstacles along the way, and the exact moment you or your characters realized what you were meant to do.",
+    datesSubmissions: "Until March 26th",
     dateEvent: "April 23rd, 2027 (Opening Ceremony)",
     targetAudience: "Students (10–18 yrs)",
     rule1: "The film must be shot on a phone/tablet;",

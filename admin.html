@@ -683,9 +683,38 @@
               </div>
             </div>
 
+            <!-- Iframe URL Configuration Field -->
+            <div style="background:rgba(12,38,32,0.45); border:1px solid var(--border-color); border-radius:var(--site-radius); padding:16px; margin-top:16px; margin-bottom:14px;">
+              <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:8px;">
+                <label for="adminStreamIframeUrlInput" style="font-size:0.88rem; font-weight:700; color:#D4AF37; margin:0;">
+                  📺 Transliacijos Grotuvo Iframe Nuoroda (Iframe URL / Embed Link)
+                </label>
+                <span style="font-size:0.75rem; color:var(--accent-light);">Pakeitimas tiesiogiai atnaujina live.html ir šį valdymo langą</span>
+              </div>
+              <p style="font-size:0.82rem; color:var(--text-muted); margin-bottom:12px;">
+                Galite įvesti bet kurį Cloudflare Stream, YouTube, Vimeo ar pasirinktinį tiesioginės transliacijos iframe adresą.
+              </p>
+              <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+                <input
+                  type="url"
+                  id="adminStreamIframeUrlInput"
+                  class="field"
+                  placeholder="https://customer-auu36r7owuzogvfb.cloudflarestream.com/.../iframe"
+                  style="flex:1; min-width:280px; font-family:monospace; font-size:0.85rem;"
+                >
+                <button type="button" id="btnSaveStreamIframeUrl" class="btn-solid btn-sm" style="display:inline-flex; align-items:center; gap:6px;">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+                  <span>Išsaugoti Iframe Nuorodą</span>
+                </button>
+                <button type="button" id="btnResetStreamIframeUrl" class="btn-outline btn-sm" title="Atstatyti į numatytąjį Cloudflare adresą">
+                  <span>Atstatyti</span>
+                </button>
+              </div>
+            </div>
+
             <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-top:8px;">
               <span style="font-size:0.8rem; color:var(--text-muted);">
-                Cloudflare Stream Iframe: <code>customer-auu36r7owuzogvfb.cloudflarestream.com/.../iframe</code>
+                Aktyvus Iframe URL: <code id="lblCurrentIframeUrlDisplay">customer-auu36r7owuzogvfb.cloudflarestream.com/.../iframe</code>
               </span>
               <button type="button" id="btnCopyStreamIframe" class="btn-outline btn-xs" style="display:inline-flex; align-items:center; gap:6px;">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>

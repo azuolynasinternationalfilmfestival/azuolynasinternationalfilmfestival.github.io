@@ -5,6 +5,7 @@ import crypto from 'crypto';
 import { fileURLToPath } from 'url';
 import jwt from 'jsonwebtoken';
 import nodemailer from 'nodemailer';
+import multer from 'multer';
 import './email-templates.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -44,6 +45,31 @@ const JUDGE_EVALS_FILE = path.join(DATA_DIR, 'judge_evaluations.json');
 const SUBMISSIONS_FILE = path.join(DATA_DIR, 'submissions.json');
 const LIVE_VIEWERS_FILE = path.join(DATA_DIR, 'live_viewers.json');
 const STREAM_CONFIG_FILE = path.join(DATA_DIR, 'stream_config.json');
+const BROADCAST_PROJECTS_FILE = path.join(DATA_DIR, 'broadcast_graphics.json');
+const UPLOADS_DIR = path.join(DATA_DIR, 'uploads');
+if (!fs.existsSync(UPLOADS_DIR)) {
+  fs.mkdirSync(UPLOADS_DIR, { recursive: true });
+}
+
+const storageUpload = multer.diskStorage({
+  destination: (req, file, cb) => cb(null, UPLOADS_DIR),
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname) || '.mp4';
+    const safeName = (file.originalname || 'video').replace(/[^a-zA-Z0-9]/g, '_').slice(0, 40);
+    cb(null, `${Date.now()}_${safeName}${ext}`);
+  }
+});
+const uploadVideo = multer({
+  storage: storageUpload,
+  limits: { fileSize: 500 * 1024 * 1024 }
+});
+
+function loadBroadcastProjects() {
+  return loadJson(BROADCAST_PROJECTS_FILE, { projects: [] });
+}
+function saveBroadcastProjects(data) {
+  saveJson(BROADCAST_PROJECTS_FILE, data);
+}
 
 // Real-Time SSE Clients list for Stream Overlay and Live Voting
 let sseClients = [];
@@ -865,7 +891,27 @@ app.use((req, res, next) => {
   return res.status(503).send(maintenanceHtml);
 });
 
+app.use('/uploads', express.static(UPLOADS_DIR));
 app.use(express.static(__dirname));
+
+// API: Direct video upload endpoint for film submissions (fallback and high-performance server upload)
+app.post('/api/submissions/upload', uploadVideo.single('video'), (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ success: false, error: 'Vaizdo įrašo failas negautas' });
+    }
+    const videoUrl = `/uploads/${req.file.filename}`;
+    res.json({
+      success: true,
+      videoUrl,
+      filename: req.file.filename,
+      size: req.file.size
+    });
+  } catch (err) {
+    console.error('Upload error in /api/submissions/upload:', err);
+    res.status(500).json({ success: false, error: 'Nepavyko išsaugoti vaizdo įrašo serveryje: ' + err.message });
+  }
+});
 
 // ---------------------------------------------------------------------------
 // VOTING & FRAUD-PREVENTION API
@@ -3559,10 +3605,10 @@ app.get('/api/admin/stream/status', (req, res) => {
   }
 });
 
-// API: Admin Update Live Stream State (live / paused / ended)
+// API: Admin Update Live Stream State (live / paused / ended) and iframe URL
 app.post('/api/admin/stream/status', (req, res) => {
   try {
-    const { state, streamState, isLive, adminEmail, adminName } = req.body || {};
+    const { state, streamState, isLive, iframeUrl, adminEmail, adminName } = req.body || {};
     const config = loadStreamConfig();
 
     const targetState = state || streamState;
@@ -3570,13 +3616,17 @@ app.post('/api/admin/stream/status', (req, res) => {
     if (isLive !== undefined) config.isLive = !!isLive;
     if (targetState === 'ended') config.isLive = false;
     if (targetState === 'live') config.isLive = true;
+    if (iframeUrl !== undefined && typeof iframeUrl === 'string' && iframeUrl.trim()) {
+      config.iframeUrl = iframeUrl.trim();
+    }
 
     config.updatedAt = new Date().toISOString();
     saveStreamConfig(config);
 
     broadcastStreamUpdate('STREAM_STATE_UPDATE', {
       streamState: config.streamState,
-      isLive: config.isLive
+      isLive: config.isLive,
+      iframeUrl: config.iframeUrl
     });
 
     const callerEmail = String(adminEmail || PRIMARY_SUPERADMIN_EMAIL).trim().toLowerCase();
@@ -3586,12 +3636,57 @@ app.post('/api/admin/stream/status', (req, res) => {
       adminEmail: callerEmail,
       adminName: adminName || callerEmail.split('@')[0],
       target: "Cloudflare Stream",
-      details: `Pakeista tiesioginės transliacijos būsena į: ${(config.streamState || 'LIVE').toUpperCase()} (Aktyvi: ${config.isLive ? 'Taip' : 'Ne'})`
+      details: `Pakeista tiesioginės transliacijos būsena į: ${(config.streamState || 'LIVE').toUpperCase()} (Aktyvi: ${config.isLive ? 'Taip' : 'Ne'}, Iframe: ${config.iframeUrl || 'default'})`
     });
 
     res.json({ success: true, streamConfig: config, config });
   } catch (err) {
     res.status(500).json({ error: 'Failed to update stream state' });
+  }
+});
+
+// API: Dedicated Admin Endpoint to Get Stream Iframe Embed Link
+app.get('/api/admin/stream/iframe-url', (req, res) => {
+  try {
+    const config = loadStreamConfig();
+    res.json({ success: true, iframeUrl: config.iframeUrl || '' });
+  } catch (err) {
+    res.status(500).json({ success: false, error: 'Nepavyko nuskaityti iframe nuorodos' });
+  }
+});
+
+// API: Dedicated Admin Endpoint to Update Stream Iframe Embed Link
+app.post('/api/admin/stream/iframe-url', (req, res) => {
+  try {
+    const { iframeUrl, adminEmail, adminName } = req.body || {};
+    if (!iframeUrl || typeof iframeUrl !== 'string' || !iframeUrl.trim()) {
+      return res.status(400).json({ success: false, error: 'Prašome pateikti teisingą iframe nuorodą (URL)' });
+    }
+    const cleanUrl = iframeUrl.trim();
+    const config = loadStreamConfig();
+    config.iframeUrl = cleanUrl;
+    config.updatedAt = new Date().toISOString();
+    saveStreamConfig(config);
+
+    broadcastStreamUpdate('STREAM_STATE_UPDATE', {
+      streamState: config.streamState,
+      isLive: config.isLive,
+      iframeUrl: config.iframeUrl
+    });
+
+    const callerEmail = String(adminEmail || PRIMARY_SUPERADMIN_EMAIL).trim().toLowerCase();
+    recordActivityLog({
+      action: "STREAM_IFRAME_CHANGED",
+      category: "stream",
+      adminEmail: callerEmail,
+      adminName: adminName || callerEmail.split('@')[0],
+      target: "Stream Iframe",
+      details: `Atnaujinta transliacijos grotuvo iframe nuoroda: ${cleanUrl.slice(0, 60)}...`
+    });
+
+    res.json({ success: true, iframeUrl: config.iframeUrl, streamConfig: config, config });
+  } catch (err) {
+    res.status(500).json({ success: false, error: 'Nepavyko atnaujinti iframe nuorodos: ' + err.message });
   }
 });
 
@@ -3972,6 +4067,858 @@ app.get('/api/admin/live/viewers', (req, res) => {
   }
 });
 
+// ===========================================================================
+// BROADCAST GRAPHICS ADMIN & OBS STUDIO OVERLAY API
+// ===========================================================================
+
+// Helper to seed initial default broadcast graphic projects if file is empty
+function getSeededBroadcastProjects() {
+  return [
+    {
+      id: "junior-category",
+      name: "Jaunųjų kategorija (10–13 m.)",
+      type: "junior-category",
+      title: "JAUNŲJŲ KATEGORIJA",
+      subtitle: "10–13 metų amžiaus moksleivių filmai",
+      badge: "KATEGORIJA I",
+      category: "10–13 metų",
+      position: "bottom-left",
+      offsetX: 40,
+      offsetY: 40,
+      width: 520,
+      bgColor: "#0A221D",
+      bgOpacity: 0.92,
+      borderColor: "#6FA58A",
+      borderWidth: 1,
+      borderRadius: 6,
+      textColor: "#F1F3EE",
+      accentColor: "#6FA58A",
+      subtextColor: "#9BC4AE",
+      fontFamily: "Inter",
+      fontSize: 24,
+      fontWeight: 700,
+      animation: "slide-up",
+      duration: 0.6,
+      delay: 0,
+      showLogo: true,
+      logoUrl: "https://i.postimg.cc/GpCY4wPT/Logo-film-fest.webp",
+      logoSize: 52,
+      updatedAt: new Date().toISOString()
+    },
+    {
+      id: "senior-category",
+      name: "Vyresniųjų kategorija (14–18 m.)",
+      type: "senior-category",
+      title: "VYRESNIŲJŲ KATEGORIJA",
+      subtitle: "14–18 metų amžiaus moksleivių filmai",
+      badge: "KATEGORIJA II",
+      category: "14–18 metų",
+      position: "bottom-left",
+      offsetX: 40,
+      offsetY: 40,
+      width: 520,
+      bgColor: "#0A221D",
+      bgOpacity: 0.92,
+      borderColor: "#6FA58A",
+      borderWidth: 1,
+      borderRadius: 6,
+      textColor: "#F1F3EE",
+      accentColor: "#6FA58A",
+      subtextColor: "#9BC4AE",
+      fontFamily: "Inter",
+      fontSize: 24,
+      fontWeight: 700,
+      animation: "slide-up",
+      duration: 0.6,
+      delay: 0,
+      showLogo: true,
+      logoUrl: "https://i.postimg.cc/GpCY4wPT/Logo-film-fest.webp",
+      logoSize: 52,
+      updatedAt: new Date().toISOString()
+    },
+    {
+      id: "place-1",
+      name: "Pirmosios vietos apdovanojimas (I Vieta)",
+      type: "place-1",
+      title: "I VIETOS LAUREATAS",
+      subtitle: "Aukščiausias festivalio žiuri komisijos įvertinimas",
+      badge: "🏆 I VIETA",
+      category: "Auksinis Ąžuolas",
+      position: "bottom-left",
+      offsetX: 40,
+      offsetY: 40,
+      width: 560,
+      bgColor: "#0A221D",
+      bgOpacity: 0.95,
+      borderColor: "#D4AF37",
+      borderWidth: 1.5,
+      borderRadius: 6,
+      textColor: "#F1F3EE",
+      accentColor: "#D4AF37",
+      subtextColor: "#F3E5AB",
+      fontFamily: "Inter",
+      fontSize: 26,
+      fontWeight: 800,
+      animation: "slide-up",
+      duration: 0.7,
+      delay: 0,
+      showLogo: true,
+      logoUrl: "https://i.postimg.cc/GpCY4wPT/Logo-film-fest.webp",
+      logoSize: 56,
+      updatedAt: new Date().toISOString()
+    },
+    {
+      id: "place-2",
+      name: "Antrosios vietos apdovanojimas (II Vieta)",
+      type: "place-2",
+      title: "II VIETOS LAUREATAS",
+      subtitle: "Sidabrinis įvertinimas už kinematografinį meistriškumą",
+      badge: "🥈 II VIETA",
+      category: "Sidabrinis Ąžuolas",
+      position: "bottom-left",
+      offsetX: 40,
+      offsetY: 40,
+      width: 560,
+      bgColor: "#0A221D",
+      bgOpacity: 0.94,
+      borderColor: "#C0C0C0",
+      borderWidth: 1.5,
+      borderRadius: 6,
+      textColor: "#F1F3EE",
+      accentColor: "#E0E0E0",
+      subtextColor: "#9BC4AE",
+      fontFamily: "Inter",
+      fontSize: 25,
+      fontWeight: 700,
+      animation: "slide-up",
+      duration: 0.65,
+      delay: 0,
+      showLogo: true,
+      logoUrl: "https://i.postimg.cc/GpCY4wPT/Logo-film-fest.webp",
+      logoSize: 54,
+      updatedAt: new Date().toISOString()
+    },
+    {
+      id: "place-3",
+      name: "Trečiosios vietos apdovanojimas (III Vieta)",
+      type: "place-3",
+      title: "III VIETOS LAUREATAS",
+      subtitle: "Bronzinis įvertinimas už kūrybinį autorinį braižą",
+      badge: "🥉 III VIETA",
+      category: "Bronzinis Ąžuolas",
+      position: "bottom-left",
+      offsetX: 40,
+      offsetY: 40,
+      width: 560,
+      bgColor: "#0A221D",
+      bgOpacity: 0.94,
+      borderColor: "#CD7F32",
+      borderWidth: 1.5,
+      borderRadius: 6,
+      textColor: "#F1F3EE",
+      accentColor: "#E29548",
+      subtextColor: "#9BC4AE",
+      fontFamily: "Inter",
+      fontSize: 25,
+      fontWeight: 700,
+      animation: "slide-up",
+      duration: 0.65,
+      delay: 0,
+      showLogo: true,
+      logoUrl: "https://i.postimg.cc/GpCY4wPT/Logo-film-fest.webp",
+      logoSize: 54,
+      updatedAt: new Date().toISOString()
+    },
+    {
+      id: "film-title",
+      name: "Filmo pavadinimas ir kūrėjas (Lower Third)",
+      type: "film-title",
+      title: "VILTIES ŠVIESA",
+      subtitle: "Režisierius: Mantas Petraitis • Kauno Tarptautinė Gimnazija",
+      badge: "KONKURSINIS FILMAS",
+      category: "Trumpametražis kinas",
+      position: "bottom-left",
+      offsetX: 40,
+      offsetY: 40,
+      width: 580,
+      bgColor: "#0A221D",
+      bgOpacity: 0.92,
+      borderColor: "#6FA58A",
+      borderWidth: 1,
+      borderRadius: 6,
+      textColor: "#F1F3EE",
+      accentColor: "#6FA58A",
+      subtextColor: "#9BC4AE",
+      fontFamily: "Inter",
+      fontSize: 25,
+      fontWeight: 700,
+      animation: "slide-left",
+      duration: 0.6,
+      delay: 0,
+      showLogo: true,
+      logoUrl: "https://i.postimg.cc/GpCY4wPT/Logo-film-fest.webp",
+      logoSize: 50,
+      updatedAt: new Date().toISOString()
+    },
+    {
+      id: "participant",
+      name: "Dalyvio vardas ir pavardė",
+      type: "participant",
+      title: "DOMINIKAS ŠUŠKEVIČ",
+      subtitle: "8c klasė • Jaunųjų režisierių debiutas",
+      badge: "FESTIVALIO DALYVIS",
+      category: "Autorius",
+      position: "bottom-left",
+      offsetX: 40,
+      offsetY: 40,
+      width: 500,
+      bgColor: "#0A221D",
+      bgOpacity: 0.92,
+      borderColor: "#6FA58A",
+      borderWidth: 1,
+      borderRadius: 6,
+      textColor: "#F1F3EE",
+      accentColor: "#6FA58A",
+      subtextColor: "#9BC4AE",
+      fontFamily: "Inter",
+      fontSize: 24,
+      fontWeight: 700,
+      animation: "slide-left",
+      duration: 0.55,
+      delay: 0,
+      showLogo: true,
+      logoUrl: "https://i.postimg.cc/GpCY4wPT/Logo-film-fest.webp",
+      logoSize: 48,
+      updatedAt: new Date().toISOString()
+    },
+    {
+      id: "live",
+      name: "„TIESIOGIAI“ žyma (Live Bug)",
+      type: "live",
+      title: "TIESIOGIAI",
+      subtitle: "Ąžuolyno Tarptautinis Kino Festivalis",
+      badge: "LIVE",
+      category: "Transliacija",
+      position: "top-right",
+      offsetX: 40,
+      offsetY: 36,
+      width: 260,
+      bgColor: "#0A221D",
+      bgOpacity: 0.92,
+      borderColor: "#6FA58A",
+      borderWidth: 1,
+      borderRadius: 6,
+      textColor: "#F1F3EE",
+      accentColor: "#ef4444",
+      subtextColor: "#9BC4AE",
+      fontFamily: "Inter",
+      fontSize: 16,
+      fontWeight: 800,
+      animation: "fade",
+      duration: 0.5,
+      delay: 0,
+      showLogo: true,
+      logoUrl: "https://i.postimg.cc/GpCY4wPT/Logo-film-fest.webp",
+      logoSize: 34,
+      updatedAt: new Date().toISOString()
+    },
+    {
+      id: "countdown",
+      name: "Atbulinės atskaitos laikmatis",
+      type: "countdown",
+      title: "TRANSLIACIJOS PRADŽIA PO:",
+      subtitle: "Ąžuolyno Tarptautinis Mokinių Filmų Festivalis",
+      badge: "ATBULINIS LAIKMATIS",
+      category: "Laikmatis",
+      timerMinutes: 5,
+      timerSeconds: 0,
+      timerFinishMsg: "FESTIVALIS PRASIDEDA!",
+      interactive: false,
+      position: "center",
+      offsetX: 0,
+      offsetY: 0,
+      width: 620,
+      bgColor: "#0A221D",
+      bgOpacity: 0.94,
+      borderColor: "#6FA58A",
+      borderWidth: 1.5,
+      borderRadius: 6,
+      textColor: "#F1F3EE",
+      accentColor: "#D4AF37",
+      subtextColor: "#9BC4AE",
+      fontFamily: "Inter",
+      fontSize: 32,
+      fontWeight: 800,
+      animation: "scale",
+      duration: 0.7,
+      delay: 0,
+      showLogo: true,
+      logoUrl: "https://i.postimg.cc/GpCY4wPT/Logo-film-fest.webp",
+      logoSize: 64,
+      updatedAt: new Date().toISOString()
+    },
+    {
+      id: "intro",
+      name: "Festivalio pradžios ekranas",
+      type: "intro",
+      title: "ĄŽUOLYNO TARPTAUTINIS KINO FESTIVALIS",
+      subtitle: "Apdovanojimų ir Laureatų Ceremonija • Kauno Tarptautinė Gimnazija",
+      badge: "AZUOLYNAS FEST",
+      category: "Pradžios Ekranas",
+      position: "center",
+      offsetX: 0,
+      offsetY: 0,
+      width: 860,
+      bgColor: "#0A221D",
+      bgOpacity: 0.95,
+      borderColor: "#6FA58A",
+      borderWidth: 1.5,
+      borderRadius: 6,
+      textColor: "#F1F3EE",
+      accentColor: "#6FA58A",
+      subtextColor: "#9BC4AE",
+      fontFamily: "Inter",
+      fontSize: 34,
+      fontWeight: 800,
+      animation: "scale",
+      duration: 0.8,
+      delay: 0.2,
+      showLogo: true,
+      logoUrl: "https://i.postimg.cc/GpCY4wPT/Logo-film-fest.webp",
+      logoSize: 84,
+      updatedAt: new Date().toISOString()
+    },
+    {
+      id: "outro",
+      name: "Festivalio pabaigos ekranas",
+      type: "outro",
+      title: "AČIŪ, KAD BUVOTE KARTU!",
+      subtitle: "Sveikiname visus laureatus ir dalyvius. Iki susitikimo kitais metais!",
+      badge: "PABAIGA",
+      category: "Pabaigos Ekranas",
+      position: "center",
+      offsetX: 0,
+      offsetY: 0,
+      width: 800,
+      bgColor: "#0A221D",
+      bgOpacity: 0.95,
+      borderColor: "#6FA58A",
+      borderWidth: 1.5,
+      borderRadius: 6,
+      textColor: "#F1F3EE",
+      accentColor: "#6FA58A",
+      subtextColor: "#9BC4AE",
+      fontFamily: "Inter",
+      fontSize: 32,
+      fontWeight: 800,
+      animation: "fade",
+      duration: 0.8,
+      delay: 0.2,
+      showLogo: true,
+      logoUrl: "https://i.postimg.cc/GpCY4wPT/Logo-film-fest.webp",
+      logoSize: 76,
+      updatedAt: new Date().toISOString()
+    },
+    {
+      id: "notice",
+      name: "Pranešimo arba klaidos baneris",
+      type: "notice",
+      title: "NETRUKUS TĘSIME TRANSLIACIJĄ",
+      subtitle: "Signalizavimo atnaujinimas • Ačiū už kantrybę",
+      badge: "PRANEŠIMAS",
+      category: "Būsena",
+      position: "bottom-center",
+      offsetX: 0,
+      offsetY: 48,
+      width: 640,
+      bgColor: "#0A221D",
+      bgOpacity: 0.95,
+      borderColor: "#6FA58A",
+      borderWidth: 1,
+      borderRadius: 6,
+      textColor: "#F1F3EE",
+      accentColor: "#D4AF37",
+      subtextColor: "#9BC4AE",
+      fontFamily: "Inter",
+      fontSize: 24,
+      fontWeight: 700,
+      animation: "slide-up",
+      duration: 0.6,
+      delay: 0,
+      showLogo: true,
+      logoUrl: "https://i.postimg.cc/GpCY4wPT/Logo-film-fest.webp",
+      logoSize: 48,
+      updatedAt: new Date().toISOString()
+    },
+    {
+      id: "custom",
+      name: "Individualus baneris (Laisvas dizainas)",
+      type: "custom",
+      title: "AZUOLYNAS TRANSLIACIJOS BANERIS",
+      subtitle: "Redaguojamas tekstas, šriftai ir animacijos",
+      badge: "INDIVIDUALUS",
+      category: "Dizainas",
+      position: "bottom-left",
+      offsetX: 40,
+      offsetY: 40,
+      width: 540,
+      bgColor: "#0A221D",
+      bgOpacity: 0.92,
+      borderColor: "#6FA58A",
+      borderWidth: 1,
+      borderRadius: 6,
+      textColor: "#F1F3EE",
+      accentColor: "#6FA58A",
+      subtextColor: "#9BC4AE",
+      fontFamily: "Inter",
+      fontSize: 24,
+      fontWeight: 700,
+      animation: "slide-up",
+      duration: 0.6,
+      delay: 0,
+      showLogo: true,
+      logoUrl: "https://i.postimg.cc/GpCY4wPT/Logo-film-fest.webp",
+      logoSize: 50,
+      updatedAt: new Date().toISOString()
+    }
+  ];
+}
+
+// API: Get All Broadcast Graphic Projects
+app.get('/api/broadcast/projects', (req, res) => {
+  try {
+    let data = loadBroadcastProjects();
+    if (!data.projects || data.projects.length === 0) {
+      data = { projects: getSeededBroadcastProjects(), updatedAt: new Date().toISOString() };
+      saveBroadcastProjects(data);
+    }
+    res.json({ success: true, projects: data.projects || [] });
+  } catch (err) {
+    res.status(500).json({ success: false, error: 'Nepavyko gauti projektų: ' + err.message });
+  }
+});
+
+// API: Save or Update a Broadcast Graphic Project
+app.post('/api/broadcast/projects', (req, res) => {
+  try {
+    const project = req.body;
+    if (!project || !project.name) {
+      return res.status(400).json({ success: false, error: 'Projekto duomenys negaliojantys' });
+    }
+
+    const data = loadBroadcastProjects();
+    const projects = data.projects || [];
+    const id = project.id || ('proj_' + Date.now().toString(36) + '_' + Math.random().toString(36).substring(2, 6));
+
+    const updatedProject = {
+      ...project,
+      id,
+      updatedAt: new Date().toISOString()
+    };
+
+    const existingIdx = projects.findIndex(p => p.id === id);
+    if (existingIdx >= 0) {
+      projects[existingIdx] = updatedProject;
+    } else {
+      projects.unshift(updatedProject);
+    }
+
+    saveBroadcastProjects({ projects, updatedAt: new Date().toISOString() });
+    res.json({ success: true, project: updatedProject });
+  } catch (err) {
+    res.status(500).json({ success: false, error: 'Nepavyko išsaugoti projekto: ' + err.message });
+  }
+});
+
+// API: Delete a Broadcast Graphic Project
+app.delete('/api/broadcast/projects/:id', (req, res) => {
+  try {
+    const { id } = req.params;
+    const data = loadBroadcastProjects();
+    let projects = data.projects || [];
+    const initialLen = projects.length;
+    projects = projects.filter(p => p.id !== id);
+
+    if (projects.length === initialLen) {
+      return res.status(404).json({ success: false, error: 'Projektas nerastas' });
+    }
+
+    saveBroadcastProjects({ projects, updatedAt: new Date().toISOString() });
+    res.json({ success: true, message: 'Projektas sėkmingai ištrintas' });
+  } catch (err) {
+    res.status(500).json({ success: false, error: 'Nepavyko ištrinti projekto: ' + err.message });
+  }
+});
+
+// Helper function to build standalone OBS Browser Source HTML
+function generateStandaloneOverlayHtml(item, query = {}) {
+  const title = query.title || item.title || "AZUOLYNAS FEST";
+  const subtitle = query.subtitle || item.subtitle || "";
+  const badge = query.badge || item.badge || "";
+  const position = query.position || item.position || "bottom-left";
+  const offsetX = Number(query.offsetX !== undefined ? query.offsetX : (item.offsetX !== undefined ? item.offsetX : 40));
+  const offsetY = Number(query.offsetY !== undefined ? query.offsetY : (item.offsetY !== undefined ? item.offsetY : 40));
+  const width = Number(query.width || item.width || 560);
+  const bgColor = item.bgColor || "#0A221D";
+  const bgOpacity = item.bgOpacity !== undefined ? Number(item.bgOpacity) : 0.94;
+  const borderColor = item.borderColor || "#6FA58A";
+  const borderWidth = item.borderWidth !== undefined ? Number(item.borderWidth) : 1;
+  const borderRadius = item.borderRadius !== undefined ? Number(item.borderRadius) : 6;
+  const textColor = item.textColor || "#F1F3EE";
+  const accentColor = item.accentColor || "#6FA58A";
+  const subtextColor = item.subtextColor || "#9BC4AE";
+  const fontFamily = item.fontFamily || "Inter";
+  const fontSize = Number(item.fontSize || 24);
+  const fontWeight = Number(item.fontWeight || 700);
+  const animation = item.animation || "slide-up";
+  const duration = Number(item.duration || 0.6);
+  const delay = Number(item.delay || 0);
+  const showLogo = item.showLogo !== false;
+  const logoUrl = item.logoUrl || "https://i.postimg.cc/GpCY4wPT/Logo-film-fest.webp";
+  const logoSize = Number(item.logoSize || 52);
+  const isCountdown = item.type === "countdown";
+  const timerMins = Number(query.timerMinutes || item.timerMinutes || 5);
+  const timerSecs = Number(query.timerSeconds || item.timerSeconds || 0);
+  const timerFinishMsg = query.timerFinishMsg || item.timerFinishMsg || "FESTIVALIS PRASIDEDA!";
+
+  let posStyle = "";
+  if (position === "bottom-left") {
+    posStyle = `bottom: ${offsetY}px; left: ${offsetX}px;`;
+  } else if (position === "bottom-center") {
+    posStyle = `bottom: ${offsetY}px; left: 50%; transform: translateX(-50%);`;
+  } else if (position === "bottom-right") {
+    posStyle = `bottom: ${offsetY}px; right: ${offsetX}px;`;
+  } else if (position === "top-left") {
+    posStyle = `top: ${offsetY}px; left: ${offsetX}px;`;
+  } else if (position === "top-center") {
+    posStyle = `top: ${offsetY}px; left: 50%; transform: translateX(-50%);`;
+  } else if (position === "top-right") {
+    posStyle = `top: ${offsetY}px; right: ${offsetX}px;`;
+  } else if (position === "center") {
+    posStyle = `top: 50%; left: 50%; transform: translate(-50%, -50%);`;
+  } else {
+    posStyle = `bottom: ${offsetY}px; left: ${offsetX}px;`;
+  }
+
+  // Convert hex to rgba
+  let r = 10, g = 34, b = 29;
+  if (bgColor.startsWith("#") && bgColor.length >= 7) {
+    r = parseInt(bgColor.slice(1, 3), 16) || 10;
+    g = parseInt(bgColor.slice(3, 5), 16) || 34;
+    b = parseInt(bgColor.slice(5, 7), 16) || 29;
+  }
+  const rgbaBg = `rgba(${r}, ${g}, ${b}, ${bgOpacity})`;
+
+  return `<!DOCTYPE html>
+<html lang="lt">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=1920, height=1080, initial-scale=1.0">
+  <title>${item.name || 'OBS Overlay'} | AZUOLYNAS Broadcast</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Inter:wght@400;500;600;700;800;900&family=Montserrat:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body, html {
+      width: 1920px;
+      height: 1080px;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background: transparent !important;
+      font-family: '${fontFamily}', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+    .broadcast-stage {
+      position: relative;
+      width: 1920px;
+      height: 1080px;
+      overflow: hidden;
+      pointer-events: none;
+    }
+    .azuolynas-overlay-banner {
+      position: absolute;
+      ${posStyle}
+      width: ${width}px;
+      max-width: calc(100% - 60px);
+      background: ${rgbaBg};
+      border: ${borderWidth}px solid ${borderColor};
+      border-radius: ${borderRadius}px;
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45), 0 0 20px rgba(${r}, ${g}, ${b}, 0.35);
+      padding: 18px 24px;
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      color: ${textColor};
+      animation: anim-${animation} ${duration}s cubic-bezier(0.16, 1, 0.3, 1) ${delay}s both;
+      pointer-events: auto;
+    }
+    .banner-logo {
+      width: ${logoSize}px;
+      height: ${logoSize}px;
+      object-fit: contain;
+      flex-shrink: 0;
+      filter: drop-shadow(0 2px 8px rgba(0,0,0,0.4));
+    }
+    .banner-body {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .banner-badge-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 2px;
+    }
+    .banner-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 3px 9px;
+      border-radius: 4px;
+      background: rgba(111, 165, 138, 0.2);
+      border: 1px solid ${accentColor};
+      color: ${accentColor};
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+    .live-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #ef4444;
+      box-shadow: 0 0 8px #ef4444;
+      animation: pulse-live 1.2s infinite ease-in-out;
+    }
+    @keyframes pulse-live {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.85); }
+    }
+    .banner-title {
+      font-size: ${fontSize}px;
+      font-weight: ${fontWeight};
+      line-height: 1.2;
+      color: ${textColor};
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+      word-break: break-word;
+    }
+    .banner-subtitle {
+      font-size: ${Math.max(13, Math.round(fontSize * 0.58))}px;
+      color: ${subtextColor};
+      line-height: 1.35;
+      font-weight: 500;
+    }
+    .banner-accent-bar {
+      position: absolute;
+      left: 0;
+      top: 10px;
+      bottom: 10px;
+      width: 3px;
+      background: ${accentColor};
+      border-radius: 2px;
+    }
+    /* Countdown Specific */
+    .countdown-display {
+      font-family: 'Inter', monospace;
+      font-size: ${Math.round(fontSize * 1.6)}px;
+      font-weight: 900;
+      letter-spacing: 0.05em;
+      color: ${accentColor};
+      text-shadow: 0 0 20px rgba(212, 175, 55, 0.4);
+      margin: 8px 0;
+      display: inline-block;
+    }
+    .countdown-controls {
+      display: flex;
+      gap: 8px;
+      margin-top: 6px;
+    }
+    .countdown-btn {
+      background: rgba(111, 165, 138, 0.25);
+      border: 1px solid ${accentColor};
+      color: ${textColor};
+      padding: 4px 12px;
+      border-radius: 4px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .countdown-btn:hover {
+      background: ${accentColor};
+      color: #0A221D;
+    }
+    /* Animations */
+    @keyframes anim-slide-up {
+      from { opacity: 0; transform: translateY(40px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes anim-slide-left {
+      from { opacity: 0; transform: translateX(-40px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+    @keyframes anim-slide-right {
+      from { opacity: 0; transform: translateX(40px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+    @keyframes anim-fade {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    @keyframes anim-scale {
+      from { opacity: 0; transform: scale(0.85); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    @keyframes anim-cinematic {
+      0% { opacity: 0; transform: translateY(20px) scale(0.96); filter: blur(6px); }
+      100% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+    }
+  </style>
+</head>
+<body>
+  <div class="broadcast-stage">
+    <div class="azuolynas-overlay-banner" id="broadcastBanner">
+      <div class="banner-accent-bar"></div>
+      ${showLogo ? `<img src="${logoUrl}" alt="AZUOLYNAS" class="banner-logo" onerror="this.style.display='none';">` : ''}
+      <div class="banner-body">
+        ${badge ? `
+        <div class="banner-badge-row">
+          <span class="banner-badge">
+            ${item.type === 'live' ? '<span class="live-dot"></span>' : ''}
+            ${badge}
+          </span>
+        </div>` : ''}
+        <div class="banner-title" id="bannerTitle">${title}</div>
+        ${subtitle ? `<div class="banner-subtitle" id="bannerSubtitle">${subtitle}</div>` : ''}
+        ${isCountdown ? `
+        <div>
+          <div class="countdown-display" id="countdownNumbers">--:--</div>
+          ${item.interactive ? `
+          <div class="countdown-controls">
+            <button class="countdown-btn" onclick="startTimer()">Start</button>
+            <button class="countdown-btn" onclick="pauseTimer()">Pause</button>
+            <button class="countdown-btn" onclick="resetTimer()">Reset</button>
+          </div>` : ''}
+        </div>` : ''}
+      </div>
+    </div>
+  </div>
+
+  <script>
+    ${isCountdown ? `
+    let totalSeconds = (${timerMins} * 60) + ${timerSecs};
+    const initialSeconds = totalSeconds;
+    let timerInterval = null;
+    let isRunning = true;
+
+    function formatTime(sec) {
+      const m = Math.floor(sec / 60);
+      const s = sec % 60;
+      return String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+    }
+
+    function updateTimerUI() {
+      const el = document.getElementById('countdownNumbers');
+      if (!el) return;
+      if (totalSeconds <= 0) {
+        el.textContent = "00:00";
+        const sub = document.getElementById('bannerSubtitle');
+        if (sub) sub.textContent = "${timerFinishMsg.replace(/"/g, '\\"')}";
+        clearInterval(timerInterval);
+        return;
+      }
+      el.textContent = formatTime(totalSeconds);
+    }
+
+    function startTimer() {
+      if (timerInterval) clearInterval(timerInterval);
+      isRunning = true;
+      timerInterval = setInterval(() => {
+        if (totalSeconds > 0) {
+          totalSeconds--;
+          updateTimerUI();
+        } else {
+          clearInterval(timerInterval);
+        }
+      }, 1000);
+    }
+
+    function pauseTimer() {
+      isRunning = false;
+      if (timerInterval) clearInterval(timerInterval);
+    }
+
+    function resetTimer() {
+      pauseTimer();
+      totalSeconds = initialSeconds;
+      updateTimerUI();
+    }
+
+    updateTimerUI();
+    startTimer();
+    ` : ''}
+
+    // Window message listener for real-time OBS / H2R Graphics control
+    window.addEventListener('message', (e) => {
+      try {
+        const msg = (typeof e.data === 'string') ? JSON.parse(e.data) : e.data;
+        if (!msg) return;
+        if (msg.action === 'UPDATE_TEXT') {
+          if (msg.title) document.getElementById('bannerTitle').textContent = msg.title;
+          if (msg.subtitle) {
+            const sub = document.getElementById('bannerSubtitle');
+            if (sub) sub.textContent = msg.subtitle;
+          }
+        } else if (msg.action === 'HIDE') {
+          const banner = document.getElementById('broadcastBanner');
+          if (banner) banner.style.opacity = '0';
+        } else if (msg.action === 'SHOW') {
+          const banner = document.getElementById('broadcastBanner');
+          if (banner) banner.style.opacity = '1';
+        }
+      } catch (err) {}
+    });
+  </script>
+</body>
+</html>`;
+}
+
+// API: Serve OBS Studio Browser Source Standalone Overlay
+app.get('/api/broadcast/overlay/:id', (req, res) => {
+  try {
+    const { id } = req.params;
+    const data = loadBroadcastProjects();
+    const projects = data.projects && data.projects.length ? data.projects : getSeededBroadcastProjects();
+    let project = projects.find(p => p.id === id || p.type === id);
+
+    if (!project) {
+      // Fallback matching default seeded item
+      const seeded = getSeededBroadcastProjects();
+      project = seeded.find(s => s.id === id || s.type === id) || seeded[0];
+    }
+
+    const html = generateStandaloneOverlayHtml(project, req.query);
+    res.setHeader('Content-Type', 'text/html; charset=utf-8');
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.send(html);
+  } catch (err) {
+    res.status(500).send('Error rendering broadcast overlay: ' + err.message);
+  }
+});
 // Friendly aliases for Live stream, Stream Overlay & 2027 pages
 app.get('/live', (req, res) => {
   res.sendFile(path.join(__dirname, 'live.html'));
