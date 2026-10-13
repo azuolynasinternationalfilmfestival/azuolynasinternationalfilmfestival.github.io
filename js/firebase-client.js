@@ -27,7 +27,7 @@
   }
   function mail(to, subject, html, text) {
     if (!to || !subject || !html) throw new Error('Email recipient, subject and content are required.');
-    return { to: Array.isArray(to) ? to : [to], message: { subject, html, text: text || subject }, createdAt: timestamp() };
+    return { from: organizer, replyTo: organizer, to: Array.isArray(to) ? to : [to], message: { subject, html, text: text || subject }, createdAt: timestamp() };
   }
   async function queueEmail({ to, subject, html, text, template, lang = 'lt', data = {} }) {
     if (template) {
@@ -261,7 +261,14 @@
       }
       case 'live.status': return streamStatus();
       case 'stream.status': await put('stream_config', 'current', { streamState: data.state, isLive: data.state === 'live', updatedAt: now() }); return { success: true, streamConfig: await streamStatus() };
-      case 'stream.iframe-url': await put('stream_config', 'current', { iframeUrl: data.iframeUrl, updatedAt: now() }); return { success: true };
+      case 'stream.iframe-url': {
+        const iframeUrl = new URL(String(data.iframeUrl || '').trim());
+        if (iframeUrl.protocol !== 'https:' || iframeUrl.username || iframeUrl.password) {
+          throw new Error('Enter an HTTPS player URL without credentials.');
+        }
+        await put('stream_config', 'current', { iframeUrl: iframeUrl.href, updatedAt: now() });
+        return { success: true, iframeUrl: iframeUrl.href };
+      }
       case 'live.verify-access': return { authorized: true, user: await livePass(data) };
       case 'live.heartbeat': {
         await livePass(data);

@@ -26,6 +26,8 @@ Queued documents use the extension's standard format:
 
 ```js
 {
+  from: "azuolynasfilmfestival@gmail.com",
+  replyTo: "azuolynasfilmfestival@gmail.com",
   to: ["recipient@example.com"],
   message: { subject: "Subject", html: "<p>Message</p>", text: "Message" },
   createdAt: firebase.firestore.FieldValue.serverTimestamp()
@@ -37,6 +39,20 @@ A successful write means queued, not inbox delivery. The extension updates
 those states. Sender credentials belong in the extension configuration, never
 in the website or public settings documents. Remove any old `smtp` settings from
 Firestore in the Firebase console if they were previously saved.
+
+All application notifications request `azuolynasfilmfestival@gmail.com` as the
+sender and reply address. The extension's mail provider must authorize that sender;
+Gmail SMTP uses its authenticated account as the sender, so configure the extension
+with that festival account. Set its Default FROM address to the same address.
+These settings belong in Firebase Console → Extensions → Trigger Email →
+configuration. The website cannot change the extension's credentials.
+
+If an email does not arrive, inspect its document in the named database's `mail`
+collection. No `delivery` field means the extension has not processed it yet;
+confirm its database and collection configuration. `delivery.state: ERROR` means
+inspect `delivery.error` and extension logs for the provider failure.
+`delivery.state: SUCCESS` means the provider accepted the message; check the
+recipient address and spam folder. A queued document does not prove inbox receipt.
 
 Invitations also commit the invitation and its single email notification together.
 New invitations use Firestore timestamps for expiration. Reissue old invitations
@@ -57,3 +73,15 @@ No application dependency installation or environment file is needed.
 Run `npm test` for synthetic Web SDK regression checks, and `npm run build` for
 JavaScript syntax, local script paths and module import validation. These checks
 do not send real email or mutate the production Firebase database.
+
+## Live player
+
+In the admin Transliacija tab, edit **Transliacijos grotuvo nuoroda → Iframe URL**
+and choose **Išsaugoti nuorodą**. Use an absolute HTTPS embed URL, rather than iframe
+HTML. The Web SDK merges it into `stream_config/current.iframeUrl`, preserving
+broadcast settings. The live page listens to that document and updates the player
+without reloading the page. The default URL button fills the field; save to apply it.
+
+`live.html` loads the shared `style.css` design tokens and the page styles in
+`live.css`. Its player remains 16:9 at every viewport size. The broadcast indicator
+reflects the stored live state; voting cards also observe festival voting settings.
