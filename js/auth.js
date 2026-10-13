@@ -154,7 +154,7 @@ export function initAuth(options = {}) {
       if (prefillCode && actCodeInput) actCodeInput.value = prefillCode;
 
       try {
-        const resp = await fetch(`/api/admin/invite-info?token=${encodeURIComponent(inviteToken)}`);
+        const resp = await FirebaseClient.request("invite-info", { body: { token: inviteToken } });
         const data = await resp.json();
         if (resp.ok && data.success && data.invitation) {
           const inv = data.invitation;
@@ -219,19 +219,16 @@ export function initAuth(options = {}) {
     }
 
     try {
-      const resp = await fetch("/api/admin/activate-invite", {
+      const resp = await FirebaseClient.request("activate-invite", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ token, code, password, name, surname })
+
+        body: { token, code, password, name, surname }
       });
       const data = await resp.json();
       if (!resp.ok || !data.success) {
         throw new Error(data.error || "Nepavyko aktyvuoti paskyros.");
       }
 
-      if (data.token) {
-        sessionStorage.setItem("admin_jwt_token", data.token);
-      }
 
       showToast("Paskyra sėkmingai aktyvuota!", "success");
       if (actSuccessMsg) {
@@ -246,7 +243,7 @@ export function initAuth(options = {}) {
           await activeAuth.signInWithEmailAndPassword(email, password);
           return;
         } catch (authErr) {
-          // If Firebase Auth user was just provisioned on backend
+          // Firebase Auth account activation uses the Web SDK.
           console.info("Direct Firebase signin note after activation:", authErr.message);
         }
       }
@@ -380,43 +377,6 @@ export function initAuth(options = {}) {
       await activeAuth.signInWithEmailAndPassword(email, pass);
       showToast("Sėkmingai prisijungta!");
     } catch (err) {
-      console.warn("Direct Firebase auth attempt, checking token session fallback:", err.message);
-      try {
-        const res = await fetch("/api/admin/token", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email })
-        });
-        const data = await res.json();
-        if (res.ok && data.success && data.token) {
-          sessionStorage.setItem("admin_jwt_token", data.token);
-          sessionStorage.setItem("admin_user_email", data.user.email);
-          sessionStorage.setItem("admin_user_role", data.user.role);
-          sessionStorage.setItem("admin_user_name", (data.user.name ? `${data.user.name} ${data.user.surname || ''}` : data.user.email).trim());
-
-          if (loginSection) loginSection.classList.add("d-none");
-          if (panelSection) panelSection.classList.remove("d-none");
-          if (currentUserBadge) currentUserBadge.classList.remove("d-none");
-          if (currentUserName) currentUserName.textContent = data.user.name ? `${data.user.name} ${data.user.surname || ''}`.trim() : data.user.email;
-          if (currentUserRole) {
-            const roleLabels = {
-              admin: data.user.isSuperAdmin ? "Vyr. Administratorius" : "Administratorius",
-              editor: "Redaktorius",
-              judge: "Teisėjas (Komisija)",
-              moderator: "Moderatorius",
-              accountant: "Buhalteris",
-              viewer: "Žiūrovas"
-            };
-            currentUserRole.textContent = roleLabels[data.user.role] || data.user.role;
-          }
-          clearAuthError(authErrMsg);
-          showToast(`Sėkmingai prisijungta kaip ${data.user.name || data.user.email}!`, "success");
-          currentOnLoginSuccess(data.user);
-          return;
-        }
-      } catch (fallbackErr) {
-        console.warn("Token fallback error:", fallbackErr);
-      }
       displayAuthError(authErrMsg, err, "Nepavyko prisijungti prie valdymo skydo");
     } finally {
       if (submitBtn) {
@@ -573,18 +533,20 @@ export function initAuth(options = {}) {
   if (!isAuthStateListenerAttached && auth && typeof auth.onAuthStateChanged === "function") {
     isAuthStateListenerAttached = true;
     auth.onAuthStateChanged(async (user) => {
+      await FirebaseClient.waitForActivation();
       if (user) {
         const emailLower = (user.email || "").toLowerCase();
         const isSuperAdmin = emailLower === PRIMARY_SUPERADMIN_EMAIL.toLowerCase();
 
-        // Check Firestore user doc for account status and assigned role
         let userDoc = null;
+        let hasUidProfile = false;
         if (db) {
           try {
             const docId = emailLower.replace(/[^a-zA-Z0-9_-]/g, "_");
-            let docSnap = await db.collection("users").doc(docId).get();
-            if (!docSnap.exists && user.uid) {
-              docSnap = await db.collection("users").doc(user.uid).get();
+            let docSnap = await db.collection("users").doc(user.uid).get();
+            hasUidProfile = docSnap.exists;
+            if (!docSnap.exists) {
+              docSnap = await db.collection("users").doc(docId).get();
             }
             if (docSnap.exists) {
               userDoc = docSnap.data();
@@ -607,7 +569,7 @@ export function initAuth(options = {}) {
         const isAuthorized =
           isSuperAdmin ||
           AUTHORIZED_ADMIN_EMAILS.includes(emailLower) ||
-          (userDoc && (userDoc.role === "admin" || userDoc.role === "editor" || userDoc.role === "moderator" || userDoc.role === "judge" || userDoc.role === "accountant"));
+          (userDoc && userDoc.status === "active" && (userDoc.role === "admin" || userDoc.role === "editor" || userDoc.role === "moderator" || userDoc.role === "judge" || userDoc.role === "accountant"));
 
         if (isAuthorized) {
           if (db && user.uid) {
@@ -618,7 +580,8 @@ export function initAuth(options = {}) {
                 role: assignedRole,
                 status: "active",
                 lastLogin: new Date().toISOString(),
-                uid: user.uid
+                uid: user.uid,
+                ...(!hasUidProfile && userDoc ? { sourceProfileId: emailLower.replace(/[^a-zA-Z0-9_-]/g, "_") } : {})
               }, { merge: true });
             } catch (syncErr) {
               console.warn("UID doc sync notice:", syncErr.message);
@@ -708,23 +671,13 @@ export async function sendAdminInviteLink(targetEmail) {
     throw new Error("Nurodykite el. pašto adresą.");
   }
 
-  const jwtToken = sessionStorage.getItem("admin_jwt_token");
-  const headers = {
-    "Content-Type": "application/json",
-    "x-admin-email": currentUser.email
-  };
-  if (jwtToken) {
-    headers["Authorization"] = `Bearer ${jwtToken}`;
-  }
-
-  const res = await fetch("/api/admin/send-access-link", {
+  const res = await FirebaseClient.request("send-access-link", {
     method: "POST",
-    headers,
-    body: JSON.stringify({
+    body: {
       email: cleanEmail,
       role: "admin",
       adminEmail: currentUser.email
-    })
+    }
   });
 
   const data = await res.json();

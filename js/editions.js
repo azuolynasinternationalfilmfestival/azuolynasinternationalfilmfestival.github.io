@@ -108,12 +108,12 @@ export function subscribeEditions() {
           });
 
           if (allEditionsList.length === 0) {
-            loadEditionsFromApi();
+            loadEditionsFromFirestore();
           } else {
             renderAdminEditionsList();
           }
         }, () => {
-          loadEditionsFromApi();
+          loadEditionsFromFirestore();
         });
       return;
     } catch (e) {
@@ -121,12 +121,12 @@ export function subscribeEditions() {
     }
   }
 
-  loadEditionsFromApi();
+  loadEditionsFromFirestore();
 }
 
-async function loadEditionsFromApi() {
+async function loadEditionsFromFirestore() {
   try {
-    const res = await fetch("/api/editions");
+    const res = await FirebaseClient.request("editions");
     if (res.ok) {
       const data = await res.json();
       allEditionsList = data.editions || [DEFAULT_2027_EDITION, DEFAULT_2026_EDITION];
@@ -284,32 +284,22 @@ async function saveCurrentEdition() {
   };
 
   try {
-    // 1. Save to server backend API
-    const res = await fetch("/api/admin/editions", {
+
+    const res = await FirebaseClient.request("editions", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
+
+      body: payload
     });
 
     if (!res.ok) {
       const errData = await res.json().catch(() => ({}));
-      throw new Error(errData.error || "Serverio klaida išsaugant leidinį");
+      throw new Error(errData.error || "Firebase klaida išsaugant leidinį");
     }
 
-    // 2. Also sync to Firestore if db is available
-    if (db && typeof db.collection === "function") {
-      try {
-        await db.collection("editions").doc(year).set({
-          ...payload,
-          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-        }, { merge: true });
-      } catch (fsErr) {
-        console.warn("Firestore edition sync notice:", fsErr.message);
-      }
-    }
+
 
     showToast(`Metų leidinio FEST ${year} duomenys sėkmingai išsaugoti!`, "success");
-    await loadEditionsFromApi();
+    await loadEditionsFromFirestore();
     window.dispatchEvent(new CustomEvent("refresh-notifications"));
   } catch (err) {
     showToast("Klaida išsaugant leidinį: " + err.message, "error");
@@ -324,10 +314,10 @@ async function deleteEdition(yearId) {
   const callerEmail = sessionStorage.getItem("admin_user_email") || "azuolynasfilmfestival@gmail.com";
 
   try {
-    await fetch("/api/admin/editions/delete", {
+    await FirebaseClient.request("editions.delete", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ year: yearId, adminEmail: callerEmail })
+
+      body: { year: yearId, adminEmail: callerEmail }
     });
 
     if (db && typeof db.collection === "function") {
@@ -339,7 +329,7 @@ async function deleteEdition(yearId) {
     }
 
     showToast(`Leidinys ${yearId} pašalintas.`);
-    await loadEditionsFromApi();
+    await loadEditionsFromFirestore();
     window.dispatchEvent(new CustomEvent("refresh-notifications"));
   } catch (err) {
     showToast("Klaida trinant leidinį: " + err.message, "error");

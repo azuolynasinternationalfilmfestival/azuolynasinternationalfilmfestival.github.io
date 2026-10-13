@@ -72,7 +72,7 @@ export async function loadStreamData() {
 
 async function fetchStreamStatus() {
   try {
-    const res = await fetch("/api/live/status");
+    const res = await FirebaseClient.request("live.status");
     if (res.ok) {
       streamConfig = await res.json();
     }
@@ -83,7 +83,7 @@ async function fetchStreamStatus() {
 
 async function fetchSubmissionsList() {
   try {
-    const res = await fetch("/api/admin/submissions");
+    const res = await FirebaseClient.request("submissions");
     if (res.ok) {
       const data = await res.json();
       allSubmissions = data.submissions || [];
@@ -95,7 +95,7 @@ async function fetchSubmissionsList() {
 
 async function fetchAuthorizedViewers() {
   try {
-    const res = await fetch("/api/admin/stream/viewers");
+    const res = await FirebaseClient.request("stream.viewers");
     if (res.ok) {
       const data = await res.json();
       authorizedViewers = data.viewers || [];
@@ -107,7 +107,7 @@ async function fetchAuthorizedViewers() {
 
 async function fetchViewerCount() {
   try {
-    const res = await fetch("/api/admin/live/viewers");
+    const res = await FirebaseClient.request("live.viewers");
     if (res.ok) {
       const data = await res.json();
       activeViewerCount = data.activeViewers || 0;
@@ -119,7 +119,7 @@ async function fetchViewerCount() {
 
 async function pollStreamStats() {
   try {
-    const res = await fetch("/api/admin/live/viewers");
+    const res = await FirebaseClient.request("live.viewers");
     if (res.ok) {
       const data = await res.json();
       activeViewerCount = data.activeViewers || 0;
@@ -170,10 +170,10 @@ function initStreamIframeUrlControls() {
       btnSaveIframe.disabled = true;
       try {
         const callerEmail = sessionStorage.getItem("admin_user_email") || "azuolynasfilmfestival@gmail.com";
-        const res = await fetch("/api/admin/stream/iframe-url", {
+        const res = await FirebaseClient.request("stream.iframe-url", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ iframeUrl: newUrl, adminEmail: callerEmail })
+
+          body: { iframeUrl: newUrl, adminEmail: callerEmail }
         });
         const data = await res.json();
         if (res.ok && data.success) {
@@ -181,7 +181,7 @@ function initStreamIframeUrlControls() {
           if (streamConfig) streamConfig.iframeUrl = newUrl;
           renderLivePreviewIframe();
         } else {
-          showToast("Klaida saugant iframe nuorodą: " + (data.error || "Serverio klaida"), "error");
+          showToast("Klaida saugant iframe nuorodą: " + (data.error || "Firebase klaida"), "error");
         }
       } catch (err) {
         showToast("Tinklo klaida: " + err.message, "error");
@@ -258,7 +258,7 @@ export function renderAuthorizedViewersTable() {
     tableBody.innerHTML = `
       <tr>
         <td colspan="6" style="text-align:center; padding:32px 16px; color:var(--text-muted);">
-          Autorizuotų žiūrovų su Cloudflare Signed Tokens nerasta. Pasinaudokite žemiau esančia forma naujam žiūrovui pridėti.
+          Autorizuotų žiūrovų su Prieigos žetonass nerasta. Pasinaudokite žemiau esančia forma naujam žiūrovui pridėti.
         </td>
       </tr>
     `;
@@ -345,13 +345,13 @@ export function renderAuthorizedViewersTable() {
       btn.disabled = true;
       try {
         showToast("Siunčiamas transliacijos žetono laiškas...");
-        const res = await fetch("/api/admin/stream/viewers/resend", {
+        const res = await FirebaseClient.request("stream.viewers.resend", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ token })
+
+          body: { token }
         });
         if (res.ok) {
-          showToast("El. laiškas sėkmingai išsiųstas žiūrovui!", "success");
+          showToast("Laiškas įrašytas į siuntimo eilę.", "success");
         } else {
           showToast("Klaida siunčiant laišką", "error");
         }
@@ -368,10 +368,10 @@ export function renderAuthorizedViewersTable() {
       const token = btn.getAttribute("data-token");
       if (!token || !confirm("Ar tikrai norite atšaukti šį žiūrovo prieigos žetoną?")) return;
       try {
-        const res = await fetch("/api/admin/stream/viewers/delete", {
+        const res = await FirebaseClient.request("stream.viewers.delete", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ token })
+
+          body: { token }
         });
         if (res.ok) {
           authorizedViewers = authorizedViewers.filter(v => v.token !== token);
@@ -407,22 +407,22 @@ function initViewerTokenForm() {
       const expiresInHours = document.getElementById("newViewerExpires")?.value || "48";
       const sendEmail = document.getElementById("newViewerSendEmail")?.checked === true;
 
-      const res = await fetch("/api/admin/stream/viewers/create", {
+      const res = await FirebaseClient.request("stream.viewers.create", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+
+        body: {
           email,
           name,
           customToken,
           role,
           expiresInHours,
           sendEmail
-        })
+        }
       });
 
       if (res.ok) {
         const data = await res.json();
-        showToast(`Cloudflare Signed Token sėkmingai sugeneruotas žiūrovui ${email}!`, "success");
+        showToast(`Prieigos žetonas sėkmingai sugeneruotas žiūrovui ${email}!`, "success");
         form.reset();
         await fetchAuthorizedViewers();
         renderAuthorizedViewersTable();
@@ -579,10 +579,10 @@ export function renderRsvpTable() {
 async function updateStreamState(newState) {
   try {
     showToast(`Keičiama transliacijos būsena į: ${newState.toUpperCase()}...`);
-    const res = await fetch("/api/admin/stream/status", {
+    const res = await FirebaseClient.request("stream.status", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ state: newState })
+
+      body: { state: newState }
     });
     if (res.ok) {
       const data = await res.json();
@@ -596,27 +596,27 @@ async function updateStreamState(newState) {
       showToast(err.error || "Nepavyko atnaujinti transliacijos būsenos", "error");
     }
   } catch (err) {
-    showToast("Serverio ryšio klaida", "error");
+    showToast("Firebase ryšio klaida", "error");
   }
 }
 
 async function resendLiveTokenEmail(submissionId) {
   try {
     showToast("Siunčiamas el. laiškas dalyviui...");
-    const res = await fetch("/api/admin/resend-live-link", {
+    const res = await FirebaseClient.request("resend-live-link", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ submissionId })
+
+      body: { submissionId }
     });
     if (res.ok) {
-      showToast("El. laiškas su žetonu ir transliacijos nuoroda sėkmingai išsiųstas!", "success");
+      showToast("Laiškas su prieigos nuoroda įrašytas į siuntimo eilę.", "success");
       window.dispatchEvent(new CustomEvent("refresh-notifications"));
     } else {
       const err = await res.json();
       showToast(err.error || "Klaida siunčiant laišką", "error");
     }
   } catch (err) {
-    showToast("Serverio ryšio klaida", "error");
+    showToast("Firebase ryšio klaida", "error");
   }
 }
 

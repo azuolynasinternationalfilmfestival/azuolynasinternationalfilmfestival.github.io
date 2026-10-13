@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="lt">
 <head>
+  <script src="../js/firebase-client.js"></script>
   <meta charset="UTF-8">
   <link rel="preconnect" href="https://firebasestorage.googleapis.com">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -724,7 +725,7 @@
               </svg>
               <h3 style="color:var(--text-color); margin-bottom:8px;">Paraiška sėkmingai gauta!</h3>
               <p style="color:var(--text-muted); font-size:0.92rem; max-width:480px; margin:0 auto 20px auto;">
-                Nuoširdžiai dėkojame. Jūsų filmas pasiekė festivalio organizatorių komandą. Į jūsų nurodytą el. paštą išsiųstas patvirtinimas.
+                Nuoširdžiai dėkojame. Jūsų filmas pasiekė festivalio organizatorių komandą. Patvirtinimo ieškokite savo el. pašte.
               </p>
               <button type="button" class="btn-outline btn-sm" onclick="resetFormView()">Pateikti kitą paraišką</button>
             </div>
@@ -1339,8 +1340,7 @@
       }
     }
 
-    // 1. Instant preload from local backend API to avoid flash of outdated defaults
-    fetch("/api/settings")
+    FirebaseClient.request("settings")
       .then((res) => res.ok ? res.json() : null)
       .then((data) => {
         if (data && (data.settings || data.lt)) {
@@ -1349,7 +1349,6 @@
       })
       .catch(() => {});
 
-    // 2. Real-time Firestore synchronization stream
     if (firestoreDb && typeof firestoreDb.collection === "function") {
       try {
         firestoreDb.collection("settings").doc("festival").onSnapshot((doc) => {
@@ -1562,7 +1561,7 @@
         renderFilmsGallery();
       }, (err) => {
         console.warn("Submissions snapshot listener:", err.message);
-        // Fallback: try targeted queries if collection listing was restricted
+
         try {
           firestoreDb.collection("submissions").where("inVoting", "==", true).get().then((snap) => {
             if (snap && !snap.empty) {
@@ -1744,6 +1743,7 @@
             submitBtn.disabled = false;
           },
           async () => {
+            try {
             const videoUrl = await uploadTask.snapshot.ref.getDownloadURL();
 
             const attendanceInput = document.querySelector('input[name="attendanceType"]:checked');
@@ -1776,83 +1776,18 @@
             };
 
             const targetDb = firestoreDb || (typeof window !== "undefined" && window.db) || (typeof db !== "undefined" ? db : null) || firebase.firestore();
-            const docRef = await targetDb.collection("submissions").add(submissionData);
-
-            // Also register remote live viewer token in live_viewers collection
-            if (attendanceType === 'remote') {
-              try {
-                await targetDb.collection("live_viewers").doc(liveToken).set({
-                  token: liveToken,
-                  email: email.toLowerCase(),
-                  name,
-                  filmTitle,
-                  role: "remote_participant",
-                  createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                  status: "authorized"
-                });
-              } catch (viewerErr) {
-                console.warn("live_viewers registration note:", viewerErr);
-              }
-            }
-
-            // Sync with backend local storage and audit log
-            try {
-              await fetch("/api/submissions/record", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                  id: docRef.id,
-                  ...submissionData,
-                  submittedAt: new Date().toISOString()
-                })
-              });
-            } catch (syncErr) {
-              console.warn("Backend submission sync note:", syncErr);
-            }
-
-            if (typeof generateEmailHtml === "function") {
-              const emailTemplateKey = (attendanceType === "remote") ? "remoteLivePass" : "submissionReceived";
-              const emailHtml = generateEmailHtml(emailTemplateKey, "lt", {
-                name,
-                filmTitle,
-                category,
-                institution,
-                deviceModel,
-                videoDurationSeconds,
-                attendanceType,
-                liveToken,
-                liveStreamUrl,
-                ctaUrl: (attendanceType === "remote") ? liveStreamUrl : undefined
-              });
-
-              const emailSubject = (emailTexts && emailTexts.lt && emailTexts.lt[emailTemplateKey])
-                ? emailTexts.lt[emailTemplateKey].sub
-                : "Ąžuolynas Film Fest | Paraiška gauta!";
-
-              await targetDb.collection("mail").add({
-                to: [email],
-                message: {
-                  subject: emailSubject,
-                  html: emailHtml
-                }
-              });
-            }
-
-            if (typeof generateAdminNotificationHtml === "function") {
-              const adminEmailHtml = generateAdminNotificationHtml("lt", submissionData);
-
-              await targetDb.collection("mail").add({
-                to: ["azuolynasfilmfestival@gmail.com"],
-                message: {
-                  subject: `Nauja paraiška (${attendanceType === 'remote' ? 'Nuotoliu' : 'Gyvai'}): ${filmTitle} (${name})`,
-                  html: adminEmailHtml
-                }
-              });
-            }
+            await FirebaseClient.submitFilm(targetDb, submissionData);
 
             form.classList.add("d-none");
             formSuccessDisplay.classList.remove("d-none");
             showToast("Dėkojame! Jūsų filmo paraiška sėkmingai gauta.");
+            } catch (error) {
+              console.error(error);
+              showToast("Nepavyko išsaugoti filmo. Bandykite dar kartą.", "error");
+            } finally {
+              submitBtn.disabled = false;
+              progressContainer.classList.remove("active");
+            }
           }
         );
       } catch (error) {
