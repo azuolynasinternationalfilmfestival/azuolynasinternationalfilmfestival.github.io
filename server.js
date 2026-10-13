@@ -1187,8 +1187,13 @@ app.get('/api/admin/settings', (req, res) => {
     const settings = loadSettingsData();
     res.json({ success: true, settings });
   } catch (e) {
-    console.error('[Settings API Error]:', e.message);
-    res.json({ success: true, settings: loadSettingsData() });
+    console.error('[Admin Settings API Error]:', e.message);
+    try {
+      const fallback = loadSettingsData();
+      res.json({ success: true, settings: fallback });
+    } catch (innerErr) {
+      res.json({ success: true, settings: {} });
+    }
   }
 });
 
@@ -1199,28 +1204,42 @@ app.get('/api/settings', (req, res) => {
     res.json({
       success: true,
       settings,
-      maintenanceMode: settings.maintenanceMode === true,
-      votingActive: settings.votingActive !== false,
-      publicWinners: settings.publicWinners !== false,
-      submissionsOpen: settings.submissionsOpen !== false,
-      selectedYear: settings.selectedYear || "2027",
-      lt: settings.lt || {},
-      en: settings.en || {}
+      maintenanceMode: settings?.maintenanceMode === true,
+      votingActive: settings?.votingActive !== false,
+      publicWinners: settings?.publicWinners !== false,
+      submissionsOpen: settings?.submissionsOpen !== false,
+      selectedYear: settings?.selectedYear || "2027",
+      lt: settings?.lt || {},
+      en: settings?.en || {}
     });
   } catch (e) {
     console.error('[Settings API Error]:', e.message);
-    const fallback = loadSettingsData();
-    res.json({
-      success: true,
-      settings: fallback,
-      maintenanceMode: false,
-      votingActive: true,
-      publicWinners: true,
-      submissionsOpen: true,
-      selectedYear: "2027",
-      lt: fallback.lt,
-      en: fallback.en
-    });
+    try {
+      const fallback = loadSettingsData() || {};
+      res.json({
+        success: true,
+        settings: fallback,
+        maintenanceMode: false,
+        votingActive: true,
+        publicWinners: true,
+        submissionsOpen: true,
+        selectedYear: "2027",
+        lt: fallback.lt || {},
+        en: fallback.en || {}
+      });
+    } catch (innerErr) {
+      res.json({
+        success: true,
+        settings: {},
+        maintenanceMode: false,
+        votingActive: true,
+        publicWinners: true,
+        submissionsOpen: true,
+        selectedYear: "2027",
+        lt: {},
+        en: {}
+      });
+    }
   }
 });
 
