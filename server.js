@@ -11,46 +11,118 @@ import './email-templates.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Explicitly load environment variables via dotenv from root and __dirname
+// Explicitly load environment variables via dotenv from root, __dirname, and cwd
 try {
   dotenv.config();
   dotenv.config({ path: path.resolve(__dirname, '.env') });
+  dotenv.config({ path: path.resolve(process.cwd(), '.env') });
 } catch (dotenvErr) {
   console.warn('[Env] Dotenv initialization notice:', dotenvErr.message);
 }
 
 // Resilient fallback parser for .env to guarantee variables like FIREBASE_API_KEY are loaded
 try {
-  const envPath = path.resolve(__dirname, '.env');
-  if (fs.existsSync(envPath)) {
-    const rawContent = fs.readFileSync(envPath, 'utf-8');
-    const lines = rawContent.split(/\r?\n/);
-    for (const rawLine of lines) {
-      const line = rawLine.trim();
-      if (!line || line.startsWith('#')) continue;
-      const eq = line.indexOf('=');
-      if (eq > 0) {
-        const k = line.substring(0, eq).trim();
-        let v = line.substring(eq + 1).trim();
-        if ((v.startsWith('"') && v.endsWith('"')) || (v.startsWith("'") && v.endsWith("'"))) {
-          v = v.substring(1, v.length - 1);
-        }
-        if (!process.env[k] || process.env[k] === '') {
-          process.env[k] = v;
+  const envCandidates = [
+    path.resolve(__dirname, '.env'),
+    path.resolve(process.cwd(), '.env')
+  ];
+  for (const envPath of envCandidates) {
+    if (fs.existsSync(envPath)) {
+      const rawContent = fs.readFileSync(envPath, 'utf-8');
+      const lines = rawContent.split(/\r?\n/);
+      for (const rawLine of lines) {
+        const line = rawLine.trim();
+        if (!line || line.startsWith('#')) continue;
+        const eq = line.indexOf('=');
+        if (eq > 0) {
+          const k = line.substring(0, eq).trim();
+          let v = line.substring(eq + 1).trim();
+          if ((v.startsWith('"') && v.endsWith('"')) || (v.startsWith("'") && v.endsWith("'"))) {
+            v = v.substring(1, v.length - 1);
+          }
+          if (!process.env[k] || process.env[k] === '') {
+            process.env[k] = v;
+          }
         }
       }
+      break;
     }
   }
 } catch (e) {
   console.warn('[Env] Fallback env parser notice:', e.message);
 }
 
+// Ensure guaranteed defaults for critical server environment variables
+process.env.FIREBASE_API_KEY = process.env.FIREBASE_API_KEY || 'AIzaSyDDKEzn0jN_xUTDw5aXABU79ZEYKIACfdE';
+process.env.FIREBASE_PROJECT_ID = process.env.FIREBASE_PROJECT_ID || 'filmfest-509606';
+process.env.FIREBASE_DATABASE_ID = process.env.FIREBASE_DATABASE_ID || 'ai-studio-azuolynasinterna-cd7ce36e-5213-4751-8aa0-a7141d397a83';
+process.env.PORT = process.env.PORT || '3000';
+process.env.JWT_SECRET = process.env.JWT_SECRET || 'azuolynas-film-festival-secure-jwt-key-2026';
+process.env.SMTP_HOST = process.env.SMTP_HOST || 'smtp.gmail.com';
+process.env.SMTP_PORT = process.env.SMTP_PORT || '587';
+process.env.SMTP_SECURE = process.env.SMTP_SECURE || 'false';
+process.env.SMTP_USER = process.env.SMTP_USER || 'azuolynasfilmfestival@gmail.com';
+process.env.EMAIL_FROM = process.env.EMAIL_FROM || '"Ąžuolynas Film Fest" <azuolynasfilmfestival@gmail.com>';
+
+// In-memory diagnostic error logs buffer
+const serverErrorLogs = [
+  {
+    id: "diag_boot_1",
+    timestamp: new Date().toISOString(),
+    level: "INFO",
+    source: "Nginx/Reverse-Proxy",
+    message: "Reversinio proxy konfigūracija aktyvi. Port 3000 nukreipimas veikia be sutrikimų."
+  },
+  {
+    id: "diag_boot_2",
+    timestamp: new Date().toISOString(),
+    level: "INFO",
+    source: "Node/Express",
+    message: "Express HTTP serveris paleistas sėkmingai. Visi API maršrutai paruošti darbui."
+  },
+  {
+    id: "diag_boot_3",
+    timestamp: new Date().toISOString(),
+    level: "INFO",
+    source: "Cloudflare/CORS",
+    message: "CORS antraštės ir Cross-Origin-Resource-Policy paruoštos Cloudflare Stream transliacijai."
+  }
+];
+
+function recordServerErrorLog({ level = "ERROR", source = "App/Server", message, details }) {
+  const logItem = {
+    id: "err_" + Date.now() + "_" + Math.random().toString(36).substring(2, 6),
+    timestamp: new Date().toISOString(),
+    level,
+    source,
+    message: message || "Nežinoma klaida",
+    details: details || ""
+  };
+  serverErrorLogs.unshift(logItem);
+  if (serverErrorLogs.length > 150) {
+    serverErrorLogs.length = 150;
+  }
+  return logItem;
+}
+
 // Process-level crash prevention (Prevents 502 Bad Gateway on unhandled exceptions/rejections)
 process.on('uncaughtException', (err) => {
   console.error('[CRITICAL] Uncaught exception in Node.js server:', err);
+  recordServerErrorLog({
+    level: "CRITICAL",
+    source: "Process/UncaughtException",
+    message: "Server uncaught exception prevented from crashing process",
+    details: err ? (err.stack || err.message) : 'Unknown error'
+  });
 });
 process.on('unhandledRejection', (reason, promise) => {
   console.error('[CRITICAL] Unhandled promise rejection in Node.js server:', reason);
+  recordServerErrorLog({
+    level: "CRITICAL",
+    source: "Process/UnhandledRejection",
+    message: "Unhandled promise rejection captured safely",
+    details: reason ? (reason.stack || String(reason)) : 'Unknown rejection'
+  });
 });
 
 
@@ -731,7 +803,11 @@ function getEffectiveSmtpConfig() {
     ? Boolean(settingsSmtp.secure) 
     : (process.env.SMTP_SECURE === 'true' || port === 465);
   const user = (settingsSmtp.user || process.env.SMTP_USER || 'azuolynasfilmfestival@gmail.com').trim();
-  const pass = (settingsSmtp.pass !== undefined ? settingsSmtp.pass : process.env.SMTP_PASS || '').trim();
+  let pass = (settingsSmtp.pass !== undefined ? settingsSmtp.pass : (process.env.SMTP_PASS || '')).trim();
+  // Strip intra-token spaces if Google App Password (16 characters with spaces like "abcd efgh ijkl mnop")
+  if (pass && host.toLowerCase().includes('gmail') && pass.replace(/\s+/g, '').length === 16) {
+    pass = pass.replace(/\s+/g, '');
+  }
   const from = (settingsSmtp.from || process.env.EMAIL_FROM || `"Ąžuolynas Film Fest" <${user}>`).trim();
 
   return { host, port, secure, user, pass, from };
@@ -762,12 +838,18 @@ function getMailTransporter() {
       },
       tls: {
         rejectUnauthorized: false
-      }
+      },
+      connectionTimeout: 10000,
+      greetingTimeout: 10000,
+      socketTimeout: 15000
     };
 
     // If host is gmail, leverage nodemailer gmail service preset for maximum reliability
-    if (cfg.host.toLowerCase().includes('gmail.com')) {
+    if (cfg.host.toLowerCase().includes('gmail')) {
       transportOptions.service = 'gmail';
+      delete transportOptions.host;
+      delete transportOptions.port;
+      delete transportOptions.secure;
     }
 
     activeTransporter = nodemailer.createTransport(transportOptions);
@@ -794,7 +876,8 @@ async function sendEmail({ to, subject, html, text }) {
     timestamp: new Date().toISOString()
   };
 
-  if (!to || !subject || !html) {
+  const recipientStr = Array.isArray(to) ? to.join(', ') : (to ? String(to).trim() : '');
+  if (!recipientStr || !subject || !html) {
     result.error = 'Missing required email fields (to, subject, html)';
     return result;
   }
@@ -808,7 +891,7 @@ async function sendEmail({ to, subject, html, text }) {
     try {
       const info = await transporter.sendMail({
         from: cfg.from,
-        to,
+        to: recipientStr,
         subject,
         html,
         text: text || subject
@@ -816,9 +899,9 @@ async function sendEmail({ to, subject, html, text }) {
       result.smtpSent = true;
       result.success = true;
       result.messageId = info.messageId;
-      console.log(`[SMTP] Email successfully delivered to: ${to} (MessageId: ${info.messageId})`);
+      console.log(`[SMTP] Email successfully delivered to: ${recipientStr} (MessageId: ${info.messageId})`);
     } catch (smtpErr) {
-      console.error(`[SMTP] Failed to send email via SMTP to ${to}:`, smtpErr.message);
+      console.error(`[SMTP] Failed to send email via SMTP to ${recipientStr}:`, smtpErr.message);
       result.error = `SMTP delivery notice: ${smtpErr.message}`;
     }
   } else {
@@ -829,20 +912,16 @@ async function sendEmail({ to, subject, html, text }) {
   try {
     const mailId = 'mail_' + Date.now() + '_' + crypto.randomBytes(4).toString('hex');
     await syncToFirestore('mail', mailId, {
-      to: { stringValue: to },
+      to: recipientStr,
       message: {
-        mapValue: {
-          fields: {
-            subject: { stringValue: subject },
-            html: { stringValue: html },
-            text: { stringValue: text || subject }
-          }
-        }
+        subject: subject,
+        html: html,
+        text: text || subject
       },
-      createdAt: { timestampValue: new Date().toISOString() },
-      status: { stringValue: result.smtpSent ? 'delivered_smtp' : 'pending_queue' },
-      smtpAttempted: { booleanValue: result.smtpAttempted },
-      smtpSent: { booleanValue: result.smtpSent }
+      createdAt: new Date().toISOString(),
+      status: result.smtpSent ? 'delivered_smtp' : 'pending_queue',
+      smtpAttempted: result.smtpAttempted,
+      smtpSent: result.smtpSent
     });
     result.firestoreQueued = true;
     result.success = true; // Queued safely in Firestore
@@ -854,47 +933,8 @@ async function sendEmail({ to, subject, html, text }) {
 }
 
 // ---------------------------------------------------------------------------
-// MIDDLEWARE: UNIVERSAL CORS & CLOUDFLARE STREAM INTEGRATION
+// MIDDLEWARE: UNIVERSAL CORS, BODY PARSERS & CLOUDFLARE STREAM INTEGRATION
 // ---------------------------------------------------------------------------
-const serverErrorLogs = [
-  {
-    id: "diag_boot_1",
-    timestamp: new Date().toISOString(),
-    level: "INFO",
-    source: "Nginx/Reverse-Proxy",
-    message: "Reversinio proxy konfigūracija aktyvi. Port 3000 nukreipimas veikia be sutrikimų."
-  },
-  {
-    id: "diag_boot_2",
-    timestamp: new Date().toISOString(),
-    level: "INFO",
-    source: "Node/Express",
-    message: "Express HTTP serveris paleistas sėkmingai. Visi API maršrutai paruošti darbui."
-  },
-  {
-    id: "diag_boot_3",
-    timestamp: new Date().toISOString(),
-    level: "INFO",
-    source: "Cloudflare/CORS",
-    message: "CORS antraštės ir Cross-Origin-Resource-Policy paruoštos Cloudflare Stream transliacijai."
-  }
-];
-
-function recordServerErrorLog({ level = "ERROR", source = "App/Server", message, details }) {
-  const logItem = {
-    id: "err_" + Date.now() + "_" + Math.random().toString(36).substring(2, 6),
-    timestamp: new Date().toISOString(),
-    level,
-    source,
-    message: message || "Nežinoma klaida",
-    details: details || ""
-  };
-  serverErrorLogs.unshift(logItem);
-  if (serverErrorLogs.length > 150) {
-    serverErrorLogs.length = 150;
-  }
-  return logItem;
-}
 
 app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -906,6 +946,25 @@ app.use((req, res, next) => {
     return res.sendStatus(200);
   }
   next();
+});
+
+// Configure robust Express body parsing middleware with appropriate size limits
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// Resilient JSON parser error handler (protects against malformed body 400/500 crashes)
+app.use((err, req, res, next) => {
+  if (err instanceof SyntaxError && (err.status === 400 || err.statusCode === 400) && 'body' in err) {
+    console.warn(`[JSON Parse Warning] Malformed payload in ${req.method} ${req.url}:`, err.message);
+    recordServerErrorLog({
+      level: "WARN",
+      source: "Express/JSON-Parser",
+      message: "Atmestas netinkamas JSON užklausos turinys",
+      details: `${req.method} ${req.url} - ${err.message}`
+    });
+    return res.status(400).json({ error: 'Invalid JSON payload', message: err.message });
+  }
+  next(err);
 });
 
 // Resilient Health Check Endpoints (prevents 502 Bad Gateway from cloud orchestrator probes)
@@ -925,16 +984,6 @@ app.get(['/health', '/api/health', '/_health'], (req, res) => {
 // ---------------------------------------------------------------------------
 // MIDDLEWARE: GLOBAL MAINTENANCE MODE ("PROFILAKTIKOS REŽIMAS")
 // ---------------------------------------------------------------------------
-
-app.use(express.json());
-
-// Resilient JSON parser error handler (protects against malformed body 500s)
-app.use((err, req, res, next) => {
-  if (err instanceof SyntaxError && err.status === 400 && 'body' in err) {
-    return res.status(400).json({ error: 'Invalid JSON payload' });
-  }
-  next(err);
-});
 
 // Maintenance Mode Interceptor
 app.use((req, res, next) => {
@@ -1289,10 +1338,12 @@ app.get('/api/admin/settings', (req, res) => {
   }
 });
 
-// API: Public read-only settings for client-side pages
+// API: Public read-only settings for client-side pages (hardened against crashes)
 app.get('/api/settings', (req, res) => {
   try {
     const settings = loadSettingsData();
+    res.setHeader('Content-Type', 'application/json');
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
     if (!res.headersSent) {
       res.status(200).json({
         success: true,
@@ -1308,6 +1359,12 @@ app.get('/api/settings', (req, res) => {
     }
   } catch (e) {
     console.error('[Settings API Error]:', e.message);
+    recordServerErrorLog({
+      level: "ERROR",
+      source: "API/Settings",
+      message: "Klaida nuskaitant festivalio nustatymus",
+      details: e.stack || e.message
+    });
     if (!res.headersSent) {
       res.status(200).json({
         success: true,
@@ -1322,6 +1379,12 @@ app.get('/api/settings', (req, res) => {
       });
     }
   }
+});
+
+// Safe fallback for POST /api/settings alias to prevent 404 or unhandled errors
+app.post('/api/settings', (req, res, next) => {
+  req.url = '/api/admin/settings';
+  app._router.handle(req, res, next);
 });
 
 // API: Update global settings and feature tumblers (including Maintenance Mode)
@@ -4250,14 +4313,17 @@ app.post('/api/submissions/record', async (req, res) => {
   try {
     const data = req.body || {};
     if (!data.name || !data.email || !data.filmTitle) {
-      return res.status(400).json({ error: 'Missing required submission fields' });
+      return res.status(400).json({ error: 'Missing required submission fields (name, email, filmTitle)' });
     }
 
     const subsData = loadSubmissionsData();
     if (!subsData.submissions) subsData.submissions = [];
 
-    const subId = data.id || 'sub_' + Date.now();
+    const subId = data.id || ('sub_' + Date.now() + '_' + crypto.randomBytes(3).toString('hex'));
     const existingIndex = subsData.submissions.findIndex(s => s.id === subId || (s.email === data.email && s.filmTitle === data.filmTitle));
+
+    const generatedLiveToken = data.liveToken || ('live_' + crypto.randomBytes(4).toString('hex'));
+    const generatedLiveStreamUrl = data.liveStreamUrl || `https://azuolynasinternationalfilmfestival.github.io/live.html?token=${generatedLiveToken}`;
 
     const record = {
       id: subId,
@@ -4274,8 +4340,8 @@ app.post('/api/submissions/record', async (req, res) => {
       videoDurationSeconds: data.videoDurationSeconds || 0,
       storagePath: data.storagePath || '',
       attendanceType: data.attendanceType || 'in_person',
-      liveToken: data.liveToken || 'live_' + Math.random().toString(36).substring(2, 9),
-      liveStreamUrl: data.liveStreamUrl || `https://azuolynasinternationalfilmfestival.github.io/live.html?token=${data.liveToken}`,
+      liveToken: generatedLiveToken,
+      liveStreamUrl: generatedLiveStreamUrl,
       votesCount: data.votesCount || 0,
       inVoting: data.inVoting || false,
       status: data.status || 'submitted',
@@ -4292,29 +4358,33 @@ app.post('/api/submissions/record', async (req, res) => {
 
     // If remote attendee, add to live_viewers
     if (record.attendanceType === 'remote') {
-      const viewersData = loadLiveViewersData();
-      if (!viewersData.viewers) viewersData.viewers = [];
-      const vIdx = viewersData.viewers.findIndex(v => v.token === record.liveToken);
-      const vRecord = {
-        token: record.liveToken,
-        email: record.email.toLowerCase(),
-        name: record.name,
-        filmTitle: record.filmTitle,
-        role: 'remote_participant',
-        status: 'authorized',
-        lastActive: new Date().toISOString()
-      };
-      if (vIdx >= 0) {
-        viewersData.viewers[vIdx] = vRecord;
-      } else {
-        viewersData.viewers.push(vRecord);
+      try {
+        const viewersData = loadLiveViewersData();
+        if (!viewersData.viewers) viewersData.viewers = [];
+        const vIdx = viewersData.viewers.findIndex(v => v.token === record.liveToken);
+        const vRecord = {
+          token: record.liveToken,
+          email: record.email.toLowerCase(),
+          name: record.name,
+          filmTitle: record.filmTitle,
+          role: 'remote_participant',
+          status: 'authorized',
+          lastActive: new Date().toISOString()
+        };
+        if (vIdx >= 0) {
+          viewersData.viewers[vIdx] = vRecord;
+        } else {
+          viewersData.viewers.push(vRecord);
+        }
+        saveLiveViewersData(viewersData);
+      } catch (viewerErr) {
+        console.warn('[Submission Record] Live viewers update notice:', viewerErr.message);
       }
-      saveLiveViewersData(viewersData);
     }
 
-    // Automatically send confirmation / live pass email
+    // Automatically send confirmation / live pass email (protected against crashes)
     try {
-      const emailLang = (record.language === 'en' || (record.location && !record.location.toLowerCase().includes('lietuva') && !record.location.toLowerCase().includes('kaun'))) ? 'en' : 'lt';
+      const emailLang = (record.submissionLang === 'en' || (record.location && !record.location.toLowerCase().includes('lietuva') && !record.location.toLowerCase().includes('kaun'))) ? 'en' : 'lt';
       if (record.attendanceType === 'remote') {
         const streamEmailHtml = generateEmailHtml('remoteLivePass', emailLang, {
           name: record.name,
@@ -4359,27 +4429,51 @@ app.post('/api/submissions/record', async (req, res) => {
         });
       }
     } catch (mailErr) {
-      console.warn('[Submission Email] Warning sending initial email:', mailErr.message);
+      console.warn('[Submission Email] Warning sending initial confirmation email:', mailErr.message);
     }
 
-    recordActivityLog({
-      action: "SUBMISSION_RECEIVED",
-      category: "submissions",
-      adminEmail: record.email,
-      adminName: record.name,
-      target: record.filmTitle,
-      details: `Gauta nauja paraiška: „${record.filmTitle}“ (Autorius: ${record.name}, RSVP: ${record.attendanceType === 'remote' ? 'Nuotolinis stebėtojas' : 'Dalyvaus gyvai'})`
+    // Non-blocking sync to Firestore
+    syncToFirestore('submissions', subId, record).catch(fsErr => {
+      console.warn('[Firestore Sync] Submission sync notice:', fsErr.message);
     });
 
-    broadcastStreamUpdate('NEW_SUBMISSION', {
-      filmTitle: record.filmTitle,
-      author: record.name,
-      category: record.category
-    });
+    try {
+      recordActivityLog({
+        action: "SUBMISSION_RECEIVED",
+        category: "submissions",
+        adminEmail: record.email,
+        adminName: record.name,
+        target: record.filmTitle,
+        details: `Gauta nauja paraiška: „${record.filmTitle}“ (Autorius: ${record.name}, RSVP: ${record.attendanceType === 'remote' ? 'Nuotolinis stebėtojas' : 'Dalyvaus gyvai'})`
+      });
+    } catch (logErr) {
+      // Activity log notice
+    }
 
-    res.json({ success: true, submission: record });
+    try {
+      broadcastStreamUpdate('NEW_SUBMISSION', {
+        filmTitle: record.filmTitle,
+        author: record.name,
+        category: record.category
+      });
+    } catch (sseErr) {
+      // Broadcast notice
+    }
+
+    if (!res.headersSent) {
+      res.json({ success: true, submission: record });
+    }
   } catch (err) {
-    res.status(500).json({ error: 'Failed to record submission' });
+    console.error('[Submissions Record Error]:', err);
+    recordServerErrorLog({
+      level: "ERROR",
+      source: "API/Submissions-Record",
+      message: "Klaida įrašant paraišką",
+      details: err.stack || err.message
+    });
+    if (!res.headersSent) {
+      res.status(500).json({ error: 'Failed to record submission', message: err.message });
+    }
   }
 });
 

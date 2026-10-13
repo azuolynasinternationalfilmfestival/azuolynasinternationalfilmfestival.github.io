@@ -38,6 +38,15 @@
       "role": "guest_viewer",
       "status": "authorized",
       "lastActive": "2026-10-07T00:20:00.000Z"
+    },
+    {
+      "token": "live_7d3f79a2",
+      "email": "aiste@pavyzdys.lt",
+      "name": "Aistė Jonaitė",
+      "filmTitle": "Vilties Šviesa",
+      "role": "remote_participant",
+      "status": "authorized",
+      "lastActive": "2026-10-13T07:54:53.823Z"
     }
   ]
 }

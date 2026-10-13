@@ -1,6 +1,50 @@
 {
   "logs": [
     {
+      "id": "log_1791878111836_buchg",
+      "action": "SUBMISSION_EMAIL_SENT",
+      "category": "submissions",
+      "adminEmail": "azuolynasfilmfestival@gmail.com",
+      "adminName": "azuolynasfilmfestival",
+      "target": "dalyvis@pavyzdys.lt",
+      "details": "Išsiųstas el. laiškas dalyviui dalyvis@pavyzdys.lt (Šablonas: accepted, Filmas: „Filmas“)",
+      "timestamp": "2026-10-13T07:55:11.836Z",
+      "status": "success"
+    },
+    {
+      "id": "log_1791878105316_19jsl",
+      "action": "EMAIL_TEST_SENT",
+      "category": "settings",
+      "adminEmail": "azuolynasfilmfestival@gmail.com",
+      "adminName": "azuolynasfilmfestival",
+      "target": "azuolynasfilmfestival@gmail.com",
+      "details": "Atliktas bandomojo el. laiško siuntimas į azuolynasfilmfestival@gmail.com. Rezultatas: Įrašyta į Firestore eilę",
+      "timestamp": "2026-10-13T07:55:05.316Z",
+      "status": "success"
+    },
+    {
+      "id": "log_1791878094027_dq5sx",
+      "action": "SUBMISSION_RECEIVED",
+      "category": "submissions",
+      "adminEmail": "aiste@pavyzdys.lt",
+      "adminName": "Aistė Jonaitė",
+      "target": "Vilties Šviesa",
+      "details": "Gauta nauja paraiška: „Vilties Šviesa“ (Autorius: Aistė Jonaitė, RSVP: Nuotolinis stebėtojas)",
+      "timestamp": "2026-10-13T07:54:54.027Z",
+      "status": "success"
+    },
+    {
+      "id": "log_1791877765335_apanu",
+      "action": "SUBMISSION_RECEIVED",
+      "category": "submissions",
+      "adminEmail": "test@example.com",
+      "adminName": "Test User",
+      "target": "My Test Film",
+      "details": "Gauta nauja paraiška: „My Test Film“ (Autorius: Test User, RSVP: Dalyvaus gyvai)",
+      "timestamp": "2026-10-13T07:49:25.335Z",
+      "status": "success"
+    },
+    {
       "id": "log_1791877385447_hjl36",
       "action": "DIRECT_EMAIL_SENT",
       "category": "users",
