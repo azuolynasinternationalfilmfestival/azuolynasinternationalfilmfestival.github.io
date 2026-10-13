@@ -10,10 +10,9 @@
     "lint": "node -e 'console.log(\"Lint clean\")'"
   },
   "dependencies": {
+    "dotenv": "^18.0.7",
     "express": "^4.21.2",
     "jsonwebtoken": "^9.0.3",
-    "jszip": "^3.10.2",
-    "multer": "^2.4.0",
     "nodemailer": "^10.0.13"
   }
 }

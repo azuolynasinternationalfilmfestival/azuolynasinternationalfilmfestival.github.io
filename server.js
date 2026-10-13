@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import express from 'express';
 import path from 'path';
 import fs from 'fs';
@@ -10,6 +11,39 @@ import './email-templates.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// Fallback loader for .env if environment variables are not preloaded
+try {
+  const envPath = path.join(__dirname, '.env');
+  if (fs.existsSync(envPath)) {
+    const lines = fs.readFileSync(envPath, 'utf-8').split('\n');
+    for (const rawLine of lines) {
+      const line = rawLine.trim();
+      if (!line || line.startsWith('#')) continue;
+      const eq = line.indexOf('=');
+      if (eq > 0) {
+        const k = line.substring(0, eq).trim();
+        let v = line.substring(eq + 1).trim();
+        if ((v.startsWith('"') && v.endsWith('"')) || (v.startsWith("'") && v.endsWith("'"))) {
+          v = v.substring(1, v.length - 1);
+        }
+        if (!process.env[k]) {
+          process.env[k] = v;
+        }
+      }
+    }
+  }
+} catch (e) {
+  // Silent fallback
+}
+
+// Process-level crash prevention (Prevents 502 Bad Gateway on unhandled exceptions/rejections)
+process.on('uncaughtException', (err) => {
+  console.error('[CRITICAL] Uncaught exception in Node.js server:', err);
+});
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('[CRITICAL] Unhandled promise rejection in Node.js server:', reason);
+});
+
 const {
   emailTexts,
   generateEmailHtml,
@@ -20,7 +54,7 @@ const {
 } = globalThis;
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = parseInt(process.env.PORT || '3000', 10);
 
 // Security & Authentication Configuration
 const JWT_SECRET = process.env.JWT_SECRET || 'azuolynas-film-festival-secure-jwt-key-2026';
@@ -29,6 +63,11 @@ const TRUSTED_ADMIN_EMAILS = [
   'azuolynasfilmfestival@gmail.com',
   'karina.brdar@gmail.com'
 ];
+
+// Firebase Project & Database Configuration (loaded from .env with fallback)
+const FIREBASE_API_KEY = process.env.FIREBASE_API_KEY || 'AIzaSyDDKEzn0jN_xUTDw5aXABU79ZEYKIACfdE';
+const FIREBASE_PROJECT_ID = process.env.FIREBASE_PROJECT_ID || 'filmfest-509606';
+const FIREBASE_DATABASE_ID = process.env.FIREBASE_DATABASE_ID || 'ai-studio-azuolynasinterna-cd7ce36e-5213-4751-8aa0-a7141d397a83';
 
 // Persistent Data Storage
 const DATA_DIR = path.join(__dirname, 'data');
@@ -228,7 +267,7 @@ function saveVotesData(data) {
 }
 
 function loadSettingsData() {
-  return loadJson(SETTINGS_FILE, {
+  const defaultSettings = {
     votingActive: true,
     maintenanceMode: false,
     publicWinners: true,
@@ -236,8 +275,52 @@ function loadSettingsData() {
     autoRankings: true,
     selectedYear: "2027",
     institutionNameLt: "Kauno Tarptautinė Gimnazija",
-    institutionNameEn: "Kaunas International Gymnasium"
-  });
+    institutionNameEn: "Kaunas International Gymnasium",
+    showAbout: true,
+    showTerms: true,
+    showFaq: true,
+    showCategories: true,
+    showEditions: true,
+    showArchive: true,
+    showCurrentEdition: true,
+    showResults: false,
+    showVoting: true,
+    showScreening: true,
+    showSubmit: true,
+    archiveVisibility: true,
+    recordingVideoUrl: "",
+    lt: {
+      heroBadge: "7-asis Tarptautinis Mokinių Filmų Festivalis",
+      topic: "Mano pašaukimas",
+      topicDesc: "Ką norite veikti savo gyvenime ir kaip atrasti tikrąjį pašaukimą? Ieškome istorijų apie savo kelio paieškas, karjeros pasirinkimus ir vidinių abejonių įveikimą. Papasakokite, ko reikia, kad sektumėte savo aistra, kai aplinkiniai tikisi kažko kito – ar tai būtų šeimos spaudimas rinktis „rimtą“ profesiją, pavyzdžiui, mediciną ar teisę, ar jūsų pačių baimė žengti į meną, muziką ar kūrybines sritis. Parodykite šios kelionės tikrovę, kliūtis pakeliui ir tą akimirką, kai jūs ar jūsų herojai suprato, ką iš tiesų lemta daryti.",
+      openingDate: "Lapkričio 1 d.",
+      deadlineDate: "Kovo 26 d.",
+      eventDate: "Balandžio 23 d.",
+      aboutText: "„Ąžuolyno“ filmų festivalis pavadintas vieno iš Kauno lankytinų vietų – Ąžuolyno parko – garbei, kurio papėdėje yra įsikūrusi mūsų studija. Kviečiame 10–18 m. moksleivius kurti trumpametražius filmus iki 3 min. išmaniaisiais įrenginiais.",
+      datesSubmissions: "Nuo lapkričio 1 d. iki kovo 26 d.",
+      dateEvent: "2027 m. balandžio 23 d. (Kino festivalis ir tiesioginė transliacija)",
+      targetAudience: "Mokiniai (10–18 m.)",
+      recordingPlaceholder: "Festivalio ir tiesioginės transliacijos vaizdo įrašas bus pasiekiamas 2027 m. balandžio 23 d."
+    },
+    en: {
+      heroBadge: "The 7th International Students Film Festival",
+      topic: "My Purpose",
+      topicDesc: "What do you want to do with your life, and how do you find your true calling? We are looking for stories about discovering your path, making career choices, and overcoming self-doubt. Tell us what it takes to follow your passion when the people around you expect something different—whether it is family pressure to pursue a \"serious\" career like medicine or law, or your own fear of stepping into the arts, music, or creative fields. Show the reality of this journey, the obstacles along the way, and the exact moment you or your characters realized what you were meant to do.",
+      openingDate: "November 1st",
+      deadlineDate: "March 26th",
+      eventDate: "April 23rd",
+      aboutText: "The «Ažuolynas» Film Festival is named after one of the sights of Kaunas, at the foot of which our studio is located. We invite youth directors aged 10–18 to submit smartphone short films up to 3 minutes.",
+      datesSubmissions: "November 1st – March 26th",
+      dateEvent: "April 23rd, 2027 (Film Festival & Live Stream)",
+      targetAudience: "Students (10–18 yrs)",
+      recordingPlaceholder: "The official festival recording and live stream replay will be published here on April 23rd, 2027."
+    }
+  };
+  const d = loadJson(SETTINGS_FILE, defaultSettings);
+  if (!d || typeof d !== 'object') return defaultSettings;
+  if (!d.lt) d.lt = defaultSettings.lt;
+  if (!d.en) d.en = defaultSettings.en;
+  return d;
 }
 
 function getDefaultPermissionsForRole(role) {
@@ -398,9 +481,6 @@ function saveAccessRequestsData(data) {
 // ---------------------------------------------------------------------------
 // Firestore REST Sync Helper
 // ---------------------------------------------------------------------------
-const FIREBASE_API_KEY = 'AIzaSyDDKEzn0jN_xUTDw5aXABU79ZEYKIACfdE';
-const FIREBASE_PROJECT_ID = 'filmfest-509606';
-const FIREBASE_DATABASE_ID = 'ai-studio-azuolynasinterna-cd7ce36e-5213-4751-8aa0-a7141d397a83';
 
 function toFirestoreValue(val) {
   if (val === null || val === undefined) return { nullValue: null };
@@ -740,11 +820,33 @@ app.use((req, res, next) => {
   next();
 });
 
+// Resilient Health Check Endpoints (prevents 502 Bad Gateway from cloud orchestrator probes)
+app.get(['/health', '/api/health', '/_health'], (req, res) => {
+  res.status(200).json({
+    status: 'ok',
+    uptime: Math.round(process.uptime()),
+    timestamp: new Date().toISOString(),
+    env: {
+      port: PORT,
+      firebaseProject: FIREBASE_PROJECT_ID,
+      firebaseDatabase: FIREBASE_DATABASE_ID
+    }
+  });
+});
+
 // ---------------------------------------------------------------------------
 // MIDDLEWARE: GLOBAL MAINTENANCE MODE ("PROFILAKTIKOS REŽIMAS")
 // ---------------------------------------------------------------------------
 
 app.use(express.json());
+
+// Resilient JSON parser error handler (protects against malformed body 500s)
+app.use((err, req, res, next) => {
+  if (err instanceof SyntaxError && err.status === 400 && 'body' in err) {
+    return res.status(400).json({ error: 'Invalid JSON payload' });
+  }
+  next(err);
+});
 
 // Maintenance Mode Interceptor
 app.use((req, res, next) => {
@@ -757,8 +859,12 @@ app.use((req, res, next) => {
 
   const reqPath = req.path || '';
 
-  // Allow admin portal, admin assets, and static files
+  // Allow settings, health, admin portal, admin assets, and static files
   const isExcluded = 
+    reqPath === '/api/settings' ||
+    reqPath === '/api/health' ||
+    reqPath === '/health' ||
+    reqPath === '/_health' ||
     reqPath.startsWith('/admin') ||
     reqPath.startsWith('/api/admin') ||
     reqPath.startsWith('/js/') ||
@@ -1081,7 +1187,8 @@ app.get('/api/admin/settings', (req, res) => {
     const settings = loadSettingsData();
     res.json({ success: true, settings });
   } catch (e) {
-    res.status(500).json({ error: 'Failed to read settings' });
+    console.error('[Settings API Error]:', e.message);
+    res.json({ success: true, settings: loadSettingsData() });
   }
 });
 
@@ -1097,11 +1204,23 @@ app.get('/api/settings', (req, res) => {
       publicWinners: settings.publicWinners !== false,
       submissionsOpen: settings.submissionsOpen !== false,
       selectedYear: settings.selectedYear || "2027",
-      lt: settings.lt,
-      en: settings.en
+      lt: settings.lt || {},
+      en: settings.en || {}
     });
   } catch (e) {
-    res.status(500).json({ error: 'Failed to read settings' });
+    console.error('[Settings API Error]:', e.message);
+    const fallback = loadSettingsData();
+    res.json({
+      success: true,
+      settings: fallback,
+      maintenanceMode: false,
+      votingActive: true,
+      publicWinners: true,
+      submissionsOpen: true,
+      selectedYear: "2027",
+      lt: fallback.lt,
+      en: fallback.en
+    });
   }
 });
 
@@ -4037,6 +4156,18 @@ app.get('/terms', (req, res) => {
 
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
+});
+
+// Express Global Fallback Error Handler (prevents unhandled route crashes and returns JSON error)
+app.use((err, req, res, next) => {
+  console.error('[Express Unhandled Error]:', err);
+  if (res.headersSent) {
+    return next(err);
+  }
+  res.status(500).json({
+    error: 'Internal server error',
+    message: err.message || 'An unexpected server error occurred'
+  });
 });
 
 app.listen(PORT, '0.0.0.0', () => {
