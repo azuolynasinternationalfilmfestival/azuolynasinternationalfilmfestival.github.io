@@ -98,10 +98,24 @@ export function getFirebaseStorage() {
   return null;
 }
 
+export function getFirebaseFunctions() {
+  if (typeof firebase !== "undefined" && typeof firebase.functions === "function") {
+    try {
+      if (!firebase.apps || !firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+      }
+      return firebase.functions("europe-west1");
+    } catch (e) {
+      return null;
+    }
+  }
+  return null;
+}
+
 export const auth = getFirebaseAuth();
 export const db = getFirestoreInstance();
 export const storage = getFirebaseStorage();
-if (window.FirebaseClient) window.FirebaseClient.configure({ db, auth });
+export const functions = getFirebaseFunctions();
 
 export const PRIMARY_SUPERADMIN_EMAIL = "azuolynasfilmfestival@gmail.com";
 

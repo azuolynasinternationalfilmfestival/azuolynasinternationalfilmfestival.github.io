@@ -46,7 +46,7 @@ export function initNotificationsLog() {
 
 export async function loadActivityLogs() {
   try {
-    const res = await FirebaseClient.request("logs");
+    const res = await fetch("/api/admin/logs");
     if (res.ok) {
       const data = await res.json();
       allLogs = data.logs || [];

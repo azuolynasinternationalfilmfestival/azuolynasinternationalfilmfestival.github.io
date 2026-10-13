@@ -80,10 +80,12 @@ export function subscribeActivityLogs() {
   const loadingElem = document.getElementById("logsLoadingState");
   if (loadingElem) loadingElem.classList.remove("d-none");
 
-  readFirestoreLogs().then(() => {
+  // Initial fetch from backend API to ensure instant display
+  fetchLogsFromApi().then(() => {
     if (loadingElem) loadingElem.classList.add("d-none");
   });
 
+  // Real-time Firestore onSnapshot listener
   if (db) {
     try {
       unsubscribeLogs = db.collection("logs")
@@ -112,12 +114,12 @@ export function subscribeActivityLogs() {
           (err) => {
             console.warn("Firestore logs listener note (falling back to REST):", err.message);
             if (loadingElem) loadingElem.classList.add("d-none");
-            readFirestoreLogs();
+            fetchLogsFromApi();
           }
         );
     } catch (err) {
       console.warn("Error starting logs snapshot:", err);
-      readFirestoreLogs();
+      fetchLogsFromApi();
     }
   }
 }
@@ -129,9 +131,9 @@ export function unsubscribeActivityLogsListener() {
   }
 }
 
-async function readFirestoreLogs() {
+async function fetchLogsFromApi() {
   try {
-    const res = await FirebaseClient.request("logs");
+    const res = await fetch("/api/admin/logs");
     const data = await res.json();
     if (data.success && Array.isArray(data.logs)) {
       mergeLogs(data.logs);
@@ -139,7 +141,7 @@ async function readFirestoreLogs() {
       renderLogsTable();
     }
   } catch (err) {
-    console.warn("Could not read Firestore logs:", err.message);
+    console.warn("Could not fetch logs from API:", err.message);
   }
 }
 
@@ -181,6 +183,7 @@ export async function logActivity({ action, category = "users", target = "", det
   updateLogMetrics();
   renderLogsTable();
 
+  // 2. Persist to Firestore logs collection
   if (db) {
     try {
       await db.collection("logs").doc(logId).set(newLogObj);
@@ -189,7 +192,16 @@ export async function logActivity({ action, category = "users", target = "", det
     }
   }
 
-
+  // 3. Persist to server API mirror
+  try {
+    await fetch("/api/admin/logs", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(newLogObj)
+    });
+  } catch (apiErr) {
+    console.warn("Backend log sync notice:", apiErr.message);
+  }
 }
 
 function updateLogMetrics() {

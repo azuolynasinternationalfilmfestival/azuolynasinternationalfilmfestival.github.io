@@ -67,7 +67,7 @@ export function initTasks() {
 
 export async function loadTasks() {
   try {
-    const res = await FirebaseClient.request("tasks");
+    const res = await fetch("/api/admin/tasks");
     if (res.ok) {
       const data = await res.json();
       allTasksList = data.tasks || [];
@@ -111,10 +111,10 @@ async function handleSaveTask() {
   const currentUserEmail = sessionStorage.getItem("admin_user_email") || "azuolynasfilmfestival@gmail.com";
 
   try {
-    const res = await FirebaseClient.request("tasks", {
+    const res = await fetch("/api/admin/tasks", {
       method: "POST",
-
-      body: {
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
         title,
         description,
         priority,
@@ -123,7 +123,7 @@ async function handleSaveTask() {
         assignedName: assignedName || assignedTo,
         deadline,
         adminEmail: currentUserEmail
-      }
+      })
     });
 
     const data = await res.json();
@@ -275,10 +275,10 @@ export function renderTasksList() {
 async function updateTaskStatus(taskId, status) {
   const currentUserEmail = sessionStorage.getItem("admin_user_email") || "azuolynasfilmfestival@gmail.com";
   try {
-    const res = await FirebaseClient.request("tasks.status", {
+    const res = await fetch("/api/admin/tasks/status", {
       method: "POST",
-
-      body: { taskId, status, adminEmail: currentUserEmail }
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ taskId, status, adminEmail: currentUserEmail })
     });
     if (res.ok) {
       showToast(`Užduoties būsena atnaujinta!`, "success");
@@ -293,10 +293,10 @@ async function updateTaskStatus(taskId, status) {
 async function deleteTask(taskId) {
   const currentUserEmail = sessionStorage.getItem("admin_user_email") || "azuolynasfilmfestival@gmail.com";
   try {
-    const res = await FirebaseClient.request("tasks.delete", {
+    const res = await fetch("/api/admin/tasks/delete", {
       method: "POST",
-
-      body: { taskId, adminEmail: currentUserEmail }
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ taskId, adminEmail: currentUserEmail })
     });
     if (res.ok) {
       showToast("Užduotis pašalinta.", "info");
