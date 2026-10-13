@@ -744,11 +744,11 @@
               <div class="input-row">
                 <div class="input-cell">
                   <label for="participantName">Vardas ir Pavardė *</label>
-                  <input type="text" id="participantName" class="field" placeholder="Vardenis Pavardenis" required>
+                  <input type="text" id="participantName" maxlength="150" class="field" placeholder="Vardenis Pavardenis" required>
                 </div>
                 <div class="input-cell">
                   <label for="participantEmail">El. pašto adresas *</label>
-                  <input type="email" id="participantEmail" class="field" placeholder="vardas@pavyzdys.lt" required>
+                  <input type="email" id="participantEmail" maxlength="150" class="field" placeholder="vardas@pavyzdys.lt" required>
                 </div>
               </div>
 
@@ -780,7 +780,7 @@
 
               <div class="input-cell">
                 <label for="filmTitle">Filmo pavadinimas *</label>
-                <input type="text" id="filmTitle" class="field" placeholder="Originalus filmo pavadinimas" required>
+                <input type="text" id="filmTitle" maxlength="200" class="field" placeholder="Originalus filmo pavadinimas" required>
               </div>
 
               <div class="input-cell">
@@ -1702,13 +1702,11 @@
 
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
+      if (submitBtn.disabled) return;
       if (!verifiedVideoFile) {
         showToast("Prašome pasirinkti vaizdo įrašą, kurio trukmė neviršija 3 minučių!", "error");
         return;
       }
-
-      submitBtn.disabled = true;
-      progressContainer.classList.add("active");
 
       const name = document.getElementById("participantName").value.trim();
       const email = document.getElementById("participantEmail").value.trim();
@@ -1719,6 +1717,13 @@
       const filmTitle = document.getElementById("filmTitle").value.trim();
       const deviceModel = document.getElementById("deviceModel").value.trim();
       const synopsis = document.getElementById("synopsis").value.trim();
+
+      if (!name || name.length > 150 || !email || email.length > 150 || !filmTitle || filmTitle.length > 200) {
+        showToast("Įveskite vardą, el. paštą ir filmo pavadinimą neviršydami leidžiamo ilgio.", "error");
+        return;
+      }
+      submitBtn.disabled = true;
+      progressContainer.classList.add("active");
 
       try {
         const ext = verifiedVideoFile.name.split(".").pop();
@@ -1741,6 +1746,7 @@
             console.error(err);
             showToast("Klaida įkeliant vaizdo įrašą: " + err.message, "error");
             submitBtn.disabled = false;
+            progressContainer.classList.remove("active");
           },
           async () => {
             try {
@@ -1794,6 +1800,7 @@
         console.error(error);
         showToast("Įvyko klaida siunčiant paraišką. Bandykite vėliau.", "error");
         submitBtn.disabled = false;
+        progressContainer.classList.remove("active");
       }
     });
   </script>

@@ -743,11 +743,11 @@
               <div class="input-row">
                 <div class="input-cell">
                   <label for="participantName">Full Name *</label>
-                  <input type="text" id="participantName" class="field" placeholder="John Doe" required>
+                  <input type="text" id="participantName" maxlength="150" class="field" placeholder="John Doe" required>
                 </div>
                 <div class="input-cell">
                   <label for="participantEmail">Email Address *</label>
-                  <input type="email" id="participantEmail" class="field" placeholder="john@example.com" required>
+                  <input type="email" id="participantEmail" maxlength="150" class="field" placeholder="john@example.com" required>
                 </div>
               </div>
 
@@ -779,7 +779,7 @@
 
               <div class="input-cell">
                 <label for="filmTitle">Film Title *</label>
-                <input type="text" id="filmTitle" class="field" placeholder="Original title of your film" required>
+                <input type="text" id="filmTitle" maxlength="200" class="field" placeholder="Original title of your film" required>
               </div>
 
               <div class="input-cell">
@@ -1678,16 +1678,28 @@
     const progressContainer = document.getElementById("progressContainer");
     const progressFill = document.getElementById("progressFill");
     const progressStatus = document.getElementById("progressStatus");
+    const formSuccessDisplay = document.getElementById("formSuccessDisplay");
+
+    function resetFormView() {
+      if (formSuccessDisplay) formSuccessDisplay.classList.add("d-none");
+      if (form) {
+        form.classList.remove("d-none");
+        form.reset();
+      }
+      verifiedVideoFile = null;
+      if (feedback) feedback.textContent = "";
+      if (progressContainer) progressContainer.classList.remove("active");
+      if (progressFill) progressFill.style.width = "0%";
+      if (submitBtn) submitBtn.disabled = false;
+    }
 
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
+      if (submitBtn.disabled) return;
       if (!verifiedVideoFile) {
         showToast("Please attach a valid video strictly under 3 minutes.", "error");
         return;
       }
-
-      submitBtn.disabled = true;
-      progressContainer.classList.add("active");
 
       const name = document.getElementById("participantName").value.trim();
       const email = document.getElementById("participantEmail").value.trim();
@@ -1698,6 +1710,13 @@
       const filmTitle = document.getElementById("filmTitle").value.trim();
       const deviceModel = document.getElementById("deviceModel").value.trim();
       const synopsis = document.getElementById("synopsis").value.trim();
+
+      if (!name || name.length > 150 || !email || email.length > 150 || !filmTitle || filmTitle.length > 200) {
+        showToast("Enter your name, email and film title within the allowed lengths.", "error");
+        return;
+      }
+      submitBtn.disabled = true;
+      progressContainer.classList.add("active");
 
       try {
         const ext = verifiedVideoFile.name.split(".").pop();
@@ -1720,6 +1739,7 @@
             console.error(err);
             showToast("Upload failed: " + err.message, "error");
             submitBtn.disabled = false;
+            progressContainer.classList.remove("active");
           },
           async () => {
             try {
@@ -1757,13 +1777,9 @@
             const targetDb = firestoreDb || (typeof window !== "undefined" && window.db) || (typeof db !== "undefined" ? db : null) || firebase.firestore();
             await FirebaseClient.submitFilm(targetDb, submissionData);
 
+            form.classList.add("d-none");
+            formSuccessDisplay.classList.remove("d-none");
             showToast("Thank you! Your entry has been submitted successfully.");
-            form.reset();
-            verifiedVideoFile = null;
-            feedback.textContent = "";
-            progressContainer.classList.remove("active");
-            progressFill.style.width = "0%";
-            submitBtn.disabled = false;
             } catch (error) {
               console.error(error);
               showToast("Could not save the film. Please try again.", "error");
@@ -1777,6 +1793,7 @@
         console.error(error);
         showToast("An error occurred during submission.", "error");
         submitBtn.disabled = false;
+        progressContainer.classList.remove("active");
       }
     });
   </script>
