@@ -80,31 +80,15 @@ export function initSettings() {
     btnThemePurpose.addEventListener("click", () => {
       const ltTopic = document.getElementById("cfgLtTopic");
       const enTopic = document.getElementById("cfgEnTopic");
+      const ltTopicDesc = document.getElementById("cfgLtTopicDesc");
+      const enTopicDesc = document.getElementById("cfgEnTopicDesc");
+
       if (ltTopic) ltTopic.value = "Mano pašaukimas";
       if (enTopic) enTopic.value = "My Purpose";
+      if (ltTopicDesc) ltTopicDesc.value = "Ką norite veikti savo gyvenime ir kaip atrasti tikrąjį pašaukimą? Ieškome istorijų apie savo kelio paieškas, karjeros pasirinkimus ir vidinių abejonių įveikimą. Papasakokite, ko reikia, kad sektumėte savo aistra, kai aplinkiniai tikisi kažko kito – ar tai būtų šeimos spaudimas rinktis „rimtą“ profesiją, pavyzdžiui, mediciną ar teisę, ar jūsų pačių baimė žengti į meną, muziką ar kūrybines sritis. Parodykite šios kelionės tikrovę, kliūtis pakeliui ir tą akimirką, kai jūs ar jūsų herojai suprato, ką iš tiesų lemta daryti.";
+      if (enTopicDesc) enTopicDesc.value = "What do you want to do with your life, and how do you find your true calling? We are looking for stories about discovering your path, making career choices, and overcoming self-doubt. Tell us what it takes to follow your passion when the people around you expect something different—whether it is family pressure to pursue a \"serious\" career like medicine or law, or your own fear of stepping into the arts, music, or creative fields. Show the reality of this journey, the obstacles along the way, and the exact moment you or your characters realized what you were meant to do.";
+
       showToast("Nustatyta tema: „Mano pašaukimas“ / My Purpose");
-    });
-  }
-
-  const btnThemeFate = document.getElementById("btnThemePresetFate");
-  if (btnThemeFate) {
-    btnThemeFate.addEventListener("click", () => {
-      const ltTopic = document.getElementById("cfgLtTopic");
-      const enTopic = document.getElementById("cfgEnTopic");
-      if (ltTopic) ltTopic.value = "Mano pašaukimas";
-      if (enTopic) enTopic.value = "My Fate";
-      showToast("Nustatyta tema: „Mano pašaukimas“ / My Fate");
-    });
-  }
-
-  const btnThemeBoth = document.getElementById("btnThemePresetBoth");
-  if (btnThemeBoth) {
-    btnThemeBoth.addEventListener("click", () => {
-      const ltTopic = document.getElementById("cfgLtTopic");
-      const enTopic = document.getElementById("cfgEnTopic");
-      if (ltTopic) ltTopic.value = "Mano pašaukimas";
-      if (enTopic) enTopic.value = "My Purpose (My Fate)";
-      showToast("Nustatyta tema: „Mano pašaukimas“ / My Purpose (My Fate)");
     });
   }
 
@@ -287,6 +271,8 @@ function applySettingsToForm(d) {
 
   const ltTopicElem = document.getElementById("cfgLtTopic");
   if (ltTopicElem) ltTopicElem.value = lt.topic || "Mano pašaukimas";
+  const ltTopicDescElem = document.getElementById("cfgLtTopicDesc");
+  if (ltTopicDescElem) ltTopicDescElem.value = lt.topicDesc || "Ką norite veikti savo gyvenime ir kaip atrasti tikrąjį pašaukimą? Ieškome istorijų apie savo kelio paieškas, karjeros pasirinkimus ir vidinių abejonių įveikimą. Papasakokite, ko reikia, kad sektumėte savo aistra, kai aplinkiniai tikisi kažko kito – ar tai būtų šeimos spaudimas rinktis „rimtą“ profesiją, pavyzdžiui, mediciną ar teisę, ar jūsų pačių baimė žengti į meną, muziką ar kūrybines sritis. Parodykite šios kelionės tikrovę, kliūtis pakeliui ir tą akimirką, kai jūs ar jūsų herojai suprato, ką iš tiesų lemta daryti.";
   const ltOpeningElem = document.getElementById("cfgLtOpening");
   if (ltOpeningElem) ltOpeningElem.value = lt.openingDate || "Lapkričio 1 d.";
   const ltDeadlineElem = document.getElementById("cfgLtDeadline");
@@ -305,7 +291,9 @@ function applySettingsToForm(d) {
   if (ltRecPhElem) ltRecPhElem.value = lt.recordingPlaceholder || "Festivalio ir tiesioginės transliacijos vaizdo įrašas bus pasiekiamas 2027 m. balandžio 23 d.";
 
   const enTopicElem = document.getElementById("cfgEnTopic");
-  if (enTopicElem) enTopicElem.value = en.topic || "My Purpose (My Fate)";
+  if (enTopicElem) enTopicElem.value = en.topic || "My Purpose";
+  const enTopicDescElem = document.getElementById("cfgEnTopicDesc");
+  if (enTopicDescElem) enTopicDescElem.value = en.topicDesc || "What do you want to do with your life, and how do you find your true calling? We are looking for stories about discovering your path, making career choices, and overcoming self-doubt. Tell us what it takes to follow your passion when the people around you expect something different—whether it is family pressure to pursue a \"serious\" career like medicine or law, or your own fear of stepping into the arts, music, or creative fields. Show the reality of this journey, the obstacles along the way, and the exact moment you or your characters realized what you were meant to do.";
   const enOpeningElem = document.getElementById("cfgEnOpening");
   if (enOpeningElem) enOpeningElem.value = en.openingDate || "November 1st";
   const enDeadlineElem = document.getElementById("cfgEnDeadline");
@@ -386,11 +374,13 @@ async function saveSettings() {
   const ltDeadline = (document.getElementById("cfgLtDeadline")?.value || "").trim() || "Kovo 26 d.";
   const ltEvent = (document.getElementById("cfgLtEvent")?.value || "").trim() || "2027 m. balandžio 23 d. (Kino festivalis ir tiesioginė transliacija)";
   const ltDates = (document.getElementById("cfgLtDates")?.value || "").trim() || "Nuo lapkričio 1 d. iki kovo 26 d.";
+  const ltTopicDesc = (document.getElementById("cfgLtTopicDesc")?.value || "").trim() || "Ką norite veikti savo gyvenime ir kaip atrasti tikrąjį pašaukimą? Ieškome istorijų apie savo kelio paieškas, karjeros pasirinkimus ir vidinių abejonių įveikimą. Papasakokite, ko reikia, kad sektumėte savo aistra, kai aplinkiniai tikisi kažko kito – ar tai būtų šeimos spaudimas rinktis „rimtą“ profesiją, pavyzdžiui, mediciną ar teisę, ar jūsų pačių baimė žengti į meną, muziką ar kūrybines sritis. Parodykite šios kelionės tikrovę, kliūtis pakeliui ir tą akimirką, kai jūs ar jūsų herojai suprato, ką iš tiesų lemta daryti.";
 
   const enOpening = (document.getElementById("cfgEnOpening")?.value || "").trim() || "November 1st";
   const enDeadline = (document.getElementById("cfgEnDeadline")?.value || "").trim() || "March 26th";
   const enEvent = (document.getElementById("cfgEnEvent")?.value || "").trim() || "April 23rd, 2027 (Film Festival & Live Stream)";
   const enDates = (document.getElementById("cfgEnDates")?.value || "").trim() || "November 1st – March 26th";
+  const enTopicDesc = (document.getElementById("cfgEnTopicDesc")?.value || "").trim() || "What do you want to do with your life, and how do you find your true calling? We are looking for stories about discovering your path, making career choices, and overcoming self-doubt. Tell us what it takes to follow your passion when the people around you expect something different—whether it is family pressure to pursue a \"serious\" career like medicine or law, or your own fear of stepping into the arts, music, or creative fields. Show the reality of this journey, the obstacles along the way, and the exact moment you or your characters realized what you were meant to do.";
 
   const updated = {
     selectedYear: "2027",
@@ -411,6 +401,7 @@ async function saveSettings() {
     recordingVideoUrl: document.getElementById("cfgRecordingUrl") ? document.getElementById("cfgRecordingUrl").value.trim() : "",
     lt: {
       topic: (document.getElementById("cfgLtTopic")?.value || "").trim() || "Mano pašaukimas",
+      topicDesc: ltTopicDesc,
       openingDate: ltOpening,
       deadlineDate: ltDeadline,
       eventDate: ltEvent,
@@ -422,7 +413,8 @@ async function saveSettings() {
       recordingPlaceholder: (document.getElementById("cfgLtRecordingPh")?.value || "").trim() || "Festivalio ir tiesioginės transliacijos vaizdo įrašas bus pasiekiamas 2027 m. balandžio 23 d."
     },
     en: {
-      topic: (document.getElementById("cfgEnTopic")?.value || "").trim() || "My Purpose (My Fate)",
+      topic: (document.getElementById("cfgEnTopic")?.value || "").trim() || "My Purpose",
+      topicDesc: enTopicDesc,
       openingDate: enOpening,
       deadlineDate: enDeadline,
       eventDate: enEvent,

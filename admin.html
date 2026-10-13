@@ -1343,13 +1343,7 @@
             </div>
             <div style="display:flex; flex-wrap:wrap; gap:8px;">
               <button type="button" class="btn-solid btn-xs" id="btnThemePresetPurpose" style="background:linear-gradient(135deg, #1f5847, #134e4a);">
-                ✨ „Mano pašaukimas“ &bull; My Purpose
-              </button>
-              <button type="button" class="btn-outline btn-xs" id="btnThemePresetFate">
-                🔮 „Mano pašaukimas“ &bull; My Fate
-              </button>
-              <button type="button" class="btn-outline btn-xs" id="btnThemePresetBoth">
-                🌟 „Mano pašaukimas“ &bull; My Purpose (My Fate)
+                ✨ Nustatyti temą: „Mano pašaukimas“ &bull; My Purpose
               </button>
               <button type="button" class="btn-solid btn-xs" id="btnDatePreset2027" style="background:linear-gradient(135deg, #D4AF37, #b8972e); color:#051512; font-weight:700;">
                 📅 Nustatyti oficialias datas: Lapkričio 1 d. &bull; Kovo 26 d. &bull; Balandžio 23 d.
@@ -1361,6 +1355,7 @@
             <div class="content-card">
               <h4>Lietuviška versija (LT)</h4>
               <div class="input-cell"><label for="cfgLtTopic">Festivalio tema</label><input type="text" id="cfgLtTopic" class="field" placeholder="Mano pašaukimas"></div>
+              <div class="input-cell"><label for="cfgLtTopicDesc">Festivalio temos aprašymas (angl. Theme Story)</label><textarea id="cfgLtTopicDesc" class="field" rows="3" placeholder="Ką norite veikti savo gyvenime ir kaip atrasti tikrąjį pašaukimą?..."></textarea></div>
               <div class="input-row">
                 <div class="input-cell"><label for="cfgLtOpening">Paraiškų pradžia (Opening)</label><input type="text" id="cfgLtOpening" class="field" placeholder="Lapkričio 1 d."></div>
                 <div class="input-cell"><label for="cfgLtDeadline">Paraiškų pabaiga (Deadline)</label><input type="text" id="cfgLtDeadline" class="field" placeholder="Kovo 26 d."></div>
@@ -1372,7 +1367,8 @@
 
             <div class="content-card">
               <h4>Angliška versija (EN)</h4>
-              <div class="input-cell"><label for="cfgEnTopic">Festival Topic</label><input type="text" id="cfgEnTopic" class="field" placeholder="My Purpose (My Fate)"></div>
+              <div class="input-cell"><label for="cfgEnTopic">Festival Topic</label><input type="text" id="cfgEnTopic" class="field" placeholder="My Purpose"></div>
+              <div class="input-cell"><label for="cfgEnTopicDesc">Festival Topic Story / Description</label><textarea id="cfgEnTopicDesc" class="field" rows="3" placeholder="What do you want to do with your life, and how do you find your true calling?..."></textarea></div>
               <div class="input-row">
                 <div class="input-cell"><label for="cfgEnOpening">Opening Date</label><input type="text" id="cfgEnOpening" class="field" placeholder="November 1st"></div>
                 <div class="input-cell"><label for="cfgEnDeadline">Submission Deadline</label><input type="text" id="cfgEnDeadline" class="field" placeholder="March 26th"></div>

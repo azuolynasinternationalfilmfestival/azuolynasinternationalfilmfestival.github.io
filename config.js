@@ -78,6 +78,7 @@ const DEFAULT_CONTENT = {
   lt: {
     heroBadge: "7-asis Tarptautinis Mokinių Filmų Festivalis",
     topic: "Mano pašaukimas",
+    topicDesc: "Ką norite veikti savo gyvenime ir kaip atrasti tikrąjį pašaukimą? Ieškome istorijų apie savo kelio paieškas, karjeros pasirinkimus ir vidinių abejonių įveikimą. Papasakokite, ko reikia, kad sektumėte savo aistra, kai aplinkiniai tikisi kažko kito – ar tai būtų šeimos spaudimas rinktis „rimtą“ profesiją, pavyzdžiui, mediciną ar teisę, ar jūsų pačių baimė žengti į meną, muziką ar kūrybines sritis. Parodykite šios kelionės tikrovę, kliūtis pakeliui ir tą akimirką, kai jūs ar jūsų herojai suprato, ką iš tiesų lemta daryti.",
     openingDate: "Lapkričio 1 d.",
     deadlineDate: "Kovo 26 d.",
     eventDate: "Balandžio 23 d.",
@@ -97,7 +98,8 @@ const DEFAULT_CONTENT = {
   },
   en: {
     heroBadge: "The 7th International Students Film Festival",
-    topic: "My Purpose (My Fate)",
+    topic: "My Purpose",
+    topicDesc: "What do you want to do with your life, and how do you find your true calling? We are looking for stories about discovering your path, making career choices, and overcoming self-doubt. Tell us what it takes to follow your passion when the people around you expect something different—whether it is family pressure to pursue a \"serious\" career like medicine or law, or your own fear of stepping into the arts, music, or creative fields. Show the reality of this journey, the obstacles along the way, and the exact moment you or your characters realized what you were meant to do.",
     openingDate: "November 1st",
     deadlineDate: "March 26th",
     eventDate: "April 23rd",
