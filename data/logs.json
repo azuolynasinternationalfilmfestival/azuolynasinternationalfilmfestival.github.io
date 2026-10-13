@@ -1,6 +1,50 @@
 {
   "logs": [
     {
+      "id": "log_1791877385447_hjl36",
+      "action": "DIRECT_EMAIL_SENT",
+      "category": "users",
+      "adminEmail": "azuolynasfilmfestival@gmail.com",
+      "adminName": "azuolynasfilmfestival",
+      "target": "test@example.com",
+      "details": "Tiesioginis el. laiškas išsiųstas į test@example.com (Tema: „Festivalio informacija“)",
+      "timestamp": "2026-10-13T07:43:05.447Z",
+      "status": "success"
+    },
+    {
+      "id": "log_1791877380140_bqdlp",
+      "action": "SUBMISSION_EMAIL_SENT",
+      "category": "submissions",
+      "adminEmail": "azuolynasfilmfestival@gmail.com",
+      "adminName": "azuolynasfilmfestival",
+      "target": "dalyvis@gmail.com",
+      "details": "Išsiųstas el. laiškas dalyviui dalyvis@gmail.com (Šablonas: accepted, Filmas: „Filmas“)",
+      "timestamp": "2026-10-13T07:43:00.140Z",
+      "status": "success"
+    },
+    {
+      "id": "log_1791877372025_ystgb",
+      "action": "EMAIL_TEST_SENT",
+      "category": "settings",
+      "adminEmail": "azuolynasfilmfestival@gmail.com",
+      "adminName": "azuolynasfilmfestival",
+      "target": "azuolynasfilmfestival@gmail.com",
+      "details": "Atliktas bandomojo el. laiško siuntimas į azuolynasfilmfestival@gmail.com. Rezultatas: Įrašyta į Firestore eilę",
+      "timestamp": "2026-10-13T07:42:52.025Z",
+      "status": "success"
+    },
+    {
+      "id": "log_1791876616584_9dxxt",
+      "action": "SETTINGS_UPDATED",
+      "category": "settings",
+      "adminEmail": "azuolynasfilmfestival@gmail.com",
+      "adminName": "azuolynasfilmfestival",
+      "target": "settings/festival",
+      "details": "Atnaujinti nustatymai. Profilaktikos režimas: IŠJUNGTAS, Balsavimas: AKTYVUS",
+      "timestamp": "2026-10-13T07:30:16.584Z",
+      "status": "success"
+    },
+    {
       "id": "log_1791874368986_wguwe",
       "action": "SETTINGS_UPDATED",
       "category": "settings",

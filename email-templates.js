@@ -536,11 +536,18 @@ function buildMetaRow(label, valueHtml) {
 
 /**
  * Generates an applicant-facing notification email HTML string.
+ * Supports both argument orders: (templateKey, lang, data) and (lang, templateKey, data).
  */
 function generateEmailHtml(templateKey, lang, data = {}) {
+  // Gracefully handle inverted argument calls: (lang, templateKey, data)
+  if ((templateKey === "lt" || templateKey === "en") && (lang !== "lt" && lang !== "en")) {
+    const tmp = templateKey;
+    templateKey = lang;
+    lang = tmp;
+  }
   const currentLang = (lang === "lt" || lang === "en") ? lang : "lt";
   const texts = emailTexts[currentLang] || emailTexts.lt;
-  const t = texts[templateKey] || texts.submissionReceived;
+  const t = (texts && texts[templateKey]) ? texts[templateKey] : texts.submissionReceived;
   const isLt = currentLang === "lt";
 
   const applicantName = data.name || (isLt ? "Dalyvi" : "Filmmaker");
@@ -991,10 +998,34 @@ function generateAccessGrantedEmailHtml(lang, data = {}) {
   });
 }
 
+/**
+ * Returns the localized email subject line for any given template key.
+ * Supports both argument orders: (templateKey, lang, data) and (lang, templateKey, data).
+ */
+function getEmailSubject(templateKey, lang, data = {}) {
+  if ((templateKey === "lt" || templateKey === "en") && (lang !== "lt" && lang !== "en")) {
+    const tmp = templateKey;
+    templateKey = lang;
+    lang = tmp;
+  }
+  const currentLang = (lang === "lt" || lang === "en") ? lang : "lt";
+  const texts = emailTexts[currentLang] || emailTexts.lt;
+  const t = (texts && texts[templateKey]) ? texts[templateKey] : (texts ? texts.submissionReceived : null);
+  
+  if (t && t.sub) {
+    if (data && data.filmTitle) {
+      return `${t.sub}: „${data.filmTitle}“`;
+    }
+    return t.sub;
+  }
+  return currentLang === "en" ? "Ąžuolynas Film Fest Notification" : "Ąžuolynas Film Fest Pranešimas";
+}
+
 // Global browser and runtime scope compatibility
 if (typeof window !== "undefined") {
   window.emailTexts = emailTexts;
   window.generateEmailHtml = generateEmailHtml;
+  window.getEmailSubject = getEmailSubject;
   window.generateAdminNotificationHtml = generateAdminNotificationHtml;
   window.generateInviteEmailHtml = generateInviteEmailHtml;
   window.generateAccessRequestEmailHtml = generateAccessRequestEmailHtml;
@@ -1003,6 +1034,7 @@ if (typeof window !== "undefined") {
 if (typeof globalThis !== "undefined") {
   globalThis.emailTexts = emailTexts;
   globalThis.generateEmailHtml = generateEmailHtml;
+  globalThis.getEmailSubject = getEmailSubject;
   globalThis.generateAdminNotificationHtml = generateAdminNotificationHtml;
   globalThis.generateInviteEmailHtml = generateInviteEmailHtml;
   globalThis.generateAccessRequestEmailHtml = generateAccessRequestEmailHtml;
@@ -1014,6 +1046,7 @@ if (typeof module !== "undefined" && module.exports) {
   module.exports = {
     emailTexts,
     generateEmailHtml,
+    getEmailSubject,
     generateAdminNotificationHtml,
     generateInviteEmailHtml,
     generateAccessRequestEmailHtml,

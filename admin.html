@@ -1379,6 +1379,135 @@
             </div>
           </div>
 
+          <!-- 10. EMAIL SENDER & SMTP SERVICE MODULE -->
+          <div class="content-card" style="border:1px solid rgba(111,165,138,0.4); margin-top:16px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:14px; border-bottom:1px solid var(--border-color); padding-bottom:12px;">
+              <div>
+                <h3 class="content-card-title" style="margin:0; display:flex; align-items:center; gap:8px;">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+                  <span>El. Pašto Siuntėjas & SMTP Tarnyba</span>
+                </h3>
+                <p class="content-card-sub" style="margin:4px 0 0 0;">
+                  Valdykite laiškų siuntimą dalyviams, žiūrovams ir komandai per Nodemailer ir Firestore eilę.
+                </p>
+              </div>
+              <div style="display:flex; align-items:center; gap:8px;">
+                <span id="smtpStatusBadge" class="status-pill status-accepted" style="font-size:0.75rem; padding:4px 10px;">
+                  Aktyvus (Firestore & SMTP)
+                </span>
+                <button type="button" id="btnRefreshEmailStatus" class="btn-outline btn-xs" title="Atnaujinti būseną">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+                </button>
+              </div>
+            </div>
+
+            <!-- Quick Test Email & Direct Sender Two-Column Section -->
+            <div class="two-col-grid" style="margin-bottom:16px;">
+              <!-- Left: Quick Test Dispatcher -->
+              <div style="background:rgba(8,27,23,0.65); border:1px solid rgba(111,165,138,0.22); border-radius:var(--site-radius); padding:16px;">
+                <h4 style="margin:0 0 8px 0; font-size:0.92rem; color:var(--text-color); display:flex; align-items:center; gap:6px;">
+                  <span>🧪 Bandomojo Laiško Siuntimas</span>
+                </h4>
+                <p style="font-size:0.78rem; color:var(--text-muted); margin:0 0 12px 0;">
+                  Patikrinkite ar el. pašto siuntėjas sėkmingai pristato laiškus į nurodytą pašto dėžutę.
+                </p>
+                <div class="input-cell" style="margin-bottom:10px;">
+                  <label for="testEmailRecipient">Gavėjo el. pašto adresas</label>
+                  <input type="email" id="testEmailRecipient" class="field" placeholder="azuolynasfilmfestival@gmail.com" value="azuolynasfilmfestival@gmail.com">
+                </div>
+                <button type="button" id="btnSendTestEmail" class="btn-solid btn-full btn-sm" style="display:flex; align-items:center; justify-content:center; gap:6px;">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                  <span>Siųsti Bandomąjį Laišką</span>
+                </button>
+              </div>
+
+              <!-- Right: Direct Custom Message Dispatcher -->
+              <div style="background:rgba(8,27,23,0.65); border:1px solid rgba(111,165,138,0.22); border-radius:var(--site-radius); padding:16px;">
+                <h4 style="margin:0 0 8px 0; font-size:0.92rem; color:var(--text-color); display:flex; align-items:center; gap:6px;">
+                  <span>✉️ Tiesioginis Laiškas Gavėjui</span>
+                </h4>
+                <p style="font-size:0.78rem; color:var(--text-muted); margin:0 0 12px 0;">
+                  Išsiųskite laišką su festivalio stiliumi konkrečiam gavėjui arba dalyviui.
+                </p>
+                <div class="input-cell" style="margin-bottom:8px;">
+                  <label for="directEmailRecipient">Gavėjo adresas *</label>
+                  <input type="email" id="directEmailRecipient" class="field" placeholder="dalyvis@gmail.com">
+                </div>
+                <div class="input-row" style="margin-bottom:8px;">
+                  <div class="input-cell">
+                    <label for="directEmailTemplate">Šablonas</label>
+                    <select id="directEmailTemplate" class="field">
+                      <option value="custom">Individualus laiškas</option>
+                      <option value="accepted">Priėmimo patvirtinimas</option>
+                      <option value="semiFinalist">Pusfinalio žinia</option>
+                      <option value="finalist">Finalo žinia</option>
+                      <option value="winner">Nugalėtojo diplomas</option>
+                      <option value="rejected">Neatrankos pranešimas</option>
+                      <option value="eventReminder">Renginio įrašo priminimas</option>
+                    </select>
+                  </div>
+                  <div class="input-cell">
+                    <label for="directEmailLang">Kalba</label>
+                    <select id="directEmailLang" class="field">
+                      <option value="lt" selected>Lietuvių (LT)</option>
+                      <option value="en">English (EN)</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="input-cell" style="margin-bottom:8px;" id="directEmailSubjectWrap">
+                  <label for="directEmailSubject">Tema (Subject)</label>
+                  <input type="text" id="directEmailSubject" class="field" placeholder="Ąžuolynas Film Fest | Pranešimas">
+                </div>
+                <div class="input-cell" style="margin-bottom:10px;">
+                  <label for="directEmailBody">Turinys / Papildoma žinutė</label>
+                  <textarea id="directEmailBody" class="field" rows="2" placeholder="Įveskite tekstą..."></textarea>
+                </div>
+                <button type="button" id="btnSendDirectEmail" class="btn-solid btn-full btn-sm" style="display:flex; align-items:center; justify-content:center; gap:6px;">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+                  <span>Išsiųsti El. Laišką</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- SMTP Settings Config Drawer -->
+            <details style="background:rgba(0,0,0,0.25); border:1px solid rgba(111,165,138,0.2); border-radius:var(--site-radius); padding:12px 14px;">
+              <summary style="cursor:pointer; color:var(--accent-light); font-weight:600; font-size:0.85rem; user-select:none;">
+                ⚙️ Išplėstiniai SMTP Serverio Nustatymai (Nodemailer Configuration)
+              </summary>
+              <div style="margin-top:14px;">
+                <div class="two-col-grid" style="margin-bottom:12px;">
+                  <div class="input-cell">
+                    <label for="cfgSmtpHost">SMTP Serverio Adresas (Host)</label>
+                    <input type="text" id="cfgSmtpHost" class="field" placeholder="smtp.gmail.com" value="smtp.gmail.com">
+                  </div>
+                  <div class="input-cell">
+                    <label for="cfgSmtpPort">SMTP Prievadas (Port)</label>
+                    <input type="number" id="cfgSmtpPort" class="field" placeholder="587" value="587">
+                  </div>
+                </div>
+                <div class="two-col-grid" style="margin-bottom:12px;">
+                  <div class="input-cell">
+                    <label for="cfgSmtpUser">SMTP Naudotojas / Paskyra (User / Gmail)</label>
+                    <input type="text" id="cfgSmtpUser" class="field" placeholder="azuolynasfilmfestival@gmail.com" value="azuolynasfilmfestival@gmail.com">
+                  </div>
+                  <div class="input-cell">
+                    <label for="cfgSmtpPass">SMTP Slaptažodis (Google App Password)</label>
+                    <input type="password" id="cfgSmtpPass" class="field" placeholder="16 simbolių Google programos slaptažodis">
+                  </div>
+                </div>
+                <div class="input-cell" style="margin-bottom:12px;">
+                  <label for="cfgEmailFrom">Siuntėjo Antraštė (Sender Header)</label>
+                  <input type="text" id="cfgEmailFrom" class="field" placeholder='"Ąžuolynas Film Fest" <azuolynasfilmfestival@gmail.com>' value='"Ąžuolynas Film Fest" <azuolynasfilmfestival@gmail.com>'>
+                </div>
+                <div style="display:flex; justify-content:flex-end;">
+                  <button type="button" id="btnSaveSmtpConfig" class="btn-outline btn-sm">
+                    Išsaugoti SMTP Nustatymus
+                  </button>
+                </div>
+              </div>
+            </details>
+          </div>
+
           <div style="display:flex; justify-content:flex-end; margin-top:14px;">
             <button id="saveSettingsBtn" class="btn-solid">Išsaugoti Pakeitimus</button>
           </div>

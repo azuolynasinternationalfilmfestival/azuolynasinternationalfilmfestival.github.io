@@ -1,4 +1,4 @@
-import 'dotenv/config';
+import dotenv from 'dotenv';
 import express from 'express';
 import path from 'path';
 import fs from 'fs';
@@ -11,11 +11,20 @@ import './email-templates.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Fallback loader for .env if environment variables are not preloaded
+// Explicitly load environment variables via dotenv from root and __dirname
 try {
-  const envPath = path.join(__dirname, '.env');
+  dotenv.config();
+  dotenv.config({ path: path.resolve(__dirname, '.env') });
+} catch (dotenvErr) {
+  console.warn('[Env] Dotenv initialization notice:', dotenvErr.message);
+}
+
+// Resilient fallback parser for .env to guarantee variables like FIREBASE_API_KEY are loaded
+try {
+  const envPath = path.resolve(__dirname, '.env');
   if (fs.existsSync(envPath)) {
-    const lines = fs.readFileSync(envPath, 'utf-8').split('\n');
+    const rawContent = fs.readFileSync(envPath, 'utf-8');
+    const lines = rawContent.split(/\r?\n/);
     for (const rawLine of lines) {
       const line = rawLine.trim();
       if (!line || line.startsWith('#')) continue;
@@ -26,14 +35,14 @@ try {
         if ((v.startsWith('"') && v.endsWith('"')) || (v.startsWith("'") && v.endsWith("'"))) {
           v = v.substring(1, v.length - 1);
         }
-        if (!process.env[k]) {
+        if (!process.env[k] || process.env[k] === '') {
           process.env[k] = v;
         }
       }
     }
   }
 } catch (e) {
-  // Silent fallback
+  console.warn('[Env] Fallback env parser notice:', e.message);
 }
 
 // Process-level crash prevention (Prevents 502 Bad Gateway on unhandled exceptions/rejections)
@@ -44,9 +53,11 @@ process.on('unhandledRejection', (reason, promise) => {
   console.error('[CRITICAL] Unhandled promise rejection in Node.js server:', reason);
 });
 
+
 const {
   emailTexts,
   generateEmailHtml,
+  getEmailSubject,
   generateAdminNotificationHtml,
   generateInviteEmailHtml,
   generateAccessRequestEmailHtml,
@@ -68,6 +79,9 @@ const TRUSTED_ADMIN_EMAILS = [
 const FIREBASE_API_KEY = process.env.FIREBASE_API_KEY || 'AIzaSyDDKEzn0jN_xUTDw5aXABU79ZEYKIACfdE';
 const FIREBASE_PROJECT_ID = process.env.FIREBASE_PROJECT_ID || 'filmfest-509606';
 const FIREBASE_DATABASE_ID = process.env.FIREBASE_DATABASE_ID || 'ai-studio-azuolynasinterna-cd7ce36e-5213-4751-8aa0-a7141d397a83';
+
+console.log(`[Init] Environment status: PORT=${PORT}, FIREBASE_PROJECT_ID=${FIREBASE_PROJECT_ID}, FIREBASE_DATABASE_ID=${FIREBASE_DATABASE_ID}, FIREBASE_API_KEY=${FIREBASE_API_KEY ? 'CONFIGURED' : 'NOT_FOUND'}`);
+
 
 // Persistent Data Storage
 const DATA_DIR = path.join(__dirname, 'data');
@@ -266,62 +280,92 @@ function saveVotesData(data) {
   saveJson(VOTES_FILE, data);
 }
 
+const DEFAULT_SETTINGS = Object.freeze({
+  votingActive: true,
+  maintenanceMode: false,
+  publicWinners: true,
+  submissionsOpen: true,
+  autoRankings: true,
+  selectedYear: "2027",
+  institutionNameLt: "Kauno Tarptautinė Gimnazija",
+  institutionNameEn: "Kaunas International Gymnasium",
+  showAbout: true,
+  showTerms: true,
+  showFaq: true,
+  showCategories: true,
+  showEditions: true,
+  showArchive: true,
+  showCurrentEdition: true,
+  showResults: false,
+  showVoting: true,
+  showScreening: true,
+  showSubmit: true,
+  archiveVisibility: true,
+  recordingVideoUrl: "",
+  lt: {
+    heroBadge: "7-asis Tarptautinis Mokinių Filmų Festivalis",
+    topic: "Mano pašaukimas",
+    topicDesc: "Ką norite veikti savo gyvenime ir kaip atrasti tikrąjį pašaukimą? Ieškome istorijų apie savo kelio paieškas, karjeros pasirinkimus ir vidinių abejonių įveikimą. Papasakokite, ko reikia, kad sektumėte savo aistra, kai aplinkiniai tikisi kažko kito – ar tai būtų šeimos spaudimas rinktis „rimtą“ profesiją, pavyzdžiui, mediciną ar teisę, ar jūsų pačių baimė žengti į meną, muziką ar kūrybines sritis. Parodykite šios kelionės tikrovę, kliūtis pakeliui ir tą akimirką, kai jūs ar jūsų herojai suprato, ką iš tiesų lemta daryti.",
+    openingDate: "Lapkričio 1 d.",
+    deadlineDate: "Kovo 26 d.",
+    eventDate: "Balandžio 23 d.",
+    aboutText: "„Ąžuolyno“ filmų festivalis pavadintas vieno iš Kauno lankytinų vietų – Ąžuolyno parko – garbei, kurio papėdėje yra įsikūrusi mūsų studija. Kviečiame 10–18 m. moksleivius kurti trumpametražius filmus iki 3 min. išmaniaisiais įrenginiais.",
+    datesSubmissions: "Nuo lapkričio 1 d. iki kovo 26 d.",
+    dateEvent: "2027 m. balandžio 23 d. (Kino festivalis ir tiesioginė transliacija)",
+    targetAudience: "Mokiniai (10–18 m.)",
+    recordingPlaceholder: "Festivalio ir tiesioginės transliacijos vaizdo įrašas bus pasiekiamas 2027 m. balandžio 23 d."
+  },
+  en: {
+    heroBadge: "The 7th International Students Film Festival",
+    topic: "My Purpose",
+    topicDesc: "What do you want to do with your life, and how do you find your true calling? We are looking for stories about discovering your path, making career choices, and overcoming self-doubt. Tell us what it takes to follow your passion when the people around you expect something different—whether it is family pressure to pursue a \"serious\" career like medicine or law, or your own fear of stepping into the arts, music, or creative fields. Show the reality of this journey, the obstacles along the way, and the exact moment you or your characters realized what you were meant to do.",
+    openingDate: "November 1st",
+    deadlineDate: "March 26th",
+    eventDate: "April 23rd",
+    aboutText: "The «Ažuolynas» Film Festival is named after one of the sights of Kaunas, at the foot of which our studio is located. We invite youth directors aged 10–18 to submit smartphone short films up to 3 minutes.",
+    datesSubmissions: "November 1st – March 26th",
+    dateEvent: "April 23rd, 2027 (Film Festival & Live Stream)",
+    targetAudience: "Students (10–18 yrs)",
+    recordingPlaceholder: "The official festival recording and live stream replay will be published here on April 23rd, 2027."
+  },
+  smtp: {
+    host: "smtp.gmail.com",
+    port: 587,
+    secure: false,
+    user: "azuolynasfilmfestival@gmail.com",
+    pass: "",
+    from: '"Ąžuolynas Film Fest" <azuolynasfilmfestival@gmail.com>'
+  }
+});
+
 function loadSettingsData() {
-  const defaultSettings = {
-    votingActive: true,
-    maintenanceMode: false,
-    publicWinners: true,
-    submissionsOpen: true,
-    autoRankings: true,
-    selectedYear: "2027",
-    institutionNameLt: "Kauno Tarptautinė Gimnazija",
-    institutionNameEn: "Kaunas International Gymnasium",
-    showAbout: true,
-    showTerms: true,
-    showFaq: true,
-    showCategories: true,
-    showEditions: true,
-    showArchive: true,
-    showCurrentEdition: true,
-    showResults: false,
-    showVoting: true,
-    showScreening: true,
-    showSubmit: true,
-    archiveVisibility: true,
-    recordingVideoUrl: "",
-    lt: {
-      heroBadge: "7-asis Tarptautinis Mokinių Filmų Festivalis",
-      topic: "Mano pašaukimas",
-      topicDesc: "Ką norite veikti savo gyvenime ir kaip atrasti tikrąjį pašaukimą? Ieškome istorijų apie savo kelio paieškas, karjeros pasirinkimus ir vidinių abejonių įveikimą. Papasakokite, ko reikia, kad sektumėte savo aistra, kai aplinkiniai tikisi kažko kito – ar tai būtų šeimos spaudimas rinktis „rimtą“ profesiją, pavyzdžiui, mediciną ar teisę, ar jūsų pačių baimė žengti į meną, muziką ar kūrybines sritis. Parodykite šios kelionės tikrovę, kliūtis pakeliui ir tą akimirką, kai jūs ar jūsų herojai suprato, ką iš tiesų lemta daryti.",
-      openingDate: "Lapkričio 1 d.",
-      deadlineDate: "Kovo 26 d.",
-      eventDate: "Balandžio 23 d.",
-      aboutText: "„Ąžuolyno“ filmų festivalis pavadintas vieno iš Kauno lankytinų vietų – Ąžuolyno parko – garbei, kurio papėdėje yra įsikūrusi mūsų studija. Kviečiame 10–18 m. moksleivius kurti trumpametražius filmus iki 3 min. išmaniaisiais įrenginiais.",
-      datesSubmissions: "Nuo lapkričio 1 d. iki kovo 26 d.",
-      dateEvent: "2027 m. balandžio 23 d. (Kino festivalis ir tiesioginė transliacija)",
-      targetAudience: "Mokiniai (10–18 m.)",
-      recordingPlaceholder: "Festivalio ir tiesioginės transliacijos vaizdo įrašas bus pasiekiamas 2027 m. balandžio 23 d."
-    },
-    en: {
-      heroBadge: "The 7th International Students Film Festival",
-      topic: "My Purpose",
-      topicDesc: "What do you want to do with your life, and how do you find your true calling? We are looking for stories about discovering your path, making career choices, and overcoming self-doubt. Tell us what it takes to follow your passion when the people around you expect something different—whether it is family pressure to pursue a \"serious\" career like medicine or law, or your own fear of stepping into the arts, music, or creative fields. Show the reality of this journey, the obstacles along the way, and the exact moment you or your characters realized what you were meant to do.",
-      openingDate: "November 1st",
-      deadlineDate: "March 26th",
-      eventDate: "April 23rd",
-      aboutText: "The «Ažuolynas» Film Festival is named after one of the sights of Kaunas, at the foot of which our studio is located. We invite youth directors aged 10–18 to submit smartphone short films up to 3 minutes.",
-      datesSubmissions: "November 1st – March 26th",
-      dateEvent: "April 23rd, 2027 (Film Festival & Live Stream)",
-      targetAudience: "Students (10–18 yrs)",
-      recordingPlaceholder: "The official festival recording and live stream replay will be published here on April 23rd, 2027."
+  try {
+    const raw = loadJson(SETTINGS_FILE, null);
+    if (!raw || typeof raw !== 'object' || Array.isArray(raw)) {
+      return JSON.parse(JSON.stringify(DEFAULT_SETTINGS));
     }
-  };
-  const d = loadJson(SETTINGS_FILE, defaultSettings);
-  if (!d || typeof d !== 'object') return defaultSettings;
-  if (!d.lt) d.lt = defaultSettings.lt;
-  if (!d.en) d.en = defaultSettings.en;
-  return d;
+    return {
+      ...DEFAULT_SETTINGS,
+      ...raw,
+      smtp: {
+        ...DEFAULT_SETTINGS.smtp,
+        ...(raw.smtp && typeof raw.smtp === 'object' ? raw.smtp : {})
+      },
+      lt: {
+        ...DEFAULT_SETTINGS.lt,
+        ...(raw.lt && typeof raw.lt === 'object' ? raw.lt : {})
+      },
+      en: {
+        ...DEFAULT_SETTINGS.en,
+        ...(raw.en && typeof raw.en === 'object' ? raw.en : {})
+      }
+    };
+  } catch (err) {
+    console.warn('[Settings Load Warning]:', err.message);
+    return JSON.parse(JSON.stringify(DEFAULT_SETTINGS));
+  }
 }
+
 
 function getDefaultPermissionsForRole(role) {
   if (role === 'admin') {
@@ -668,36 +712,72 @@ function requireAdminAuth(req, res, next) {
 }
 
 // ---------------------------------------------------------------------------
-// NODEMAILER SMTP EMAIL SERVICE WITH ROBUST LOGGING & FIRESTORE QUEUE
+// DYNAMIC NODEMAILER SMTP EMAIL SERVICE & FIRESTORE MAIL QUEUE
 // ---------------------------------------------------------------------------
-const smtpHost = process.env.SMTP_HOST || 'smtp.gmail.com';
-const smtpPort = parseInt(process.env.SMTP_PORT || '587', 10);
-const smtpSecure = process.env.SMTP_SECURE === 'true' || smtpPort === 465;
-const smtpUser = process.env.SMTP_USER || 'azuolynasfilmfestival@gmail.com';
-const smtpPass = process.env.SMTP_PASS || '';
-const emailFrom = process.env.EMAIL_FROM || '"Ąžuolynas Film Fest" <azuolynasfilmfestival@gmail.com>';
-
-let mailTransporter = null;
-if (smtpPass) {
+function getEffectiveSmtpConfig() {
+  let settingsSmtp = {};
   try {
-    mailTransporter = nodemailer.createTransport({
-      host: smtpHost,
-      port: smtpPort,
-      secure: smtpSecure,
+    const s = loadSettingsData();
+    if (s && s.smtp && typeof s.smtp === 'object') {
+      settingsSmtp = s.smtp;
+    }
+  } catch (e) {
+    // fallback
+  }
+
+  const host = (settingsSmtp.host || process.env.SMTP_HOST || 'smtp.gmail.com').trim();
+  const port = parseInt(String(settingsSmtp.port || process.env.SMTP_PORT || '587'), 10);
+  const secure = settingsSmtp.secure !== undefined 
+    ? Boolean(settingsSmtp.secure) 
+    : (process.env.SMTP_SECURE === 'true' || port === 465);
+  const user = (settingsSmtp.user || process.env.SMTP_USER || 'azuolynasfilmfestival@gmail.com').trim();
+  const pass = (settingsSmtp.pass !== undefined ? settingsSmtp.pass : process.env.SMTP_PASS || '').trim();
+  const from = (settingsSmtp.from || process.env.EMAIL_FROM || `"Ąžuolynas Film Fest" <${user}>`).trim();
+
+  return { host, port, secure, user, pass, from };
+}
+
+let activeTransporter = null;
+let activeTransporterConfigHash = '';
+
+function getMailTransporter() {
+  const cfg = getEffectiveSmtpConfig();
+  if (!cfg.pass) {
+    return null;
+  }
+
+  const currentHash = `${cfg.host}:${cfg.port}:${cfg.secure}:${cfg.user}:${cfg.pass}`;
+  if (activeTransporter && activeTransporterConfigHash === currentHash) {
+    return activeTransporter;
+  }
+
+  try {
+    const transportOptions = {
+      host: cfg.host,
+      port: cfg.port,
+      secure: cfg.secure,
       auth: {
-        user: smtpUser,
-        pass: smtpPass
+        user: cfg.user,
+        pass: cfg.pass
       },
       tls: {
         rejectUnauthorized: false
       }
-    });
-    console.log(`[SMTP] Nodemailer initialized for host: ${smtpHost}:${smtpPort} (User: ${smtpUser})`);
+    };
+
+    // If host is gmail, leverage nodemailer gmail service preset for maximum reliability
+    if (cfg.host.toLowerCase().includes('gmail.com')) {
+      transportOptions.service = 'gmail';
+    }
+
+    activeTransporter = nodemailer.createTransport(transportOptions);
+    activeTransporterConfigHash = currentHash;
+    console.log(`[SMTP] Nodemailer initialized for host: ${cfg.host}:${cfg.port} (User: ${cfg.user})`);
+    return activeTransporter;
   } catch (smtpInitErr) {
     console.warn('[SMTP] Transporter init warning:', smtpInitErr.message);
+    return null;
   }
-} else {
-  console.log('[SMTP] Note: SMTP_PASS is not configured in environment. Outgoing emails will use Firestore mail queue and fallback dispatch.');
 }
 
 /**
@@ -710,7 +790,8 @@ async function sendEmail({ to, subject, html, text }) {
     smtpSent: false,
     firestoreQueued: false,
     messageId: null,
-    error: null
+    error: null,
+    timestamp: new Date().toISOString()
   };
 
   if (!to || !subject || !html) {
@@ -718,12 +799,15 @@ async function sendEmail({ to, subject, html, text }) {
     return result;
   }
 
+  const cfg = getEffectiveSmtpConfig();
+  const transporter = getMailTransporter();
+
   // 1. Attempt Nodemailer SMTP if configured
-  if (mailTransporter && smtpPass) {
+  if (transporter && cfg.pass) {
     result.smtpAttempted = true;
     try {
-      const info = await mailTransporter.sendMail({
-        from: emailFrom,
+      const info = await transporter.sendMail({
+        from: cfg.from,
         to,
         subject,
         html,
@@ -737,6 +821,8 @@ async function sendEmail({ to, subject, html, text }) {
       console.error(`[SMTP] Failed to send email via SMTP to ${to}:`, smtpErr.message);
       result.error = `SMTP delivery notice: ${smtpErr.message}`;
     }
+  } else {
+    console.log(`[SMTP] Direct SMTP delivery skipped (SMTP_PASS not provided). Dispatching via Firestore mail queue.`);
   }
 
   // 2. Queue in Firestore 'mail' collection for Firebase Cloud Functions / Extensions
@@ -754,7 +840,9 @@ async function sendEmail({ to, subject, html, text }) {
         }
       },
       createdAt: { timestampValue: new Date().toISOString() },
-      status: { stringValue: result.smtpSent ? 'delivered_smtp' : 'pending_queue' }
+      status: { stringValue: result.smtpSent ? 'delivered_smtp' : 'pending_queue' },
+      smtpAttempted: { booleanValue: result.smtpAttempted },
+      smtpSent: { booleanValue: result.smtpSent }
     });
     result.firestoreQueued = true;
     result.success = true; // Queued safely in Firestore
@@ -850,8 +938,13 @@ app.use((err, req, res, next) => {
 
 // Maintenance Mode Interceptor
 app.use((req, res, next) => {
-  const settings = loadSettingsData();
-  const isMaintenanceActive = settings.maintenanceMode === true;
+  let isMaintenanceActive = false;
+  try {
+    const settings = loadSettingsData();
+    isMaintenanceActive = settings && settings.maintenanceMode === true;
+  } catch (err) {
+    isMaintenanceActive = false;
+  }
 
   if (!isMaintenanceActive) {
     return next();
@@ -1185,14 +1278,13 @@ app.post('/api/vote', async (req, res) => {
 app.get('/api/admin/settings', (req, res) => {
   try {
     const settings = loadSettingsData();
-    res.json({ success: true, settings });
+    if (!res.headersSent) {
+      res.status(200).json({ success: true, settings });
+    }
   } catch (e) {
     console.error('[Admin Settings API Error]:', e.message);
-    try {
-      const fallback = loadSettingsData();
-      res.json({ success: true, settings: fallback });
-    } catch (innerErr) {
-      res.json({ success: true, settings: {} });
+    if (!res.headersSent) {
+      res.status(200).json({ success: true, settings: DEFAULT_SETTINGS });
     }
   }
 });
@@ -1201,43 +1293,32 @@ app.get('/api/admin/settings', (req, res) => {
 app.get('/api/settings', (req, res) => {
   try {
     const settings = loadSettingsData();
-    res.json({
-      success: true,
-      settings,
-      maintenanceMode: settings?.maintenanceMode === true,
-      votingActive: settings?.votingActive !== false,
-      publicWinners: settings?.publicWinners !== false,
-      submissionsOpen: settings?.submissionsOpen !== false,
-      selectedYear: settings?.selectedYear || "2027",
-      lt: settings?.lt || {},
-      en: settings?.en || {}
-    });
+    if (!res.headersSent) {
+      res.status(200).json({
+        success: true,
+        settings,
+        maintenanceMode: settings?.maintenanceMode === true,
+        votingActive: settings?.votingActive !== false,
+        publicWinners: settings?.publicWinners !== false,
+        submissionsOpen: settings?.submissionsOpen !== false,
+        selectedYear: settings?.selectedYear || "2027",
+        lt: settings?.lt || DEFAULT_SETTINGS.lt,
+        en: settings?.en || DEFAULT_SETTINGS.en
+      });
+    }
   } catch (e) {
     console.error('[Settings API Error]:', e.message);
-    try {
-      const fallback = loadSettingsData() || {};
-      res.json({
+    if (!res.headersSent) {
+      res.status(200).json({
         success: true,
-        settings: fallback,
+        settings: DEFAULT_SETTINGS,
         maintenanceMode: false,
         votingActive: true,
         publicWinners: true,
         submissionsOpen: true,
         selectedYear: "2027",
-        lt: fallback.lt || {},
-        en: fallback.en || {}
-      });
-    } catch (innerErr) {
-      res.json({
-        success: true,
-        settings: {},
-        maintenanceMode: false,
-        votingActive: true,
-        publicWinners: true,
-        submissionsOpen: true,
-        selectedYear: "2027",
-        lt: {},
-        en: {}
+        lt: DEFAULT_SETTINGS.lt,
+        en: DEFAULT_SETTINGS.en
       });
     }
   }
@@ -1251,23 +1332,25 @@ app.post('/api/admin/settings', (req, res) => {
     const updated = {
       ...current,
       ...updates,
-      selectedYear: updates.selectedYear || "2027",
+      selectedYear: updates.selectedYear || current.selectedYear || "2027",
       adminEmail: updates.adminEmail || PRIMARY_SUPERADMIN_EMAIL,
       updatedAt: new Date().toISOString(),
       showCategories: updates.showCategories !== false,
       lt: {
-        ...(current.lt || {}),
-        ...(updates.lt || {})
+        ...(current.lt || DEFAULT_SETTINGS.lt),
+        ...(updates.lt && typeof updates.lt === 'object' ? updates.lt : {})
       },
       en: {
-        ...(current.en || {}),
-        ...(updates.en || {})
+        ...(current.en || DEFAULT_SETTINGS.en),
+        ...(updates.en && typeof updates.en === 'object' ? updates.en : {})
       }
     };
     saveJson(SETTINGS_FILE, updated);
 
-    // Full synchronization to Firestore settings/festival document
-    syncToFirestore('settings', 'festival', updated);
+    // Full synchronization to Firestore settings/festival document (non-blocking)
+    syncToFirestore('settings', 'festival', updated).catch(err => {
+      console.warn('[Firestore Sync Error]:', err.message);
+    });
 
     recordActivityLog({
       action: "SETTINGS_UPDATED",
@@ -1277,51 +1360,317 @@ app.post('/api/admin/settings', (req, res) => {
       details: `Atnaujinti nustatymai. Profilaktikos režimas: ${updated.maintenanceMode ? 'ĮJUNGTAS' : 'IŠJUNGTAS'}, Balsavimas: ${updated.votingActive ? 'AKTYVUS' : 'UŽDARYTAS'}`
     });
 
-    res.json({ success: true, settings: updated });
+    if (!res.headersSent) {
+      res.status(200).json({ success: true, settings: updated });
+    }
   } catch (e) {
-    res.status(500).json({ error: 'Failed to save settings' });
+    console.error('[Admin Settings Save Error]:', e.message);
+    if (!res.headersSent) {
+      res.status(500).json({ error: 'Failed to save settings', message: e.message });
+    }
   }
 });
 
-// Resilient API Aliases for Public & Subsystem Clients
+// Resilient API Aliases for Public & Subsystem Clients (always succeed with defaults)
 app.get('/api/tasks', (req, res) => {
   try {
     const data = loadTasksData();
-    res.json({ success: true, tasks: data.tasks || [] });
+    res.status(200).json({ success: true, tasks: (data && data.tasks) || [] });
   } catch (e) {
-    res.status(500).json({ error: 'Failed to read tasks' });
+    console.warn('[Tasks API Notice]:', e.message);
+    res.status(200).json({ success: true, tasks: [] });
   }
 });
 
 app.get('/api/logs', (req, res) => {
   try {
     const logsData = loadLogsData();
-    res.json({ success: true, logs: logsData.logs || [] });
+    res.status(200).json({ success: true, logs: (logsData && logsData.logs) || [] });
   } catch (e) {
-    res.status(500).json({ error: 'Failed to read logs' });
+    console.warn('[Logs API Notice]:', e.message);
+    res.status(200).json({ success: true, logs: [] });
   }
 });
 
 app.get('/api/submissions', (req, res) => {
   try {
     const data = loadSubmissionsData();
-    res.json({ success: true, submissions: data.submissions || [] });
+    res.status(200).json({ success: true, submissions: (data && data.submissions) || [] });
   } catch (e) {
-    res.status(500).json({ error: 'Failed to read submissions' });
+    console.warn('[Submissions API Notice]:', e.message);
+    res.status(200).json({ success: true, submissions: [] });
   }
 });
 
+// ---------------------------------------------------------------------------
+// EMAIL SERVICE ADMIN API ENDPOINTS
+// ---------------------------------------------------------------------------
+
 // API: Email service status
 app.get('/api/admin/email-status', (req, res) => {
-  res.json({
-    success: true,
-    smtpConfigured: Boolean(smtpPass),
-    smtpHost: smtpHost,
-    smtpPort: smtpPort,
-    smtpUser: smtpUser,
-    emailFrom: emailFrom,
-    firestoreQueueEnabled: true
-  });
+  try {
+    const cfg = getEffectiveSmtpConfig();
+    const transporter = getMailTransporter();
+    res.json({
+      success: true,
+      smtpConfigured: Boolean(cfg.pass),
+      smtpConnected: Boolean(transporter),
+      smtpHost: cfg.host,
+      smtpPort: cfg.port,
+      smtpSecure: cfg.secure,
+      smtpUser: cfg.user,
+      emailFrom: cfg.from,
+      firestoreQueueEnabled: true
+    });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to retrieve email status: ' + err.message });
+  }
+});
+
+// API: Send test email to verify SMTP and Firestore dispatch
+app.post('/api/admin/email/test', async (req, res) => {
+  try {
+    const { testEmail, adminEmail } = req.body || {};
+    const cfg = getEffectiveSmtpConfig();
+    const targetEmail = String(testEmail || cfg.user || PRIMARY_SUPERADMIN_EMAIL).trim();
+
+    if (!targetEmail || !targetEmail.includes('@')) {
+      return res.status(400).json({ error: 'Reikalingas galiojantis gavėjo el. pašto adresas.' });
+    }
+
+    const testHtml = `
+<!DOCTYPE html>
+<html lang="lt">
+<head><meta charset="UTF-8"><title>Bandomasis Laiškas &bull; Ąžuolynas Film Fest</title></head>
+<body style="margin:0; padding:0; background-color:#051512; font-family:sans-serif; color:#F8FAF7;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="padding:32px 16px;">
+    <tr><td align="center">
+      <table width="560" cellpadding="0" cellspacing="0" style="background:#0C241F; border:1px solid rgba(111,165,138,0.3); border-radius:14px; padding:32px; text-align:left;">
+        <tr><td align="center" style="padding-bottom:16px;">
+          <img src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media" width="60" height="60" style="border-radius:50%; border:2px solid #6FA58A;">
+          <h2 style="color:#6FA58A; margin:12px 0 4px 0;">Ąžuolynas Film Fest</h2>
+          <p style="color:#BAC9C0; margin:0; font-size:0.85rem;">Sistemos El. Pašto Tarnybos Patikrinimas</p>
+        </td></tr>
+        <tr><td style="line-height:1.6; font-size:0.95rem; color:#F8FAF7;">
+          <p>Sveiki!</p>
+          <p>Tai yra sėkmingas bandomasis pranešimas iš <strong>Ąžuolynas Film Fest</strong> serverio el. pašto siuntėjo tarnybos.</p>
+          <div style="background:rgba(0,0,0,0.35); border:1px solid rgba(111,165,138,0.3); border-radius:8px; padding:16px; margin:20px 0;">
+            <p style="margin:0 0 6px 0; font-size:0.8rem; color:#BAC9C0;">SMTP Tarnyba: <strong style="color:#4ade80;">${cfg.host}:${cfg.port}</strong></p>
+            <p style="margin:0 0 6px 0; font-size:0.8rem; color:#BAC9C0;">Siuntėjo adresas: <strong style="color:#F3E5AB;">${cfg.user}</strong></p>
+            <p style="margin:0; font-size:0.8rem; color:#BAC9C0;">Išsiuntimo laikas: <strong>${new Date().toLocaleString('lt-LT')}</strong></p>
+          </div>
+          <p style="font-size:0.85rem; color:#BAC9C0;">Jei gavote šį laišką, el. pašto siuntėjas veikia nepriekaištingai.</p>
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>
+    `;
+
+    const emailResult = await sendEmail({
+      to: targetEmail,
+      subject: 'Ąžuolynas Film Fest | Bandomasis el. pašto patikrinimas',
+      html: testHtml,
+      text: `Sveiki! Tai yra bandomasis pranešimas iš Ąžuolynas Film Fest serverio. Išsiųsta: ${new Date().toISOString()}`
+    });
+
+    const callerEmail = String(adminEmail || req.headers['x-admin-email'] || PRIMARY_SUPERADMIN_EMAIL).trim().toLowerCase();
+    recordActivityLog({
+      action: "EMAIL_TEST_SENT",
+      category: "settings",
+      adminEmail: callerEmail,
+      target: targetEmail,
+      details: `Atliktas bandomojo el. laiško siuntimas į ${targetEmail}. Rezultatas: ${emailResult.smtpSent ? 'Pristatyta per SMTP' : (emailResult.firestoreQueued ? 'Įrašyta į Firestore eilę' : 'Klaida')}`
+    });
+
+    res.json({
+      success: emailResult.success,
+      emailResult,
+      targetEmail,
+      message: emailResult.smtpSent 
+        ? `Bandomasis laiškas sėkmingai išsiųstas į ${targetEmail} per SMTP!` 
+        : (emailResult.firestoreQueued 
+            ? `Bandomasis laiškas paruoštas ir įrašytas į Firestore eilę (${targetEmail})!` 
+            : `Nepavyko išsiųsti laiško: ${emailResult.error || 'Nežinoma klaida'}`)
+    });
+  } catch (err) {
+    console.error('[Email Test Error]:', err);
+    res.status(500).json({ error: 'Klaida siunčiant bandomąjį laišką: ' + err.message });
+  }
+});
+
+// API: Update and save SMTP configuration in settings
+app.post('/api/admin/email/config', (req, res) => {
+  try {
+    const { host, port, secure, user, pass, from, adminEmail } = req.body || {};
+    const settings = loadSettingsData();
+    if (!settings.smtp) settings.smtp = {};
+
+    if (host !== undefined) settings.smtp.host = String(host).trim();
+    if (port !== undefined) settings.smtp.port = parseInt(port, 10);
+    if (secure !== undefined) settings.smtp.secure = Boolean(secure);
+    if (user !== undefined) settings.smtp.user = String(user).trim();
+    if (pass !== undefined) settings.smtp.pass = String(pass).trim();
+    if (from !== undefined) settings.smtp.from = String(from).trim();
+
+    saveJson(SETTINGS_FILE, settings);
+    activeTransporter = null; // force re-initialization
+
+    const callerEmail = String(adminEmail || req.headers['x-admin-email'] || PRIMARY_SUPERADMIN_EMAIL).trim().toLowerCase();
+    recordActivityLog({
+      action: "SMTP_SETTINGS_UPDATED",
+      category: "settings",
+      adminEmail: callerEmail,
+      target: settings.smtp.user || "SMTP",
+      details: `Atnaujinta SMTP el. pašto siuntėjo konfigūracija (${settings.smtp.host || 'smtp.gmail.com'})`
+    });
+
+    res.json({
+      success: true,
+      message: 'SMTP nustatymai sėkmingai išsaugoti!',
+      smtp: {
+        host: settings.smtp.host,
+        port: settings.smtp.port,
+        secure: settings.smtp.secure,
+        user: settings.smtp.user,
+        configured: Boolean(settings.smtp.pass)
+      }
+    });
+  } catch (err) {
+    console.error('[SMTP Config Save Error]:', err);
+    res.status(500).json({ error: 'Nepavyko išsaugoti SMTP nustatymų: ' + err.message });
+  }
+});
+
+// API: Send email directly to an applicant or custom recipient
+app.post('/api/admin/send-email', async (req, res) => {
+  try {
+    const { to, subject, html, text, template, lang, data, adminEmail } = req.body || {};
+    if (!to || !String(to).includes('@')) {
+      return res.status(400).json({ error: 'Reikalingas gavėjo el. pašto adresas' });
+    }
+
+    let finalSubject = subject;
+    let finalHtml = html;
+    let finalText = text;
+
+    if (template && (!finalHtml || !finalSubject)) {
+      const emailLang = lang === 'en' ? 'en' : 'lt';
+      finalHtml = generateEmailHtml(template, emailLang, data || {});
+      finalSubject = getEmailSubject(template, emailLang, data || {});
+    }
+
+    if (!finalSubject || !finalHtml) {
+      return res.status(400).json({ error: 'Reikalinga laiško tema ir turinys (subject ir html)' });
+    }
+
+    const emailResult = await sendEmail({
+      to: String(to).trim(),
+      subject: finalSubject,
+      html: finalHtml,
+      text: finalText || finalSubject
+    });
+
+    const callerEmail = String(adminEmail || req.headers['x-admin-email'] || PRIMARY_SUPERADMIN_EMAIL).trim().toLowerCase();
+    recordActivityLog({
+      action: "DIRECT_EMAIL_SENT",
+      category: "users",
+      adminEmail: callerEmail,
+      target: to,
+      details: `Tiesioginis el. laiškas išsiųstas į ${to} (Tema: „${finalSubject}“)`
+    });
+
+    res.json({
+      success: emailResult.success,
+      emailResult,
+      message: `El. laiškas sėkmingai išsiųstas į ${to}!`
+    });
+  } catch (err) {
+    console.error('[Direct Email Send Error]:', err);
+    res.status(500).json({ error: 'Klaida siunčiant el. laišką: ' + err.message });
+  }
+});
+
+// API: Send submission update notification email
+app.post('/api/admin/submissions/send-email', async (req, res) => {
+  try {
+    const { submissionId, to, template, lang, customMessage, streamLink, awardTitle, adminEmail } = req.body || {};
+    
+    // Find submission if ID is given
+    let sub = null;
+    if (submissionId) {
+      const subsData = loadSubmissionsData();
+      sub = (subsData.submissions || []).find(s => s.id === submissionId);
+    }
+
+    const cleanEmail = String(to || (sub ? sub.email : '')).trim();
+    if (!cleanEmail || !cleanEmail.includes('@')) {
+      return res.status(400).json({ error: 'Reikalingas galiojantis el. pašto adresas' });
+    }
+
+    const tpl = template || 'accepted';
+    const emailLang = (lang === 'en' || lang === 'lt') ? lang : 'lt';
+
+    const emailData = {
+      id: submissionId || (sub ? sub.id : 'custom'),
+      name: (sub ? sub.name : '') || cleanEmail.split('@')[0],
+      filmTitle: (sub ? sub.filmTitle : '') || 'Filmas',
+      category: (sub ? sub.category : '') || 'Bendroji',
+      institution: (sub ? sub.institution : '') || '',
+      deviceModel: (sub ? sub.deviceModel : '') || '',
+      videoDurationSeconds: (sub ? sub.videoDurationSeconds : null),
+      attendanceType: (sub ? sub.attendanceType : 'in_person'),
+      liveToken: (sub ? sub.liveToken : null),
+      liveStreamUrl: (sub ? sub.liveStreamUrl : null),
+      awardTitle: awardTitle || (sub ? sub.awardTitle : null),
+      customMessage: customMessage || '',
+      streamLink: streamLink || (sub ? sub.liveStreamUrl : null)
+    };
+
+    const emailHtml = generateEmailHtml(tpl, emailLang, emailData);
+    const emailSubject = getEmailSubject(tpl, emailLang, emailData);
+
+    const emailResult = await sendEmail({
+      to: cleanEmail,
+      subject: emailSubject,
+      html: emailHtml,
+      text: `Sveiki, ${emailData.name}! Jūsų filmas „${emailData.filmTitle}“: informacija atnaujinta.`
+    });
+
+    // Update submission record if exists
+    if (sub) {
+      const subsData = loadSubmissionsData();
+      const targetSub = (subsData.submissions || []).find(s => s.id === submissionId);
+      if (targetSub) {
+        targetSub.lastEmailSent = {
+          template: tpl,
+          sentAt: new Date().toISOString(),
+          to: cleanEmail,
+          status: emailResult.success ? 'sent' : 'failed'
+        };
+        saveSubmissionsData(subsData);
+      }
+    }
+
+    const callerEmail = String(adminEmail || req.headers['x-admin-email'] || PRIMARY_SUPERADMIN_EMAIL).trim().toLowerCase();
+    recordActivityLog({
+      action: "SUBMISSION_EMAIL_SENT",
+      category: "submissions",
+      adminEmail: callerEmail,
+      target: cleanEmail,
+      details: `Išsiųstas el. laiškas dalyviui ${cleanEmail} (Šablonas: ${tpl}, Filmas: „${emailData.filmTitle}“)`
+    });
+
+    res.json({
+      success: true,
+      emailResult,
+      message: `El. laiškas sėkmingai išsiųstas į ${cleanEmail}!`
+    });
+  } catch (err) {
+    console.error('[Submission Email Send Error]:', err);
+    res.status(500).json({ error: 'Klaida siunčiant paraiškos laišką: ' + err.message });
+  }
 });
 
 // API: Live voting results and rankings

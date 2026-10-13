@@ -16,6 +16,9 @@ export function initSettings() {
     sendInviteBtn.addEventListener("click", handleSendAdminInvite);
   }
 
+  // Bind email sender and SMTP testing controls
+  bindEmailSenderControls();
+
   // Bind Instant Global Control Tumblers (tied to single settings/festival Firestore doc)
   const maintenanceSwitch = document.getElementById("cfgMaintenanceMode");
   if (maintenanceSwitch) {
@@ -311,6 +314,13 @@ function applySettingsToForm(d) {
   const enRecPhElem = document.getElementById("cfgEnRecordingPh");
   if (enRecPhElem) enRecPhElem.value = en.recordingPlaceholder || "The official festival recording and live stream replay will be published here on April 23rd, 2027.";
 
+  if (d.smtp && typeof d.smtp === "object") {
+    if (document.getElementById("cfgSmtpHost")) document.getElementById("cfgSmtpHost").value = d.smtp.host || "smtp.gmail.com";
+    if (document.getElementById("cfgSmtpPort")) document.getElementById("cfgSmtpPort").value = d.smtp.port || "587";
+    if (document.getElementById("cfgSmtpUser")) document.getElementById("cfgSmtpUser").value = d.smtp.user || "azuolynasfilmfestival@gmail.com";
+    if (document.getElementById("cfgEmailFrom")) document.getElementById("cfgEmailFrom").value = d.smtp.from || '"Ąžuolynas Film Fest" <azuolynasfilmfestival@gmail.com>';
+  }
+
   syncArchiveState(d);
 }
 
@@ -460,5 +470,230 @@ async function saveSettings() {
     showToast("Klaida išsaugant nustatymus: " + err.message, "error");
   } finally {
     btn.disabled = false;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// EMAIL SENDER & SMTP SERVICE CLIENT CONTROLS
+// ---------------------------------------------------------------------------
+
+export function bindEmailSenderControls() {
+  const btnRefresh = document.getElementById("btnRefreshEmailStatus");
+  if (btnRefresh) {
+    btnRefresh.addEventListener("click", refreshEmailStatusDisplay);
+  }
+
+  const btnSendTest = document.getElementById("btnSendTestEmail");
+  if (btnSendTest) {
+    btnSendTest.addEventListener("click", handleSendTestEmail);
+  }
+
+  const btnSendDirect = document.getElementById("btnSendDirectEmail");
+  if (btnSendDirect) {
+    btnSendDirect.addEventListener("click", handleSendDirectEmail);
+  }
+
+  const btnSaveSmtp = document.getElementById("btnSaveSmtpConfig");
+  if (btnSaveSmtp) {
+    btnSaveSmtp.addEventListener("click", handleSaveSmtpConfig);
+  }
+
+  const tplSelect = document.getElementById("directEmailTemplate");
+  if (tplSelect) {
+    tplSelect.addEventListener("change", (e) => {
+      const isCustom = e.target.value === "custom";
+      const subjInput = document.getElementById("directEmailSubject");
+      if (subjInput && !isCustom) {
+        subjInput.placeholder = "Šablono tema paruošta automatiškai";
+      } else if (subjInput) {
+        subjInput.placeholder = "Ąžuolynas Film Fest | Pranešimas";
+      }
+    });
+  }
+
+  // Load initial email status
+  refreshEmailStatusDisplay();
+}
+
+async function refreshEmailStatusDisplay() {
+  const badge = document.getElementById("smtpStatusBadge");
+  try {
+    const res = await fetch("/api/admin/email-status");
+    if (res.ok) {
+      const data = await res.json();
+      if (badge) {
+        if (data.smtpConnected) {
+          badge.className = "status-pill status-accepted";
+          badge.textContent = `Aktyvus (${data.smtpHost}:${data.smtpPort})`;
+        } else if (data.smtpConfigured) {
+          badge.className = "status-pill status-accepted";
+          badge.textContent = `Nustatyta (${data.smtpUser})`;
+        } else {
+          badge.className = "status-pill status-accepted";
+          badge.textContent = "Paruošta (Firestore eilė & Gmail)";
+        }
+      }
+      if (data.smtpHost && document.getElementById("cfgSmtpHost") && !document.getElementById("cfgSmtpHost").value) {
+        document.getElementById("cfgSmtpHost").value = data.smtpHost;
+      }
+      if (data.smtpPort && document.getElementById("cfgSmtpPort") && !document.getElementById("cfgSmtpPort").value) {
+        document.getElementById("cfgSmtpPort").value = data.smtpPort;
+      }
+      if (data.smtpUser && document.getElementById("cfgSmtpUser") && !document.getElementById("cfgSmtpUser").value) {
+        document.getElementById("cfgSmtpUser").value = data.smtpUser;
+      }
+      if (data.emailFrom && document.getElementById("cfgEmailFrom") && !document.getElementById("cfgEmailFrom").value) {
+        document.getElementById("cfgEmailFrom").value = data.emailFrom;
+      }
+    }
+  } catch (err) {
+    console.warn("Could not refresh email status:", err);
+  }
+}
+
+async function handleSendTestEmail() {
+  const input = document.getElementById("testEmailRecipient");
+  const btn = document.getElementById("btnSendTestEmail");
+  const targetEmail = (input ? input.value : "").trim();
+  if (!targetEmail || !targetEmail.includes("@")) {
+    showToast("Nurodykite teisingą gavėjo el. pašto adresą!", "error");
+    return;
+  }
+
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = "Siunčiama...";
+  }
+
+  try {
+    const callerEmail = sessionStorage.getItem("admin_user_email") || PRIMARY_SUPERADMIN_EMAIL;
+    const res = await fetch("/api/admin/email/test", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ testEmail: targetEmail, adminEmail: callerEmail })
+    });
+    const data = await res.json();
+    if (res.ok && data.success) {
+      showToast(data.message || `Bandomasis laiškas sėkmingai išsiųstas į ${targetEmail}!`, "success");
+      refreshEmailStatusDisplay();
+    } else {
+      showToast(data.error || "Nepavyko išsiųsti bandomojo laiško.", "error");
+    }
+  } catch (err) {
+    showToast("Ryšio klaida siunčiant laišką: " + err.message, "error");
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = `
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+        <span>Siųsti Bandomąjį Laišką</span>
+      `;
+    }
+  }
+}
+
+async function handleSendDirectEmail() {
+  const recipientInput = document.getElementById("directEmailRecipient");
+  const tplSelect = document.getElementById("directEmailTemplate");
+  const langSelect = document.getElementById("directEmailLang");
+  const subjectInput = document.getElementById("directEmailSubject");
+  const bodyInput = document.getElementById("directEmailBody");
+  const btn = document.getElementById("btnSendDirectEmail");
+
+  const to = (recipientInput ? recipientInput.value : "").trim();
+  const template = tplSelect ? tplSelect.value : "custom";
+  const lang = langSelect ? langSelect.value : "lt";
+  let subject = (subjectInput ? subjectInput.value : "").trim();
+  const body = (bodyInput ? bodyInput.value : "").trim();
+
+  if (!to || !to.includes("@")) {
+    showToast("Nurodykite galiojantį gavėjo el. pašto adresą!", "error");
+    return;
+  }
+
+  if (template === "custom" && !subject) {
+    subject = lang === "en" ? "Ąžuolynas Film Fest Notification" : "Ąžuolynas Film Fest Pranešimas";
+  }
+
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = "Siunčiama...";
+  }
+
+  try {
+    const callerEmail = sessionStorage.getItem("admin_user_email") || PRIMARY_SUPERADMIN_EMAIL;
+    const res = await fetch("/api/admin/send-email", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        to,
+        template: template !== "custom" ? template : undefined,
+        lang,
+        subject,
+        html: template === "custom" ? `<div style="font-family:sans-serif; color:#F8FAF7; background:#051512; padding:24px; border-radius:8px;"><p>${body.replace(/\n/g, '<br>')}</p></div>` : undefined,
+        text: body || subject,
+        data: {
+          name: to.split("@")[0],
+          customMessage: body
+        },
+        adminEmail: callerEmail
+      })
+    });
+    const data = await res.json();
+    if (res.ok && data.success) {
+      showToast(data.message || `El. laiškas sėkmingai išsiųstas į ${to}!`, "success");
+      if (recipientInput) recipientInput.value = "";
+      if (bodyInput) bodyInput.value = "";
+    } else {
+      showToast(data.error || "Nepavyko išsiųsti laiško", "error");
+    }
+  } catch (err) {
+    showToast("Ryšio klaida siunčiant laišką: " + err.message, "error");
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = `
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+        <span>Išsiųsti El. Laišką</span>
+      `;
+    }
+  }
+}
+
+async function handleSaveSmtpConfig() {
+  const host = (document.getElementById("cfgSmtpHost")?.value || "").trim();
+  const port = parseInt(document.getElementById("cfgSmtpPort")?.value || "587", 10);
+  const user = (document.getElementById("cfgSmtpUser")?.value || "").trim();
+  const pass = (document.getElementById("cfgSmtpPass")?.value || "").trim();
+  const from = (document.getElementById("cfgEmailFrom")?.value || "").trim();
+
+  const btn = document.getElementById("btnSaveSmtpConfig");
+  if (btn) btn.disabled = true;
+
+  try {
+    const callerEmail = sessionStorage.getItem("admin_user_email") || PRIMARY_SUPERADMIN_EMAIL;
+    const res = await fetch("/api/admin/email/config", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        host,
+        port,
+        user,
+        pass,
+        from,
+        adminEmail: callerEmail
+      })
+    });
+    const data = await res.json();
+    if (res.ok && data.success) {
+      showToast("SMTP nustatymai sėkmingai išsaugoti!", "success");
+      refreshEmailStatusDisplay();
+    } else {
+      showToast(data.error || "Nepavyko išsaugoti SMTP nustatymų", "error");
+    }
+  } catch (err) {
+    showToast("Ryšio klaida saugant SMTP: " + err.message, "error");
+  } finally {
+    if (btn) btn.disabled = false;
   }
 }

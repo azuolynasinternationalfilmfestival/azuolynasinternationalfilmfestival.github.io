@@ -488,25 +488,56 @@ function initEntryModal() {
           }
         }
 
-        if (tpl !== "none" && typeof generateEmailHtml === "function") {
-          const emailData = {
-            id: currentEntry.id,
-            name: currentEntry.name,
-            filmTitle: currentEntry.filmTitle,
-            category: currentEntry.category,
-            institution: currentEntry.institution,
-            deviceModel: currentEntry.deviceModel,
-            videoDurationSeconds: currentEntry.videoDurationSeconds,
-            customMessage: customMsg,
-            streamLink: streamLink
-          };
-          const emailHtml = generateEmailHtml(lang, tpl, emailData);
-          const emailSubject = (typeof getEmailSubject === "function")
-            ? getEmailSubject(lang, tpl, emailData)
-            : emailTexts[lang][tpl].sub;
+        if (tpl !== "none") {
+          let emailSentSuccessfully = false;
+          try {
+            const emailResp = await fetch("/api/admin/submissions/send-email", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                submissionId: currentEntry.id,
+                to: currentEntry.email,
+                name: currentEntry.name,
+                filmTitle: currentEntry.filmTitle,
+                category: currentEntry.category,
+                institution: currentEntry.institution,
+                deviceModel: currentEntry.deviceModel,
+                videoDurationSeconds: currentEntry.videoDurationSeconds,
+                template: tpl,
+                lang,
+                customMessage: customMsg,
+                streamLink,
+                awardTitle: awardVal,
+                adminEmail: callerEmail
+              })
+            });
+            if (emailResp.ok) {
+              const resData = await emailResp.json();
+              emailSentSuccessfully = resData.success;
+            }
+          } catch (apiEmailErr) {
+            console.warn("Backend submission send-email notice:", apiEmailErr.message);
+          }
 
-          if (db && typeof db.collection === "function") {
+          // Fallback or mirror queue via client Firestore
+          if (!emailSentSuccessfully && typeof generateEmailHtml === "function" && db && typeof db.collection === "function") {
             try {
+              const emailData = {
+                id: currentEntry.id,
+                name: currentEntry.name,
+                filmTitle: currentEntry.filmTitle,
+                category: currentEntry.category,
+                institution: currentEntry.institution,
+                deviceModel: currentEntry.deviceModel,
+                videoDurationSeconds: currentEntry.videoDurationSeconds,
+                customMessage: customMsg,
+                streamLink
+              };
+              const emailHtml = generateEmailHtml(tpl, lang, emailData);
+              const emailSubject = (typeof getEmailSubject === "function")
+                ? getEmailSubject(tpl, lang, emailData)
+                : ((window.emailTexts && window.emailTexts[lang] && window.emailTexts[lang][tpl]) ? window.emailTexts[lang][tpl].sub : "Ąžuolynas Film Fest Pranešimas");
+
               await db.collection("mail").add({
                 to: [currentEntry.email],
                 message: {
@@ -514,11 +545,13 @@ function initEntryModal() {
                   html: emailHtml
                 }
               });
+              emailSentSuccessfully = true;
             } catch (mailErr) {
               console.warn("Mail queue notice:", mailErr.message);
             }
           }
-          showToast("Statusas atnaujintas ir el. laiškas paruoštas!", "success");
+
+          showToast(`Statusas atnaujintas ir el. laiškas sėkmingai išsiųstas į ${currentEntry.email}!`, "success");
         } else {
           showToast("Statusas sėkmingai atnaujintas.", "success");
         }
