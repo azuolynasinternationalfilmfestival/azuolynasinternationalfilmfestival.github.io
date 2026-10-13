@@ -1,9 +1,10 @@
-import { db, DEFAULT_CONTENT, PRIMARY_SUPERADMIN_EMAIL } from "./firebase-init.js";
+import { db, auth, DEFAULT_CONTENT, PRIMARY_SUPERADMIN_EMAIL, AUTHORIZED_ADMIN_EMAILS } from "./firebase-init.js";
 import { showToast } from "./ui-feedback.js";
 import { syncArchiveState } from "./archive.js";
 import { sendAdminInviteLink } from "./auth.js";
 
 let unsubscribeSettings = null;
+let unsubscribeMail = null;
 
 export function initSettings() {
   const saveBtn = document.getElementById("saveSettingsBtn");
@@ -171,7 +172,7 @@ export function evaluateAdminPrivileges(user) {
   const inviteCard = document.getElementById("adminInviteCard");
   if (!inviteCard) return;
 
-  const isSuperAdmin = user && user.email && user.email.toLowerCase() === PRIMARY_SUPERADMIN_EMAIL;
+  const isSuperAdmin = user && user.email && AUTHORIZED_ADMIN_EMAILS.includes(user.email.toLowerCase());
   if (isSuperAdmin) {
     inviteCard.classList.remove("d-none");
   } else {
@@ -339,6 +340,7 @@ export async function loadSettingsFromApi() {
 }
 
 export function subscribeSettings() {
+  refreshEmailStatusDisplay();
   if (unsubscribeSettings) {
     unsubscribeSettings();
   }
@@ -370,6 +372,11 @@ export function unsubscribeSettingsListener() {
     unsubscribeSettings();
     unsubscribeSettings = null;
   }
+  if (unsubscribeMail) {
+    unsubscribeMail();
+    unsubscribeMail = null;
+  }
+  document.getElementById("emailDeliveryLog")?.replaceChildren();
 }
 
 async function saveSettings() {
@@ -517,37 +524,48 @@ export function bindEmailSenderControls() {
 
 async function refreshEmailStatusDisplay() {
   const badge = document.getElementById("smtpStatusBadge");
+  const note = document.getElementById("emailTransportNote");
   try {
-    const res = await fetch("/api/admin/email-status");
-    if (res.ok) {
-      const data = await res.json();
-      if (badge) {
-        if (data.smtpConnected) {
-          badge.className = "status-pill status-accepted";
-          badge.textContent = `Aktyvus (${data.smtpHost}:${data.smtpPort})`;
-        } else if (data.smtpConfigured) {
-          badge.className = "status-pill status-accepted";
-          badge.textContent = `Nustatyta (${data.smtpUser})`;
-        } else {
-          badge.className = "status-pill status-accepted";
-          badge.textContent = "Paruošta (Firestore eilė & Gmail)";
-        }
-      }
-      if (data.smtpHost && document.getElementById("cfgSmtpHost") && !document.getElementById("cfgSmtpHost").value) {
-        document.getElementById("cfgSmtpHost").value = data.smtpHost;
-      }
-      if (data.smtpPort && document.getElementById("cfgSmtpPort") && !document.getElementById("cfgSmtpPort").value) {
-        document.getElementById("cfgSmtpPort").value = data.smtpPort;
-      }
-      if (data.smtpUser && document.getElementById("cfgSmtpUser") && !document.getElementById("cfgSmtpUser").value) {
-        document.getElementById("cfgSmtpUser").value = data.smtpUser;
-      }
-      if (data.emailFrom && document.getElementById("cfgEmailFrom") && !document.getElementById("cfgEmailFrom").value) {
-        document.getElementById("cfgEmailFrom").value = data.emailFrom;
+    const hasServer = await window.FestivalApi.hasServer();
+    const drawer = document.getElementById("smtpConfigDrawer");
+    if (drawer) drawer.hidden = !hasServer;
+    if (note) note.textContent = hasServer
+      ? "Laiškus siunčia serveris. Nepavykus SMTP, naudojama Firestore eilė."
+      : "Laiškus siunčia Firestore plėtinys. SMTP nustatymus keiskite Firebase plėtinio konfigūracijoje.";
+    if (!hasServer) {
+      if (badge) badge.textContent = "Firestore laiškų eilė";
+    } else {
+      const data = await window.FestivalApi.json("/api/admin/email-status");
+      if (badge) badge.textContent = data.smtpConfigured ? `SMTP nustatytas (${data.smtpUser})` : "Firestore laiškų eilė";
+      for (const [id, value] of Object.entries({cfgSmtpHost: data.smtpHost, cfgSmtpPort: data.smtpPort,
+        cfgSmtpUser: data.smtpUser, cfgEmailFrom: data.emailFrom})) {
+        const input = document.getElementById(id);
+        if (input && !input.value && value) input.value = value;
       }
     }
+    if (db && auth?.currentUser && !unsubscribeMail) {
+      unsubscribeMail = db.collection("mail").orderBy("createdAt", "desc").limit(10).onSnapshot(snapshot => {
+        const log = document.getElementById("emailDeliveryLog");
+        if (!log) return;
+        log.replaceChildren();
+        for (const doc of snapshot.docs) {
+          const mail = doc.data();
+          const state = mail.delivery?.state;
+          const status = state === 'SUCCESS' ? 'Pristatyta pašto serveriui' : state === 'ERROR' ? 'Siuntimo klaida'
+            : ['PROCESSING', 'RETRY'].includes(state) ? 'Siunčiama' : 'Eilėje';
+          const row = document.createElement('p');
+          row.textContent = `${Array.isArray(mail.to) ? mail.to.join(', ') : mail.to} — ${mail.message?.subject || ''} — ${status}${mail.delivery?.error ? ': ' + mail.delivery.error : ''}`;
+          log.appendChild(row);
+        }
+        if (!snapshot.docs.length) log.textContent = "Laiškų eilė tuščia. Galite išsiųsti bandomąjį laišką.";
+      }, error => {
+        const log = document.getElementById("emailDeliveryLog");
+        if (log) log.textContent = "Nepavyko perskaityti laiškų būsenų: " + error.message;
+      });
+    }
   } catch (err) {
-    console.warn("Could not refresh email status:", err);
+    if (badge) badge.textContent = "Būsena nepasiekiama";
+    if (note) note.textContent = err.message;
   }
 }
 
@@ -567,13 +585,17 @@ async function handleSendTestEmail() {
 
   try {
     const callerEmail = sessionStorage.getItem("admin_user_email") || PRIMARY_SUPERADMIN_EMAIL;
-    const res = await fetch("/api/admin/email/test", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ testEmail: targetEmail, adminEmail: callerEmail })
-    });
-    const data = await res.json();
-    if (res.ok && data.success) {
+    let data;
+    if (await window.FestivalApi.hasServer()) {
+      data = await window.FestivalApi.json("/api/admin/email/test", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ testEmail: targetEmail, adminEmail: callerEmail })
+      });
+    } else {
+      data = await window.MailClient.send(db, { to: targetEmail, subject: "Ąžuolynas Film Fest — bandomasis laiškas",
+        html: window.generateEmailHtml('submissionReceived', 'lt', { name: 'Bandomasis gavėjas', filmTitle: 'Bandomasis laiškas' }) });
+    }
+    if (data.success) {
       showToast(data.message || `Bandomasis laiškas sėkmingai išsiųstas į ${targetEmail}!`, "success");
       refreshEmailStatusDisplay();
     } else {
@@ -622,25 +644,16 @@ async function handleSendDirectEmail() {
 
   try {
     const callerEmail = sessionStorage.getItem("admin_user_email") || PRIMARY_SUPERADMIN_EMAIL;
-    const res = await fetch("/api/admin/send-email", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        to,
-        template: template !== "custom" ? template : undefined,
-        lang,
-        subject,
-        html: template === "custom" ? `<div style="font-family:sans-serif; color:#F8FAF7; background:#051512; padding:24px; border-radius:8px;"><p>${body.replace(/\n/g, '<br>')}</p></div>` : undefined,
-        text: body || subject,
-        data: {
-          name: to.split("@")[0],
-          customMessage: body
-        },
-        adminEmail: callerEmail
-      })
+    const escape = value => value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    const templateData = { name: to.split("@")[0], customMessage: body };
+    const data = await window.MailClient.send(db, {
+      to,
+      subject: subject || window.getEmailSubject(template, lang, templateData),
+      html: template === 'custom' ? `<div style="font-family:sans-serif;padding:24px;"><p>${escape(body).replace(/\n/g, '<br>')}</p></div>`
+        : window.generateEmailHtml(template, lang, templateData),
+      text: body || subject
     });
-    const data = await res.json();
-    if (res.ok && data.success) {
+    if (data.success) {
       showToast(data.message || `El. laiškas sėkmingai išsiųstas į ${to}!`, "success");
       if (recipientInput) recipientInput.value = "";
       if (bodyInput) bodyInput.value = "";
@@ -672,7 +685,7 @@ async function handleSaveSmtpConfig() {
 
   try {
     const callerEmail = sessionStorage.getItem("admin_user_email") || PRIMARY_SUPERADMIN_EMAIL;
-    const res = await fetch("/api/admin/email/config", {
+    const data = await window.FestivalApi.json("/api/admin/email/config", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -684,8 +697,7 @@ async function handleSaveSmtpConfig() {
         adminEmail: callerEmail
       })
     });
-    const data = await res.json();
-    if (res.ok && data.success) {
+    if (data.success) {
       showToast("SMTP nustatymai sėkmingai išsaugoti!", "success");
       refreshEmailStatusDisplay();
     } else {

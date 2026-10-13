@@ -871,8 +871,12 @@ async function sendEmail({ to, subject, html, text }) {
     timestamp: new Date().toISOString()
   };
 
-  const recipientStr = Array.isArray(to) ? to.join(', ') : (to ? String(to).trim() : '');
-  if (!recipientStr || !subject || !html) {
+  const recipients = (Array.isArray(to) ? to : typeof to === 'string' ? to.split(',') : [])
+    .map(value => typeof value === 'string' ? value.trim() : value);
+  const recipientStr = recipients.join(', ');
+  if (!recipients.length || !recipients.every(value => typeof value === 'string' && /^[^\s@,;<>]+@[^\s@,;<>]+\.[^\s@,;<>]+$/.test(value)) ||
+      typeof subject !== 'string' || !subject.trim() || typeof html !== 'string' || !html.trim() ||
+      (text !== undefined && typeof text !== 'string')) {
     result.error = 'Missing required email fields (to, subject, html)';
     return result;
   }
@@ -911,7 +915,7 @@ async function sendEmail({ to, subject, html, text }) {
     const queued = await syncToFirestore('mail', mailId, {
       from: cfg.from,
       replyTo: cfg.user,
-      to: Array.isArray(to) ? to : [recipientStr],
+      to: recipients,
       message: {
         subject: subject,
         html: html,
@@ -1675,10 +1679,12 @@ app.post('/api/admin/send-email', async (req, res) => {
       details: `Tiesioginis el. laiškas išsiųstas į ${to} (Tema: „${finalSubject}“)`
     });
 
-    res.json({
+    res.status(emailResult.success ? 200 : 502).json({
       success: emailResult.success,
+      error: emailResult.success ? undefined : emailResult.error,
       emailResult,
-      message: `El. laiškas sėkmingai išsiųstas į ${to}!`
+      message: emailResult.smtpSent ? `El. laiškas sėkmingai išsiųstas į ${to}!`
+        : emailResult.firestoreQueued ? `Laiškas įrašytas į siuntimo eilę (${to}).` : "Nepavyko išsiųsti arba įrašyti laiško į eilę."
     });
   } catch (err) {
     console.error('[Direct Email Send Error]:', err);
@@ -4357,13 +4363,22 @@ app.post('/api/admin/submissions/delete', async (req, res) => {
   }
 });
 
+// Prevent overlapping retries from dispatching the same submission twice.
+const pendingSubmissionDispatches = new Set();
 // API: Record incoming submission and RSVP in local backend store
 app.post('/api/submissions/record', async (req, res) => {
+  let dispatchKey;
   try {
     const data = req.body || {};
     if (!data.name || !data.email || !data.filmTitle) {
       return res.status(400).json({ error: 'Missing required submission fields (name, email, filmTitle)' });
     }
+    dispatchKey = JSON.stringify([String(data.email).toLowerCase(), data.filmTitle]);
+    if (pendingSubmissionDispatches.has(dispatchKey)) {
+      dispatchKey = undefined;
+      return res.status(409).json({ success: false, error: 'Submission is already being processed. Please retry shortly.' });
+    }
+    pendingSubmissionDispatches.add(dispatchKey);
 
     const subsData = loadSubmissionsData();
     if (!subsData.submissions) subsData.submissions = [];
@@ -4397,6 +4412,8 @@ app.post('/api/submissions/record', async (req, res) => {
       submissionLang: data.submissionLang || 'lt',
       submittedAt: data.submittedAt || new Date().toISOString()
     };
+    // Preserve completed dispatches when retrying after a partial failure.
+    record.notificationResults = existingIndex >= 0 ? (subsData.submissions[existingIndex].notificationResults || {}) : {};
 
     if (existingIndex >= 0) {
       subsData.submissions[existingIndex] = { ...subsData.submissions[existingIndex], ...record };
@@ -4434,12 +4451,16 @@ app.post('/api/submissions/record', async (req, res) => {
     const emailLang = record.submissionLang === 'en' ? 'en' : 'lt';
     const emailTemplate = record.attendanceType === 'remote' ? 'remoteLivePass' : 'submissionReceived';
     const emailData = { ...record, ctaUrl: record.attendanceType === 'remote' ? record.liveStreamUrl : undefined };
-    const receipt = await sendEmail({ to: record.email,
+    const receipt = record.notificationResults.receipt?.success ? record.notificationResults.receipt : await sendEmail({ to: record.email,
       subject: getEmailSubject(emailTemplate, emailLang, emailData),
       html: generateEmailHtml(emailTemplate, emailLang, emailData) });
-    const organizer = await sendEmail({ to: PRIMARY_SUPERADMIN_EMAIL,
+    record.notificationResults.receipt = receipt;
+    saveSubmissionsData(subsData);
+    const organizer = record.notificationResults.organizer?.success ? record.notificationResults.organizer : await sendEmail({ to: PRIMARY_SUPERADMIN_EMAIL,
       subject: emailLang === 'en' ? `New Submission: ${record.filmTitle}` : `Nauja paraiška: ${record.filmTitle}`,
       html: generateAdminNotificationHtml(emailLang, record) });
+    record.notificationResults.organizer = organizer;
+    saveSubmissionsData(subsData);
     if (!receipt.success || !organizer.success) {
       return res.status(502).json({ success: false, submission: record,
         error: 'The film was recorded but its notifications could not be sent or queued.' });
@@ -4487,6 +4508,8 @@ app.post('/api/submissions/record', async (req, res) => {
     if (!res.headersSent) {
       res.status(500).json({ error: 'Failed to record submission', message: err.message });
     }
+  } finally {
+    if (dispatchKey) pendingSubmissionDispatches.delete(dispatchKey);
   }
 });
 

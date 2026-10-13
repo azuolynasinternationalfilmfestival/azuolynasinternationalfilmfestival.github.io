@@ -1409,13 +1409,16 @@
               </div>
               <div style="display:flex; align-items:center; gap:8px;">
                 <span id="smtpStatusBadge" class="status-pill status-accepted" style="font-size:0.75rem; padding:4px 10px;">
-                  Aktyvus (Firestore & SMTP)
+                  Tikrinama…
                 </span>
                 <button type="button" id="btnRefreshEmailStatus" class="btn-outline btn-xs" title="Atnaujinti būseną">
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
                 </button>
               </div>
             </div>
+
+            <p id="emailTransportNote" class="content-card-sub"></p>
+            <div id="emailDeliveryLog" aria-live="polite" style="margin-bottom:16px;"></div>
 
             <!-- Quick Test Email & Direct Sender Two-Column Section -->
             <div class="two-col-grid" style="margin-bottom:16px;">
@@ -1486,7 +1489,7 @@
             </div>
 
             <!-- SMTP Settings Config Drawer -->
-            <details style="background:rgba(0,0,0,0.25); border:1px solid rgba(111,165,138,0.2); border-radius:var(--site-radius); padding:12px 14px;">
+            <details id="smtpConfigDrawer" style="background:rgba(0,0,0,0.25); border:1px solid rgba(111,165,138,0.2); border-radius:var(--site-radius); padding:12px 14px;">
               <summary style="cursor:pointer; color:var(--accent-light); font-weight:600; font-size:0.85rem; user-select:none;">
                 ⚙️ Išplėstiniai SMTP Serverio Nustatymai (Nodemailer Configuration)
               </summary>
@@ -2094,6 +2097,7 @@
   <div id="toastContainer" class="toast-container"></div>
 
   <script src="email-templates.js"></script>
+  <script src="js/mail-client.js"></script>
   <script type="module" src="js/admin-main.js"></script>
 </body>
 </html>

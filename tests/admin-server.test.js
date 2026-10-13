@@ -33,7 +33,7 @@ async function serverFixture(t, {smtp = false, rejectQueue = false, rejectSmtp =
     }
     if (!url.startsWith('https://firestore.googleapis.com/')) throw new Error(`Unexpected external request: ${url}`);
     if (options.body) writes.push({url, data: JSON.parse(options.body)});
-    const denied = rejectQueue && url.includes('/mail/');
+    const denied = (typeof rejectQueue === 'function' ? rejectQueue(url, options, writes) : rejectQueue) && url.includes('/mail/');
     return new Response(JSON.stringify(denied ? {error: 'denied'} : {}), {status: denied ? 403 : 200});
   };
   const transporter = { sendMail: async message => {
@@ -169,4 +169,36 @@ test('environment SMTP credentials work before any SMTP settings are saved', asy
   assert.equal(result.smtpSent, true);
   assert.equal(f.messages[0].from, 'Festival <sender@example.test>');
   assert.equal(f.writes.filter(write => write.url.includes('/mail/')).length, 0);
+});
+
+test('submission retry does not resend either successful notification', async t => {
+  const f = await serverFixture(t);
+  const data = {id: 'retry_film', name: 'Test Participant', email: 'applicant@example.test', filmTitle: 'Retry film'};
+  for (let index = 0; index < 2; index++) assert.equal((await f.request('/api/submissions/record', null, data)).status, 200);
+  assert.equal(f.writes.filter(write => write.url.includes('/mail/')).length, 2);
+  assert.equal(JSON.parse(fs.readFileSync(f.directory + '/data/submissions.json')).submissions.length, 1);
+});
+
+test('partial submission retry only retries the failed recipient', async t => {
+  let denyOrganizer = true;
+  const f = await serverFixture(t, {rejectQueue: (url, options) => {
+    const to = JSON.parse(options.body || '{}').fields?.to?.arrayValue?.values?.[0]?.stringValue;
+    return denyOrganizer && to === admins[0];
+  }});
+  const data = {id: 'partial_retry', name: 'Test Participant', email: 'applicant@example.test', filmTitle: 'Partial film'};
+  assert.equal((await f.request('/api/submissions/record', null, data)).status, 502);
+  denyOrganizer = false;
+  assert.equal((await f.request('/api/submissions/record', null, data)).status, 200);
+  const mails = f.writes.filter(write => write.url.includes('/mail/'));
+  assert.equal(mails.length, 3); // First receipt, denied organizer, retried organizer.
+  assert.equal(mails.filter(write => write.data.fields.to.arrayValue.values[0].stringValue === data.email).length, 1);
+});
+
+test('server normalizes recipient lists and rejects malformed mail fields', async t => {
+  const f = await serverFixture(t);
+  assert.equal((await f.sendEmail({to: 'a@example.test, b@example.test', subject: 'Test', html: '<p>Test</p>'})).success, true);
+  const values = f.writes.find(write => write.url.includes('/mail/')).data.fields.to.arrayValue.values;
+  assert.deepEqual(values.map(value => value.stringValue), ['a@example.test', 'b@example.test']);
+  assert.equal((await f.sendEmail({to: ['a@example.test', 5], subject: 'Test', html: '<p>Test</p>'})).success, false);
+  assert.equal((await f.sendEmail({to: 'a@example.test', subject: {}, html: '<p>Test</p>'})).success, false);
 });
