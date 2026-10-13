@@ -74,9 +74,10 @@ function updateYearBadges() {
   }
 }
 
-export async function loadSubmissionsFromApi() {
+export async function loadSubmissionsFromFirestore() {
+  if (unsubscribeSubmissions) return; // The live Firestore snapshot is authoritative.
   try {
-    const res = await fetch("/api/admin/submissions");
+    const res = await FirebaseClient.request("submissions");
     if (res.ok) {
       const data = await res.json();
       submissionsList = data.submissions || [];
@@ -86,7 +87,7 @@ export async function loadSubmissionsFromApi() {
       updateYearBadges();
     }
   } catch (err) {
-    console.warn("Could not load submissions from API:", err);
+    console.warn("Could not load submissions from Firestore:", err);
   }
 }
 
@@ -96,8 +97,7 @@ export function subscribeSubmissions() {
     unsubscribeSubmissions = null;
   }
 
-  // Always load from local server API first so table is populated immediately
-  loadSubmissionsFromApi();
+  loadSubmissionsFromFirestore();
 
   if (db && typeof db.collection === "function") {
     try {
@@ -114,11 +114,11 @@ export function subscribeSubmissions() {
           updateYearBadges();
         }, (err) => {
           console.warn("Firestore submissions listener notice:", err.message);
-          loadSubmissionsFromApi();
+          loadSubmissionsFromFirestore();
         });
     } catch (fsErr) {
       console.warn("Firestore subscribe error:", fsErr);
-      loadSubmissionsFromApi();
+      loadSubmissionsFromFirestore();
     }
   }
 }
@@ -157,7 +157,7 @@ async function updateMetrics() {
 
   if (liveViewersElem) {
     try {
-      const res = await fetch("/api/admin/live/viewers");
+      const res = await FirebaseClient.request("live.viewers");
       if (res.ok) {
         const d = await res.json();
         liveViewersElem.textContent = d.activeViewers || 0;
@@ -288,10 +288,10 @@ async function handleQuickTestVote(filmId, filmTitle, btn) {
   if (btn) btn.disabled = true;
   const startTime = Date.now();
   try {
-    const res = await fetch("/api/admin/test-vote", {
+    const res = await FirebaseClient.request("test-vote", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ filmId, count: 1 })
+
+      body: { filmId, count: 1 }
     });
     const data = await res.json().catch(() => null);
     const latency = Date.now() - startTime;
@@ -310,7 +310,7 @@ async function handleQuickTestVote(filmId, filmTitle, btn) {
       }
       showToast(`⚡ Testinis balsas užskaitytas per ${data.latencyMs || latency} ms! Nauja suma: ${data.currentVotes} balsų. Sistema veikia sklandžiai, nestringa!`, "success");
     } else {
-      // Direct Firestore fallback
+
       await db.collection("submissions").doc(filmId).update({
         votesCount: firebase.firestore.FieldValue.increment(1)
       });
@@ -327,29 +327,21 @@ async function toggleVoting(id, currentStatus, btn) {
   btn.disabled = true;
   try {
     const callerEmail = sessionStorage.getItem("admin_user_email") || "azuolynasfilmfestival@gmail.com";
-    const res = await fetch("/api/admin/submissions/toggle-voting", {
+    const res = await FirebaseClient.request("submissions.toggle-voting", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id, inVoting: !currentStatus, adminEmail: callerEmail })
+
+      body: { id, inVoting: !currentStatus, adminEmail: callerEmail }
     });
 
     if (!res.ok) {
       const errData = await res.json().catch(() => ({}));
-      throw new Error(errData.error || "Nepavyko pakeisti balsavimo būsenos serveryje");
+      throw new Error(errData.error || "Nepavyko pakeisti balsavimo būsenos Firestore");
     }
 
-    if (db && typeof db.collection === "function") {
-      try {
-        await db.collection("submissions").doc(id).update({
-          inVoting: !currentStatus
-        });
-      } catch (fsErr) {
-        console.warn("Firestore toggleVoting sync notice:", fsErr.message);
-      }
-    }
+
 
     showToast(currentStatus ? "Filmas paslėptas nuo balsavimo." : "Filmas aktyvuotas balsavimui!", "success");
-    await loadSubmissionsFromApi();
+    await loadSubmissionsFromFirestore();
     window.dispatchEvent(new CustomEvent("refresh-notifications"));
   } catch (err) {
     showToast("Klaida keičiant balsavimo būseną: " + err.message, "error");
@@ -366,33 +358,27 @@ async function deleteSubmission(id) {
 
   try {
     const callerEmail = sessionStorage.getItem("admin_user_email") || "azuolynasfilmfestival@gmail.com";
+    const res = await FirebaseClient.request("submissions.delete", {
+      method: "POST",
+
+      body: { id, adminEmail: callerEmail }
+    });
+
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      throw new Error(errData.error || "Nepavyko pašalinti paraiškos Firestore");
+    }
+
+
+
     if (entry.storagePath) {
       try {
         await storage.ref(entry.storagePath).delete();
       } catch (err) {}
     }
 
-    const res = await fetch("/api/admin/submissions/delete", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id, adminEmail: callerEmail })
-    });
-
-    if (!res.ok) {
-      const errData = await res.json().catch(() => ({}));
-      throw new Error(errData.error || "Nepavyko pašalinti paraiškos serveryje");
-    }
-
-    if (db && typeof db.collection === "function") {
-      try {
-        await db.collection("submissions").doc(id).delete();
-      } catch (fsErr) {
-        console.warn("Firestore delete submission notice:", fsErr.message);
-      }
-    }
-
     showToast("Paraiška sėkmingai pašalinta.", "success");
-    await loadSubmissionsFromApi();
+    await loadSubmissionsFromFirestore();
     window.dispatchEvent(new CustomEvent("refresh-notifications"));
   } catch (err) {
     showToast("Klaida trinant paraišką: " + err.message, "error");
@@ -461,103 +447,41 @@ function initEntryModal() {
         }
       } else if (currentEntry.isWinner) {
         updateData.isWinner = false;
-        updateData.awardTitle = firebase.firestore.FieldValue.delete();
+        updateData.awardTitle = "";
       }
 
       try {
         const callerEmail = sessionStorage.getItem("admin_user_email") || "azuolynasfilmfestival@gmail.com";
 
-        // 1. Primary: Save via backend API
-        const res = await fetch("/api/admin/submissions/update", {
+        const res = await FirebaseClient.request("submissions.update", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ id: currentEntry.id, updates: updateData, adminEmail: callerEmail })
+
+          body: { id: currentEntry.id, updates: updateData, adminEmail: callerEmail }
         });
 
         if (!res.ok) {
           const errData = await res.json().catch(() => ({}));
-          throw new Error(errData.error || "Nepavyko atnaujinti paraiškos serveryje");
+          throw new Error(errData.error || "Nepavyko atnaujinti paraiškos Firestore");
         }
 
-        // 2. Secondary: Mirror to Firestore if available
-        if (db && typeof db.collection === "function") {
-          try {
-            await db.collection("submissions").doc(currentEntry.id).update(updateData);
-          } catch (fsErr) {
-            console.warn("Firestore submission update notice:", fsErr.message);
-          }
-        }
+
 
         if (tpl !== "none") {
-          let emailSentSuccessfully = false;
           try {
-            const emailResp = await fetch("/api/admin/submissions/send-email", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                submissionId: currentEntry.id,
-                to: currentEntry.email,
-                name: currentEntry.name,
-                filmTitle: currentEntry.filmTitle,
-                category: currentEntry.category,
-                institution: currentEntry.institution,
-                deviceModel: currentEntry.deviceModel,
-                videoDurationSeconds: currentEntry.videoDurationSeconds,
-                template: tpl,
-                lang,
-                customMessage: customMsg,
-                streamLink,
-                awardTitle: awardVal,
-                adminEmail: callerEmail
-              })
+            await FirebaseClient.queueEmail({
+              to: currentEntry.email, template: tpl, lang,
+              data: { ...currentEntry, customMessage: customMsg, streamLink, awardTitle: awardVal }
             });
-            if (emailResp.ok) {
-              const resData = await emailResp.json();
-              emailSentSuccessfully = resData.success;
-            }
-          } catch (apiEmailErr) {
-            console.warn("Backend submission send-email notice:", apiEmailErr.message);
+            showToast("Statusas atnaujintas, laiškas įrašytas į siuntimo eilę.", "success");
+          } catch (error) {
+            showToast("Statusas išsaugotas, bet laiško įrašyti nepavyko: " + error.message, "error");
           }
-
-          // Fallback or mirror queue via client Firestore
-          if (!emailSentSuccessfully && typeof generateEmailHtml === "function" && db && typeof db.collection === "function") {
-            try {
-              const emailData = {
-                id: currentEntry.id,
-                name: currentEntry.name,
-                filmTitle: currentEntry.filmTitle,
-                category: currentEntry.category,
-                institution: currentEntry.institution,
-                deviceModel: currentEntry.deviceModel,
-                videoDurationSeconds: currentEntry.videoDurationSeconds,
-                customMessage: customMsg,
-                streamLink
-              };
-              const emailHtml = generateEmailHtml(tpl, lang, emailData);
-              const emailSubject = (typeof getEmailSubject === "function")
-                ? getEmailSubject(tpl, lang, emailData)
-                : ((window.emailTexts && window.emailTexts[lang] && window.emailTexts[lang][tpl]) ? window.emailTexts[lang][tpl].sub : "Ąžuolynas Film Fest Pranešimas");
-
-              await db.collection("mail").add({
-                to: [currentEntry.email],
-                message: {
-                  subject: emailSubject,
-                  html: emailHtml
-                }
-              });
-              emailSentSuccessfully = true;
-            } catch (mailErr) {
-              console.warn("Mail queue notice:", mailErr.message);
-            }
-          }
-
-          showToast(`Statusas atnaujintas ir el. laiškas sėkmingai išsiųstas į ${currentEntry.email}!`, "success");
         } else {
           showToast("Statusas sėkmingai atnaujintas.", "success");
         }
 
         closeModal();
-        await loadSubmissionsFromApi();
+        await loadSubmissionsFromFirestore();
         window.dispatchEvent(new CustomEvent("refresh-notifications"));
       } catch (err) {
         showToast("Klaida atnaujinant paraišką: " + err.message, "error");
@@ -640,35 +564,23 @@ function initWinnersManager() {
 
       try {
         const callerEmail = sessionStorage.getItem("admin_user_email") || "azuolynasfilmfestival@gmail.com";
-        // 1. Primary: Declare via backend API
-        const res = await fetch("/api/admin/declare-winner", {
+
+        const res = await FirebaseClient.request("declare-winner", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ filmId, awardTitle, year: selYear, adminEmail: callerEmail })
+
+          body: { filmId, awardTitle, year: selYear, adminEmail: callerEmail }
         });
 
         if (!res.ok) {
           const errData = await res.json().catch(() => ({}));
-          throw new Error(errData.error || "Nepavyko paskelbti laimėtojo serveryje");
+          throw new Error(errData.error || "Nepavyko paskelbti laimėtojo Firestore");
         }
 
-        // 2. Secondary: Mirror to Firestore if available
-        if (db && typeof db.collection === "function") {
-          try {
-            await db.collection("submissions").doc(filmId).update({
-              isWinner: true,
-              awardTitle: awardTitle,
-              awardYear: selYear,
-              status: "winner"
-            });
-          } catch (fsErr) {
-            console.warn("Firestore declare-winner notice:", fsErr.message);
-          }
-        }
+
 
         if (titleInput) titleInput.value = "";
         showToast(`Laimėtojas sėkmingai paskelbtas (${selYear} m.)!`, "success");
-        await loadSubmissionsFromApi();
+        await loadSubmissionsFromFirestore();
         window.dispatchEvent(new CustomEvent("refresh-notifications"));
       } catch (err) {
         showToast("Klaida skelbiant laimėtoją: " + err.message, "error");
@@ -687,32 +599,22 @@ function initWinnersManager() {
       btn.disabled = true;
       try {
         const callerEmail = sessionStorage.getItem("admin_user_email") || "azuolynasfilmfestival@gmail.com";
-        // 1. Primary: Revoke via backend API
-        const res = await fetch("/api/admin/revoke-winner", {
+
+        const res = await FirebaseClient.request("revoke-winner", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ filmId, adminEmail: callerEmail })
+
+          body: { filmId, adminEmail: callerEmail }
         });
 
         if (!res.ok) {
           const errData = await res.json().catch(() => ({}));
-          throw new Error(errData.error || "Nepavyko atšaukti laimėtojo serveryje");
+          throw new Error(errData.error || "Nepavyko atšaukti laimėtojo Firestore");
         }
 
-        // 2. Secondary: Mirror to Firestore if available
-        if (db && typeof db.collection === "function") {
-          try {
-            await db.collection("submissions").doc(filmId).update({
-              isWinner: false,
-              awardTitle: firebase.firestore.FieldValue.delete()
-            });
-          } catch (fsErr) {
-            console.warn("Firestore revoke-winner notice:", fsErr.message);
-          }
-        }
+
 
         showToast("Laimėtojo statusas atšauktas.", "success");
-        await loadSubmissionsFromApi();
+        await loadSubmissionsFromFirestore();
         window.dispatchEvent(new CustomEvent("refresh-notifications"));
       } catch (err) {
         showToast("Klaida atšaukiant laimėtoją: " + err.message, "error");

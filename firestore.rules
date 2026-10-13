@@ -54,27 +54,13 @@ service cloud.firestore {
     // Festival Settings
     match /settings/{settingId} {
       allow read: if isValidId(settingId);
-      allow write: if isAdmin() || (
-        incoming().adminEmail in [
-          'azuolynasfilmfestival@gmail.com',
-          'karina.brdar@gmail.com',
-          'dominikphotofficial.t@gmail.com',
-          'dominikphotofficial.lt@gmail.com'
-        ]
-      );
+      allow write: if isAdmin();
     }
 
     // Festival Editions
     match /editions/{editionId} {
       allow read: if isValidId(editionId);
-      allow write: if isAdmin() || (
-        incoming().adminEmail in [
-          'azuolynasfilmfestival@gmail.com',
-          'karina.brdar@gmail.com',
-          'dominikphotofficial.t@gmail.com',
-          'dominikphotofficial.lt@gmail.com'
-        ]
-      );
+      allow write: if isAdmin();
     }
 
     // Submissions
@@ -119,12 +105,7 @@ service cloud.firestore {
     // Stream Configuration (Cloudflare Stream & Status)
     match /stream_config/{configId} {
       allow read: if isValidId(configId);
-      allow write: if isAdmin() || (
-        incoming().adminEmail in [
-          'azuolynasfilmfestival@gmail.com',
-          'karina.brdar@gmail.com'
-        ]
-      );
+      allow write: if isAdmin();
     }
 
     // Live Stream Viewers / Tokens
@@ -150,16 +131,55 @@ service cloud.firestore {
       allow update, delete: if isAdmin();
     }
 
-    // User Accounts (RBAC) - Strictly permitted for azuolynasfilmfestival@gmail.com or whitelisted admin emails
-    match /users/{userId} {
-      allow read, write: if isWhitelistedAdmin();
+    // User accounts: admins manage access; invited users can activate their own profile.
+    function hasValidInvitation() {
+      let invitation = get(/databases/$(database)/documents/invitations/$(incoming().invitationToken));
+      return isSignedIn() && invitation.data.status == 'pending' &&
+        invitation.data.email == request.auth.token.email &&
+        invitation.data.expiresAt > request.time &&
+        incoming().email == invitation.data.email &&
+        incoming().role == invitation.data.role &&
+        incoming().status == 'active' &&
+        incoming().canManageUsers == invitation.data.canManageUsers;
     }
 
-    // Invitations
+    function hasLegacyProfile() {
+      let member = get(/databases/$(database)/documents/users/$(incoming().sourceProfileId));
+      return member.data.email == request.auth.token.email && member.data.status == 'active' &&
+        incoming().email == member.data.email && incoming().role == member.data.role &&
+        incoming().status == 'active' && incoming().uid == request.auth.uid &&
+        incoming().keys().hasOnly(['uid', 'email', 'role', 'status', 'lastLogin', 'sourceProfileId']);
+    }
+
+    match /users/{userId} {
+      allow get: if isWhitelistedAdmin() || (isSignedIn() &&
+        (userId == request.auth.uid || existing().email == request.auth.token.email));
+      allow list, delete: if isWhitelistedAdmin();
+      allow create: if isWhitelistedAdmin() || (isSignedIn() && userId == request.auth.uid &&
+        incoming().keys().hasOnly(['uid', 'email', 'name', 'surname', 'role', 'status',
+          'canManageUsers', 'invitationToken', 'updatedAt']) &&
+        incoming().uid == request.auth.uid && 'invitationToken' in incoming() && hasValidInvitation()) ||
+        (isSignedIn() && userId == request.auth.uid && 'sourceProfileId' in incoming() && hasLegacyProfile());
+      allow update: if isWhitelistedAdmin() || (isSignedIn() && userId == request.auth.uid &&
+        incoming().diff(existing()).affectedKeys().hasOnly(['lastLogin', 'name', 'surname', 'updatedAt']));
+    }
+
     match /invitations/{invitationToken} {
-      // Anyone with valid token can verify invitation info
       allow get: if isValidId(invitationToken);
-      allow list, create, update, delete: if isWhitelistedAdmin();
+      allow list, create, delete: if isWhitelistedAdmin();
+      allow update: if isWhitelistedAdmin() || (isSignedIn() &&
+        existing().status == 'pending' && existing().email == request.auth.token.email &&
+        existing().expiresAt > request.time &&
+        incoming().status == 'activated' && incoming().activatedBy == request.auth.uid &&
+        incoming().diff(existing()).affectedKeys().hasOnly(['status', 'activatedBy', 'activatedAt']));
+    }
+
+    match /judge_evaluations/{evaluationId} {
+      allow read: if isStaff();
+      allow create: if isStaff() && incoming().judgeEmail == request.auth.token.email;
+      allow update: if isStaff() && existing().judgeEmail == request.auth.token.email &&
+        incoming().judgeEmail == existing().judgeEmail;
+      allow delete: if isAdmin();
     }
 
     // Mail queue for automated notifications

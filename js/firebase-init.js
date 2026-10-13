@@ -98,30 +98,18 @@ export function getFirebaseStorage() {
   return null;
 }
 
-export function getFirebaseFunctions() {
-  if (typeof firebase !== "undefined" && typeof firebase.functions === "function") {
-    try {
-      if (!firebase.apps || !firebase.apps.length) {
-        firebase.initializeApp(firebaseConfig);
-      }
-      return firebase.functions("europe-west1");
-    } catch (e) {
-      return null;
-    }
-  }
-  return null;
-}
-
 export const auth = getFirebaseAuth();
 export const db = getFirestoreInstance();
 export const storage = getFirebaseStorage();
-export const functions = getFirebaseFunctions();
+if (window.FirebaseClient) window.FirebaseClient.configure({ db, auth });
 
 export const PRIMARY_SUPERADMIN_EMAIL = "azuolynasfilmfestival@gmail.com";
 
 export const AUTHORIZED_ADMIN_EMAILS = [
   "azuolynasfilmfestival@gmail.com",
-  "karina.brdar@gmail.com"
+  "karina.brdar@gmail.com",
+  "dominikphotofficial.t@gmail.com",
+  "dominikphotofficial.lt@gmail.com"
 ];
 
 export const DEFAULT_CONTENT = {

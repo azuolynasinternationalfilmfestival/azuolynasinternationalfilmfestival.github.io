@@ -282,8 +282,7 @@
       this.render();
       this.updateStatusBanner();
 
-      // Sync server-authoritative live vote counts
-      fetch("/api/votes")
+      FirebaseClient.request("votes")
         .then((res) => (res.ok ? res.json() : null))
         .then((data) => {
           if (data && data.success && data.votes) {
@@ -585,67 +584,8 @@
           }
         }
 
-        let voteSucceeded = false;
-        let finalVotesCount = null;
-
-        // 1. Primary: Server-side vote handler (guaranteed persistent commit & audit)
-        try {
-          const apiResp = await fetch("/api/vote", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ filmId: filmId, voterUid: uid })
-          });
-          const result = await apiResp.json().catch(() => null);
-          if (apiResp.ok && result && result.success) {
-            voteSucceeded = true;
-            finalVotesCount = result.votesCount;
-          } else if (result && result.error === "already-voted") {
-            throw new Error("already-voted");
-          }
-        } catch (apiErr) {
-          if (apiErr.message === "already-voted") throw apiErr;
-          console.warn("API vote endpoint fallback:", apiErr);
-        }
-
-        // 2. Fallback: Client-side Firestore SDK
-        if (!voteSucceeded) {
-          const db = (typeof window !== "undefined" && window.db) || ((typeof firebase !== "undefined" && typeof firebase.firestore === "function") ? firebase.firestore() : null);
-          if (db) {
-            const filmRef = db.collection("submissions").doc(filmId);
-            const voteAuditRef = db.collection("submissions").doc(filmId).collection("votes").doc(uid);
-
-            try {
-              await db.runTransaction(async (transaction) => {
-                const voteDoc = await transaction.get(voteAuditRef);
-                if (voteDoc.exists) {
-                  throw new Error("already-voted");
-                }
-                transaction.set(voteAuditRef, {
-                  votedAt: firebase.firestore.FieldValue.serverTimestamp()
-                });
-                transaction.update(filmRef, {
-                  votesCount: firebase.firestore.FieldValue.increment(1)
-                });
-              });
-              voteSucceeded = true;
-            } catch (trxErr) {
-              if (trxErr.message === "already-voted") throw trxErr;
-              console.warn("Audit vote note:", trxErr.message);
-              try {
-                await filmRef.update({
-                  votesCount: firebase.firestore.FieldValue.increment(1)
-                });
-                voteSucceeded = true;
-              } catch (incErr) {
-                console.warn("Vote update note:", incErr.message);
-              }
-            }
-          }
-        }
-
-        if (!voteSucceeded && finalVotesCount === null) {
-          throw new Error("Could not record vote");
-        }
+        const result = await FirebaseClient.vote({ filmId, voterUid: uid });
+        const finalVotesCount = result.votesCount;
 
         localStorage.setItem("festival_voted_film_id", filmId);
 

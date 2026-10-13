@@ -1,6 +1,11 @@
 <!DOCTYPE html>
 <html lang="lt">
 <head>
+  <script src="js/firebase-client.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+  <script src="config.js"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>OBS Stream Graphics Overlay | Ąžuolynas Film Fest</title>
@@ -330,7 +335,7 @@
 
     async function fetchLatestVotes() {
       try {
-        const res = await fetch("/api/admin/submissions");
+        const res = await FirebaseClient.request("votingFilms");
         if (res.ok) {
           const data = await res.json();
           const all = data.submissions || [];
@@ -344,43 +349,16 @@
       } catch (e) {}
     }
 
-    // Connect to Server-Sent Events (SSE) for Real-Time Zero Latency Updates
-    function connectSSE() {
-      try {
-        const evtSource = new EventSource("/api/stream/events");
-
-        evtSource.onmessage = (event) => {
-          try {
-            const parsed = JSON.parse(event.data);
-            if (parsed.type === "INIT_SNAPSHOT") {
-              if (parsed.data.films && parsed.data.films.length > 0) {
-                films = parsed.data.films;
-                updateOverlayUI();
-              }
-            } else if (parsed.type === "VOTE_UPDATE") {
-              const target = films.find(f => f.id === parsed.data.filmId);
-              if (target) {
-                target.votes = parsed.data.votesCount;
-              } else {
-                fetchLatestVotes();
-              }
-              updateOverlayUI();
-            }
-          } catch (e) {}
-        };
-
-        evtSource.onerror = () => {
-          // SSE reconnect or fallback
-          setTimeout(fetchLatestVotes, 2500);
-        };
-      } catch (e) {
-        setInterval(fetchLatestVotes, 2500);
-      }
+    function subscribeVotes() {
+      FirebaseClient.subscribeVotingFilms(latest => {
+        films = latest.map(film => ({ ...film, votes: film.votesCount || 0 }));
+        updateOverlayUI();
+      });
     }
 
     fetchLatestVotes();
-    connectSSE();
-    setInterval(fetchLatestVotes, 3000); // Polling safeguard
+    subscribeVotes();
+
   </script>
 </body>
 </html>

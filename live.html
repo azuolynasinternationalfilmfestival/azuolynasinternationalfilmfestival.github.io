@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="lt">
 <head>
+  <script src="js/firebase-client.js"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Tiesioginė Transliacija & Balsavimas | Live Stream | Ąžuolynas Film Fest</title>
@@ -475,7 +476,7 @@
         Transliacijos Prieiga
       </h3>
       <p style="font-size:0.85rem; color:var(--text-muted); line-height:1.45; margin:0 0 20px 0;" id="authModalDesc">
-        Tiesioginė transliacija skirta autorizuotiems festivalio dalyviams ir žiūrovams. Įveskite savo asmeninį žetoną (Token) arba registruotą el. paštą:
+        Tiesioginė transliacija skirta autorizuotiems festivalio dalyviams ir žiūrovams. Įveskite savo asmeninį prieigos žetoną iš el. laiško:
       </p>
 
       <form id="liveAuthForm" action="javascript:void(0);">
@@ -526,7 +527,7 @@
         voteBtn: "Balsuoti už šį filmą",
         votedBtn: "Jūsų balsas įskaitytas ✓",
         authTitle: "Transliacijos Prieiga",
-        authDesc: "Tiesioginė transliacija skirta autorizuotiems festivalio dalyviams ir žiūrovams. Įveskite savo asmeninį žetoną (Token) arba registruotą el. paštą:"
+        authDesc: "Tiesioginė transliacija skirta autorizuotiems festivalio dalyviams ir žiūrovams. Įveskite savo asmeninį prieigos žetoną iš el. laiško:"
       },
       en: {
         liveTag: "Official Live Broadcast",
@@ -543,7 +544,7 @@
         voteBtn: "Vote for this film",
         votedBtn: "Vote Recorded ✓",
         authTitle: "Live Stream Access",
-        authDesc: "The live stream is reserved for authorized festival participants and viewers. Enter your personal pass token or registered email:"
+        authDesc: "The live stream is reserved for authorized festival participants and viewers. Enter your personal access token from your email:"
       }
     };
 
@@ -572,18 +573,16 @@
     // 1. Check URL parameters (?token=... or ?email=...)
     const urlParams = new URLSearchParams(window.location.search);
     const paramToken = urlParams.get("token") || urlParams.get("pass");
-    const paramEmail = urlParams.get("email");
 
     // 2. Authentication check
     async function verifyAccess(credential) {
       try {
-        const isEmail = credential.includes("@");
-        const payload = isEmail ? { email: credential } : { token: credential };
+        const payload = { token: credential };
 
-        const res = await fetch("/api/live/verify-access", {
+        const res = await FirebaseClient.request("live.verify-access", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload)
+
+          body: payload
         });
 
         const data = await res.json();
@@ -602,7 +601,7 @@
           return false;
         }
       } catch (err) {
-        showAuthError("Nepavyko susisiekti su serveriu.");
+        showAuthError("Nepavyko susisiekti su Firebase.");
         return false;
       }
     }
@@ -617,14 +616,19 @@
     const storedAuth = sessionStorage.getItem("live_auth_user");
     if (storedAuth) {
       try {
-        authorizedUser = JSON.parse(storedAuth);
-        document.getElementById("userBadge").classList.remove("d-none");
-        document.getElementById("userNameLabel").textContent = authorizedUser.name || authorizedUser.email;
-        document.getElementById("logoutLiveBtn").classList.remove("d-none");
-        startHeartbeat();
-      } catch (e) {}
-    } else if (paramToken || paramEmail) {
-      verifyAccess(paramToken || paramEmail);
+        const cached = JSON.parse(storedAuth);
+        verifyAccess(cached.token || "").then(granted => {
+          if (!granted) {
+            sessionStorage.removeItem("live_auth_user");
+            document.getElementById("liveAuthModal").classList.remove("d-none");
+          }
+        });
+      } catch (error) {
+        sessionStorage.removeItem("live_auth_user");
+        document.getElementById("liveAuthModal").classList.remove("d-none");
+      }
+    } else if (paramToken) {
+      verifyAccess(paramToken);
     } else {
       document.getElementById("liveAuthModal").classList.remove("d-none");
     }
@@ -648,10 +652,10 @@
       setInterval(async () => {
         if (!authorizedUser) return;
         try {
-          await fetch("/api/live/heartbeat", {
+          await FirebaseClient.request("live.heartbeat", {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ token: authorizedUser.token, email: authorizedUser.email })
+
+            body: { token: authorizedUser.token, email: authorizedUser.email }
           });
         } catch (e) {}
       }, 30000);
@@ -660,7 +664,7 @@
     // 3. Load Stream Status and Real-time SSE Connection
     async function loadStreamStatus() {
       try {
-        const res = await fetch("/api/live/status");
+        const res = await FirebaseClient.request("live.status");
         if (res.ok) {
           streamConfig = await res.json();
           updateStreamUI(streamConfig);
@@ -771,12 +775,12 @@
     // 4. Load Films for Voting
     async function loadFilms() {
       try {
-        const res = await fetch("/api/admin/submissions");
+        const res = await FirebaseClient.request("votingFilms");
         if (res.ok) {
           const data = await res.json();
           const all = data.submissions || [];
           votingFilms = all.filter(s => s.inVoting === true || s.votesCount > 0);
-          if (votingFilms.length === 0) votingFilms = all.slice(0, 6);
+
           renderVotingCards();
           updateTotalVotes();
         }
@@ -843,10 +847,10 @@
 
       try {
         const deviceHash = 'dev_' + Math.random().toString(36).substring(2, 10);
-        const res = await fetch("/api/vote", {
+        const res = await FirebaseClient.request("vote", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ filmId, category: "general", deviceHash })
+
+          body: { filmId, category: "general", deviceHash }
         });
 
         const data = await res.json();
@@ -868,54 +872,17 @@
       }
     }
 
-    // 5. Connect to Server-Sent Events (SSE) for Real-Time Live Sync
-    function initSSE() {
-      try {
-        const evtSource = new EventSource("/api/stream/events");
-
-        evtSource.onmessage = (event) => {
-          try {
-            const parsed = JSON.parse(event.data);
-            if (parsed.type === "INIT_SNAPSHOT") {
-              if (parsed.data.streamConfig) updateStreamUI(parsed.data.streamConfig);
-              if (parsed.data.films && parsed.data.films.length > 0) {
-                votingFilms = parsed.data.films;
-                renderVotingCards();
-                updateTotalVotes();
-              }
-            } else if (parsed.type === "VOTE_UPDATE") {
-              const target = votingFilms.find(x => x.id === parsed.data.filmId);
-              if (target) {
-                target.votesCount = parsed.data.votesCount;
-                renderVotingCards();
-                updateTotalVotes();
-              }
-            } else if (parsed.type === "STREAM_STATE_UPDATE") {
-              if (streamConfig) {
-                streamConfig.streamState = parsed.data.streamState;
-                streamConfig.isLive = parsed.data.isLive;
-                updateStreamUI(streamConfig);
-              }
-            } else if (parsed.type === "VIEWER_JOIN") {
-              const countElem = document.getElementById("liveViewerCount");
-              if (countElem && parsed.data.viewerCount) countElem.textContent = parsed.data.viewerCount;
-            }
-          } catch (e) {}
-        };
-
-        evtSource.onerror = () => {
-          // Auto fallback polling
-          setTimeout(loadFilms, 3000);
-        };
-      } catch (e) {
-        setInterval(loadFilms, 4000);
-      }
+    function subscribeLiveUpdates() {
+      FirebaseClient.subscribeStream(cfg => { streamConfig = cfg; updateStreamUI(cfg); });
+      FirebaseClient.subscribeVotingFilms(films => {
+        votingFilms = films; renderVotingCards(); updateTotalVotes();
+      });
     }
 
     applyLanguage(currentLang);
     loadStreamStatus();
     loadFilms();
-    initSSE();
+    subscribeLiveUpdates();
   </script>
 </body>
 </html>

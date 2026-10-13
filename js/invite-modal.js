@@ -166,111 +166,15 @@ async function handleInviteSubmit(e) {
   let activeToken = token;
 
   try {
-    // 1. Call backend /api/admin/invite endpoint
-    // This creates the invitation and user in server data, syncs to Firestore via admin credentials,
-    // and records administrative activity log
-    try {
-      const jwtToken = sessionStorage.getItem("admin_jwt_token");
-      const headers = { "Content-Type": "application/json" };
-      if (jwtToken) headers["Authorization"] = `Bearer ${jwtToken}`;
-
-      const resp = await fetch("/api/admin/invite", {
-        method: "POST",
-        headers,
-        body: JSON.stringify({
-          name,
-          surname,
-          email,
-          role,
-          canManageUsers,
-          lang: emailLang,
-          adminEmail: currentAdminEmail
-        })
-      });
-      if (resp.ok) {
-        const apiData = await resp.json();
-        if (apiData && apiData.invitation) {
-          activeVerificationCode = apiData.invitation.code || activeVerificationCode;
-          activeToken = apiData.invitation.token || activeToken;
-        }
-        createdSuccessfully = true;
-      }
-    } catch (apiErr) {
-      console.warn("Backend API invite notice:", apiErr.message);
-    }
-
-    // 2. Also write directly to Firestore collections 'users' and 'invitations' via client SDK
-    if (db) {
-      try {
-        await db.collection("users").doc(docId).set({
-          uid: docId,
-          name,
-          surname,
-          email,
-          role,
-          status: "active",
-          canManageUsers,
-          createdAt: nowIso,
-          updatedAt: nowIso,
-          invitedBy: currentAdminEmail
-        }, { merge: true });
-        createdSuccessfully = true;
-      } catch (fErr) {
-        console.warn("Firestore client write users notice:", fErr.message);
-      }
-
-      try {
-        await db.collection("invitations").doc(activeToken).set({
-          token: activeToken,
-          code: activeVerificationCode,
-          name,
-          surname,
-          email,
-          role,
-          status: "pending",
-          canManageUsers,
-          createdAt: nowIso,
-          expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
-          invitedBy: currentAdminEmail
-        });
-        createdSuccessfully = true;
-      } catch (fErr) {
-        console.warn("Firestore client write invitations notice:", fErr.message);
-      }
-    }
-
-    if (!createdSuccessfully) {
-      throw new Error("Nepavyko užregistruoti pakvietimo nei per serverio API, nei per Firestore.");
-    }
-
-    // 3. Trigger automated email dispatch via Firebase Cloud Functions
-    try {
-      await dispatchInvitationViaFirebaseCloudFunctions({
-        name,
-        surname,
-        email,
-        role,
-        code: activeVerificationCode,
-        token: activeToken,
-        inviteUrl: `${baseUrl}/admin.html?invite=${activeToken}`,
-        lang: emailLang,
-        invitedBy: currentAdminEmail
-      });
-    } catch (cfErr) {
-      console.warn("Cloud functions email dispatch notice:", cfErr.message);
-    }
-
-    // 4. Try triggering Firebase Auth password setup email
-    if (auth && typeof auth.sendPasswordResetEmail === "function") {
-      try {
-        await auth.sendPasswordResetEmail(email);
-      } catch (authErr) {
-        console.info("Firebase Auth reset email notice (expected for newly invited non-auth accounts):", authErr.code);
-      }
-    }
+    const result = await FirebaseClient.request("invite", {
+      method: "POST", body: { name, surname, email, role, canManageUsers, lang: emailLang }
+    });
+    const created = await result.json();
+    activeVerificationCode = created.invitation.code;
+    activeToken = created.invitation.token;
 
     const roleName = (ROLE_LABELS[role] && ROLE_LABELS[role][emailLang]) || role;
-    showToast(`Pakvietimas sėkmingai išsiųstas į ${email} (Rolė: ${roleName}, Kodas: ${activeVerificationCode})!`, "success");
+    showToast(`Pakvietimas įrašytas į siuntimo eilę: ${email} (Rolė: ${roleName}, Kodas: ${activeVerificationCode})!`, "success");
 
     closeInviteModal();
 
@@ -306,107 +210,6 @@ async function handleInviteSubmit(e) {
       `;
     }
   }
-}
-
-/**
- * Executes multi-tier Firebase Cloud Functions email dispatch:
- * 1. Firebase Callable Cloud Function (sendUserInvitationEmail)
- * 2. Firestore 'mail' collection queue (triggers Firebase Cloud Function firestore-send-email)
- */
-async function dispatchInvitationViaFirebaseCloudFunctions({
-  name,
-  surname,
-  email,
-  role,
-  code,
-  token,
-  inviteUrl,
-  lang,
-  invitedBy
-}) {
-  let callableSucceeded = false;
-
-  // Tier 1: Callable Cloud Function
-  if (typeof firebase !== "undefined" && typeof firebase.functions === "function") {
-    try {
-      const sendInviteCallable = firebase.functions("europe-west1").httpsCallable("sendUserInvitationEmail");
-      const result = await sendInviteCallable({
-        name,
-        surname,
-        email,
-        role,
-        code,
-        token,
-        inviteUrl,
-        lang,
-        invitedBy,
-        institution: "Kauno Tarptautinė Gimnazija"
-      });
-      console.info("Firebase Cloud Function 'sendUserInvitationEmail' result:", result);
-      callableSucceeded = true;
-    } catch (cfError) {
-      console.warn("Firebase Callable Cloud Function note (triggering Firestore queue):", cfError.message);
-    }
-  }
-
-  // Tier 2: Trigger via Firestore 'mail' collection for Cloud Functions email extension
-  if (db) {
-    try {
-      const fullName = `${name} ${surname}`.trim();
-      let htmlContent = "";
-
-      if (typeof window !== "undefined" && typeof window.generateInviteEmailHtml === "function") {
-        htmlContent = window.generateInviteEmailHtml(lang, {
-          name: fullName,
-          email,
-          role,
-          code,
-          token,
-          inviteUrl,
-          invitedBy
-        });
-      } else {
-        htmlContent = `
-          <div style="background:#051512; color:#F8FAF7; padding:24px; font-family:sans-serif; border-radius:8px;">
-            <h2 style="color:#6FA58A;">Kvietimas prisijungti prie Kauno Tarptautinės Gimnazijos kino festivalio komandos</h2>
-            <p>Sveiki, <b>${fullName}</b>!</p>
-            <p>Jums suteikta prieiga prie festivalio valdymo platformos su role: <b>${role.toUpperCase()}</b>.</p>
-            <div style="background:#0C241F; border:1px solid #D4AF37; padding:16px; border-radius:6px; margin:16px 0; text-align:center;">
-              <p style="margin:0; font-size:12px; color:#D4AF37; text-transform:uppercase;">Aktyvavimo patvirtinimo kodas:</p>
-              <h1 style="margin:8px 0; font-size:32px; letter-spacing:6px; color:#ffffff;">${code}</h1>
-            </div>
-            <p><a href="${inviteUrl}" style="display:inline-block; background:#17453B; color:#ffffff; padding:12px 24px; text-decoration:none; border-radius:4px; font-weight:bold;">Aktyvuoti paskyrą &rarr;</a></p>
-          </div>
-        `;
-      }
-
-      await db.collection("mail").add({
-        to: email,
-        template: "userInvite",
-        message: {
-          subject: lang === "en"
-            ? "Ąžuolynas Film Fest | Staff Team Invitation (Kaunas International Gymnasium)"
-            : "Ąžuolynas Film Fest | Kvietimas prisijungti prie komandos (Kauno Tarptautinė Gimnazija)",
-          html: htmlContent
-        },
-        data: {
-          name: fullName,
-          role,
-          code,
-          token,
-          inviteUrl,
-          lang,
-          institution: "Kauno Tarptautinė Gimnazija"
-        },
-        status: "queued",
-        createdAt: new Date().toISOString()
-      });
-    } catch (mailErr) {
-      console.warn("Firestore mail queue notice:", mailErr.message);
-    }
-  }
-
-  return { success: true, callableSucceeded };
 }
 
 function generateSecureToken() {

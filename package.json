@@ -4,15 +4,10 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "node server.js",
-    "start": "node server.js",
-    "build": "node -e 'console.log(\"Build complete\")'",
-    "lint": "node -e 'console.log(\"Lint clean\")'"
-  },
-  "dependencies": {
-    "dotenv": "^18.0.7",
-    "express": "^4.21.2",
-    "jsonwebtoken": "^9.0.3",
-    "nodemailer": "^10.0.13"
+    "dev": "python3 -m http.server 3000",
+    "start": "python3 -m http.server 3000",
+    "test": "node --test tests/*.test.js",
+    "build": "node scripts/check-static.mjs",
+    "lint": "node scripts/check-static.mjs"
   }
 }
