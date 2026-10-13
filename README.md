@@ -41,22 +41,38 @@ Publish `firestore.rules` to the named database
 
 ## Email
 
-Both forms upload the video and save the film in Firestore, then call
-`/api/submissions/record`. The server stores the local record and sends the applicant
-receipt (or remote live pass) and the organizer notification using Nodemailer.
-When direct SMTP is unavailable or fails, it queues standard `mail` documents for
-the Trigger Email extension in the same named database. A successful SMTP delivery
-is not queued again. The browser does not create a second set of notifications.
+Both forms upload the video, then choose the email transport before writing the film.
+On GitHub Pages (and static hosts without the server health endpoint), a Firestore
+batch creates the submission, applicant receipt, organizer notification and remote
+viewer token together. Rejected writes roll back the entire batch. The Trigger Email
+extension processes `mail` in the configured named database. The applicant receives
+a receipt in their form language; remote applicants receive their live access link.
+The organizer receives the film details and can reply to the applicant.
 
-SMTP settings can be supplied in `.env` or the restored authenticated admin email
-settings panel. Saved credentials stay in the private server settings file and are
-excluded from public settings and Firestore sync. Keep the server's `data/` storage
-persistent and private. Set the extension's default sender to the festival address.
+On Node hosting, the original `/api/submissions/record` dispatcher remains in use.
+It sends via Nodemailer, falling back to the extension queue if needed. Completed
+recipient results are saved so retrying a partial failure does not resend successful
+notifications. Browser retries reuse the uploaded file and submission ID.
+A browser never falls back to creating mail after an unsuccessful server POST.
 
-Film, local record and notifications are separate writes in this restored server
-architecture. If notification dispatch fails, the form shows an error; a film may
-already have been stored. Queuing confirms document creation, not inbox delivery;
-inspect the extension's `delivery.state` and `delivery.error` for processing results.
+For a separate Node backend, define `window.FESTIVAL_API_BASE_URL =
+"https://your-backend.example"` before loading `js/server-api.js` on each page.
+Use an HTTPS backend with the repository's health/API routes and Firebase identity
+verification. Without this override, other server administration functions still
+require a Node deployment or a reverse proxy; GitHub Pages cannot run Express.
+
+The admin email panel supports test and direct email on both hosting types. Its
+recent queue displays the extension's `delivery.state` and `delivery.error`, including
+queued, processing, error and success. Success means accepted by the recipient's
+mail server, not confirmed inbox placement. SMTP configuration is shown on Node
+hosting; on GitHub Pages configure SMTP in the Firebase extension. Credentials
+must never be stored in public Firestore settings or browser code.
+
+Mail documents use array `to`, string `from` and `replyTo`, and string
+`message.subject`, `message.html` and `message.text`. Existing rules allow public
+mail creation with valid document IDs and allow staff to read delivery status.
+No rules changes are required for these payloads. Queuing confirms document creation;
+actual delivery depends on the deployed extension and SMTP configuration.
 
 ## Live player
 

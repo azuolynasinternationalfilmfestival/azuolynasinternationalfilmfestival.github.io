@@ -59,7 +59,9 @@ service cloud.firestore {
 
     // Festival Editions
     match /editions/{editionId} {
-      allow read: if isValidId(editionId);
+      allow get: if isValidId(editionId);
+      // Public homepages list festival editions; IDs cannot be checked by a list query.
+      allow list: if true;
       allow write: if isAdmin();
     }
 

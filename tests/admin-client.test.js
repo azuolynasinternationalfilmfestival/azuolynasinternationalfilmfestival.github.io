@@ -39,6 +39,13 @@ for (const email of admins) {
     assert.equal(synced.canManageUsers, true);
     assert.equal(document.getElementById('panelSection').classList.contains('d-none'), false);
   });
+  test(`${email} can see the settings invitation controls`, () => {
+    const document = dom();
+    const evaluate = new Function('AUTHORIZED_ADMIN_EMAILS', 'document',
+      stripModules(read('js/settings.js')) + '\nreturn evaluateAdminPrivileges;')(admins, document);
+    evaluate({email: email.toUpperCase()});
+    assert.equal(document.getElementById('adminInviteCard').classList.contains('d-none'), false);
+  });
   test(`${email} can see the user-management tab`, async () => {
     const document = dom();
     const access = new Function('db', 'auth', 'PRIMARY_SUPERADMIN_EMAIL', 'AUTHORIZED_ADMIN_EMAILS', 'document',

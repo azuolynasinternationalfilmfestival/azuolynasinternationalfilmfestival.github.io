@@ -1122,6 +1122,7 @@
 
   <script src="../config.js"></script>
   <script src="../email-templates.js"></script>
+  <script src="../js/mail-client.js"></script>
   <script src="../js/social-share.js"></script>
   <script src="../js/voting-and-winners.js"></script>
   <script src="../js/photo-lightbox.js"></script>
@@ -1340,8 +1341,8 @@
       }
     }
 
-    fetch("/api/settings")
-      .then((res) => res.ok ? res.json() : null)
+    window.FestivalApi.hasServer()
+      .then(hasServer => hasServer ? window.FestivalApi.json("/api/settings") : null)
       .then((data) => {
         if (data && (data.settings || data.lt)) {
           applyFestivalSettings(data.settings || data);
@@ -1535,11 +1536,14 @@
     }, { passive: true });
 
     if (firestoreDb) {
-      firestoreDb.collection("submissions").onSnapshot((snapshot) => {
-        filmsCache = [];
-        snapshot.forEach((doc) => {
-          filmsCache.push({ id: doc.id, ...doc.data() });
-        });
+      const publicFilms = new Map();
+      // Rules permit public queries only for published films or winners.
+      for (const field of ["inVoting", "isWinner"]) {
+        firestoreDb.collection("submissions").where(field, "==", true).onSnapshot(snapshot => {
+          const films = [];
+          snapshot.forEach(doc => films.push({ id: doc.id, ...doc.data() }));
+          publicFilms.set(field, films);
+          filmsCache = [...new Map([...publicFilms.values()].flat().map(film => [film.id, film])).values()];
         window.filmsCache = filmsCache;
 
         const hasWinners = filmsCache.some((f) => f.isWinner === true);
@@ -1559,32 +1563,8 @@
 
         renderWinnersSection();
         renderFilmsGallery();
-      }, (err) => {
-        console.warn("Submissions snapshot listener:", err.message);
-
-        try {
-          firestoreDb.collection("submissions").where("inVoting", "==", true).get().then((snap) => {
-            if (snap && !snap.empty) {
-              snap.forEach((doc) => {
-                if (!filmsCache.some(f => f.id === doc.id)) {
-                  filmsCache.push({ id: doc.id, ...doc.data() });
-                }
-              });
-              renderFilmsGallery();
-            }
-          }).catch(() => {});
-          firestoreDb.collection("submissions").where("isWinner", "==", true).get().then((snap) => {
-            if (snap && !snap.empty) {
-              snap.forEach((doc) => {
-                if (!filmsCache.some(f => f.id === doc.id)) {
-                  filmsCache.push({ id: doc.id, ...doc.data() });
-                }
-              });
-              renderWinnersSection();
-            }
-          }).catch(() => {});
-        } catch (e) {}
-      });
+        }, error => console.warn("Public films listener:", error.message));
+      }
     }
 
     function renderWinnersSection() {
@@ -1641,6 +1621,7 @@
       }
     });
 
+    let pendingSubmission = null;
     let verifiedVideoFile = null;
     let videoDurationSeconds = 0;
 
@@ -1692,6 +1673,7 @@
       if (form) {
         form.classList.remove("d-none");
         form.reset();
+        pendingSubmission = null;
       }
       verifiedVideoFile = null;
       if (feedback) feedback.textContent = "";
@@ -1722,6 +1704,9 @@
         showToast("Įveskite vardą, el. paštą ir filmo pavadinimą neviršydami leidžiamo ilgio.", "error");
         return;
       }
+      const attendanceInput = document.querySelector('input[name="attendanceType"]:checked');
+      const attendanceType = attendanceInput ? attendanceInput.value : 'in_person';
+      const fingerprint = JSON.stringify([name, email, age, category, location, institution, filmTitle, deviceModel, synopsis, attendanceType]);
       submitBtn.disabled = true;
       progressContainer.classList.add("active");
 
@@ -1733,27 +1718,8 @@
         if (!activeStorage) {
           throw new Error("Saugyklos tarnyba šiuo metu nepasiekiama.");
         }
-        const storageRef = activeStorage.ref(storagePath);
-        const uploadTask = storageRef.put(verifiedVideoFile);
-
-        uploadTask.on("state_changed",
-          (snap) => {
-            const pct = Math.round((snap.bytesTransferred / snap.totalBytes) * 100);
-            progressFill.style.width = pct + "%";
-            progressStatus.textContent = `Įkeliama... ${pct}%`;
-          },
-          (err) => {
-            console.error(err);
-            showToast("Klaida įkeliant vaizdo įrašą: " + err.message, "error");
-            submitBtn.disabled = false;
-            progressContainer.classList.remove("active");
-          },
-          async () => {
-            try {
-            const videoUrl = await uploadTask.snapshot.ref.getDownloadURL();
-
-            const attendanceInput = document.querySelector('input[name="attendanceType"]:checked');
-            const attendanceType = attendanceInput ? attendanceInput.value : 'in_person';
+        const finishSubmission = async (videoUrl) => {
+          try {
             const liveToken = 'live_' + Math.random().toString(36).substring(2, 10) + '_' + Date.now().toString(36);
             const baseUrl = window.location.origin;
             const liveStreamUrl = `${baseUrl}/live.html?token=${liveToken}`;
@@ -1779,44 +1745,50 @@
               status: "submitted",
               submissionLang: "lt",
               submittedAt: firebase.firestore.FieldValue.serverTimestamp()
-            };
+        };
 
             const targetDb = firestoreDb || (typeof window !== "undefined" && window.db) || (typeof db !== "undefined" ? db : null) || firebase.firestore();
-            const docRef = await targetDb.collection("submissions").add(submissionData);
-
-            // Also register remote live viewer token in live_viewers collection
-            if (attendanceType === 'remote') {
-              try {
-                await targetDb.collection("live_viewers").doc(liveToken).set({
-                  token: liveToken,
-                  email: email.toLowerCase(),
-                  name,
-                  filmTitle,
-                  role: "remote_participant",
-                  createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                  status: "authorized"
-                });
-              } catch (viewerErr) {
-                console.warn("live_viewers registration note:", viewerErr);
-              }
+            if (!pendingSubmission || pendingSubmission.fingerprint !== fingerprint || pendingSubmission.file !== verifiedVideoFile) {
+              pendingSubmission = { ...window.MailClient.createSubmission(targetDb, submissionData), fingerprint, file: verifiedVideoFile, videoUrl, storagePath };
             }
-
-            // The restored server records the film and dispatches both notifications.
-            const response = await fetch("/api/submissions/record", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ id: docRef.id, ...submissionData, submittedAt: new Date().toISOString() })
-            });
-            const result = await response.json();
-            if (!response.ok || !result.success) throw new Error(result.error || "Submission notifications failed.");
+            await window.MailClient.submit(targetDb, pendingSubmission);
 
             form.classList.add("d-none");
             formSuccessDisplay.classList.remove("d-none");
             showToast("Dėkojame! Jūsų filmo paraiška sėkmingai gauta.");
+          } catch (error) {
+            console.error(error);
+            showToast("Nepavyko išsaugoti paraiškos ir laiškų. Bandykite dar kartą: " + error.message, "error");
+          } finally {
+            submitBtn.disabled = false;
+            progressContainer.classList.remove("active");
+          }
+        };
+
+        if (pendingSubmission && pendingSubmission.fingerprint === fingerprint && pendingSubmission.file === verifiedVideoFile) {
+          await finishSubmission(pendingSubmission.videoUrl);
+          return;
+        }
+        const storageRef = activeStorage.ref(storagePath);
+        const uploadTask = storageRef.put(verifiedVideoFile);
+
+        uploadTask.on("state_changed",
+          (snap) => {
+            const pct = Math.round((snap.bytesTransferred / snap.totalBytes) * 100);
+            progressFill.style.width = pct + "%";
+            progressStatus.textContent = `Įkeliama... ${pct}%`;
+          },
+          (err) => {
+            console.error(err);
+            showToast("Klaida įkeliant vaizdo įrašą: " + err.message, "error");
+            submitBtn.disabled = false;
+            progressContainer.classList.remove("active");
+          },
+          async () => {
+            try {
+              await finishSubmission(await uploadTask.snapshot.ref.getDownloadURL());
             } catch (error) {
-              console.error(error);
-              showToast("Nepavyko išsaugoti filmo. Bandykite dar kartą.", "error");
-            } finally {
+              showToast(error.message, "error");
               submitBtn.disabled = false;
               progressContainer.classList.remove("active");
             }
