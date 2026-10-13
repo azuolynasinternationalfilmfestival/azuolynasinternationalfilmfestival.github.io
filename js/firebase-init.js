@@ -126,23 +126,30 @@ export const AUTHORIZED_ADMIN_EMAILS = [
 
 export const DEFAULT_CONTENT = {
   lt: {
-    heroBadge: "Tarptautinis Mokinių Filmų Festivalis",
-    topic: "Neįprastas žvilgsnis į įprastus dalykus",
-    aboutText: "„Ąžuolyno“ filmų festivalis pavadintas vieno iš Kauno lankytinų vietų – Ąžuolyno parko – garbei, kurio papėdėje yra įsikūrusi mūsų studija.",
-    datesSubmissions: "Iki 2026 m. balandžio 2 d.",
-    dateEvent: "2026 m. balandžio 17 d. (Atidarymo ceremonija)",
+    heroBadge: "7-asis Tarptautinis Mokinių Filmų Festivalis",
+    topic: "Mano pašaukimas",
+    openingDate: "Lapkričio 1 d.",
+    deadlineDate: "Kovo 26 d.",
+    eventDate: "Balandžio 23 d.",
+    aboutText: "„Ąžuolyno“ filmų festivalis pavadintas vieno iš Kauno lankytinų vietų – Ąžuolyno parko – garbei, kurio papėdėje yra įsikūrusi mūsų studija. Kviečiame 10–18 m. moksleivius kurti trumpametražius filmus iki 3 min. išmaniaisiais įrenginiais.",
+    datesSubmissions: "Nuo lapkričio 1 d. iki kovo 26 d.",
+    dateEvent: "2027 m. balandžio 23 d. (Kino festivalis ir tiesioginė transliacija)",
     targetAudience: "Mokiniai (10–18 m.)",
-    recordingPlaceholder: "Festivalio atidarymo vaizdo įrašas bus patalpintas 2026 m. balandžio 17 d."
+    recordingPlaceholder: "Festivalio ir tiesioginės transliacijos vaizdo įrašas bus pasiekiamas 2027 m. balandžio 23 d."
   },
   en: {
-    heroBadge: "International Students Film Festival",
-    topic: "An unusual view at ordinary things",
-    aboutText: "The «Ažuolynas» Film Festival is named after one of the sights of Kaunas, at the foot of which our studio is located.",
-    datesSubmissions: "Until April 2nd, 2026",
-    dateEvent: "April 17th, 2026 (Opening Ceremony)",
+    heroBadge: "The 7th International Students Film Festival",
+    topic: "My Purpose (My Fate)",
+    openingDate: "November 1st",
+    deadlineDate: "March 26th",
+    eventDate: "April 23rd",
+    aboutText: "The «Ažuolynas» Film Festival is named after one of the sights of Kaunas, at the foot of which our studio is located. We invite youth directors aged 10–18 to submit smartphone short films up to 3 minutes.",
+    datesSubmissions: "November 1st – March 26th",
+    dateEvent: "April 23rd, 2027 (Film Festival & Live Stream)",
     targetAudience: "Students (10–18 yrs)",
-    recordingPlaceholder: "The official festival recording will be published here on April 17th, 2026."
+    recordingPlaceholder: "The official festival recording and live stream replay will be published here on April 23rd, 2027."
   },
+  selectedYear: "2027",
   showAbout: true,
   showTerms: true,
   showFaq: true,
@@ -151,8 +158,8 @@ export const DEFAULT_CONTENT = {
   showArchive: true,
   showCurrentEdition: true,
   showResults: false,
-  showVoting: false,
-  votingActive: false,
+  showVoting: true,
+  votingActive: true,
   showScreening: true,
   showSubmit: true,
   maintenanceMode: false,

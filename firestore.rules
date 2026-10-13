@@ -54,13 +54,27 @@ service cloud.firestore {
     // Festival Settings
     match /settings/{settingId} {
       allow read: if isValidId(settingId);
-      allow write: if isAdmin();
+      allow write: if isAdmin() || (
+        incoming().adminEmail in [
+          'azuolynasfilmfestival@gmail.com',
+          'karina.brdar@gmail.com',
+          'dominikphotofficial.t@gmail.com',
+          'dominikphotofficial.lt@gmail.com'
+        ]
+      );
     }
 
     // Festival Editions
     match /editions/{editionId} {
       allow read: if isValidId(editionId);
-      allow write: if isAdmin();
+      allow write: if isAdmin() || (
+        incoming().adminEmail in [
+          'azuolynasfilmfestival@gmail.com',
+          'karina.brdar@gmail.com',
+          'dominikphotofficial.t@gmail.com',
+          'dominikphotofficial.lt@gmail.com'
+        ]
+      );
     }
 
     // Submissions
@@ -105,7 +119,12 @@ service cloud.firestore {
     // Stream Configuration (Cloudflare Stream & Status)
     match /stream_config/{configId} {
       allow read: if isValidId(configId);
-      allow write: if isAdmin();
+      allow write: if isAdmin() || (
+        incoming().adminEmail in [
+          'azuolynasfilmfestival@gmail.com',
+          'karina.brdar@gmail.com'
+        ]
+      );
     }
 
     // Live Stream Viewers / Tokens

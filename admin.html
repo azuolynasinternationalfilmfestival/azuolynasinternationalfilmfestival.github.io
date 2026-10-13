@@ -683,38 +683,9 @@
               </div>
             </div>
 
-            <!-- Iframe URL Configuration Field -->
-            <div style="background:rgba(12,38,32,0.45); border:1px solid var(--border-color); border-radius:var(--site-radius); padding:16px; margin-top:16px; margin-bottom:14px;">
-              <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:8px;">
-                <label for="adminStreamIframeUrlInput" style="font-size:0.88rem; font-weight:700; color:#D4AF37; margin:0;">
-                  📺 Transliacijos Grotuvo Iframe Nuoroda (Iframe URL / Embed Link)
-                </label>
-                <span style="font-size:0.75rem; color:var(--accent-light);">Pakeitimas tiesiogiai atnaujina live.html ir šį valdymo langą</span>
-              </div>
-              <p style="font-size:0.82rem; color:var(--text-muted); margin-bottom:12px;">
-                Galite įvesti bet kurį Cloudflare Stream, YouTube, Vimeo ar pasirinktinį tiesioginės transliacijos iframe adresą.
-              </p>
-              <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
-                <input
-                  type="url"
-                  id="adminStreamIframeUrlInput"
-                  class="field"
-                  placeholder="https://customer-auu36r7owuzogvfb.cloudflarestream.com/.../iframe"
-                  style="flex:1; min-width:280px; font-family:monospace; font-size:0.85rem;"
-                >
-                <button type="button" id="btnSaveStreamIframeUrl" class="btn-solid btn-sm" style="display:inline-flex; align-items:center; gap:6px;">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
-                  <span>Išsaugoti Iframe Nuorodą</span>
-                </button>
-                <button type="button" id="btnResetStreamIframeUrl" class="btn-outline btn-sm" title="Atstatyti į numatytąjį Cloudflare adresą">
-                  <span>Atstatyti</span>
-                </button>
-              </div>
-            </div>
-
             <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-top:8px;">
               <span style="font-size:0.8rem; color:var(--text-muted);">
-                Aktyvus Iframe URL: <code id="lblCurrentIframeUrlDisplay">customer-auu36r7owuzogvfb.cloudflarestream.com/.../iframe</code>
+                Cloudflare Stream Iframe: <code>customer-auu36r7owuzogvfb.cloudflarestream.com/.../iframe</code>
               </span>
               <button type="button" id="btnCopyStreamIframe" class="btn-outline btn-xs" style="display:inline-flex; align-items:center; gap:6px;">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
@@ -1305,7 +1276,7 @@
                 <span class="switch-slider"></span>
                 <div class="switch-text">
                   <span class="switch-title" style="display:flex; align-items:center; gap:6px;">
-                    <span>Profilaktikos rėžimas (Maintenance Mode)</span>
+                    <span>Profilaktikos režimas (Maintenance Mode)</span>
                     <span class="status-pill status-rejected" id="badgeMaintenanceMode" style="display:none; font-size:0.68rem; padding:2px 8px;">Aktyvus</span>
                   </span>
                   <span class="switch-sub">Apriboja viešą prieigą ir rodo profilaktikos pranešimą</span>
@@ -1349,7 +1320,7 @@
               <label class="switch-label"><input type="checkbox" id="cfgShowCategories" class="switch-input" checked><span class="switch-slider"></span><div class="switch-text"><span class="switch-title">Kategorijos & Prizai</span></div></label>
               <label class="switch-label"><input type="checkbox" id="cfgShowEditions" class="switch-input" checked><span class="switch-slider"></span><div class="switch-text"><span class="switch-title">Metų Leidimai (FEST)</span></div></label>
               <label class="switch-label"><input type="checkbox" id="cfgShowArchive" class="switch-input" checked><span class="switch-slider"></span><div class="switch-text"><span class="switch-title">Retrospektyva (Archyvas)</span></div></label>
-              <label class="switch-label"><input type="checkbox" id="cfgShowVoting" class="switch-input"><span class="switch-slider"></span><div class="switch-text"><span class="switch-title">Balsavimo skiltis</span></div></label>
+              <label class="switch-label"><input type="checkbox" id="cfgShowVoting" class="switch-input" checked><span class="switch-slider"></span><div class="switch-text"><span class="switch-title">Balsavimo skiltis</span></div></label>
               <label class="switch-label"><input type="checkbox" id="cfgShowSubmit" class="switch-input" checked><span class="switch-slider"></span><div class="switch-text"><span class="switch-title">Registracijos Forma</span></div></label>
             </div>
           </div>
@@ -1366,8 +1337,8 @@
           <div class="content-card" style="border:1px solid rgba(212,175,55,0.35); background:rgba(12,38,32,0.45); margin-bottom:14px;">
             <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:10px;">
               <div>
-                <strong style="color:#F3E5AB; font-size:0.95rem;">🎯 2027 m. Temos & Datos Greitieji Šablonai</strong>
-                <div style="font-size:0.8rem; color:var(--text-muted);">Vienu paspaudimu parinkite temos vertimą ir balandžio 23 d. renginio datą:</div>
+                <strong style="color:#F3E5AB; font-size:0.95rem;">🎯 Festivalio Temos & Datų Greitieji Šablonai</strong>
+                <div style="font-size:0.8rem; color:var(--text-muted);">Vienu paspaudimu nustatykite temą („Mano pašaukimas“) ir oficialias datas (Lapkričio 1 d. &bull; Kovo 26 d. &bull; Balandžio 23 d.):</div>
               </div>
             </div>
             <div style="display:flex; flex-wrap:wrap; gap:8px;">
@@ -1380,8 +1351,8 @@
               <button type="button" class="btn-outline btn-xs" id="btnThemePresetBoth">
                 🌟 „Mano pašaukimas“ &bull; My Purpose (My Fate)
               </button>
-              <button type="button" class="btn-outline btn-xs" id="btnDatePreset2027">
-                📅 Nustatyti: 2027 m. balandžio 23 d.
+              <button type="button" class="btn-solid btn-xs" id="btnDatePreset2027" style="background:linear-gradient(135deg, #D4AF37, #b8972e); color:#051512; font-weight:700;">
+                📅 Nustatyti oficialias datas: Lapkričio 1 d. &bull; Kovo 26 d. &bull; Balandžio 23 d.
               </button>
             </div>
           </div>
@@ -1389,18 +1360,26 @@
           <div class="two-col-grid">
             <div class="content-card">
               <h4>Lietuviška versija (LT)</h4>
-              <div class="input-cell"><label for="cfgLtTopic">Festivalio tema</label><input type="text" id="cfgLtTopic" class="field"></div>
-              <div class="input-cell"><label for="cfgLtAbout">Apie festivalį (tekstas)</label><textarea id="cfgLtAbout" class="field"></textarea></div>
-              <div class="input-cell"><label for="cfgLtDates">Paraiškų datos</label><input type="text" id="cfgLtDates" class="field"></div>
-              <div class="input-cell"><label for="cfgLtEvent">Renginio data ir vieta</label><input type="text" id="cfgLtEvent" class="field"></div>
+              <div class="input-cell"><label for="cfgLtTopic">Festivalio tema</label><input type="text" id="cfgLtTopic" class="field" placeholder="Mano pašaukimas"></div>
+              <div class="input-row">
+                <div class="input-cell"><label for="cfgLtOpening">Paraiškų pradžia (Opening)</label><input type="text" id="cfgLtOpening" class="field" placeholder="Lapkričio 1 d."></div>
+                <div class="input-cell"><label for="cfgLtDeadline">Paraiškų pabaiga (Deadline)</label><input type="text" id="cfgLtDeadline" class="field" placeholder="Kovo 26 d."></div>
+              </div>
+              <div class="input-cell"><label for="cfgLtEvent">Kino festivalio ir transliacijos data</label><input type="text" id="cfgLtEvent" class="field" placeholder="2027 m. balandžio 23 d. (Kino festivalis ir tiesioginė transliacija)"></div>
+              <div class="input-cell"><label for="cfgLtDates">Paraiškų priėmimo bendras tekstas</label><input type="text" id="cfgLtDates" class="field" placeholder="Nuo lapkričio 1 d. iki kovo 26 d."></div>
+              <div class="input-cell"><label for="cfgLtAbout">Apie festivalį (tekstas)</label><textarea id="cfgLtAbout" class="field" rows="4"></textarea></div>
             </div>
 
             <div class="content-card">
               <h4>Angliška versija (EN)</h4>
-              <div class="input-cell"><label for="cfgEnTopic">Festival Topic</label><input type="text" id="cfgEnTopic" class="field"></div>
-              <div class="input-cell"><label for="cfgEnAbout">About Festival (text)</label><textarea id="cfgEnAbout" class="field"></textarea></div>
-              <div class="input-cell"><label for="cfgEnDates">Submissions Dates</label><input type="text" id="cfgEnDates" class="field"></div>
-              <div class="input-cell"><label for="cfgEnEvent">Event Date & Location</label><input type="text" id="cfgEnEvent" class="field"></div>
+              <div class="input-cell"><label for="cfgEnTopic">Festival Topic</label><input type="text" id="cfgEnTopic" class="field" placeholder="My Purpose (My Fate)"></div>
+              <div class="input-row">
+                <div class="input-cell"><label for="cfgEnOpening">Opening Date</label><input type="text" id="cfgEnOpening" class="field" placeholder="November 1st"></div>
+                <div class="input-cell"><label for="cfgEnDeadline">Submission Deadline</label><input type="text" id="cfgEnDeadline" class="field" placeholder="March 26th"></div>
+              </div>
+              <div class="input-cell"><label for="cfgEnEvent">Film Festival & Live Stream Date</label><input type="text" id="cfgEnEvent" class="field" placeholder="April 23rd, 2027 (Film Festival & Live Stream)"></div>
+              <div class="input-cell"><label for="cfgEnDates">Submissions Dates Text</label><input type="text" id="cfgEnDates" class="field" placeholder="November 1st – March 26th"></div>
+              <div class="input-cell"><label for="cfgEnAbout">About Festival (text)</label><textarea id="cfgEnAbout" class="field" rows="4"></textarea></div>
             </div>
           </div>
 

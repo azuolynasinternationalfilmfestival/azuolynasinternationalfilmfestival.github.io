@@ -23,7 +23,7 @@ export function initSettings() {
       const isEnabled = e.target.checked;
       await updateGlobalTumbler({
         maintenanceMode: isEnabled
-      }, isEnabled ? "Profilaktikos rėžimas ĮJUNGTAS (Platformos prieiga apribota)" : "Profilaktikos rėžimas IŠJUNGTAS (Platforma atvira lankytojams)", e.target);
+      }, isEnabled ? "Profilaktikos režimas ĮJUNGTAS (Platformos prieiga apribota)" : "Profilaktikos režimas IŠJUNGTAS (Platforma atvira lankytojams)", e.target);
     });
   }
 
@@ -111,15 +111,27 @@ export function initSettings() {
   const btnDate2027 = document.getElementById("btnDatePreset2027");
   if (btnDate2027) {
     btnDate2027.addEventListener("click", () => {
+      const ltOpening = document.getElementById("cfgLtOpening");
+      const ltDeadline = document.getElementById("cfgLtDeadline");
       const ltEvent = document.getElementById("cfgLtEvent");
-      const enEvent = document.getElementById("cfgEnEvent");
       const ltDates = document.getElementById("cfgLtDates");
+
+      const enOpening = document.getElementById("cfgEnOpening");
+      const enDeadline = document.getElementById("cfgEnDeadline");
+      const enEvent = document.getElementById("cfgEnEvent");
       const enDates = document.getElementById("cfgEnDates");
-      if (ltEvent) ltEvent.value = "2027 m. balandžio 23 d. (Atidarymo ceremonija)";
-      if (enEvent) enEvent.value = "April 23rd, 2027 (Opening Ceremony)";
-      if (ltDates) ltDates.value = "Iki 2027 m. balandžio 9 d.";
-      if (enDates) enDates.value = "Until April 9th, 2027";
-      showToast("Nustatytos festivalio datos: 2027 m. balandžio 23 d.");
+
+      if (ltOpening) ltOpening.value = "Lapkričio 1 d.";
+      if (ltDeadline) ltDeadline.value = "Kovo 26 d.";
+      if (ltEvent) ltEvent.value = "2027 m. balandžio 23 d. (Kino festivalis ir tiesioginė transliacija)";
+      if (ltDates) ltDates.value = "Nuo lapkričio 1 d. iki kovo 26 d.";
+
+      if (enOpening) enOpening.value = "November 1st";
+      if (enDeadline) enDeadline.value = "March 26th";
+      if (enEvent) enEvent.value = "April 23rd, 2027 (Film Festival & Live Stream)";
+      if (enDates) enDates.value = "November 1st – March 26th";
+
+      showToast("Nustatytos oficialios festivalio datos: Lapkričio 1 d. &bull; Kovo 26 d. &bull; Balandžio 23 d.", "success");
     });
   }
 }
@@ -274,34 +286,42 @@ function applySettingsToForm(d) {
   if (recUrlElem) recUrlElem.value = d.recordingVideoUrl || "";
 
   const ltTopicElem = document.getElementById("cfgLtTopic");
-  if (ltTopicElem) ltTopicElem.value = lt.topic || "";
+  if (ltTopicElem) ltTopicElem.value = lt.topic || "Mano pašaukimas";
+  const ltOpeningElem = document.getElementById("cfgLtOpening");
+  if (ltOpeningElem) ltOpeningElem.value = lt.openingDate || "Lapkričio 1 d.";
+  const ltDeadlineElem = document.getElementById("cfgLtDeadline");
+  if (ltDeadlineElem) ltDeadlineElem.value = lt.deadlineDate || "Kovo 26 d.";
+  const ltEventElem = document.getElementById("cfgLtEvent");
+  if (ltEventElem) ltEventElem.value = lt.dateEvent || lt.eventDate || "2027 m. balandžio 23 d. (Kino festivalis ir tiesioginė transliacija)";
+  const ltDatesElem = document.getElementById("cfgLtDates");
+  if (ltDatesElem) ltDatesElem.value = lt.datesSubmissions || "Nuo lapkričio 1 d. iki kovo 26 d.";
   const ltAboutElem = document.getElementById("cfgLtAbout");
   if (ltAboutElem) ltAboutElem.value = lt.aboutText || "";
   const ltHeroBadgeElem = document.getElementById("cfgLtHeroBadge");
-  if (ltHeroBadgeElem) ltHeroBadgeElem.value = lt.heroBadge || "";
-  const ltDatesElem = document.getElementById("cfgLtDates");
-  if (ltDatesElem) ltDatesElem.value = lt.datesSubmissions || "";
-  const ltEventElem = document.getElementById("cfgLtEvent");
-  if (ltEventElem) ltEventElem.value = lt.dateEvent || "";
+  if (ltHeroBadgeElem) ltHeroBadgeElem.value = lt.heroBadge || "7-asis Tarptautinis Mokinių Filmų Festivalis";
   const ltTargetElem = document.getElementById("cfgLtTarget");
-  if (ltTargetElem) ltTargetElem.value = lt.targetAudience || "";
+  if (ltTargetElem) ltTargetElem.value = lt.targetAudience || "Mokiniai (10–18 m.)";
   const ltRecPhElem = document.getElementById("cfgLtRecordingPh");
-  if (ltRecPhElem) ltRecPhElem.value = lt.recordingPlaceholder || "";
+  if (ltRecPhElem) ltRecPhElem.value = lt.recordingPlaceholder || "Festivalio ir tiesioginės transliacijos vaizdo įrašas bus pasiekiamas 2027 m. balandžio 23 d.";
 
   const enTopicElem = document.getElementById("cfgEnTopic");
-  if (enTopicElem) enTopicElem.value = en.topic || "";
+  if (enTopicElem) enTopicElem.value = en.topic || "My Purpose (My Fate)";
+  const enOpeningElem = document.getElementById("cfgEnOpening");
+  if (enOpeningElem) enOpeningElem.value = en.openingDate || "November 1st";
+  const enDeadlineElem = document.getElementById("cfgEnDeadline");
+  if (enDeadlineElem) enDeadlineElem.value = en.deadlineDate || "March 26th";
+  const enEventElem = document.getElementById("cfgEnEvent");
+  if (enEventElem) enEventElem.value = en.dateEvent || en.eventDate || "April 23rd, 2027 (Film Festival & Live Stream)";
+  const enDatesElem = document.getElementById("cfgEnDates");
+  if (enDatesElem) enDatesElem.value = en.datesSubmissions || "November 1st – March 26th";
   const enAboutElem = document.getElementById("cfgEnAbout");
   if (enAboutElem) enAboutElem.value = en.aboutText || "";
   const enHeroBadgeElem = document.getElementById("cfgEnHeroBadge");
-  if (enHeroBadgeElem) enHeroBadgeElem.value = en.heroBadge || "";
-  const enDatesElem = document.getElementById("cfgEnDates");
-  if (enDatesElem) enDatesElem.value = en.datesSubmissions || "";
-  const enEventElem = document.getElementById("cfgEnEvent");
-  if (enEventElem) enEventElem.value = en.dateEvent || "";
+  if (enHeroBadgeElem) enHeroBadgeElem.value = en.heroBadge || "The 7th International Students Film Festival";
   const enTargetElem = document.getElementById("cfgEnTarget");
-  if (enTargetElem) enTargetElem.value = en.targetAudience || "";
+  if (enTargetElem) enTargetElem.value = en.targetAudience || "Students (10–18 yrs)";
   const enRecPhElem = document.getElementById("cfgEnRecordingPh");
-  if (enRecPhElem) enRecPhElem.value = en.recordingPlaceholder || "";
+  if (enRecPhElem) enRecPhElem.value = en.recordingPlaceholder || "The official festival recording and live stream replay will be published here on April 23rd, 2027.";
 
   syncArchiveState(d);
 }
@@ -333,7 +353,10 @@ export function subscribeSettings() {
       unsubscribeSettings = db.collection("settings").doc("festival")
         .onSnapshot((doc) => {
           if (doc.exists) {
-            applySettingsToForm(doc.data());
+            const data = doc.data();
+            if (data && Object.keys(data).length > 0) {
+              applySettingsToForm(data);
+            }
           }
         }, (err) => {
           console.warn("Firestore settings stream notice:", err.message);
@@ -359,6 +382,16 @@ async function saveSettings() {
   const votingChecked = document.getElementById("cfgVotingActive") ? document.getElementById("cfgVotingActive").checked : false;
   const archiveChecked = document.getElementById("cfgArchiveVisibility") ? document.getElementById("cfgArchiveVisibility").checked : true;
 
+  const ltOpening = (document.getElementById("cfgLtOpening")?.value || "").trim() || "Lapkričio 1 d.";
+  const ltDeadline = (document.getElementById("cfgLtDeadline")?.value || "").trim() || "Kovo 26 d.";
+  const ltEvent = (document.getElementById("cfgLtEvent")?.value || "").trim() || "2027 m. balandžio 23 d. (Kino festivalis ir tiesioginė transliacija)";
+  const ltDates = (document.getElementById("cfgLtDates")?.value || "").trim() || "Nuo lapkričio 1 d. iki kovo 26 d.";
+
+  const enOpening = (document.getElementById("cfgEnOpening")?.value || "").trim() || "November 1st";
+  const enDeadline = (document.getElementById("cfgEnDeadline")?.value || "").trim() || "March 26th";
+  const enEvent = (document.getElementById("cfgEnEvent")?.value || "").trim() || "April 23rd, 2027 (Film Festival & Live Stream)";
+  const enDates = (document.getElementById("cfgEnDates")?.value || "").trim() || "November 1st – March 26th";
+
   const updated = {
     selectedYear: "2027",
     maintenanceMode: maintenanceChecked,
@@ -377,22 +410,28 @@ async function saveSettings() {
     showSubmit: document.getElementById("cfgShowSubmit") ? document.getElementById("cfgShowSubmit").checked : true,
     recordingVideoUrl: document.getElementById("cfgRecordingUrl") ? document.getElementById("cfgRecordingUrl").value.trim() : "",
     lt: {
-      topic: document.getElementById("cfgLtTopic") ? document.getElementById("cfgLtTopic").value.trim() : "Mano pašaukimas",
-      aboutText: document.getElementById("cfgLtAbout") ? document.getElementById("cfgLtAbout").value.trim() : "",
-      heroBadge: document.getElementById("cfgLtHeroBadge") ? document.getElementById("cfgLtHeroBadge").value.trim() : "7-asis Tarptautinis Mokinių Filmų Festivalis",
-      datesSubmissions: document.getElementById("cfgLtDates") ? document.getElementById("cfgLtDates").value.trim() : "Iki 2027 m. balandžio 9 d.",
-      dateEvent: document.getElementById("cfgLtEvent") ? document.getElementById("cfgLtEvent").value.trim() : "2027 m. balandžio 23 d. (Atidarymo ceremonija)",
-      targetAudience: document.getElementById("cfgLtTarget") ? document.getElementById("cfgLtTarget").value.trim() : "Mokiniai (10–18 m.)",
-      recordingPlaceholder: document.getElementById("cfgLtRecordingPh") ? document.getElementById("cfgLtRecordingPh").value.trim() : ""
+      topic: (document.getElementById("cfgLtTopic")?.value || "").trim() || "Mano pašaukimas",
+      openingDate: ltOpening,
+      deadlineDate: ltDeadline,
+      eventDate: ltEvent,
+      datesSubmissions: ltDates,
+      dateEvent: ltEvent,
+      aboutText: (document.getElementById("cfgLtAbout")?.value || "").trim(),
+      heroBadge: (document.getElementById("cfgLtHeroBadge")?.value || "").trim() || "7-asis Tarptautinis Mokinių Filmų Festivalis",
+      targetAudience: (document.getElementById("cfgLtTarget")?.value || "").trim() || "Mokiniai (10–18 m.)",
+      recordingPlaceholder: (document.getElementById("cfgLtRecordingPh")?.value || "").trim() || "Festivalio ir tiesioginės transliacijos vaizdo įrašas bus pasiekiamas 2027 m. balandžio 23 d."
     },
     en: {
-      topic: document.getElementById("cfgEnTopic") ? document.getElementById("cfgEnTopic").value.trim() : "My Purpose (My Fate)",
-      aboutText: document.getElementById("cfgEnAbout") ? document.getElementById("cfgEnAbout").value.trim() : "",
-      heroBadge: document.getElementById("cfgEnHeroBadge") ? document.getElementById("cfgEnHeroBadge").value.trim() : "The 7th International Students Film Festival",
-      datesSubmissions: document.getElementById("cfgEnDates") ? document.getElementById("cfgEnDates").value.trim() : "Until April 9th, 2027",
-      dateEvent: document.getElementById("cfgEnEvent") ? document.getElementById("cfgEnEvent").value.trim() : "April 23rd, 2027 (Opening Ceremony)",
-      targetAudience: document.getElementById("cfgEnTarget") ? document.getElementById("cfgEnTarget").value.trim() : "Students (10–18 yrs)",
-      recordingPlaceholder: document.getElementById("cfgEnRecordingPh") ? document.getElementById("cfgEnRecordingPh").value.trim() : ""
+      topic: (document.getElementById("cfgEnTopic")?.value || "").trim() || "My Purpose (My Fate)",
+      openingDate: enOpening,
+      deadlineDate: enDeadline,
+      eventDate: enEvent,
+      datesSubmissions: enDates,
+      dateEvent: enEvent,
+      aboutText: (document.getElementById("cfgEnAbout")?.value || "").trim(),
+      heroBadge: (document.getElementById("cfgEnHeroBadge")?.value || "").trim() || "The 7th International Students Film Festival",
+      targetAudience: (document.getElementById("cfgEnTarget")?.value || "").trim() || "Students (10–18 yrs)",
+      recordingPlaceholder: (document.getElementById("cfgEnRecordingPh")?.value || "").trim() || "The official festival recording and live stream replay will be published here on April 23rd, 2027."
     }
   };
 
