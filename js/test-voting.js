@@ -141,7 +141,7 @@ function updateFilmSelectionMeta() {
 async function checkVotingHealth() {
   const start = Date.now();
   try {
-    const res = await FirebaseClient.request("voting-health");
+    const res = await fetch("/api/admin/voting-health");
     const data = await res.json().catch(() => null);
     const latency = Date.now() - start;
 
@@ -156,7 +156,7 @@ async function checkVotingHealth() {
           ? `Balsavimo sistema AKTYVI • Atsakas: ${data.latencyMs || latency} ms (Nestringa)`
           : `Balsavimo sistema SUSTABDYTA nustatymuose • Atsakas: ${data.latencyMs || latency} ms`;
       }
-      logToConsole(`✔ Firestore atsakas: ${data.latencyMs || latency} ms. Viso registruota balsų: ${data.totalVotesRecorded}.`, "success");
+      logToConsole(`✔ Serverio atsakas: ${data.latencyMs || latency} ms. Viso registruota balsų: ${data.totalVotesRecorded}.`, "success");
     } else {
       if (healthDotElement) healthDotElement.style.background = "#f87171";
       if (healthTitleElement) healthTitleElement.textContent = "Ryšio klaida tikrinant būseną";
@@ -187,10 +187,10 @@ async function runSingleTestVote() {
   const start = Date.now();
 
   try {
-    const res = await FirebaseClient.request("test-vote", {
+    const res = await fetch("/api/admin/test-vote", {
       method: "POST",
-
-      body: { filmId, count: 1 }
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ filmId, count: 1 })
     });
     const data = await res.json().catch(() => null);
     const roundTrip = Date.now() - start;
@@ -201,7 +201,7 @@ async function runSingleTestVote() {
       updateRowBadge(filmId, data.currentVotes);
       updateFilmSelectionMeta();
     } else {
-
+      // Fallback direct to Firestore
       logToConsole(`⚠️ API atsakė klaida, bandoma tiesiogiai per Firestore...`, "warn");
       await db.collection("submissions").doc(filmId).update({
         votesCount: (film?.votesCount || 0) + 1
@@ -235,10 +235,10 @@ async function runStressTestVotes() {
   const overallStart = Date.now();
 
   try {
-    const res = await FirebaseClient.request("test-vote", {
+    const res = await fetch("/api/admin/test-vote", {
       method: "POST",
-
-      body: { filmId, count: 5 }
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ filmId, count: 5 })
     });
     const data = await res.json().catch(() => null);
     const duration = Date.now() - overallStart;
@@ -281,10 +281,10 @@ async function executeResetVotes() {
   logToConsole(`🔄 Atstatomas filmo „${filmTitle}“ balsų skaičius į ${targetVotes}...`);
 
   try {
-    const res = await FirebaseClient.request("reset-votes", {
+    const res = await fetch("/api/admin/reset-votes", {
       method: "POST",
-
-      body: { filmId, targetVotes }
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ filmId, targetVotes })
     });
     const data = await res.json().catch(() => null);
 
@@ -294,7 +294,7 @@ async function executeResetVotes() {
       updateRowBadge(filmId, targetVotes);
       updateFilmSelectionMeta();
     } else {
-
+      // Direct Firestore fallback
       await db.collection("submissions").doc(filmId).update({
         votesCount: targetVotes
       });

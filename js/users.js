@@ -109,10 +109,7 @@ export const ROLE_PERMISSION_DEFAULTS = {
   }
 };
 
-const TRUSTED_MANAGEMENT_EMAILS = [
-  "azuolynasfilmfestival@gmail.com",
-  "karina.brdar@gmail.com"
-];
+const TRUSTED_MANAGEMENT_EMAILS = AUTHORIZED_ADMIN_EMAILS;
 
 export function initUsers() {
   const searchInput = document.getElementById("filterUserSearch");
@@ -256,9 +253,9 @@ export async function evaluateUserManagementAccess(user) {
   return hasAccess;
 }
 
-export async function loadUsersFromFirestore() {
+export async function loadUsersFallback() {
   try {
-    const resp = await FirebaseClient.request("users");
+    const resp = await fetch("/api/admin/users");
     if (resp.ok) {
       const data = await resp.json();
       if (data && Array.isArray(data.users) && data.users.length) {
@@ -269,7 +266,6 @@ export async function loadUsersFromFirestore() {
           ...u,
         }));
 
-        allUsersList = uniqueUserProfiles(allUsersList);
         allUsersList.sort((a, b) => {
           if (a.role === "admin" && b.role !== "admin") return -1;
           if (b.role === "admin" && a.role !== "admin") return 1;
@@ -291,7 +287,7 @@ export function subscribeUsers() {
   const loadingElem = document.getElementById("usersLoadingState");
   if (loadingElem) loadingElem.classList.remove("d-none");
 
-  loadUsersFromFirestore();
+  loadUsersFallback();
 
   if (!db) {
     if (loadingElem) loadingElem.classList.add("d-none");
@@ -308,7 +304,7 @@ export function subscribeUsers() {
         if (loadingElem) loadingElem.classList.add("d-none");
 
         if (snapshot.empty) {
-          allUsersList = []; updateUserMetrics(); renderUsersTable(); return;
+          return;
         }
 
         allUsersList = [];
@@ -322,7 +318,6 @@ export function subscribeUsers() {
           });
         });
 
-        allUsersList = uniqueUserProfiles(allUsersList);
         allUsersList.sort((a, b) => {
           if (a.role === "admin" && b.role !== "admin") return -1;
           if (b.role === "admin" && a.role !== "admin") return 1;
@@ -337,13 +332,13 @@ export function subscribeUsers() {
       (err) => {
         if (loadingElem) loadingElem.classList.add("d-none");
         handleFirestoreError(err, OperationType.LIST, "users");
-        loadUsersFromFirestore();
+        loadUsersFallback();
       }
     );
   } catch (err) {
     if (loadingElem) loadingElem.classList.add("d-none");
     handleFirestoreError(err, OperationType.LIST, "users");
-    loadUsersFromFirestore();
+    loadUsersFallback();
   }
 }
 
@@ -520,14 +515,14 @@ function attachTableEventHandlers() {
       input.disabled = true;
 
       try {
-        const resp = await FirebaseClient.request("users.status", {
+        const resp = await fetch("/api/admin/users/status", {
           method: "POST",
-
-          body: {
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
             email: userEmail,
             status: newStatus,
             adminEmail: (auth && auth.currentUser) ? auth.currentUser.email : PRIMARY_SUPERADMIN_EMAIL
-          }
+          })
         });
 
         if (resp.ok) {
@@ -569,19 +564,22 @@ function attachTableEventHandlers() {
 
   // Resend email verification
   document.querySelectorAll(".btn-resend-verify").forEach((btn) => {
-    btn.disabled = (btn.dataset.userEmail || "").toLowerCase() !== (auth.currentUser?.email || "").toLowerCase();
-    if (btn.disabled) btn.title = "Patvirtinimą siunčia prisijungęs paskyros savininkas.";
     btn.onclick = async () => {
       const email = btn.dataset.userEmail;
       if (!email) return;
       btn.disabled = true;
       try {
         showToast("Siunčiamas el. pašto patvirtinimo laiškas...");
-        if (!auth.currentUser || auth.currentUser.email.toLowerCase() !== email.toLowerCase()) {
-          throw new Error("El. paštą gali patvirtinti pats paskyros savininkas prisijungęs.");
+        const res = await fetch("/api/admin/users/resend-verification", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email })
+        });
+        if (res.ok) {
+          showToast(`Patvirtinimo laiškas sėkmingai išsiųstas į ${email}!`, "success");
+        } else {
+          showToast("Nepavyko išsiųsti patvirtinimo laiško", "error");
         }
-        await auth.currentUser.sendEmailVerification();
-        showToast("Firebase Auth patvirtinimo laiškas išsiųstas.", "success");
       } catch (err) {
         showToast("Ryšio klaida", "error");
       } finally {
@@ -633,14 +631,14 @@ function promptDeleteUser(userId, email) {
 
 async function executeDeleteUser(userId, email) {
   try {
-    const resp = await FirebaseClient.request("users.delete", {
+    const resp = await fetch("/api/admin/users/delete", {
       method: "POST",
-
-      body: {
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
         userId,
         email,
         adminEmail: (auth && auth.currentUser) ? auth.currentUser.email : PRIMARY_SUPERADMIN_EMAIL
-      }
+      })
     });
     if (resp.ok) {
       allUsersList = allUsersList.filter((u) => u.id !== userId && (!email || (u.email || "").toLowerCase() !== email.toLowerCase()));
@@ -704,10 +702,10 @@ function initUserEditModal() {
 
         const permissions = extractPermissionsFromCheckboxes();
 
-        const res = await FirebaseClient.request("users.update-profile", {
+        const res = await fetch("/api/admin/users/update-profile", {
           method: "POST",
-
-          body: {
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
             uid,
             oldEmail,
             email,
@@ -718,14 +716,14 @@ function initUserEditModal() {
             permissions,
             emailVerified,
             adminEmail: (auth && auth.currentUser) ? auth.currentUser.email : PRIMARY_SUPERADMIN_EMAIL
-          }
+          })
         });
 
         if (res.ok) {
           const data = await res.json();
           showToast("Vartotojo profilis ir teisės sėkmingai atnaujinti!", "success");
           hideModal();
-          await loadUsersFromFirestore();
+          await loadUsersFallback();
         } else {
           const err = await res.json();
           showToast(err.error || "Nepavyko išsaugoti profilio", "error");
@@ -875,13 +873,13 @@ function initPasswordResetModal() {
       btnSendEmail.textContent = "Siunčiama...";
 
       try {
-        const res = await FirebaseClient.request("users.send-password-reset", {
+        const res = await fetch("/api/admin/users/send-password-reset", {
           method: "POST",
-
-          body: {
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
             email,
             adminEmail: (auth && auth.currentUser) ? auth.currentUser.email : PRIMARY_SUPERADMIN_EMAIL
-          }
+          })
         });
         if (res.ok) {
           const data = await res.json();
@@ -907,7 +905,44 @@ function initPasswordResetModal() {
     };
   }
 
+  if (btnGenerateDirect) {
+    btnGenerateDirect.onclick = async () => {
+      const email = document.getElementById("pwdResetTargetEmail")?.value;
+      if (!email) return;
 
+      btnGenerateDirect.disabled = true;
+      btnGenerateDirect.textContent = "Generuojama...";
+
+      try {
+        const res = await fetch("/api/admin/users/generate-reset-link", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            email,
+            adminEmail: (auth && auth.currentUser) ? auth.currentUser.email : PRIMARY_SUPERADMIN_EMAIL
+          })
+        });
+        if (res.ok) {
+          const data = await res.json();
+          const container = document.getElementById("pwdResetDirectLinkContainer");
+          const input = document.getElementById("pwdResetDirectLinkInput");
+          if (container && input) {
+            input.value = data.resetUrl;
+            container.classList.remove("d-none");
+          }
+          showToast("Vienkartinė slaptažodžio keitimo nuoroda sėkmingai sugeneruota!", "success");
+        } else {
+          const err = await res.json();
+          showToast(err.error || "Klaida generuojant nuorodą", "error");
+        }
+      } catch (err) {
+        showToast("Ryšio klaida", "error");
+      } finally {
+        btnGenerateDirect.disabled = false;
+        btnGenerateDirect.textContent = "Generuoti Vienkartinį Linką Tiesiogiai";
+      }
+    };
+  }
 
   if (btnCopyResetLink) {
     btnCopyResetLink.onclick = () => {
@@ -973,14 +1008,4 @@ function escapeHtml(str) {
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#039;");
-}
-
-function uniqueUserProfiles(users) {
-  const profiles = new Map();
-  for (const user of users) {
-    const key = (user.email || user.id).toLowerCase();
-    const prior = profiles.get(key);
-    if (!prior || (user.uid === user.id && user.id !== key.replace(/[^a-zA-Z0-9_-]/g, "_"))) profiles.set(key, user);
-  }
-  return [...profiles.values()];
 }

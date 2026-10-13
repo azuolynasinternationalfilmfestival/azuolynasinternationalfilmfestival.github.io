@@ -16,9 +16,10 @@ export function initSettings() {
     sendInviteBtn.addEventListener("click", handleSendAdminInvite);
   }
 
-  // Bind email sender and email queue testing controls
+  // Bind email sender and SMTP testing controls
   bindEmailSenderControls();
 
+  // Bind Instant Global Control Tumblers (tied to single settings/festival Firestore doc)
   const maintenanceSwitch = document.getElementById("cfgMaintenanceMode");
   if (maintenanceSwitch) {
     maintenanceSwitch.addEventListener("change", async (e) => {
@@ -133,18 +134,26 @@ async function updateGlobalTumbler(patchData, successMsg, toggleInput) {
       updatedAt: new Date().toISOString()
     };
 
-    const res = await FirebaseClient.request("settings", {
+    // 1. Primary: Save to local server backend API (always reliable and instant)
+    const res = await fetch("/api/admin/settings", {
       method: "POST",
-
-      body: payload
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
     });
 
     if (!res.ok) {
       const errData = await res.json().catch(() => ({}));
-      throw new Error(errData.error || "Nepavyko išsaugoti nustatymo");
+      throw new Error(errData.error || "Nepavyko išsaugoti serverio nustatymo");
     }
 
-
+    // 2. Secondary: Safely mirror to Firestore if db is available
+    if (db && typeof db.collection === "function") {
+      try {
+        await db.collection("settings").doc("festival").set(payload, { merge: true });
+      } catch (fsErr) {
+        console.warn("Firestore settings tumbler direct sync notice:", fsErr.message);
+      }
+    }
 
     showToast(successMsg, "success");
     window.dispatchEvent(new CustomEvent("refresh-notifications"));
@@ -187,7 +196,7 @@ async function handleSendAdminInvite() {
   try {
     await sendAdminInviteLink(email);
     input.value = "";
-    showToast(`Prieigos laiškas įrašytas į siuntimo eilę: ${email}!`, "success");
+    showToast(`Prieigos nuoroda su žetonu sėkmingai išsiųsta į ${email}!`, "success");
   } catch (err) {
     showToast("Klaida: " + err.message, "error");
   } finally {
@@ -305,12 +314,19 @@ function applySettingsToForm(d) {
   const enRecPhElem = document.getElementById("cfgEnRecordingPh");
   if (enRecPhElem) enRecPhElem.value = en.recordingPlaceholder || "The official festival recording and live stream replay will be published here on April 23rd, 2027.";
 
+  if (d.smtp && typeof d.smtp === "object") {
+    if (document.getElementById("cfgSmtpHost")) document.getElementById("cfgSmtpHost").value = d.smtp.host || "smtp.gmail.com";
+    if (document.getElementById("cfgSmtpPort")) document.getElementById("cfgSmtpPort").value = d.smtp.port || "587";
+    if (document.getElementById("cfgSmtpUser")) document.getElementById("cfgSmtpUser").value = d.smtp.user || "azuolynasfilmfestival@gmail.com";
+    if (document.getElementById("cfgEmailFrom")) document.getElementById("cfgEmailFrom").value = d.smtp.from || '"Ąžuolynas Film Fest" <azuolynasfilmfestival@gmail.com>';
+  }
 
+  syncArchiveState(d);
 }
 
-export async function loadSettingsFromFirestore() {
+export async function loadSettingsFromApi() {
   try {
-    const res = await FirebaseClient.request("settings");
+    const res = await fetch("/api/admin/settings");
     if (res.ok) {
       const data = await res.json();
       if (data && data.settings) {
@@ -318,7 +334,7 @@ export async function loadSettingsFromFirestore() {
       }
     }
   } catch (err) {
-    console.warn("Could not load settings from Firestore:", err);
+    console.warn("Could not load settings from backend API:", err);
   }
 }
 
@@ -327,7 +343,8 @@ export function subscribeSettings() {
     unsubscribeSettings();
   }
 
-  loadSettingsFromFirestore();
+  // Always load from server backend first so form is immediately filled
+  loadSettingsFromApi();
 
   if (db && typeof db.collection === "function") {
     try {
@@ -423,21 +440,24 @@ async function saveSettings() {
   try {
     const callerEmail = sessionStorage.getItem("admin_user_email") || "azuolynasfilmfestival@gmail.com";
 
-    const res = await FirebaseClient.request("settings", {
+    // 1. Primary: Save to local server backend API (always works reliably)
+    const res = await fetch("/api/admin/settings", {
       method: "POST",
-
-      body: {
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
         ...updated,
         adminEmail: callerEmail
-      }
+      })
     });
 
-    if (!res.ok) {
-      const error = await res.json().catch(() => ({}));
-      throw new Error(error.error || "Nepavyko išsaugoti nustatymų");
+    // 2. Secondary: Also sync to Firestore if db is available
+    if (db && typeof db.collection === "function") {
+      try {
+        await db.collection("settings").doc("festival").set(updated, { merge: true });
+      } catch (fsErr) {
+        console.warn("Firestore settings direct sync notice:", fsErr.message);
+      }
     }
-
-
 
     if (res.ok) {
       showToast("Nustatymai sėkmingai išsaugoti!", "success");
@@ -454,7 +474,7 @@ async function saveSettings() {
 }
 
 // ---------------------------------------------------------------------------
-// EMAIL SENDER & FIREBASE MAIL QUEUE CLIENT CONTROLS
+// EMAIL SENDER & SMTP SERVICE CLIENT CONTROLS
 // ---------------------------------------------------------------------------
 
 export function bindEmailSenderControls() {
@@ -471,6 +491,11 @@ export function bindEmailSenderControls() {
   const btnSendDirect = document.getElementById("btnSendDirectEmail");
   if (btnSendDirect) {
     btnSendDirect.addEventListener("click", handleSendDirectEmail);
+  }
+
+  const btnSaveSmtp = document.getElementById("btnSaveSmtpConfig");
+  if (btnSaveSmtp) {
+    btnSaveSmtp.addEventListener("click", handleSaveSmtpConfig);
   }
 
   const tplSelect = document.getElementById("directEmailTemplate");
@@ -491,10 +516,38 @@ export function bindEmailSenderControls() {
 }
 
 async function refreshEmailStatusDisplay() {
-  const badge = document.getElementById("emailStatusBadge");
-  if (badge) {
-    badge.className = "status-pill status-accepted";
-    badge.textContent = "Firebase Trigger Email";
+  const badge = document.getElementById("smtpStatusBadge");
+  try {
+    const res = await fetch("/api/admin/email-status");
+    if (res.ok) {
+      const data = await res.json();
+      if (badge) {
+        if (data.smtpConnected) {
+          badge.className = "status-pill status-accepted";
+          badge.textContent = `Aktyvus (${data.smtpHost}:${data.smtpPort})`;
+        } else if (data.smtpConfigured) {
+          badge.className = "status-pill status-accepted";
+          badge.textContent = `Nustatyta (${data.smtpUser})`;
+        } else {
+          badge.className = "status-pill status-accepted";
+          badge.textContent = "Paruošta (Firestore eilė & Gmail)";
+        }
+      }
+      if (data.smtpHost && document.getElementById("cfgSmtpHost") && !document.getElementById("cfgSmtpHost").value) {
+        document.getElementById("cfgSmtpHost").value = data.smtpHost;
+      }
+      if (data.smtpPort && document.getElementById("cfgSmtpPort") && !document.getElementById("cfgSmtpPort").value) {
+        document.getElementById("cfgSmtpPort").value = data.smtpPort;
+      }
+      if (data.smtpUser && document.getElementById("cfgSmtpUser") && !document.getElementById("cfgSmtpUser").value) {
+        document.getElementById("cfgSmtpUser").value = data.smtpUser;
+      }
+      if (data.emailFrom && document.getElementById("cfgEmailFrom") && !document.getElementById("cfgEmailFrom").value) {
+        document.getElementById("cfgEmailFrom").value = data.emailFrom;
+      }
+    }
+  } catch (err) {
+    console.warn("Could not refresh email status:", err);
   }
 }
 
@@ -514,10 +567,10 @@ async function handleSendTestEmail() {
 
   try {
     const callerEmail = sessionStorage.getItem("admin_user_email") || PRIMARY_SUPERADMIN_EMAIL;
-    const res = await FirebaseClient.request("email.test", {
+    const res = await fetch("/api/admin/email/test", {
       method: "POST",
-
-      body: { testEmail: targetEmail, adminEmail: callerEmail }
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ testEmail: targetEmail, adminEmail: callerEmail })
     });
     const data = await res.json();
     if (res.ok && data.success) {
@@ -569,22 +622,22 @@ async function handleSendDirectEmail() {
 
   try {
     const callerEmail = sessionStorage.getItem("admin_user_email") || PRIMARY_SUPERADMIN_EMAIL;
-    const res = await FirebaseClient.request("send-email", {
+    const res = await fetch("/api/admin/send-email", {
       method: "POST",
-
-      body: {
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
         to,
         template: template !== "custom" ? template : undefined,
         lang,
         subject,
-        html: template === "custom" ? `<div style="font-family:sans-serif; color:#F8FAF7; background:#051512; padding:24px; border-radius:8px;"><p>${escapeHtml(body).replace(/\n/g, '<br>')}</p></div>` : undefined,
+        html: template === "custom" ? `<div style="font-family:sans-serif; color:#F8FAF7; background:#051512; padding:24px; border-radius:8px;"><p>${body.replace(/\n/g, '<br>')}</p></div>` : undefined,
         text: body || subject,
         data: {
           name: to.split("@")[0],
           customMessage: body
         },
         adminEmail: callerEmail
-      }
+      })
     });
     const data = await res.json();
     if (res.ok && data.success) {
@@ -607,5 +660,40 @@ async function handleSendDirectEmail() {
   }
 }
 
+async function handleSaveSmtpConfig() {
+  const host = (document.getElementById("cfgSmtpHost")?.value || "").trim();
+  const port = parseInt(document.getElementById("cfgSmtpPort")?.value || "587", 10);
+  const user = (document.getElementById("cfgSmtpUser")?.value || "").trim();
+  const pass = (document.getElementById("cfgSmtpPass")?.value || "").trim();
+  const from = (document.getElementById("cfgEmailFrom")?.value || "").trim();
 
-function escapeHtml(text) { return String(text).replace(/[&<>"']/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", "\"":"&quot;", "'":"&#39;" }[c])); }
+  const btn = document.getElementById("btnSaveSmtpConfig");
+  if (btn) btn.disabled = true;
+
+  try {
+    const callerEmail = sessionStorage.getItem("admin_user_email") || PRIMARY_SUPERADMIN_EMAIL;
+    const res = await fetch("/api/admin/email/config", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        host,
+        port,
+        user,
+        pass,
+        from,
+        adminEmail: callerEmail
+      })
+    });
+    const data = await res.json();
+    if (res.ok && data.success) {
+      showToast("SMTP nustatymai sėkmingai išsaugoti!", "success");
+      refreshEmailStatusDisplay();
+    } else {
+      showToast(data.error || "Nepavyko išsaugoti SMTP nustatymų", "error");
+    }
+  } catch (err) {
+    showToast("Ryšio klaida saugant SMTP: " + err.message, "error");
+  } finally {
+    if (btn) btn.disabled = false;
+  }
+}

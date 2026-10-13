@@ -55,8 +55,8 @@ export function initVotingAnalytics() {
 export async function loadVotingAnalytics() {
   try {
     const [evalsRes, analyticsRes] = await Promise.all([
-      FirebaseClient.request("judge-evaluations"),
-      FirebaseClient.request("voting-analytics")
+      fetch("/api/admin/judge-evaluations"),
+      fetch("/api/admin/voting-analytics")
     ]);
 
     if (evalsRes.ok) {
@@ -290,17 +290,17 @@ async function handleSaveJudgeEvaluation() {
   const notes = (document.getElementById("judgeEvalNotes")?.value || "").trim();
 
   try {
-    const res = await FirebaseClient.request("judge-evaluation", {
+    const res = await fetch("/api/admin/judge-evaluation", {
       method: "POST",
-
-      body: {
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
         filmId: currentJudgeFilm.id,
         filmTitle: currentJudgeFilm.title,
         judgeEmail,
         judgeName,
         scores,
         notes
-      }
+      })
     });
 
     const data = await res.json();
@@ -320,15 +320,15 @@ async function handleSaveJudgeEvaluation() {
 async function declareWinnerAction(filmId, awardTitle) {
   const currentUserEmail = sessionStorage.getItem("admin_user_email") || "azuolynasfilmfestival@gmail.com";
   try {
-    const res = await FirebaseClient.request("declare-winner", {
+    const res = await fetch("/api/admin/declare-winner", {
       method: "POST",
-
-      body: {
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
         filmId,
         awardTitle,
         year: "2026",
         adminEmail: currentUserEmail
-      }
+      })
     });
 
     if (res.ok) {

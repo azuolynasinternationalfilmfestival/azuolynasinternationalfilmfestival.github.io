@@ -144,4 +144,3 @@ if (typeof window !== "undefined") {
   window.AUTHORIZED_ADMIN_EMAILS = AUTHORIZED_ADMIN_EMAILS;
   window.DEFAULT_CONTENT = DEFAULT_CONTENT;
 }
-if (window.FirebaseClient) window.FirebaseClient.configure({ db, auth });

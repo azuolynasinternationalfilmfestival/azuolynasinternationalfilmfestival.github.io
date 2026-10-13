@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="lt">
 <head>
-  <script src="js/firebase-client.js"></script>
+  <script src="js/server-api.js"></script>
   <meta charset="UTF-8">
   <link rel="preconnect" href="https://firebasestorage.googleapis.com">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -230,10 +230,10 @@
   <script src="config.js"></script>
   <script src="js/burger-menu.js"></script>
   <script type="module">
-
+    // CMS Dynamic Sync: load latest 2027 data from editions endpoint / Firestore
     async function syncEditionData() {
       try {
-        const res = await FirebaseClient.request("editions");
+        const res = await fetch("/api/editions");
         if (res.ok) {
           const data = await res.json();
           const edition2027 = (data.editions || []).find(e => String(e.year) === "2027" || e.id === "2027");
