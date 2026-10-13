@@ -144,7 +144,7 @@ function renderLivePreviewIframe() {
   }
 
   const inputEl = document.getElementById("adminStreamIframeUrlInput");
-  if (inputEl && document.activeElement !== inputEl) {
+  if (inputEl && document.activeElement !== inputEl && inputEl.dataset.edited !== "true") {
     inputEl.value = url;
   }
 
@@ -160,8 +160,11 @@ function initStreamIframeUrlControls() {
   const btnResetIframe = document.getElementById("btnResetStreamIframeUrl");
   const inputIframe = document.getElementById("adminStreamIframeUrlInput");
 
-  if (btnSaveIframe && inputIframe) {
-    btnSaveIframe.addEventListener("click", async () => {
+  inputIframe?.addEventListener("input", () => { inputIframe.dataset.edited = "true"; });
+  const form = document.getElementById("streamIframeUrlForm");
+  if (form && btnSaveIframe && inputIframe) {
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
       const newUrl = inputIframe.value.trim();
       if (!newUrl) {
         showToast("Įveskite galiojančią iframe nuorodą", "error");
@@ -178,7 +181,8 @@ function initStreamIframeUrlControls() {
         const data = await res.json();
         if (res.ok && data.success) {
           showToast("Iframe nuoroda sėkmingai išsaugota ir atnaujinta!", "success");
-          if (streamConfig) streamConfig.iframeUrl = newUrl;
+          streamConfig = { ...streamConfig, iframeUrl: data.iframeUrl };
+          inputIframe.dataset.edited = "false";
           renderLivePreviewIframe();
         } else {
           showToast("Klaida saugant iframe nuorodą: " + (data.error || "Firebase klaida"), "error");
@@ -194,6 +198,7 @@ function initStreamIframeUrlControls() {
   if (btnResetIframe && inputIframe) {
     btnResetIframe.addEventListener("click", () => {
       inputIframe.value = "https://customer-auu36r7owuzogvfb.cloudflarestream.com/937d1a8b2c545a980c9fabc8502d8af4/iframe";
+      inputIframe.dataset.edited = "true";
     });
   }
 }

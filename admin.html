@@ -607,6 +607,20 @@
             </div>
           </div>
 
+          <form id="streamIframeUrlForm" class="content-card" style="margin-bottom:24px;">
+            <h3 class="content-card-title">Transliacijos grotuvo nuoroda</h3>
+            <div class="input-cell">
+              <label for="adminStreamIframeUrlInput">Iframe URL</label>
+              <input type="url" id="adminStreamIframeUrlInput" class="field" placeholder="https://…/iframe" required aria-describedby="streamIframeUrlHelp">
+              <p id="streamIframeUrlHelp" class="content-card-sub">Įklijuokite HTTPS grotuvo nuorodą. Išsaugojus ji automatiškai atsinaujins tiesioginės transliacijos puslapyje.</p>
+            </div>
+            <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:16px;">
+              <button type="submit" id="btnSaveStreamIframeUrl" class="btn-solid btn-sm">Išsaugoti nuorodą</button>
+              <button type="button" id="btnResetStreamIframeUrl" class="btn-outline btn-sm">Numatytoji nuoroda</button>
+            </div>
+            <p class="content-card-sub" style="margin-top:12px; overflow-wrap:anywhere;">Išsaugota: <span id="lblCurrentIframeUrlDisplay">—</span></p>
+          </form>
+
           <!-- Cloudflare Stream & OBS Control -->
           <div class="content-card" style="margin-bottom:24px; border:1px solid rgba(111,165,138,0.35);">
             <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:16px; border-bottom:1px solid var(--border-color); padding-bottom:12px;">
