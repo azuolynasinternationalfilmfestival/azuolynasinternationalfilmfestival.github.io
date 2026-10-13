@@ -26,8 +26,15 @@
     return { ...data, id };
   }
   function mail(to, subject, html, text) {
-    if (!to || !subject || !html) throw new Error('Email recipient, subject and content are required.');
-    return { from: organizer, replyTo: organizer, to: Array.isArray(to) ? to : [to], message: { subject, html, text: text || subject }, createdAt: timestamp() };
+    const recipients = Array.isArray(to) ? to : [to];
+    if (!recipients.length || recipients.some(recipient => typeof recipient !== 'string' || !recipient.trim())) {
+      throw new Error('Email recipients must be non-empty strings.');
+    }
+    if (typeof subject !== 'string' || !subject.trim() || typeof html !== 'string' || !html.trim() ||
+        (text !== undefined && typeof text !== 'string')) {
+      throw new Error('Email subject and content must be non-empty strings.');
+    }
+    return { from: organizer, replyTo: organizer, to: recipients.map(recipient => recipient.trim()), message: { subject, html, text: text || subject }, createdAt: timestamp() };
   }
   async function queueEmail({ to, subject, html, text, template, lang = 'lt', data = {} }) {
     if (template) {

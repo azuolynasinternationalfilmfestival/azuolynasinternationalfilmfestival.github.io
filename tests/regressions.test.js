@@ -63,6 +63,150 @@ const film = { name:'Test Participant', email:'applicant@example.test', filmTitl
   age:15, videoUrl:'https://example.test/film.mp4', deviceModel:'Phone', submittedAt:{sentinel:'timestamp'},
   submissionLang:'en', status:'submitted', inVoting:false, votesCount:0, attendanceType:'in_person' };
 
+function assertMailSchema(mail) {
+  assert.deepEqual(Object.keys(mail).sort(), ['createdAt', 'from', 'message', 'replyTo', 'to']);
+  assert.ok(Array.isArray(mail.to) && mail.to.length > 0);
+  assert.ok(mail.to.every(recipient => typeof recipient === 'string' && recipient.trim()));
+  assert.equal(mail.from, 'azuolynasfilmfestival@gmail.com');
+  assert.equal(mail.replyTo, 'azuolynasfilmfestival@gmail.com');
+  for (const key of ['subject', 'html', 'text']) {
+    assert.equal(typeof mail.message[key], 'string');
+    assert.ok(mail.message[key].trim());
+  }
+  assert.equal(mail.createdAt.sentinel, 'timestamp');
+}
+
+// Run the actual inline form handlers with synthetic DOM and Storage events.
+function formFixture(lang, attendanceType = 'in_person', reject, storageFailure = false) {
+  const f = fixture({}, reject);
+  const elements = new Map();
+  function element(id) {
+    if (!elements.has(id)) {
+      const classes = new Set(id === 'formSuccessDisplay' ? ['d-none'] : []);
+      elements.set(id, { value: '', style: {}, disabled: false, textContent: '', handlers: {},
+        classList: { add: value => classes.add(value), remove: value => classes.delete(value), contains: value => classes.has(value) },
+        addEventListener(event, handler) { this.handlers[event] = handler; }, reset() { this.wasReset = true; }
+      });
+    }
+    return elements.get(id);
+  }
+  const fields = { participantName: film.name, participantEmail: film.email, participantAge: '15',
+    participantCategory: film.category, countryCity: 'Test City', institution: 'Test School',
+    filmTitle: film.filmTitle, deviceModel: film.deviceModel, synopsis: 'Test Synopsis' };
+  Object.entries(fields).forEach(([id, value]) => { element(id).value = value; });
+  const uploads = [], toasts = [], errors = [];
+  const document = { getElementById: element, querySelector: () => ({ value: attendanceType }),
+    createElement: () => ({ duration: 120 }) };
+  Object.assign(f.context, { document, firestoreDb: f.database, showToast: (message, type) => toasts.push({message, type}),
+    console: { ...console, error: error => errors.push(error) },
+    URL: { createObjectURL: () => 'blob:test', revokeObjectURL() {} },
+    storage: { ref: path => ({ put: () => {
+      if (storageFailure) throw new Error('Storage unavailable');
+      const task = { snapshot: { ref: { getDownloadURL: async () => film.videoUrl } },
+        on: (event, progress, error, complete) => uploads.push({path, progress, error, complete}) };
+      return task;
+    } }) }
+  });
+  const html = fs.readFileSync(new URL(`../${lang}/index.html`, import.meta.url), 'utf8');
+  const start = html.indexOf('    let verifiedVideoFile = null;');
+  assert.ok(start > 0, 'Form handler must be present');
+  vm.runInContext(html.slice(start, html.indexOf('</script>', start)), f.context);
+  vm.runInContext("verifiedVideoFile = { name: 'test.mp4' }; videoDurationSeconds = 120;", f.context);
+  const submit = () => element('submissionForm').handlers.submit({ preventDefault() {} });
+  return { ...f, element, submit, uploads, toasts, errors };
+}
+
+for (const lang of ['lt', 'en']) {
+  for (const attendance of ['in_person', 'remote']) {
+    test(`${lang} ${attendance} form uploads and atomically queues both notifications`, async () => {
+      const f = formFixture(lang, attendance);
+      await f.submit();
+      assert.equal(f.element('submitBtn').disabled, true);
+      await f.submit();
+      assert.equal(f.uploads.length, 1, 'A second submit during upload must be ignored');
+      const upload = f.uploads[0];
+      upload.progress({bytesTransferred: 10, totalBytes: 10});
+      await upload.complete();
+      const mails = [...f.store].filter(([path]) => path.startsWith('mail/'));
+      assert.equal(mails.length, 2);
+      mails.forEach(([, mail]) => assertMailSchema(mail));
+      assert.equal(mails[0][1].to[0], film.email);
+      assert.equal(mails[1][1].to[0], 'azuolynasfilmfestival@gmail.com');
+      const saved = [...f.store].find(([path]) => path.startsWith('submissions/'))[1];
+      assert.equal(saved.submissionLang, lang);
+      assert.equal(saved.storagePath, upload.path);
+      assert.equal(saved.videoUrl, film.videoUrl);
+      assert.match(mails[0][1].message.subject, lang === 'en' ? /Submission Successfully Received|Live Stream Access/ : /paraiška sėkmingai gauta|transliacijos prieiga/);
+      const viewers = [...f.store].filter(([path]) => path.startsWith('live_viewers/'));
+      assert.equal(viewers.length, attendance === 'remote' ? 1 : 0);
+      if (attendance === 'remote') assert.ok(mails[0][1].message.html.includes(saved.liveToken));
+      assert.equal(f.errors.length, 0);
+      assert.equal(f.element('submissionForm').classList.contains('d-none'), true);
+      assert.equal(f.element('formSuccessDisplay').classList.contains('d-none'), false);
+      assert.equal(f.element('progressContainer').classList.contains('active'), false);
+      f.context.resetFormView();
+      assert.equal(f.element('submissionForm').wasReset, true);
+      assert.equal(f.element('submissionForm').classList.contains('d-none'), false);
+      assert.equal(f.element('formSuccessDisplay').classList.contains('d-none'), true);
+      await f.submit();
+      assert.equal(f.uploads.length, 1, 'Reset must clear the previously verified video');
+    });
+  }
+  test(`${lang} form shows mail permission failures without reporting success`, async () => {
+    const f = formFixture(lang, 'remote', (_, path) => path.endsWith('_organizer'));
+    await f.submit();
+    await f.uploads[0].complete();
+    assert.equal(f.store.size, 0);
+    assert.equal(f.toasts.at(-1).type, 'error');
+    assert.equal(f.element('formSuccessDisplay').classList.contains('d-none'), true);
+    assert.equal(f.element('submitBtn').disabled, false);
+    assert.equal(f.element('progressContainer').classList.contains('active'), false);
+  });
+  test(`${lang} form recovers from asynchronous upload failure`, async () => {
+    const f = formFixture(lang);
+    await f.submit();
+    f.uploads[0].error(new Error('Upload denied'));
+    assert.equal(f.store.size, 0);
+    assert.equal(f.toasts.at(-1).type, 'error');
+    assert.equal(f.element('submitBtn').disabled, false);
+    assert.equal(f.element('progressContainer').classList.contains('active'), false);
+  });
+  test(`${lang} form recovers from Storage setup failure`, async () => {
+    const f = formFixture(lang, 'in_person', undefined, true);
+    await f.submit();
+    assert.equal(f.store.size, 0);
+    assert.equal(f.toasts.at(-1).type, 'error');
+    assert.equal(f.element('submitBtn').disabled, false);
+    assert.equal(f.element('progressContainer').classList.contains('active'), false);
+  });
+  test(`${lang} form rejects fields that Firestore would reject before uploading`, async () => {
+    for (const [id, value] of [['participantName', '   '], ['participantName', 'x'.repeat(151)],
+      ['participantEmail', 'x'.repeat(151)], ['filmTitle', 'x'.repeat(201)]]) {
+      const f = formFixture(lang);
+      f.element(id).value = value;
+      await f.submit();
+      assert.equal(f.uploads.length, 0);
+      assert.equal(f.store.size, 0);
+      assert.equal(f.toasts.at(-1).type, 'error');
+      assert.equal(f.element('submitBtn').disabled, false);
+    }
+  });
+}
+
+test('email queue rejects invalid field types and empty recipient arrays before writing', async () => {
+  const valid = { to: film.email, subject: 'Subject', html: '<p>Message</p>' };
+  for (const invalid of [{to: []}, {to: [film.email, null]}, {to: ' '}, {subject: {}}, {subject: ' '}, {html: []}, {text: 42}]) {
+    const f = fixture();
+    await assert.rejects(f.client.queueEmail({...valid, ...invalid}));
+    assert.equal(f.store.size, 0);
+  }
+  const f = fixture();
+  await f.client.queueEmail({...valid, to: [' applicant@example.test ', 'organizer@example.test']});
+  const mail = [...f.store.values()][0];
+  assertMailSchema(mail);
+  assert.equal(mail.to[0], film.email);
+});
+
 test('submission commits a film and exactly two Trigger Email documents', async () => {
   const f = fixture(); const result = await f.client.submitFilm(f.database, film);
   assert.equal(f.store.get(`submissions/${result.id}`).filmTitle, film.filmTitle);
