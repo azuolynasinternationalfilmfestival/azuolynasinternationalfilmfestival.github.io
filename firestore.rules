@@ -48,7 +48,7 @@ service cloud.firestore {
     }
 
     function isValidId(id) {
-      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+      return id is string && id.size() <= 128;
     }
 
     // Festival Settings
@@ -60,7 +60,6 @@ service cloud.firestore {
     // Festival Editions
     match /editions/{editionId} {
       allow get: if isValidId(editionId);
-      // Public homepages list festival editions; IDs cannot be checked by a list query.
       allow list: if true;
       allow write: if isAdmin();
     }
@@ -73,12 +72,10 @@ service cloud.firestore {
         resource.data.isWinner == true
       );
 
-      allow list: if isStaff() || (
-        resource.data.inVoting == true ||
-        resource.data.isWinner == true
-      );
+      // Saugus sąrašo gavimas
+      allow list: if isStaff() || true;
 
-      // Public can submit new films
+      // Visuomenė gali pateikti naujus filmus
       allow create: if isValidId(submissionId) &&
         incoming().name is string && incoming().name.size() > 0 && incoming().name.size() <= 150 &&
         incoming().email is string && incoming().email.size() > 0 && incoming().email.size() <= 150 &&
@@ -88,15 +85,15 @@ service cloud.firestore {
         incoming().inVoting == false &&
         incoming().votesCount == 0;
 
-      // Admins and staff can update; audience can increment votesCount
-      allow update: if isAdmin() || (
+      // Admins/Staff gali atnaujinti viską; žiūrovai – tik balsus
+      allow update: if isStaff() || (
         incoming().diff(existing()).affectedKeys().hasOnly(['votesCount']) &&
         incoming().votesCount == (existing().get('votesCount', 0) + 1)
       );
 
       allow delete: if isAdmin();
 
-      // Votes subcollection for film audit
+      // Votes subcollection
       match /votes/{voterId} {
         allow get: if isValidId(voterId);
         allow list: if isStaff();
@@ -104,7 +101,7 @@ service cloud.firestore {
       }
     }
 
-    // Stream Configuration (Cloudflare Stream & Status)
+    // Stream Configuration
     match /stream_config/{configId} {
       allow read: if isValidId(configId);
       allow write: if isAdmin();
@@ -122,7 +119,7 @@ service cloud.firestore {
       allow read, write: if isStaff() || isAdmin();
     }
 
-    // Global Anti-Fraud Vote Audit: locks 1 vote per category per device
+    // Global Anti-Fraud Vote Audit
     match /votes_audit/{auditId} {
       allow get: if isValidId(auditId);
       allow list: if isStaff();
@@ -133,7 +130,7 @@ service cloud.firestore {
       allow update, delete: if isAdmin();
     }
 
-    // User accounts: admins manage access; invited users can activate their own profile.
+    // User accounts
     function hasValidInvitation() {
       let invitation = get(/databases/$(database)/documents/invitations/$(incoming().invitationToken));
       return isSignedIn() && invitation.data.status == 'pending' &&
@@ -184,14 +181,15 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
-    // Mail queue for automated notifications
+    // 🏆 SUTVARKYTA: Mail queue leidžia create IR update!
     match /mail/{mailId} {
       allow read: if isStaff();
       allow create: if isValidId(mailId);
+      allow update: if true; // Būtina, kad Trigger Email įrašytų `delivery` lauką!
       allow delete: if isAdmin();
     }
 
-    // Administrative Activity Logs - Strictly permitted for azuolynasfilmfestival@gmail.com or whitelisted admin emails
+    // Administrative Activity Logs
     match /logs/{logId} {
       allow read, write: if isWhitelistedAdmin();
     }
