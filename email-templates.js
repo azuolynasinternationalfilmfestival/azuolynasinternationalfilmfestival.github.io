@@ -189,7 +189,7 @@ const emailTexts = {
       sub: "Ąžuolynas Film Fest | Jūsų darbas pateko į PUSFINALĮ!",
       preheader: "Sveikiname! Vertinimo komisija jūsų kūrinį atrinko tarp oficialių pusfinalininkų.",
       heading: "Sveikiname, {{name}}!",
-      body: "Atrankos komisija itin aukštai įvertino jūsų filmo originalumą, kinematografiją bei temos „Neįprastas žvilgsnis į įprastus dalykus“ atskleidimą. Jūsų darbas oficialiai patenka tarp festivalio PUSFINALININKŲ!",
+      body: "Atrankos komisija itin aukštai įvertino jūsų filmo originalumą, kinematografiją bei temos „Neįprastas žvilgsnis į įprastus dalykus“ atskleidimą. Jūsų darbas officially patenka tarp festivalio PUSFINALININKŲ!",
       detailsTitle: "Pusfinalio rezultatai",
       note: "Pusfinalio filmai bus pristatomi festivalio peržiūros programoje 2026 m. balandžio 17 d.",
       ctaText: "Sekti Festivalio Naujienas"
@@ -198,7 +198,7 @@ const emailTexts = {
       sub: "Ąžuolynas Film Fest | Jūs esate FINALE!",
       preheader: "Ypatingas pasiekimas! Jūsų filmas pateko į oficialų finalą ir varžosi dėl ąžuolo statulėlių.",
       heading: "Ypatingas pasiekimas, {{name}}!",
-      body: "Nuoširdžiai sveikiname! Jūsų filmas oficialiai pateko į Ąžuolyno kino festivalio FINALĄ ir pretenduoja į prizines vietas, natūralaus ąžuolo statulėles bei Žiūrovų simpatijų prizą.",
+      body: "Nuoširdžiai sveikiname! Jūsų filmas officially pateko į Ąžuolyno kino festivalio FINALĄ ir pretenduoja į prizines vietas, natūralaus ąžuolo statulėles bei Žiūrovų simpatijų prizą.",
       detailsTitle: "Finalo informacija",
       note: "Laureatai bus apdovanoti iškilmingoje ceremonijoje Kaune 2026 m. balandžio 17 d.",
       ctaText: "Peržiūrėti Finalininkų Programą"
@@ -361,13 +361,50 @@ const emailTexts = {
 };
 
 /**
+ * Normalizes input arguments so functions support flexibly:
+ * (templateKey, lang, data), (templateKey, data), (lang, data), or (data)
+ */
+function normalizeParams(p1, p2, p3) {
+  let templateKey = "submissionReceived";
+  let lang = "lt";
+  let data = {};
+
+  if (typeof p1 === "object" && p1 !== null) {
+    data = p1;
+  } else if (typeof p1 === "string") {
+    if (p1 === "lt" || p1 === "en") {
+      lang = p1;
+      if (typeof p2 === "string") {
+        templateKey = p2;
+        data = (typeof p3 === "object" && p3 !== null) ? p3 : {};
+      } else if (typeof p2 === "object" && p2 !== null) {
+        data = p2;
+      }
+    } else {
+      templateKey = p1;
+      if (typeof p2 === "string") {
+        lang = p2 === "en" ? "en" : "lt";
+        data = (typeof p3 === "object" && p3 !== null) ? p3 : {};
+      } else if (typeof p2 === "object" && p2 !== null) {
+        data = p2;
+        if (typeof data.lang === "string") {
+          lang = data.lang === "en" ? "en" : "lt";
+        }
+      }
+    }
+  }
+
+  return { templateKey, lang, data };
+}
+
+/**
  * Builds the top-level HTML email wrapper with fluid responsive table architecture,
  * Outlook mso conditions, dark-theme styling, and zero-width preheader.
  */
 function buildEmailDocument({ lang, preheader, statusKey, childrenHtml }) {
   const badge = STATUS_BADGES[statusKey] || STATUS_BADGES.submissionReceived;
-  const badgeLabel = lang === "lt" ? badge.labelLt : badge.labelEn;
   const isLt = lang === "lt";
+  const badgeLabel = isLt ? badge.labelLt : badge.labelEn;
 
   return `<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="${isLt ? 'lt' : 'en'}" xml:lang="${isLt ? 'lt' : 'en'}">
@@ -536,19 +573,13 @@ function buildMetaRow(label, valueHtml) {
 
 /**
  * Generates an applicant-facing notification email HTML string.
- * Supports both argument orders: (templateKey, lang, data) and (lang, templateKey, data).
+ * Supports: (templateKey, lang, data), (templateKey, data), or (data)
  */
-function generateEmailHtml(templateKey, lang, data = {}) {
-  // Gracefully handle inverted argument calls: (lang, templateKey, data)
-  if ((templateKey === "lt" || templateKey === "en") && (lang !== "lt" && lang !== "en")) {
-    const tmp = templateKey;
-    templateKey = lang;
-    lang = tmp;
-  }
-  const currentLang = (lang === "lt" || lang === "en") ? lang : "lt";
-  const texts = emailTexts[currentLang] || emailTexts.lt;
-  const t = (texts && texts[templateKey]) ? texts[templateKey] : texts.submissionReceived;
-  const isLt = currentLang === "lt";
+function generateEmailHtml(p1, p2, p3) {
+  const { templateKey, lang, data } = normalizeParams(p1, p2, p3);
+  const texts = emailTexts[lang] || emailTexts.lt;
+  const t = texts[templateKey] || texts.submissionReceived;
+  const isLt = lang === "lt";
 
   const applicantName = data.name || (isLt ? "Dalyvi" : "Filmmaker");
   const filmTitle = data.filmTitle || "-";
@@ -656,7 +687,7 @@ function generateEmailHtml(templateKey, lang, data = {}) {
   `;
 
   return buildEmailDocument({
-    lang: currentLang,
+    lang,
     preheader: t.preheader,
     statusKey: templateKey,
     childrenHtml
@@ -665,12 +696,13 @@ function generateEmailHtml(templateKey, lang, data = {}) {
 
 /**
  * Generates an administrative notification email sent to the festival committee.
+ * Supports: (lang, data), (data), or (templateKey, lang, data)
  */
-function generateAdminNotificationHtml(lang, data = {}) {
-  const currentLang = (lang === "lt" || lang === "en") ? lang : "lt";
-  const texts = emailTexts[currentLang] || emailTexts.lt;
+function generateAdminNotificationHtml(p1, p2, p3) {
+  const { lang, data } = normalizeParams("adminNotification", p1, p2);
+  const texts = emailTexts[lang] || emailTexts.lt;
   const t = texts.adminNotification;
-  const isLt = currentLang === "lt";
+  const isLt = lang === "lt";
 
   const adminUrl = EMAIL_THEME.adminUrl;
   const filmTitle = data.filmTitle || "-";
@@ -685,7 +717,7 @@ function generateAdminNotificationHtml(lang, data = {}) {
   dossierRows += buildMetaRow(isLt ? "Šalis ir miestas:" : "Location:", escapeHtml(data.location || data.countryCity || '-'));
   dossierRows += buildMetaRow(isLt ? "Mokykla / Studija:" : "Institution:", escapeHtml(data.institution || '-'));
   dossierRows += buildMetaRow(isLt ? "Įrenginio modelis:" : "Device Model:", `📱 ${escapeHtml(data.deviceModel || '-')}`);
-  dossierRows += buildMetaRow(isLt ? "Vaizdo įrašo trukmė:" : "Video Runtime:", `⏱️ ${escapeHtml(duration)} ${data.videoDurationSeconds <= 180 ? '✅ (Tinka &le; 180s)' : '⚠️ (>180s)'}`);
+  dossierRows += buildMetaRow(isLt ? "Vaizdo įrašo trukmė:" : "Video Runtime:", `⏱️ ${escapeHtml(duration)} ${data.videoDurationSeconds && Number(data.videoDurationSeconds) <= 180 ? '✅ (Tinka &le; 180s)' : '⚠️ (>180s)'}`);
   
   if (data.attendanceType) {
     const isRemote = data.attendanceType === 'remote';
@@ -702,7 +734,6 @@ function generateAdminNotificationHtml(lang, data = {}) {
     dossierRows += buildMetaRow(isLt ? "Saugyklos kelias:" : "Storage Path:", `<code style="font-size:11px; color:#BAC9C0;">${escapeHtml(data.storagePath)}</code>`);
   }
 
-  // Synopsis block
   let synopsisBlock = "";
   if (data.synopsis) {
     synopsisBlock = `
@@ -717,7 +748,6 @@ function generateAdminNotificationHtml(lang, data = {}) {
     `;
   }
 
-  // Direct video link button if present
   let videoLinkHtml = "";
   if (data.videoUrl) {
     videoLinkHtml = `
@@ -760,7 +790,7 @@ function generateAdminNotificationHtml(lang, data = {}) {
   `;
 
   return buildEmailDocument({
-    lang: currentLang,
+    lang,
     preheader: `${t.preheader} ${filmTitle} (${authorName})`,
     statusKey: "adminNotification",
     childrenHtml
@@ -768,21 +798,13 @@ function generateAdminNotificationHtml(lang, data = {}) {
 }
 
 /**
- * Generates an automated dark-themed team invitation email with verification code and activation link.
+ * Generates team invitation email.
  */
-function generateInviteEmailHtml(langOrData, maybeData = {}) {
-  let currentLang = "lt";
-  let data = {};
-  if (langOrData && typeof langOrData === "object") {
-    data = langOrData;
-    currentLang = (data.lang === "lt" || data.lang === "en") ? data.lang : "lt";
-  } else {
-    currentLang = (langOrData === "lt" || langOrData === "en") ? langOrData : "lt";
-    data = maybeData || {};
-  }
-  const texts = emailTexts[currentLang] || emailTexts.lt;
+function generateInviteEmailHtml(p1, p2) {
+  const { lang, data } = normalizeParams("userInvite", p1, p2);
+  const texts = emailTexts[lang] || emailTexts.lt;
   const t = texts.userInvite;
-  const isLt = currentLang === "lt";
+  const isLt = lang === "lt";
 
   const inviteeName = [data.name || "", data.surname || ""].filter(Boolean).join(" ") || (isLt ? "Būsimas komandos narys" : "New Team Member");
   const email = data.email || "-";
@@ -817,7 +839,6 @@ function generateInviteEmailHtml(langOrData, maybeData = {}) {
       ${t.body}
     </p>
 
-    <!-- Activation Code Box -->
     <div style="background-color: #081B17; border: 1px solid rgba(212, 175, 55, 0.4); border-radius: 8px; padding: 20px; margin: 20px 0; text-align: center;">
       <p style="margin: 0 0 6px 0; font-size: 11px; font-weight: 700; color: #D4AF37; text-transform: uppercase; letter-spacing: 0.1em;">
         ${isLt ? "Jūsų unikalus patvirtinimo kodas:" : "Your Unique Verification Code:"}
@@ -830,7 +851,6 @@ function generateInviteEmailHtml(langOrData, maybeData = {}) {
       </p>
     </div>
 
-    <!-- Details Box -->
     <div style="background-color: #081B17; border: 1px solid rgba(111,165,138,0.22); border-radius: 6px; padding: 18px 20px; margin: 18px 0;">
       <p style="margin: 0 0 12px 0; font-weight: 700; color: #9BC4AE; font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em;">
         ${t.detailsTitle}
@@ -840,7 +860,6 @@ function generateInviteEmailHtml(langOrData, maybeData = {}) {
       </table>
     </div>
 
-    <!-- Direct CTA Button -->
     <table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center" class="cta-table" style="margin: 24px auto 14px auto;">
       <tr>
         <td align="center" style="border-radius: 6px; background-color: #17453B; border: 1px solid #D4AF37;">
@@ -857,7 +876,7 @@ function generateInviteEmailHtml(langOrData, maybeData = {}) {
   `;
 
   return buildEmailDocument({
-    lang: currentLang,
+    lang,
     preheader: `${t.preheader} (${inviteeName} - ${roleDisplay})`,
     statusKey: "userInvite",
     childrenHtml
@@ -867,11 +886,11 @@ function generateInviteEmailHtml(langOrData, maybeData = {}) {
 /**
  * Generates an email notification for a new dashboard access request.
  */
-function generateAccessRequestEmailHtml(lang, data = {}) {
-  const currentLang = (lang === "lt" || lang === "en") ? lang : "lt";
-  const texts = emailTexts[currentLang] || emailTexts.lt;
+function generateAccessRequestEmailHtml(p1, p2) {
+  const { lang, data } = normalizeParams("accessRequest", p1, p2);
+  const texts = emailTexts[lang] || emailTexts.lt;
   const t = texts.accessRequest;
-  const isLt = currentLang === "lt";
+  const isLt = lang === "lt";
 
   const applicantName = data.name || (isLt ? "Pareiškėjas" : "Applicant");
   const email = data.email || "-";
@@ -892,7 +911,6 @@ function generateAccessRequestEmailHtml(lang, data = {}) {
       ${t.body}
     </p>
 
-    <!-- Details Box -->
     <div style="background-color: #081B17; border: 1px solid rgba(111,165,138,0.22); border-radius: 6px; padding: 18px 20px; margin: 18px 0;">
       <p style="margin: 0 0 12px 0; font-weight: 700; color: #9BC4AE; font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em;">
         ${t.detailsTitle}
@@ -911,7 +929,6 @@ function generateAccessRequestEmailHtml(lang, data = {}) {
       </div>
     </div>
 
-    <!-- Direct CTA Button -->
     <table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center" class="cta-table" style="margin: 24px auto 14px auto;">
       <tr>
         <td align="center" style="border-radius: 6px; background-color: #17453B; border: 1px solid #6FA58A;">
@@ -928,7 +945,7 @@ function generateAccessRequestEmailHtml(lang, data = {}) {
   `;
 
   return buildEmailDocument({
-    lang: currentLang,
+    lang,
     preheader: `${t.preheader} (${applicantName} - ${email})`,
     statusKey: "accessRequest",
     childrenHtml
@@ -938,11 +955,11 @@ function generateAccessRequestEmailHtml(lang, data = {}) {
 /**
  * Generates an email notification confirming that dashboard access has been granted to a user.
  */
-function generateAccessGrantedEmailHtml(lang, data = {}) {
-  const currentLang = (lang === "lt" || lang === "en") ? lang : "lt";
-  const texts = emailTexts[currentLang] || emailTexts.lt;
+function generateAccessGrantedEmailHtml(p1, p2) {
+  const { lang, data } = normalizeParams("accessGranted", p1, p2);
+  const texts = emailTexts[lang] || emailTexts.lt;
   const t = texts.accessGranted;
-  const isLt = currentLang === "lt";
+  const isLt = lang === "lt";
 
   const userName = data.name || (isLt ? "Vartotojas" : "Team Member");
   const email = data.email || "-";
@@ -964,7 +981,6 @@ function generateAccessGrantedEmailHtml(lang, data = {}) {
       ${t.body}
     </p>
 
-    <!-- Details Box -->
     <div style="background-color: #081B17; border: 1px solid rgba(111,165,138,0.22); border-radius: 6px; padding: 18px 20px; margin: 18px 0;">
       <p style="margin: 0 0 12px 0; font-weight: 700; color: #9BC4AE; font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em;">
         ${t.detailsTitle}
@@ -974,7 +990,6 @@ function generateAccessGrantedEmailHtml(lang, data = {}) {
       </table>
     </div>
 
-    <!-- Direct CTA Button -->
     <table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center" class="cta-table" style="margin: 24px auto 14px auto;">
       <tr>
         <td align="center" style="border-radius: 6px; background-color: #17453B; border: 1px solid #6FA58A;">
@@ -991,7 +1006,7 @@ function generateAccessGrantedEmailHtml(lang, data = {}) {
   `;
 
   return buildEmailDocument({
-    lang: currentLang,
+    lang,
     preheader: `${t.preheader} (${userName})`,
     statusKey: "accessGranted",
     childrenHtml
@@ -1000,17 +1015,12 @@ function generateAccessGrantedEmailHtml(lang, data = {}) {
 
 /**
  * Returns the localized email subject line for any given template key.
- * Supports both argument orders: (templateKey, lang, data) and (lang, templateKey, data).
+ * Supports: (templateKey, lang, data), (templateKey, data), or (data)
  */
-function getEmailSubject(templateKey, lang, data = {}) {
-  if ((templateKey === "lt" || templateKey === "en") && (lang !== "lt" && lang !== "en")) {
-    const tmp = templateKey;
-    templateKey = lang;
-    lang = tmp;
-  }
-  const currentLang = (lang === "lt" || lang === "en") ? lang : "lt";
-  const texts = emailTexts[currentLang] || emailTexts.lt;
-  const t = (texts && texts[templateKey]) ? texts[templateKey] : (texts ? texts.submissionReceived : null);
+function getEmailSubject(p1, p2, p3) {
+  const { templateKey, lang, data } = normalizeParams(p1, p2, p3);
+  const texts = emailTexts[lang] || emailTexts.lt;
+  const t = texts[templateKey] || texts.submissionReceived;
   
   if (t && t.sub) {
     if (data && data.filmTitle) {
@@ -1018,7 +1028,7 @@ function getEmailSubject(templateKey, lang, data = {}) {
     }
     return t.sub;
   }
-  return currentLang === "en" ? "Ąžuolynas Film Fest Notification" : "Ąžuolynas Film Fest Pranešimas";
+  return lang === "en" ? "Ąžuolynas Film Fest Notification" : "Ąžuolynas Film Fest Pranešimas";
 }
 
 // Global browser and runtime scope compatibility
