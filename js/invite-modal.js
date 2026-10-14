@@ -380,14 +380,22 @@ async function dispatchInvitationViaFirebaseCloudFunctions({
         `;
       }
 
+      const emailSubject = lang === "en"
+        ? "Ąžuolynas Film Fest | Staff Team Invitation (Kaunas International Gymnasium)"
+        : "Ąžuolynas Film Fest | Kvietimas prisijungti prie komandos (Kauno Tarptautinė Gimnazija)";
+      const plainTextContent = lang === "en"
+        ? `Hello ${fullName}! You have been officially invited to join the staff committee of the Ąžuolynas Film Festival with role: ${role.toUpperCase()}. Verification code: ${code}. Activation link: ${inviteUrl}`
+        : `Sveiki, ${fullName}! Jums suteikta prieiga prie festivalio valdymo platformos su role: ${role.toUpperCase()}. Aktyvavimo kodas: ${code}. Aktyvavimo nuoroda: ${inviteUrl}`;
+
       await db.collection("mail").add({
-        to: email,
+        to: [email],
+        from: "azuolynasfilmfestival@gmail.com",
+        replyTo: "azuolynasfilmfestival@gmail.com",
         template: "userInvite",
         message: {
-          subject: lang === "en"
-            ? "Ąžuolynas Film Fest | Staff Team Invitation (Kaunas International Gymnasium)"
-            : "Ąžuolynas Film Fest | Kvietimas prisijungti prie komandos (Kauno Tarptautinė Gimnazija)",
-          html: htmlContent
+          subject: emailSubject,
+          html: htmlContent,
+          text: plainTextContent
         },
         data: {
           name: fullName,

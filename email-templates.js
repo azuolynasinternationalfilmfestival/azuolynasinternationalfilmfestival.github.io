@@ -360,38 +360,86 @@ const emailTexts = {
   }
 };
 
+const TEMPLATE_KEY_MAP = {
+  submitted: "submissionReceived",
+  submissionReceived: "submissionReceived",
+  accepted: "accepted",
+  semifinal: "semiFinalist",
+  semiFinalist: "semiFinalist",
+  "semi-final": "semiFinalist",
+  final: "finalist",
+  finalist: "finalist",
+  winner: "winner",
+  rejected: "rejected",
+  remoteLivePass: "remoteLivePass",
+  remote: "remoteLivePass",
+  live_pass: "remoteLivePass",
+  eventReminder: "eventReminder",
+  userInvite: "userInvite",
+  invite: "userInvite",
+  accessRequest: "accessRequest",
+  accessGranted: "accessGranted",
+  adminNotification: "adminNotification"
+};
+
 /**
  * Normalizes input arguments so functions support flexibly:
  * (templateKey, lang, data), (templateKey, data), (lang, data), or (data)
+ * Ensures variables like authorName, filmTitle, duration, RSVP never disappear.
  */
-function normalizeParams(p1, p2, p3) {
-  let templateKey = "submissionReceived";
+function normalizeParams(p1, p2, p3, defaultKey = "submissionReceived") {
+  let templateKey = defaultKey;
   let lang = "lt";
   let data = {};
 
-  if (typeof p1 === "object" && p1 !== null) {
+  if (p1 && typeof p1 === "object") {
+    // Pattern: (data)
     data = p1;
+    templateKey = data.templateKey || data.statusKey || data.status || defaultKey;
+    lang = (data.lang === "en" || data.submissionLang === "en" || data.language === "en") ? "en" : "lt";
   } else if (typeof p1 === "string") {
     if (p1 === "lt" || p1 === "en") {
+      // Pattern: (lang, data) or (lang, templateKey, data)
       lang = p1;
       if (typeof p2 === "string") {
         templateKey = p2;
-        data = (typeof p3 === "object" && p3 !== null) ? p3 : {};
-      } else if (typeof p2 === "object" && p2 !== null) {
+        data = (p3 && typeof p3 === "object") ? p3 : {};
+      } else if (p2 && typeof p2 === "object") {
         data = p2;
+        templateKey = data.templateKey || data.statusKey || data.status || defaultKey;
       }
     } else {
+      // Pattern: (templateKey, lang, data) or (templateKey, data)
       templateKey = p1;
-      if (typeof p2 === "string") {
-        lang = p2 === "en" ? "en" : "lt";
-        data = (typeof p3 === "object" && p3 !== null) ? p3 : {};
-      } else if (typeof p2 === "object" && p2 !== null) {
+      if (p2 === "lt" || p2 === "en") {
+        lang = p2;
+        data = (p3 && typeof p3 === "object") ? p3 : {};
+      } else if (p2 && typeof p2 === "object") {
         data = p2;
-        if (typeof data.lang === "string") {
-          lang = data.lang === "en" ? "en" : "lt";
+        if (data.lang === "en" || data.submissionLang === "en" || data.language === "en") {
+          lang = "en";
         }
+      } else if (typeof p2 === "string") {
+        lang = p2.toLowerCase().startsWith("en") ? "en" : "lt";
+        data = (p3 && typeof p3 === "object") ? p3 : {};
       }
     }
+  }
+
+  // Map alias keys if found
+  if (TEMPLATE_KEY_MAP[templateKey]) {
+    templateKey = TEMPLATE_KEY_MAP[templateKey];
+  }
+
+  // Guarantee cross-field aliases so no template variable is ever lost
+  if (data && typeof data === "object") {
+    if (!data.filmTitle && data.title) data.filmTitle = data.title;
+    if (!data.name && data.authorName) data.name = data.authorName;
+    if (!data.name && data.author) data.name = data.author;
+    if (!data.name && data.userName) data.name = data.userName;
+    if (!data.videoDurationSeconds && data.duration) data.videoDurationSeconds = data.duration;
+    if (!data.location && data.countryCity) data.location = data.countryCity;
+    if (!data.attendanceType && data.rsvp) data.attendanceType = data.rsvp;
   }
 
   return { templateKey, lang, data };
@@ -696,10 +744,10 @@ function generateEmailHtml(p1, p2, p3) {
 
 /**
  * Generates an administrative notification email sent to the festival committee.
- * Supports: (lang, data), (data), or (templateKey, lang, data)
+ * Supports: (lang, data), (data), (templateKey, lang, data), or (templateKey, data)
  */
 function generateAdminNotificationHtml(p1, p2, p3) {
-  const { lang, data } = normalizeParams("adminNotification", p1, p2);
+  const { lang, data } = normalizeParams(p1, p2, p3, "adminNotification");
   const texts = emailTexts[lang] || emailTexts.lt;
   const t = texts.adminNotification;
   const isLt = lang === "lt";
@@ -799,9 +847,10 @@ function generateAdminNotificationHtml(p1, p2, p3) {
 
 /**
  * Generates team invitation email.
+ * Supports: (lang, data), (data), (templateKey, lang, data), or (templateKey, data)
  */
-function generateInviteEmailHtml(p1, p2) {
-  const { lang, data } = normalizeParams("userInvite", p1, p2);
+function generateInviteEmailHtml(p1, p2, p3) {
+  const { lang, data } = normalizeParams(p1, p2, p3, "userInvite");
   const texts = emailTexts[lang] || emailTexts.lt;
   const t = texts.userInvite;
   const isLt = lang === "lt";
@@ -885,9 +934,10 @@ function generateInviteEmailHtml(p1, p2) {
 
 /**
  * Generates an email notification for a new dashboard access request.
+ * Supports: (lang, data), (data), (templateKey, lang, data), or (templateKey, data)
  */
-function generateAccessRequestEmailHtml(p1, p2) {
-  const { lang, data } = normalizeParams("accessRequest", p1, p2);
+function generateAccessRequestEmailHtml(p1, p2, p3) {
+  const { lang, data } = normalizeParams(p1, p2, p3, "accessRequest");
   const texts = emailTexts[lang] || emailTexts.lt;
   const t = texts.accessRequest;
   const isLt = lang === "lt";
@@ -954,9 +1004,10 @@ function generateAccessRequestEmailHtml(p1, p2) {
 
 /**
  * Generates an email notification confirming that dashboard access has been granted to a user.
+ * Supports: (lang, data), (data), (templateKey, lang, data), or (templateKey, data)
  */
-function generateAccessGrantedEmailHtml(p1, p2) {
-  const { lang, data } = normalizeParams("accessGranted", p1, p2);
+function generateAccessGrantedEmailHtml(p1, p2, p3) {
+  const { lang, data } = normalizeParams(p1, p2, p3, "accessGranted");
   const texts = emailTexts[lang] || emailTexts.lt;
   const t = texts.accessGranted;
   const isLt = lang === "lt";
@@ -1015,15 +1066,18 @@ function generateAccessGrantedEmailHtml(p1, p2) {
 
 /**
  * Returns the localized email subject line for any given template key.
- * Supports: (templateKey, lang, data), (templateKey, data), or (data)
+ * Supports: (templateKey, lang, data), (templateKey, data), (lang, data), or (data)
  */
 function getEmailSubject(p1, p2, p3) {
-  const { templateKey, lang, data } = normalizeParams(p1, p2, p3);
+  const { templateKey, lang, data } = normalizeParams(p1, p2, p3, "submissionReceived");
   const texts = emailTexts[lang] || emailTexts.lt;
   const t = texts[templateKey] || texts.submissionReceived;
   
   if (t && t.sub) {
     if (data && data.filmTitle) {
+      if (templateKey === "winner" && data.awardTitle) {
+        return `${t.sub}: „${data.filmTitle}“ (${data.awardTitle})`;
+      }
       return `${t.sub}: „${data.filmTitle}“`;
     }
     return t.sub;

@@ -25,8 +25,8 @@ including user management and invitations:
 
 - `azuolynasfilmfestival@gmail.com`
 - `karina.brdar@gmail.com`
-- `dominikphotofficial.t@gmail.com`
 - `dominikphotofficial.lt@gmail.com`
+- `dominikcute4@gmail.com`
 
 The same list is used by `config.js`, `js/firebase-init.js`, server authorization
 and `firestore.rules`. User-management visibility uses the exported client list.

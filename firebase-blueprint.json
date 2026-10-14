@@ -125,6 +125,19 @@
         "status": { "type": "string", "description": "Execution status: success, warning, error" }
       },
       "required": ["action", "adminEmail", "timestamp"]
+    },
+    "MailMessage": {
+      "title": "MailMessage",
+      "description": "Trigger Email extension dispatch queue item",
+      "type": "object",
+      "properties": {
+        "to": { "type": "array", "description": "Recipient email address(es)" },
+        "message": { "type": "object", "description": "Subject, html, and text payload" },
+        "from": { "type": "string", "description": "Sender address" },
+        "replyTo": { "type": "string", "description": "Reply-to address" },
+        "createdAt": { "type": "string", "description": "ISO timestamp of message creation" }
+      },
+      "required": ["to", "message"]
     }
   },
   "firestore": {
@@ -155,6 +168,11 @@
     "/logs/{logId}": {
       "schema": "ActivityLog",
       "description": "Administrative activity and audit logs"
+    },
+    "/mail/{mailId}": {
+      "schema": "MailMessage",
+      "description": "Trigger Email queue documents"
     }
   }
 }
+

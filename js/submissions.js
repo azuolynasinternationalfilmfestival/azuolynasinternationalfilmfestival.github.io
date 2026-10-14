@@ -448,20 +448,45 @@ function initEntryModal() {
       const awardInput = document.getElementById("mAwardTitle");
       const awardVal = awardInput ? awardInput.value.trim() : "";
 
-      const updateData = {
+      // 1. Clean JSON-serializable updates for backend server
+      const serverUpdates = {
         status: newStatus,
-        inVoting: inVotingVal,
-        lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+        inVoting: Boolean(inVotingVal)
       };
 
       if (newStatus === "winner") {
-        updateData.isWinner = true;
+        serverUpdates.isWinner = true;
         if (awardVal) {
-          updateData.awardTitle = awardVal;
+          serverUpdates.awardTitle = awardVal;
         }
       } else if (currentEntry.isWinner) {
-        updateData.isWinner = false;
-        updateData.awardTitle = firebase.firestore.FieldValue.delete();
+        serverUpdates.isWinner = false;
+        serverUpdates.awardTitle = "";
+      }
+
+      // 2. Client Firestore SDK updates with server timestamp & FieldValue.delete
+      const fsUpdateData = {
+        status: newStatus,
+        inVoting: Boolean(inVotingVal)
+      };
+
+      if (typeof firebase !== "undefined" && firebase.firestore && firebase.firestore.FieldValue) {
+        fsUpdateData.lastUpdated = firebase.firestore.FieldValue.serverTimestamp();
+        if (newStatus === "winner") {
+          fsUpdateData.isWinner = true;
+          if (awardVal) {
+            fsUpdateData.awardTitle = awardVal;
+          }
+        } else if (currentEntry.isWinner) {
+          fsUpdateData.isWinner = false;
+          fsUpdateData.awardTitle = firebase.firestore.FieldValue.delete();
+        }
+      }
+
+      // Helper to strip any undefined values that would cause Firestore to error
+      const cleanFsData = {};
+      for (const [k, v] of Object.entries(fsUpdateData)) {
+        if (v !== undefined) cleanFsData[k] = v;
       }
 
       try {
@@ -471,7 +496,7 @@ function initEntryModal() {
         const res = await fetch("/api/admin/submissions/update", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ id: currentEntry.id, updates: updateData, adminEmail: callerEmail })
+          body: JSON.stringify({ id: currentEntry.id, updates: serverUpdates, adminEmail: callerEmail })
         });
 
         if (!res.ok) {
@@ -482,7 +507,7 @@ function initEntryModal() {
         // 2. Secondary: Mirror to Firestore if available
         if (db && typeof db.collection === "function") {
           try {
-            await db.collection("submissions").doc(currentEntry.id).update(updateData);
+            await db.collection("submissions").doc(currentEntry.id).update(cleanFsData);
           } catch (fsErr) {
             console.warn("Firestore submission update notice:", fsErr.message);
           }
@@ -519,7 +544,7 @@ function initEntryModal() {
             console.warn("Backend submission send-email notice:", apiEmailErr.message);
           }
 
-          // Fallback or mirror queue via client Firestore
+          // Fallback or mirror queue via client Firestore (Trigger Email extension format)
           if (!emailSentSuccessfully && typeof generateEmailHtml === "function" && db && typeof db.collection === "function") {
             try {
               const emailData = {
@@ -531,7 +556,8 @@ function initEntryModal() {
                 deviceModel: currentEntry.deviceModel,
                 videoDurationSeconds: currentEntry.videoDurationSeconds,
                 customMessage: customMsg,
-                streamLink
+                streamLink,
+                awardTitle: awardVal
               };
               const emailHtml = generateEmailHtml(tpl, lang, emailData);
               const emailSubject = (typeof getEmailSubject === "function")
@@ -540,10 +566,14 @@ function initEntryModal() {
 
               await db.collection("mail").add({
                 to: [currentEntry.email],
+                from: "azuolynasfilmfestival@gmail.com",
+                replyTo: "azuolynasfilmfestival@gmail.com",
                 message: {
                   subject: emailSubject,
-                  html: emailHtml
-                }
+                  html: emailHtml,
+                  text: emailSubject
+                },
+                createdAt: new Date().toISOString()
               });
               emailSentSuccessfully = true;
             } catch (mailErr) {
@@ -704,6 +734,7 @@ function initWinnersManager() {
           try {
             await db.collection("submissions").doc(filmId).update({
               isWinner: false,
+              status: "accepted",
               awardTitle: firebase.firestore.FieldValue.delete()
             });
           } catch (fsErr) {

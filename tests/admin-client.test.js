@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 
 const admins = ['azuolynasfilmfestival@gmail.com', 'karina.brdar@gmail.com',
-  'dominikphotofficial.t@gmail.com', 'dominikphotofficial.lt@gmail.com'];
+  'dominikphotofficial.lt@gmail.com', 'dominikcute4@gmail.com'];
 const read = name => fs.readFileSync(new URL('../' + name, import.meta.url), 'utf8');
 const stripModules = text => text.replace(/^import .*;\n/gm, '').replace(/^export /gm, '');
 function dom() {

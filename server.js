@@ -145,8 +145,8 @@ const PRIMARY_SUPERADMIN_EMAIL = 'azuolynasfilmfestival@gmail.com';
 const TRUSTED_ADMIN_EMAILS = [
   'azuolynasfilmfestival@gmail.com',
   'karina.brdar@gmail.com',
-  'dominikphotofficial.t@gmail.com',
-  'dominikphotofficial.lt@gmail.com'
+  'dominikphotofficial.lt@gmail.com',
+  'dominikcute4@gmail.com'
 ];
 
 // Firebase Project & Database Configuration (loaded from .env with fallback)
@@ -4271,20 +4271,37 @@ app.post('/api/admin/submissions/update', async (req, res) => {
     const idx = subsData.submissions.findIndex(s => s.id === id);
     if (idx === -1) return res.status(404).json({ error: 'Submission not found' });
 
+    const cleanUpdates = {};
+    if (updates && typeof updates === 'object') {
+      for (const [k, v] of Object.entries(updates)) {
+        if (v !== undefined) cleanUpdates[k] = v;
+      }
+    }
+
     subsData.submissions[idx] = {
       ...subsData.submissions[idx],
-      ...(updates || {}),
+      ...cleanUpdates,
       updatedAt: new Date().toISOString()
     };
+    if (cleanUpdates.isWinner === false) {
+      delete subsData.submissions[idx].awardTitle;
+    }
     saveSubmissionsData(subsData);
 
     // Sync to Firestore
     const fsFields = {};
-    if (updates && updates.status !== undefined) fsFields.status = { stringValue: String(updates.status) };
-    if (updates && updates.inVoting !== undefined) fsFields.inVoting = { booleanValue: Boolean(updates.inVoting) };
-    if (updates && updates.category !== undefined) fsFields.category = { stringValue: String(updates.category) };
-    if (updates && updates.isWinner !== undefined) fsFields.isWinner = { booleanValue: Boolean(updates.isWinner) };
-    if (updates && updates.awardTitle !== undefined) fsFields.awardTitle = { stringValue: String(updates.awardTitle) };
+    if (cleanUpdates.status !== undefined) fsFields.status = { stringValue: String(cleanUpdates.status) };
+    if (cleanUpdates.inVoting !== undefined) fsFields.inVoting = { booleanValue: Boolean(cleanUpdates.inVoting) };
+    if (cleanUpdates.category !== undefined) fsFields.category = { stringValue: String(cleanUpdates.category) };
+    if (cleanUpdates.isWinner !== undefined) {
+      fsFields.isWinner = { booleanValue: Boolean(cleanUpdates.isWinner) };
+      if (!cleanUpdates.isWinner) {
+        fsFields.awardTitle = { nullValue: null };
+      }
+    }
+    if (cleanUpdates.awardTitle) {
+      fsFields.awardTitle = { stringValue: String(cleanUpdates.awardTitle) };
+    }
     if (Object.keys(fsFields).length > 0) {
       await syncToFirestore('submissions', id, fsFields);
     }

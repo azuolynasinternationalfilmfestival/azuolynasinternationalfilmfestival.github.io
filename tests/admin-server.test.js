@@ -12,7 +12,7 @@ import '../email-templates.js';
 
 const root = path.resolve(import.meta.dirname, '..');
 const admins = ['azuolynasfilmfestival@gmail.com', 'karina.brdar@gmail.com',
-  'dominikphotofficial.t@gmail.com', 'dominikphotofficial.lt@gmail.com'];
+  'dominikphotofficial.lt@gmail.com', 'dominikcute4@gmail.com'];
 const source = fs.readFileSync(path.join(root, 'server.js'), 'utf8');
 
 async function serverFixture(t, {smtp = false, rejectQueue = false, rejectSmtp = false, envSmtp = false} = {}) {

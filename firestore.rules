@@ -17,8 +17,8 @@ service cloud.firestore {
         request.auth.token.email != null && (
           request.auth.token.email.lower() == 'azuolynasfilmfestival@gmail.com' ||
           request.auth.token.email.lower() == 'karina.brdar@gmail.com' ||
-          request.auth.token.email.lower() == 'dominikphotofficial.t@gmail.com' ||
-          request.auth.token.email.lower() == 'dominikphotofficial.lt@gmail.com'
+          request.auth.token.email.lower() == 'dominikphotofficial.lt@gmail.com' ||
+          request.auth.token.email.lower() == 'dominikcute4@gmail.com'
         );
     }
 
@@ -51,147 +51,125 @@ service cloud.firestore {
       return id is string && id.size() <= 128;
     }
 
-    // Festival Settings
+    // 1. Festival Settings
     match /settings/{settingId} {
-      allow read: if isValidId(settingId);
-      allow write: if isAdmin();
+      allow get, list: if true;
+      allow write: if isWhitelistedAdmin() || isAdmin();
     }
 
-    // Festival Editions
+    // 2. Festival Editions
     match /editions/{editionId} {
-      allow get: if isValidId(editionId);
-      allow list: if true;
-      allow write: if isAdmin();
+      allow get, list: if true;
+      allow write: if isWhitelistedAdmin() || isAdmin();
     }
 
-    // Submissions
+    // 3. Submissions
     match /submissions/{submissionId} {
-      allow get: if isValidId(submissionId) && (
-        isStaff() ||
-        resource.data.inVoting == true ||
-        resource.data.isWinner == true
-      );
+      // Allow read for everyone (public listing of entries/winners/voting and admin dashboard)
+      allow get, list: if true;
 
-      // Saugus sąrašo gavimas
-      allow list: if isStaff() || true;
-
-      // Visuomenė gali pateikti naujus filmus
-      allow create: if isValidId(submissionId) &&
+      // Public can create submissions (validated fields)
+      allow create: if (isWhitelistedAdmin() || isAdmin() || isStaff()) || (
+        isValidId(submissionId) &&
         incoming().name is string && incoming().name.size() > 0 && incoming().name.size() <= 150 &&
         incoming().email is string && incoming().email.size() > 0 && incoming().email.size() <= 150 &&
         incoming().filmTitle is string && incoming().filmTitle.size() > 0 && incoming().filmTitle.size() <= 200 &&
         incoming().videoUrl is string && incoming().videoUrl.size() > 0 && incoming().videoUrl.size() <= 1000 &&
         incoming().status == 'submitted' &&
         incoming().inVoting == false &&
-        incoming().votesCount == 0;
+        incoming().votesCount == 0
+      );
 
-      // Admins/Staff gali atnaujinti viską; žiūrovai – tik balsus
-      allow update: if isStaff() || (
+      // Admins and Staff can update all fields (status, inVoting, live token, etc.)
+      // Unauthenticated audience / voters can ONLY increment votesCount by exactly +1
+      allow update: if isWhitelistedAdmin() || isAdmin() || isStaff() || (
         incoming().diff(existing()).affectedKeys().hasOnly(['votesCount']) &&
         incoming().votesCount == (existing().get('votesCount', 0) + 1)
       );
 
-      allow delete: if isAdmin();
+      allow delete: if isWhitelistedAdmin() || isAdmin();
 
       // Votes subcollection
       match /votes/{voterId} {
         allow get: if isValidId(voterId);
-        allow list: if isStaff();
+        allow list: if isStaff() || isWhitelistedAdmin() || isAdmin();
         allow create, update: if isValidId(voterId);
+        allow delete: if isWhitelistedAdmin() || isAdmin();
       }
     }
 
-    // Stream Configuration
+    // 4. Stream Configuration
     match /stream_config/{configId} {
-      allow read: if isValidId(configId);
-      allow write: if isAdmin();
+      allow get, list: if true;
+      allow write: if isWhitelistedAdmin() || isAdmin();
     }
 
-    // Live Stream Viewers / Tokens
+    // 5. Live Stream Viewers / Tokens
     match /live_viewers/{viewerId} {
       allow get: if isValidId(viewerId);
+      allow list: if isWhitelistedAdmin() || isAdmin();
       allow create, update: if isValidId(viewerId);
-      allow list, delete: if isAdmin();
+      allow delete: if isWhitelistedAdmin() || isAdmin();
     }
 
-    // Tasks Management
+    // 6. Tasks Management
     match /tasks/{taskId} {
-      allow read, write: if isStaff() || isAdmin();
+      allow get, list: if isWhitelistedAdmin() || isStaff() || isAdmin();
+      allow write: if isWhitelistedAdmin() || isStaff() || isAdmin();
     }
 
-    // Global Anti-Fraud Vote Audit
+    // 7. Global Anti-Fraud Vote Audit
     match /votes_audit/{auditId} {
       allow get: if isValidId(auditId);
-      allow list: if isStaff();
+      allow list: if isStaff() || isWhitelistedAdmin() || isAdmin();
       allow create: if isValidId(auditId) &&
         incoming().filmId is string &&
         incoming().category is string &&
         incoming().deviceHash is string;
-      allow update, delete: if isAdmin();
+      allow update, delete: if isWhitelistedAdmin() || isAdmin();
     }
 
-    // User accounts
-    function hasValidInvitation() {
-      let invitation = get(/databases/$(database)/documents/invitations/$(incoming().invitationToken));
-      return isSignedIn() && invitation.data.status == 'pending' &&
-        invitation.data.email == request.auth.token.email &&
-        invitation.data.expiresAt > request.time &&
-        incoming().email == invitation.data.email &&
-        incoming().role == invitation.data.role &&
-        incoming().status == 'active' &&
-        incoming().canManageUsers == invitation.data.canManageUsers;
-    }
-
-    function hasLegacyProfile() {
-      let member = get(/databases/$(database)/documents/users/$(incoming().sourceProfileId));
-      return member.data.email == request.auth.token.email && member.data.status == 'active' &&
-        incoming().email == member.data.email && incoming().role == member.data.role &&
-        incoming().status == 'active' && incoming().uid == request.auth.uid &&
-        incoming().keys().hasOnly(['uid', 'email', 'role', 'status', 'lastLogin', 'sourceProfileId']);
-    }
-
+    // 8. User Accounts (RBAC)
     match /users/{userId} {
-      allow get: if isWhitelistedAdmin() || (isSignedIn() &&
+      allow get: if isWhitelistedAdmin() || isAdmin() || (isSignedIn() &&
         (userId == request.auth.uid || existing().email == request.auth.token.email));
-      allow list, delete: if isWhitelistedAdmin();
-      allow create: if isWhitelistedAdmin() || (isSignedIn() && userId == request.auth.uid &&
-        incoming().keys().hasOnly(['uid', 'email', 'name', 'surname', 'role', 'status',
-          'canManageUsers', 'invitationToken', 'updatedAt']) &&
-        incoming().uid == request.auth.uid && 'invitationToken' in incoming() && hasValidInvitation()) ||
-        (isSignedIn() && userId == request.auth.uid && 'sourceProfileId' in incoming() && hasLegacyProfile());
-      allow update: if isWhitelistedAdmin() || (isSignedIn() && userId == request.auth.uid &&
-        incoming().diff(existing()).affectedKeys().hasOnly(['lastLogin', 'name', 'surname', 'updatedAt']));
+      allow list: if isWhitelistedAdmin() || isAdmin();
+      allow create: if isWhitelistedAdmin() || isAdmin() || (isSignedIn() && userId == request.auth.uid);
+      allow update: if isWhitelistedAdmin() || isAdmin() || (isSignedIn() && userId == request.auth.uid);
+      allow delete: if isWhitelistedAdmin() || isAdmin();
     }
 
+    // 9. Committee Invitations
     match /invitations/{invitationToken} {
       allow get: if isValidId(invitationToken);
-      allow list, create, delete: if isWhitelistedAdmin();
-      allow update: if isWhitelistedAdmin() || (isSignedIn() &&
+      allow list, create, delete: if isWhitelistedAdmin() || isAdmin();
+      allow update: if isWhitelistedAdmin() || isAdmin() || (isSignedIn() &&
         existing().status == 'pending' && existing().email == request.auth.token.email &&
-        existing().expiresAt > request.time &&
         incoming().status == 'activated' && incoming().activatedBy == request.auth.uid &&
         incoming().diff(existing()).affectedKeys().hasOnly(['status', 'activatedBy', 'activatedAt']));
     }
 
+    // 10. Judge Evaluations
     match /judge_evaluations/{evaluationId} {
-      allow read: if isStaff();
-      allow create: if isStaff() && incoming().judgeEmail == request.auth.token.email;
-      allow update: if isStaff() && existing().judgeEmail == request.auth.token.email &&
+      allow get, list: if isStaff() || isWhitelistedAdmin() || isAdmin();
+      allow create: if (isStaff() || isWhitelistedAdmin() || isAdmin()) && incoming().judgeEmail == request.auth.token.email;
+      allow update: if (isStaff() || isWhitelistedAdmin() || isAdmin()) && existing().judgeEmail == request.auth.token.email &&
         incoming().judgeEmail == existing().judgeEmail;
-      allow delete: if isAdmin();
+      allow delete: if isWhitelistedAdmin() || isAdmin();
     }
 
-    // 🏆 SUTVARKYTA: Mail queue leidžia create IR update!
+    // 11. Trigger Email Queue: MUST allow update for extension delivery recording!
     match /mail/{mailId} {
-      allow read: if isStaff();
+      allow get, list: if isWhitelistedAdmin() || isAdmin() || isStaff();
       allow create: if isValidId(mailId);
-      allow update: if true; // Būtina, kad Trigger Email įrašytų `delivery` lauką!
-      allow delete: if isAdmin();
+      allow update: if true; // Būtina: Trigger Email plėtinys po išsiuntimo įrašo `delivery` objektą!
+      allow delete: if isWhitelistedAdmin() || isAdmin();
     }
 
-    // Administrative Activity Logs
+    // 12. Administrative Activity Logs
     match /logs/{logId} {
-      allow read, write: if isWhitelistedAdmin();
+      allow get, list: if isWhitelistedAdmin() || isAdmin();
+      allow write: if isWhitelistedAdmin() || isAdmin();
     }
   }
 }
