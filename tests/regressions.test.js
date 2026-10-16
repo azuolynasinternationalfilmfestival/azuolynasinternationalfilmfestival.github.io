@@ -255,7 +255,7 @@ function emailSettingsFixture(reject) {
     return query;
   };
   Object.assign(f.context, {db: f.database, auth: f.authentication, PRIMARY_SUPERADMIN_EMAIL: 'azuolynasfilmfestival@gmail.com',
-    AUTHORIZED_ADMIN_EMAILS: ['azuolynasfilmfestival@gmail.com','karina.brdar@gmail.com','dominikphotofficial.lt@gmail.com','dominikcute4@gmail.com'],
+    AUTHORIZED_ADMIN_EMAILS: ['azuolynasfilmfestival@gmail.com','karina.brdar@gmail.com'],
     sessionStorage: {getItem: () => 'karina.brdar@gmail.com'}, showToast: (message, type) => toasts.push({message, type}),
     FestivalApi: {hasServer: async () => false},
     document: {getElementById: element, createElement: () => ({textContent: ''})}});

@@ -121,9 +121,7 @@ export const PRIMARY_SUPERADMIN_EMAIL = "azuolynasfilmfestival@gmail.com";
 
 export const AUTHORIZED_ADMIN_EMAILS = [
   "azuolynasfilmfestival@gmail.com",
-  "karina.brdar@gmail.com",
-  "dominikphotofficial.lt@gmail.com",
-  "dominikcute4@gmail.com"
+  "karina.brdar@gmail.com"
 ];
 
 export const DEFAULT_CONTENT = {

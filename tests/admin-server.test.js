@@ -11,8 +11,7 @@ import jwt from 'jsonwebtoken';
 import '../email-templates.js';
 
 const root = path.resolve(import.meta.dirname, '..');
-const admins = ['azuolynasfilmfestival@gmail.com', 'karina.brdar@gmail.com',
-  'dominikphotofficial.lt@gmail.com', 'dominikcute4@gmail.com'];
+const admins = ['azuolynasfilmfestival@gmail.com', 'karina.brdar@gmail.com'];
 const source = fs.readFileSync(path.join(root, 'server.js'), 'utf8');
 
 async function serverFixture(t, {smtp = false, rejectQueue = false, rejectSmtp = false, envSmtp = false} = {}) {
@@ -102,7 +101,7 @@ test('server settings keep SMTP credentials private and exclude them from Firest
   assert.equal(publicSettings.settings.smtp, undefined);
   assert.equal((await f.request('/data/settings.json')).status, 404);
   assert.equal((await f.request('/data%2Fsettings.json')).status, 404);
-  const response = await f.request('/api/admin/settings', admins[2], {selectedYear: '2027'});
+  const response = await f.request('/api/admin/settings', admins[1], {selectedYear: '2027'});
   assert.equal(response.status, 200);
   const synced = f.writes.find(write => write.url.includes('/settings/festival'));
   assert.equal(synced.data.fields.smtp, undefined);

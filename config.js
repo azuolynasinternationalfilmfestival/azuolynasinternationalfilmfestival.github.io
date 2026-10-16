@@ -69,9 +69,7 @@ var PRIMARY_SUPERADMIN_EMAIL = "azuolynasfilmfestival@gmail.com";
 
 var AUTHORIZED_ADMIN_EMAILS = [
   "azuolynasfilmfestival@gmail.com",
-  "karina.brdar@gmail.com",
-  "dominikphotofficial.lt@gmail.com",
-  "dominikcute4@gmail.com"
+  "karina.brdar@gmail.com"
 ];
 
 const DEFAULT_CONTENT = {

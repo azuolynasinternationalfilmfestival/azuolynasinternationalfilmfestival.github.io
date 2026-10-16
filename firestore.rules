@@ -11,31 +11,22 @@ service cloud.firestore {
       return request.auth != null;
     }
 
-    function isWhitelistedAdmin() {
+    // Super Admin Access (Full Management): Strictly restricted exclusively to these two emails:
+    function isSuperAdmin() {
       return isSignedIn() &&
         'email' in request.auth.token &&
         request.auth.token.email != null && (
           request.auth.token.email.lower() == 'azuolynasfilmfestival@gmail.com' ||
-          request.auth.token.email.lower() == 'karina.brdar@gmail.com' ||
-          request.auth.token.email.lower() == 'dominikphotofficial.lt@gmail.com' ||
-          request.auth.token.email.lower() == 'dominikcute4@gmail.com'
+          request.auth.token.email.lower() == 'karina.brdar@gmail.com'
         );
     }
 
-    function isAdmin() {
-      return isWhitelistedAdmin() || (
-        isSignedIn() &&
-        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
-        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' &&
-        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.status == 'active'
-      );
-    }
-
-    function isStaff() {
+    // Dedicated Judge Role: Evaluation & read-only permissions for applications
+    function isJudge() {
       return isSignedIn() && (
-        isAdmin() ||
-        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
-         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.status == 'active')
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'judge' &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.status == 'active'
       );
     }
 
@@ -51,25 +42,25 @@ service cloud.firestore {
       return id is string && id.size() <= 128;
     }
 
-    // 1. Festival Settings
+    // 1. Festival Settings: Public read, Super Admin full control
     match /settings/{settingId} {
       allow get, list: if true;
-      allow write: if isWhitelistedAdmin() || isAdmin();
+      allow write: if isSuperAdmin();
     }
 
-    // 2. Festival Editions
+    // 2. Festival Editions: Public read, Super Admin full control
     match /editions/{editionId} {
       allow get, list: if true;
-      allow write: if isWhitelistedAdmin() || isAdmin();
+      allow write: if isSuperAdmin();
     }
 
-    // 3. Submissions
+    // 3. Submissions: Public creation, Judges read-only, Super Admin full write/edit/delete
     match /submissions/{submissionId} {
-      // Allow read for everyone (public listing of entries/winners/voting and admin dashboard)
+      // Public, Judges, and Super Admins have read access
       allow get, list: if true;
 
-      // Public can create submissions (validated fields)
-      allow create: if (isWhitelistedAdmin() || isAdmin() || isStaff()) || (
+      // Public creation of applications (validated schema)
+      allow create: if isSuperAdmin() || (
         isValidId(submissionId) &&
         incoming().name is string && incoming().name.size() > 0 && incoming().name.size() <= 150 &&
         incoming().email is string && incoming().email.size() > 0 && incoming().email.size() <= 150 &&
@@ -80,96 +71,96 @@ service cloud.firestore {
         incoming().votesCount == 0
       );
 
-      // Admins and Staff can update all fields (status, inVoting, live token, etc.)
-      // Unauthenticated audience / voters can ONLY increment votesCount by exactly +1
-      allow update: if isWhitelistedAdmin() || isAdmin() || isStaff() || (
+      // Strict update access: ONLY Super Admins can update/edit
+      // Audience/voters can ONLY increment votesCount by exactly +1
+      allow update: if isSuperAdmin() || (
         incoming().diff(existing()).affectedKeys().hasOnly(['votesCount']) &&
         incoming().votesCount == (existing().get('votesCount', 0) + 1)
       );
 
-      allow delete: if isWhitelistedAdmin() || isAdmin();
+      // Strict delete access: ONLY Super Admins
+      allow delete: if isSuperAdmin();
 
       // Votes subcollection
       match /votes/{voterId} {
         allow get: if isValidId(voterId);
-        allow list: if isStaff() || isWhitelistedAdmin() || isAdmin();
+        allow list: if isSuperAdmin() || isJudge();
         allow create, update: if isValidId(voterId);
-        allow delete: if isWhitelistedAdmin() || isAdmin();
+        allow delete: if isSuperAdmin();
       }
     }
 
-    // 4. Stream Configuration
+    // 4. Stream Configuration: Public read, Super Admin write
     match /stream_config/{configId} {
       allow get, list: if true;
-      allow write: if isWhitelistedAdmin() || isAdmin();
+      allow write: if isSuperAdmin();
     }
 
     // 5. Live Stream Viewers / Tokens
     match /live_viewers/{viewerId} {
       allow get: if isValidId(viewerId);
-      allow list: if isWhitelistedAdmin() || isAdmin();
+      allow list: if isSuperAdmin() || isJudge();
       allow create, update: if isValidId(viewerId);
-      allow delete: if isWhitelistedAdmin() || isAdmin();
+      allow delete: if isSuperAdmin();
     }
 
     // 6. Tasks Management
     match /tasks/{taskId} {
-      allow get, list: if isWhitelistedAdmin() || isStaff() || isAdmin();
-      allow write: if isWhitelistedAdmin() || isStaff() || isAdmin();
+      allow get, list: if isSuperAdmin() || isJudge();
+      allow write: if isSuperAdmin();
     }
 
     // 7. Global Anti-Fraud Vote Audit
     match /votes_audit/{auditId} {
       allow get: if isValidId(auditId);
-      allow list: if isStaff() || isWhitelistedAdmin() || isAdmin();
+      allow list: if isSuperAdmin() || isJudge();
       allow create: if isValidId(auditId) &&
         incoming().filmId is string &&
         incoming().category is string &&
         incoming().deviceHash is string;
-      allow update, delete: if isWhitelistedAdmin() || isAdmin();
+      allow update, delete: if isSuperAdmin();
     }
 
     // 8. User Accounts (RBAC)
     match /users/{userId} {
-      allow get: if isWhitelistedAdmin() || isAdmin() || (isSignedIn() &&
+      allow get: if isSuperAdmin() || (isSignedIn() &&
         (userId == request.auth.uid || existing().email == request.auth.token.email));
-      allow list: if isWhitelistedAdmin() || isAdmin();
-      allow create: if isWhitelistedAdmin() || isAdmin() || (isSignedIn() && userId == request.auth.uid);
-      allow update: if isWhitelistedAdmin() || isAdmin() || (isSignedIn() && userId == request.auth.uid);
-      allow delete: if isWhitelistedAdmin() || isAdmin();
+      allow list: if isSuperAdmin();
+      allow create, update: if isSuperAdmin() || (isSignedIn() && userId == request.auth.uid);
+      allow delete: if isSuperAdmin();
     }
 
     // 9. Committee Invitations
     match /invitations/{invitationToken} {
       allow get: if isValidId(invitationToken);
-      allow list, create, delete: if isWhitelistedAdmin() || isAdmin();
-      allow update: if isWhitelistedAdmin() || isAdmin() || (isSignedIn() &&
+      allow list, create, delete: if isSuperAdmin();
+      allow update: if isSuperAdmin() || (isSignedIn() &&
         existing().status == 'pending' && existing().email == request.auth.token.email &&
         incoming().status == 'activated' && incoming().activatedBy == request.auth.uid &&
         incoming().diff(existing()).affectedKeys().hasOnly(['status', 'activatedBy', 'activatedAt']));
     }
 
-    // 10. Judge Evaluations
+    // 10. Judge Evaluations: Dedicated evaluation permissions for Judges
     match /judge_evaluations/{evaluationId} {
-      allow get, list: if isStaff() || isWhitelistedAdmin() || isAdmin();
-      allow create: if (isStaff() || isWhitelistedAdmin() || isAdmin()) && incoming().judgeEmail == request.auth.token.email;
-      allow update: if (isStaff() || isWhitelistedAdmin() || isAdmin()) && existing().judgeEmail == request.auth.token.email &&
+      allow get, list: if isSuperAdmin() || isJudge();
+      allow create: if (isJudge() || isSuperAdmin()) && incoming().judgeEmail == request.auth.token.email;
+      allow update: if (isJudge() || isSuperAdmin()) && existing().judgeEmail == request.auth.token.email &&
         incoming().judgeEmail == existing().judgeEmail;
-      allow delete: if isWhitelistedAdmin() || isAdmin();
+      allow delete: if isSuperAdmin();
     }
 
-    // 11. Trigger Email Queue: MUST allow update for extension delivery recording!
+    // 11. Mail Queue: Public creation of email trigger tasks + Trigger Email delivery update rights
     match /mail/{mailId} {
-      allow get, list: if isWhitelistedAdmin() || isAdmin() || isStaff();
-      allow create: if isValidId(mailId);
-      allow update: if true; // Būtina: Trigger Email plėtinys po išsiuntimo įrašo `delivery` objektą!
-      allow delete: if isWhitelistedAdmin() || isAdmin();
+      allow get, list: if isSuperAdmin();
+      allow create: if true; // Public creation of email trigger tasks
+      allow update: if true; // Būtina: Trigger Email plėtinys po išsiuntimo įrašo delivery būsenos objektą!
+      allow delete: if isSuperAdmin();
     }
 
     // 12. Administrative Activity Logs
     match /logs/{logId} {
-      allow get, list: if isWhitelistedAdmin() || isAdmin();
-      allow write: if isWhitelistedAdmin() || isAdmin();
+      allow get, list: if isSuperAdmin();
+      allow write: if isSuperAdmin();
     }
   }
 }

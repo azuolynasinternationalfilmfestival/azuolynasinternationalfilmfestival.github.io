@@ -144,9 +144,7 @@ const JWT_SECRET = process.env.JWT_SECRET;
 const PRIMARY_SUPERADMIN_EMAIL = 'azuolynasfilmfestival@gmail.com';
 const TRUSTED_ADMIN_EMAILS = [
   'azuolynasfilmfestival@gmail.com',
-  'karina.brdar@gmail.com',
-  'dominikphotofficial.lt@gmail.com',
-  'dominikcute4@gmail.com'
+  'karina.brdar@gmail.com'
 ];
 
 // Firebase Project & Database Configuration (loaded from .env with fallback)
@@ -4269,7 +4267,6 @@ app.post('/api/admin/submissions/update', async (req, res) => {
     const subsData = loadSubmissionsData();
     if (!subsData.submissions) subsData.submissions = [];
     const idx = subsData.submissions.findIndex(s => s.id === id);
-    if (idx === -1) return res.status(404).json({ error: 'Submission not found' });
 
     const cleanUpdates = {};
     if (updates && typeof updates === 'object') {
@@ -4278,13 +4275,24 @@ app.post('/api/admin/submissions/update', async (req, res) => {
       }
     }
 
-    subsData.submissions[idx] = {
-      ...subsData.submissions[idx],
-      ...cleanUpdates,
-      updatedAt: new Date().toISOString()
-    };
-    if (cleanUpdates.isWinner === false) {
-      delete subsData.submissions[idx].awardTitle;
+    let targetSubmission;
+    if (idx === -1) {
+      targetSubmission = {
+        id,
+        ...cleanUpdates,
+        updatedAt: new Date().toISOString()
+      };
+      subsData.submissions.push(targetSubmission);
+    } else {
+      subsData.submissions[idx] = {
+        ...subsData.submissions[idx],
+        ...cleanUpdates,
+        updatedAt: new Date().toISOString()
+      };
+      if (cleanUpdates.isWinner === false) {
+        delete subsData.submissions[idx].awardTitle;
+      }
+      targetSubmission = subsData.submissions[idx];
     }
     saveSubmissionsData(subsData);
 
@@ -4303,7 +4311,11 @@ app.post('/api/admin/submissions/update', async (req, res) => {
       fsFields.awardTitle = { stringValue: String(cleanUpdates.awardTitle) };
     }
     if (Object.keys(fsFields).length > 0) {
-      await syncToFirestore('submissions', id, fsFields);
+      try {
+        await syncToFirestore('submissions', id, fsFields);
+      } catch (fsErr) {
+        console.warn('[Firestore Sync] Submission update notice:', fsErr.message);
+      }
     }
 
     recordActivityLog({
@@ -4311,12 +4323,13 @@ app.post('/api/admin/submissions/update', async (req, res) => {
       category: "submissions",
       adminEmail: adminEmail || PRIMARY_SUPERADMIN_EMAIL,
       target: id,
-      details: `Atnaujinta paraiška ID: ${id} (${subsData.submissions[idx].filmTitle || ''})`
+      details: `Atnaujinta paraiška ID: ${id} (${targetSubmission.filmTitle || ''})`
     });
 
-    res.json({ success: true, submission: subsData.submissions[idx] });
+    res.json({ success: true, submission: targetSubmission });
   } catch (err) {
-    res.status(500).json({ error: 'Failed to update submission' });
+    console.error('[Admin Submissions Update Error]:', err);
+    res.status(500).json({ error: 'Failed to update submission', message: err.message });
   }
 });
 

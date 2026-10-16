@@ -491,26 +491,48 @@ function initEntryModal() {
 
       try {
         const callerEmail = sessionStorage.getItem("admin_user_email") || "azuolynasfilmfestival@gmail.com";
+        let apiSucceeded = false;
+        let fsSucceeded = false;
 
-        // 1. Primary: Save via backend API
-        const res = await fetch("/api/admin/submissions/update", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ id: currentEntry.id, updates: serverUpdates, adminEmail: callerEmail })
-        });
-
-        if (!res.ok) {
-          const errData = await res.json().catch(() => ({}));
-          throw new Error(errData.error || "Nepavyko atnaujinti paraiškos serveryje");
-        }
-
-        // 2. Secondary: Mirror to Firestore if available
+        // 1. Direct Firestore update
         if (db && typeof db.collection === "function") {
           try {
             await db.collection("submissions").doc(currentEntry.id).update(cleanFsData);
+            fsSucceeded = true;
           } catch (fsErr) {
             console.warn("Firestore submission update notice:", fsErr.message);
           }
+        }
+
+        // 2. Primary / Sync via backend API
+        try {
+          const res = await fetch("/api/admin/submissions/update", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              id: currentEntry.id,
+              updates: {
+                ...serverUpdates,
+                filmTitle: currentEntry.filmTitle,
+                name: currentEntry.name,
+                email: currentEntry.email,
+                category: currentEntry.category
+              },
+              adminEmail: callerEmail
+            })
+          });
+          if (res.ok) {
+            apiSucceeded = true;
+          } else {
+            const errData = await res.json().catch(() => ({}));
+            console.warn("Backend submissions/update response:", errData.error);
+          }
+        } catch (apiErr) {
+          console.warn("Backend submissions/update API notice:", apiErr.message);
+        }
+
+        if (!apiSucceeded && !fsSucceeded) {
+          throw new Error("Nepavyko atnaujinti paraiškos nei serveryje, nei Firestore duomenų bazėje");
         }
 
         if (tpl !== "none") {
