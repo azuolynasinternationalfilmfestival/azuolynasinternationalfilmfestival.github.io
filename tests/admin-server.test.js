@@ -201,3 +201,26 @@ test('server normalizes recipient lists and rejects malformed mail fields', asyn
   assert.equal((await f.sendEmail({to: ['a@example.test', 5], subject: 'Test', html: '<p>Test</p>'})).success, false);
   assert.equal((await f.sendEmail({to: 'a@example.test', subject: {}, html: '<p>Test</p>'})).success, false);
 });
+
+test('admin can delete film festival submission and associated hierarchy without errors', async t => {
+  const f = await serverFixture(t);
+  await f.request('/api/submissions/record', null, {
+    id: 'sub_to_delete',
+    name: 'Delete Participant',
+    email: 'del@example.test',
+    filmTitle: 'Film To Delete',
+    attendanceType: 'remote',
+    liveToken: 'live_token_123',
+    storagePath: 'submissions/test_video.mp4'
+  });
+  const subFile = path.join(f.directory, 'data/submissions.json');
+  assert.equal(JSON.parse(fs.readFileSync(subFile, 'utf8')).submissions.some(s => s.id === 'sub_to_delete'), true);
+
+  const res = await f.request('/api/admin/submissions/delete', admins[0], { id: 'sub_to_delete' });
+  assert.equal(res.status, 200);
+  const result = await res.json();
+  assert.equal(result.success, true);
+  assert.equal(result.id, 'sub_to_delete');
+  assert.equal(JSON.parse(fs.readFileSync(subFile, 'utf8')).submissions.some(s => s.id === 'sub_to_delete'), false);
+});
+

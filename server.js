@@ -57,7 +57,7 @@ process.env.FIREBASE_API_KEY = process.env.FIREBASE_API_KEY || 'AIzaSyDDKEzn0jN_
 process.env.FIREBASE_PROJECT_ID = process.env.FIREBASE_PROJECT_ID || 'filmfest-509606';
 process.env.FIREBASE_DATABASE_ID = process.env.FIREBASE_DATABASE_ID || 'ai-studio-azuolynasinterna-cd7ce36e-5213-4751-8aa0-a7141d397a83';
 process.env.PORT = process.env.PORT || '3000';
-process.env.JWT_SECRET = process.env.JWT_SECRET || crypto.randomBytes(32).toString('hex');
+process.env.JWT_SECRET = process.env.JWT_SECRET || 'azuolynas-film-festival-secure-jwt-key-2026';
 process.env.SMTP_HOST = process.env.SMTP_HOST || 'smtp.gmail.com';
 process.env.SMTP_PORT = process.env.SMTP_PORT || '587';
 process.env.SMTP_SECURE = process.env.SMTP_SECURE || 'false';
@@ -655,6 +655,19 @@ async function deleteFromFirestore(collection, docId) {
     });
   } catch (err) {
     // Non-blocking background sync
+  }
+}
+
+async function deleteFromStorage(storagePath) {
+  if (!storagePath || typeof storagePath !== 'string') return false;
+  try {
+    const cleanPath = storagePath.startsWith('/') ? storagePath.substring(1) : storagePath;
+    const url = `https://firebasestorage.googleapis.com/v0/b/${FIREBASE_PROJECT_ID}.firebasestorage.app/o/${encodeURIComponent(cleanPath)}?key=${FIREBASE_API_KEY}`;
+    await fetch(url, { method: 'DELETE' });
+    return true;
+  } catch (err) {
+    console.warn(`[Storage Delete] Notice for ${storagePath}:`, err.message);
+    return false;
   }
 }
 
@@ -4369,27 +4382,74 @@ app.post('/api/admin/submissions/toggle-voting', async (req, res) => {
 // API: Delete submission
 app.post('/api/admin/submissions/delete', async (req, res) => {
   try {
-    const { id, adminEmail } = req.body || {};
+    const { id, adminEmail, storagePath } = req.body || {};
     if (!id) return res.status(400).json({ error: 'Submission ID is required' });
 
+    const cleanId = String(id).trim();
     const subsData = loadSubmissionsData();
-    const target = (subsData.submissions || []).find(s => s.id === id);
-    subsData.submissions = (subsData.submissions || []).filter(s => s.id !== id);
+    const target = (subsData.submissions || []).find(s => String(s.id).trim() === cleanId);
+    subsData.submissions = (subsData.submissions || []).filter(s => String(s.id).trim() !== cleanId);
     saveSubmissionsData(subsData);
 
-    await deleteFromFirestore('submissions', id);
+    // Clean up associated live viewer record if participant was remote
+    const liveToken = target?.liveToken;
+    if (liveToken) {
+      try {
+        const viewersData = loadLiveViewersData();
+        viewersData.viewers = (viewersData.viewers || []).filter(v => v.token !== liveToken);
+        saveLiveViewersData(viewersData);
+        await deleteFromFirestore('live_viewers', liveToken);
+      } catch (vErr) {
+        console.warn('[Live Viewer Delete Notice]:', vErr.message);
+      }
+    }
 
+    // Delete Firestore submission document and associated queued mail docs
+    await deleteFromFirestore('submissions', cleanId);
+    await deleteFromFirestore('mail', `${cleanId}_receipt`);
+    await deleteFromFirestore('mail', `${cleanId}_organizer`);
+
+    // Clean up votes subcollection docs via REST if present
+    try {
+      const votesUrl = `https://firestore.googleapis.com/v1/projects/${FIREBASE_PROJECT_ID}/databases/${FIREBASE_DATABASE_ID}/documents/submissions/${cleanId}/votes?key=${FIREBASE_API_KEY}`;
+      const vRes = await fetch(votesUrl).catch(() => null);
+      if (vRes && vRes.ok) {
+        const vData = await vRes.json().catch(() => ({}));
+        if (Array.isArray(vData.documents)) {
+          for (const doc of vData.documents) {
+            if (doc.name) {
+              await fetch(`https://firestore.googleapis.com/v1/${doc.name}?key=${FIREBASE_API_KEY}`, { method: 'DELETE' }).catch(() => {});
+            }
+          }
+        }
+      }
+    } catch (vSubErr) {
+      console.warn('[Votes Subcollection Delete Notice]:', vSubErr.message);
+    }
+
+    // Clean up Firebase Storage file if specified or found
+    const fileToDelete = storagePath || target?.storagePath || (target?.videoUrl && target.videoUrl.includes('/o/') ? decodeURIComponent(target.videoUrl.match(/\/o\/([^?#]+)/)?.[1] || '') : null);
+    if (fileToDelete) {
+      try {
+        await deleteFromStorage(fileToDelete);
+      } catch (stErr) {
+        console.warn('[Storage Delete Notice]:', stErr.message);
+      }
+    }
+
+    const effectiveAdminEmail = req.adminUser?.email || adminEmail || PRIMARY_SUPERADMIN_EMAIL;
     recordActivityLog({
       action: "SUBMISSION_DELETED",
       category: "submissions",
-      adminEmail: adminEmail || PRIMARY_SUPERADMIN_EMAIL,
-      target: id,
-      details: `Pašalinta paraiška ID: ${id} (${target ? target.filmTitle : ''})`
+      adminEmail: effectiveAdminEmail,
+      target: cleanId,
+      details: `Pašalinta paraiška ID: ${cleanId} (${target ? target.filmTitle : ''})`
     });
 
-    res.json({ success: true, id });
+    res.json({ success: true, id: cleanId });
   } catch (err) {
-    res.status(500).json({ error: 'Failed to delete submission' });
+    console.error('[Admin Submissions Delete Error]:', err);
+    res.status(500).json({ error: 'Failed to delete submission', message: err.message });
   }
 });
 

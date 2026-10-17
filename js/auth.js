@@ -631,6 +631,27 @@ export function initAuth(options = {}) {
           sessionStorage.setItem("admin_user_email", emailLower);
           sessionStorage.setItem("admin_user_role", activeRole);
 
+          // Ensure session token integrity for server API requests
+          try {
+            const idToken = await user.getIdToken();
+            const tokenRes = await fetch("/api/admin/token", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${idToken}`
+              },
+              body: JSON.stringify({ email: emailLower })
+            });
+            if (tokenRes.ok) {
+              const tokenData = await tokenRes.json();
+              if (tokenData && tokenData.token) {
+                sessionStorage.setItem("admin_jwt_token", tokenData.token);
+              }
+            }
+          } catch (tErr) {
+            console.warn("JWT exchange notice:", tErr.message);
+          }
+
           // Update user identity pill in sidebar/topbar
           if (currentUserBadge) {
             currentUserBadge.classList.remove("d-none");
@@ -672,12 +693,20 @@ export function initAuth(options = {}) {
           currentOnLoginSuccess(user);
         } else {
           auth.signOut();
+          sessionStorage.removeItem("admin_jwt_token");
+          sessionStorage.removeItem("admin_user_email");
+          sessionStorage.removeItem("admin_user_role");
+          sessionStorage.removeItem("admin_user_name");
           if (currentUserBadge) currentUserBadge.classList.add("d-none");
           if (loginSection) loginSection.classList.remove("d-none");
           if (panelSection) panelSection.classList.add("d-none");
           displayAuthError(authErrMsg, `Prieiga apribota: vartotojui ${emailLower} nesuteiktos administratoriaus teisės.`);
         }
       } else {
+        sessionStorage.removeItem("admin_jwt_token");
+        sessionStorage.removeItem("admin_user_email");
+        sessionStorage.removeItem("admin_user_role");
+        sessionStorage.removeItem("admin_user_name");
         if (currentUserBadge) currentUserBadge.classList.add("d-none");
         if (loginSection) loginSection.classList.remove("d-none");
         if (panelSection) panelSection.classList.add("d-none");

@@ -358,7 +358,7 @@ async function toggleVoting(id, currentStatus, btn) {
 }
 
 async function deleteSubmission(id) {
-  const entry = submissionsList.find(x => x.id === id);
+  const entry = submissionsList.find(x => String(x.id).trim() === String(id).trim());
   if (!entry) return;
 
   const confirmed = confirm(`Ar tikrai norite negrįžtamai pašalinti paraišką „${entry.filmTitle}“ (${entry.name})?`);
@@ -366,29 +366,70 @@ async function deleteSubmission(id) {
 
   try {
     const callerEmail = sessionStorage.getItem("admin_user_email") || "azuolynasfilmfestival@gmail.com";
-    if (entry.storagePath) {
+    const storagePath = entry.storagePath || (entry.videoUrl && entry.videoUrl.includes('/o/') ? decodeURIComponent(entry.videoUrl.match(/\/o\/([^?#]+)/)?.[1] || '') : null);
+
+    // 1. Delete associated Storage file (handles storagePath and videoUrl)
+    if (storagePath && storage && typeof storage.ref === "function") {
       try {
-        await storage.ref(entry.storagePath).delete();
-      } catch (err) {}
+        await storage.ref(storagePath).delete();
+      } catch (stErr) {
+        console.warn("Storage deletion notice:", stErr.message);
+      }
     }
 
-    const res = await fetch("/api/admin/submissions/delete", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id, adminEmail: callerEmail })
-    });
-
-    if (!res.ok) {
-      const errData = await res.json().catch(() => ({}));
-      throw new Error(errData.error || "Nepavyko pašalinti paraiškos serveryje");
-    }
-
+    let fsDeleted = false;
+    // 2. Delete Firestore document and associated hierarchy
     if (db && typeof db.collection === "function") {
       try {
+        // Delete votes subcollection
+        try {
+          const votesSnap = await db.collection("submissions").doc(id).collection("votes").get();
+          if (votesSnap && votesSnap.docs) {
+            for (const doc of votesSnap.docs) {
+              await doc.ref.delete().catch(() => {});
+            }
+          }
+        } catch (vErr) {
+          console.warn("Votes cleanup notice:", vErr.message);
+        }
+
+        // Delete main submission document
         await db.collection("submissions").doc(id).delete();
+        fsDeleted = true;
+
+        // Delete associated live viewer document if remote participant
+        if (entry.liveToken) {
+          await db.collection("live_viewers").doc(entry.liveToken).delete().catch(() => {});
+        }
+
+        // Delete associated mail notifications
+        await db.collection("mail").doc(`${id}_receipt`).delete().catch(() => {});
+        await db.collection("mail").doc(`${id}_organizer`).delete().catch(() => {});
       } catch (fsErr) {
         console.warn("Firestore delete submission notice:", fsErr.message);
       }
+    }
+
+    // 3. Delete on backend server
+    let apiDeleted = false;
+    try {
+      const res = await fetch("/api/admin/submissions/delete", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, adminEmail: callerEmail, storagePath })
+      });
+      if (res.ok) {
+        apiDeleted = true;
+      } else {
+        const errData = await res.json().catch(() => ({}));
+        console.warn("Backend submissions/delete notice:", errData.error);
+      }
+    } catch (apiErr) {
+      console.warn("Backend submissions/delete API notice:", apiErr.message);
+    }
+
+    if (!fsDeleted && !apiDeleted) {
+      throw new Error("Nepavyko pašalinti paraiškos nei serveryje, nei Firestore");
     }
 
     showToast("Paraiška sėkmingai pašalinta.", "success");

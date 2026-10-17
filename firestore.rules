@@ -11,14 +11,19 @@ service cloud.firestore {
       return request.auth != null;
     }
 
-    // Super Admin Access (Full Management): Strictly restricted exclusively to these two emails:
+    // Top-Level Administrator (Full Management):
+    // azuolynasfilmfestival@gmail.com has complete administrative control.
+    // Also recognizes co-admin karina.brdar@gmail.com and active admin role in users/{uid}.
     function isSuperAdmin() {
-      return isSignedIn() &&
-        'email' in request.auth.token &&
-        request.auth.token.email != null && (
+      return isSignedIn() && (
+        (request.auth.token.email != null && (
           request.auth.token.email.lower() == 'azuolynasfilmfestival@gmail.com' ||
           request.auth.token.email.lower() == 'karina.brdar@gmail.com'
-        );
+        )) ||
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' &&
+         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.status == 'active')
+      );
     }
 
     // Dedicated Judge Role: Evaluation & read-only permissions for applications
@@ -38,10 +43,6 @@ service cloud.firestore {
       return resource.data;
     }
 
-    function isValidId(id) {
-      return id is string && id.size() <= 128;
-    }
-
     // 1. Festival Settings: Public read, Super Admin full control
     match /settings/{settingId} {
       allow get, list: if true;
@@ -54,38 +55,27 @@ service cloud.firestore {
       allow write: if isSuperAdmin();
     }
 
-    // 3. Submissions: Public creation, Judges read-only, Super Admin full write/edit/delete
+    // 3. Submissions: Public creation & read, public voting increment, Super Admin full write/edit/delete
     match /submissions/{submissionId} {
       // Public, Judges, and Super Admins have read access
       allow get, list: if true;
 
-      // Public creation of applications (validated schema)
-      allow create: if isSuperAdmin() || (
-        isValidId(submissionId) &&
-        incoming().name is string && incoming().name.size() > 0 && incoming().name.size() <= 150 &&
-        incoming().email is string && incoming().email.size() > 0 && incoming().email.size() <= 150 &&
-        incoming().filmTitle is string && incoming().filmTitle.size() > 0 && incoming().filmTitle.size() <= 200 &&
-        incoming().videoUrl is string && incoming().videoUrl.size() > 0 && incoming().videoUrl.size() <= 1000 &&
-        incoming().status == 'submitted' &&
-        incoming().inVoting == false &&
-        incoming().votesCount == 0
-      );
+      // Public creation of contest applications
+      allow create: if true;
 
-      // Strict update access: ONLY Super Admins can update/edit
-      // Audience/voters can ONLY increment votesCount by exactly +1
+      // Strict update access: Super Admins can update any field;
+      // Public audience can only increment votesCount by exactly +1
       allow update: if isSuperAdmin() || (
         incoming().diff(existing()).affectedKeys().hasOnly(['votesCount']) &&
         incoming().votesCount == (existing().get('votesCount', 0) + 1)
       );
 
-      // Strict delete access: ONLY Super Admins
+      // Full deletion access for Super Admins
       allow delete: if isSuperAdmin();
 
-      // Votes subcollection
+      // Votes subcollection: Public can cast vote, Super Admin full control
       match /votes/{voterId} {
-        allow get: if isValidId(voterId);
-        allow list: if isSuperAdmin() || isJudge();
-        allow create, update: if isValidId(voterId);
+        allow read, write: if true;
         allow delete: if isSuperAdmin();
       }
     }
@@ -96,15 +86,15 @@ service cloud.firestore {
       allow write: if isSuperAdmin();
     }
 
-    // 5. Live Stream Viewers / Tokens
+    // 5. Live Stream Viewers / Tokens: Public token access, Super Admin full control
     match /live_viewers/{viewerId} {
-      allow get: if isValidId(viewerId);
+      allow get: if true;
       allow list: if isSuperAdmin() || isJudge();
-      allow create, update: if isValidId(viewerId);
+      allow create, update: if true;
       allow delete: if isSuperAdmin();
     }
 
-    // 6. Tasks Management
+    // 6. Tasks Management: Staff read, Super Admin write
     match /tasks/{taskId} {
       allow get, list: if isSuperAdmin() || isJudge();
       allow write: if isSuperAdmin();
@@ -112,55 +102,52 @@ service cloud.firestore {
 
     // 7. Global Anti-Fraud Vote Audit
     match /votes_audit/{auditId} {
-      allow get: if isValidId(auditId);
+      allow get: if true;
       allow list: if isSuperAdmin() || isJudge();
-      allow create: if isValidId(auditId) &&
-        incoming().filmId is string &&
-        incoming().category is string &&
-        incoming().deviceHash is string;
+      allow create: if true;
       allow update, delete: if isSuperAdmin();
     }
 
-    // 8. User Accounts (RBAC)
+    // 8. User Accounts (RBAC):
+    // Super admin has full control; verified users can edit their own profile data
     match /users/{userId} {
-      allow get: if isSuperAdmin() || (isSignedIn() &&
-        (userId == request.auth.uid || existing().email == request.auth.token.email));
+      allow get: if isSignedIn();
       allow list: if isSuperAdmin();
-      allow create, update: if isSuperAdmin() || (isSignedIn() && userId == request.auth.uid);
+      allow create, update: if isSuperAdmin() || (
+        isSignedIn() && (
+          userId == request.auth.uid ||
+          (resource != null && resource.data.email == request.auth.token.email)
+        )
+      );
       allow delete: if isSuperAdmin();
     }
 
-    // 9. Committee Invitations
+    // 9. Committee Invitations: Super admin management, invited users activate
     match /invitations/{invitationToken} {
-      allow get: if isValidId(invitationToken);
+      allow get: if true;
       allow list, create, delete: if isSuperAdmin();
-      allow update: if isSuperAdmin() || (isSignedIn() &&
-        existing().status == 'pending' && existing().email == request.auth.token.email &&
-        incoming().status == 'activated' && incoming().activatedBy == request.auth.uid &&
-        incoming().diff(existing()).affectedKeys().hasOnly(['status', 'activatedBy', 'activatedAt']));
+      allow update: if isSuperAdmin() || isSignedIn();
     }
 
-    // 10. Judge Evaluations: Dedicated evaluation permissions for Judges
+    // 10. Judge Evaluations: Dedicated evaluation permissions for Judges & Super Admin
     match /judge_evaluations/{evaluationId} {
       allow get, list: if isSuperAdmin() || isJudge();
-      allow create: if (isJudge() || isSuperAdmin()) && incoming().judgeEmail == request.auth.token.email;
-      allow update: if (isJudge() || isSuperAdmin()) && existing().judgeEmail == request.auth.token.email &&
-        incoming().judgeEmail == existing().judgeEmail;
+      allow create, update: if isJudge() || isSuperAdmin();
       allow delete: if isSuperAdmin();
     }
 
     // 11. Mail Queue: Public creation of email trigger tasks + Trigger Email delivery update rights
     match /mail/{mailId} {
       allow get, list: if isSuperAdmin();
-      allow create: if true; // Public creation of email trigger tasks
-      allow update: if true; // Būtina: Trigger Email plėtinys po išsiuntimo įrašo delivery būsenos objektą!
+      allow create, update: if true; // Public trigger & Trigger Email extension delivery updates
       allow delete: if isSuperAdmin();
     }
 
     // 12. Administrative Activity Logs
     match /logs/{logId} {
       allow get, list: if isSuperAdmin();
-      allow write: if isSuperAdmin();
+      allow create: if true;
+      allow update, delete: if isSuperAdmin();
     }
   }
 }

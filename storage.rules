@@ -1,0 +1,44 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    // Top-Level Administrator has full privileges across Firebase Storage
+    function isTopAdmin() {
+      return isSignedIn() && (
+        (request.auth.token.email != null && (
+          request.auth.token.email.lower() == 'azuolynasfilmfestival@gmail.com' ||
+          request.auth.token.email.lower() == 'karina.brdar@gmail.com'
+        )) ||
+        (firestore.exists(/databases/(default)/documents/users/$(request.auth.uid)) &&
+         firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.role == 'admin')
+      );
+    }
+
+    // Submissions directory: public upload & read, top admin full control (including delete)
+    match /submissions/{fileName} {
+      allow read, create: if true;
+      allow update, delete: if isTopAdmin();
+    }
+
+    // Festival Archive & Posters: public read, top admin write & delete
+    match /archive/{allPaths=**} {
+      allow read: if true;
+      allow write, delete: if isTopAdmin();
+    }
+
+    match /posters/{allPaths=**} {
+      allow read: if true;
+      allow write, delete: if isTopAdmin();
+    }
+
+    // Default: public read, top admin write & delete
+    match /{allPaths=**} {
+      allow read: if true;
+      allow write, delete: if isTopAdmin();
+    }
+  }
+}
