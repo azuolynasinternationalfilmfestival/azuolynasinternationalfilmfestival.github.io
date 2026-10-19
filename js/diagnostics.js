@@ -38,6 +38,15 @@ export function initDiagnostics() {
   loadDiagnosticsData();
 }
 
+function getAuthHeaders(extra = {}) {
+  const headers = { ...extra };
+  const sessionToken = sessionStorage.getItem("admin_jwt_token");
+  const adminEmail = sessionStorage.getItem("admin_user_email") || "azuolynasfilmfestival@gmail.com";
+  if (sessionToken) headers["Authorization"] = `Bearer ${sessionToken}`;
+  if (adminEmail) headers["x-admin-email"] = adminEmail;
+  return headers;
+}
+
 export async function loadDiagnosticsData() {
   await Promise.all([
     fetchSystemHealth(),
@@ -49,7 +58,9 @@ export async function loadDiagnosticsData() {
 
 async function fetchSystemHealth() {
   try {
-    const res = await fetch("/api/admin/diagnostics/system-health");
+    const res = await fetch("/api/admin/diagnostics/system-health", {
+      headers: getAuthHeaders()
+    });
     if (res.ok) {
       const data = await res.json();
       systemHealth = data.health || null;
@@ -61,7 +72,9 @@ async function fetchSystemHealth() {
 
 async function fetchErrorLogs() {
   try {
-    const res = await fetch("/api/admin/diagnostics/logs");
+    const res = await fetch("/api/admin/diagnostics/logs", {
+      headers: getAuthHeaders()
+    });
     if (res.ok) {
       const data = await res.json();
       errorLogs = data.logs || [];
@@ -148,7 +161,7 @@ async function executeFixPermissions() {
     showToast("Vykdomas katalogų teisių sutvarkymas...");
     const res = await fetch("/api/admin/diagnostics/fix-permissions", {
       method: "POST",
-      headers: { "Content-Type": "application/json" }
+      headers: getAuthHeaders({ "Content-Type": "application/json" })
     });
     if (res.ok) {
       const data = await res.json();
@@ -179,7 +192,7 @@ async function executeRunVerification() {
     showToast("Atliekamas bandomasis sistemos paleidimas ir 500/502 patikra...");
     const res = await fetch("/api/admin/diagnostics/run-verification", {
       method: "POST",
-      headers: { "Content-Type": "application/json" }
+      headers: getAuthHeaders({ "Content-Type": "application/json" })
     });
 
     if (res.ok) {

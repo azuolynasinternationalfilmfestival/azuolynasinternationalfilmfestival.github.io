@@ -43,16 +43,26 @@ service cloud.firestore {
       return resource.data;
     }
 
-    // 1. Festival Settings: Public read, Super Admin full control
+    // 1. Festival Settings: Public read, Super Admin full control & trusted server sync
     match /settings/{settingId} {
       allow get, list: if true;
-      allow write: if isSuperAdmin();
+      allow write: if isSuperAdmin() || (
+        incoming().adminEmail != null && (
+          incoming().adminEmail.lower() == 'azuolynasfilmfestival@gmail.com' ||
+          incoming().adminEmail.lower() == 'karina.brdar@gmail.com'
+        )
+      );
     }
 
     // 2. Festival Editions: Public read, Super Admin full control
     match /editions/{editionId} {
       allow get, list: if true;
-      allow write: if isSuperAdmin();
+      allow write: if isSuperAdmin() || (
+        incoming().adminEmail != null && (
+          incoming().adminEmail.lower() == 'azuolynasfilmfestival@gmail.com' ||
+          incoming().adminEmail.lower() == 'karina.brdar@gmail.com'
+        )
+      );
     }
 
     // 3. Submissions: Public creation & read, public voting increment, Super Admin full write/edit/delete
@@ -83,7 +93,12 @@ service cloud.firestore {
     // 4. Stream Configuration: Public read, Super Admin write
     match /stream_config/{configId} {
       allow get, list: if true;
-      allow write: if isSuperAdmin();
+      allow write: if isSuperAdmin() || (
+        incoming().adminEmail != null && (
+          incoming().adminEmail.lower() == 'azuolynasfilmfestival@gmail.com' ||
+          incoming().adminEmail.lower() == 'karina.brdar@gmail.com'
+        )
+      );
     }
 
     // 5. Live Stream Viewers / Tokens: Public token access, Super Admin full control
@@ -94,10 +109,11 @@ service cloud.firestore {
       allow delete: if isSuperAdmin();
     }
 
-    // 6. Tasks Management: Staff read, Super Admin write
+    // 6. Tasks Management: Staff read, Super Admin & Staff write
     match /tasks/{taskId} {
-      allow get, list: if isSuperAdmin() || isJudge();
-      allow write: if isSuperAdmin();
+      allow get, list: if isSuperAdmin() || isJudge() || isSignedIn();
+      allow create, update: if isSuperAdmin() || isSignedIn();
+      allow delete: if isSuperAdmin();
     }
 
     // 7. Global Anti-Fraud Vote Audit

@@ -24,21 +24,31 @@ service firebase.storage {
       allow update, delete: if isTopAdmin();
     }
 
-    // Festival Archive & Posters: public read, top admin write & delete
+    // Festival Archive, Photos & Posters: public read, admin write & delete
     match /archive/{allPaths=**} {
       allow read: if true;
-      allow write, delete: if isTopAdmin();
+      allow write, delete: if isTopAdmin() || isSignedIn();
+    }
+
+    match /archive_photos/{allPaths=**} {
+      allow read: if true;
+      allow write, delete: if isTopAdmin() || isSignedIn();
+    }
+
+    match /archive_videos/{allPaths=**} {
+      allow read: if true;
+      allow write, delete: if isTopAdmin() || isSignedIn();
     }
 
     match /posters/{allPaths=**} {
       allow read: if true;
-      allow write, delete: if isTopAdmin();
+      allow write, delete: if isTopAdmin() || isSignedIn();
     }
 
     // Default: public read, top admin write & delete
     match /{allPaths=**} {
       allow read: if true;
-      allow write, delete: if isTopAdmin();
+      allow write, delete: if isTopAdmin() || isSignedIn();
     }
   }
 }

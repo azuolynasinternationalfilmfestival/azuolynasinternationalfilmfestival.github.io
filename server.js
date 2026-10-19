@@ -974,8 +974,8 @@ app.use('/api/admin', (req, res, next) => {
   return requireAdminAuth(req, res, () => {
     const role = req.adminUser.role;
     if (role === 'admin' || req.path === '/token' || req.path === '/record-login') return next();
-    const staffReads = ['/submissions', '/tasks', '/judge-evaluations', '/voting-analytics', '/stream/status', '/live/viewers'];
-    const staffWrites = ['/tasks', '/tasks/status', '/judge-evaluation'];
+    const staffReads = ['/submissions', '/tasks', '/judge-evaluations', '/voting-analytics', '/stream/status', '/live/viewers', '/diagnostics/system-health', '/diagnostics/logs'];
+    const staffWrites = ['/tasks', '/tasks/status', '/tasks/delete', '/judge-evaluation', '/diagnostics/run-verification', '/diagnostics/fix-permissions'];
     const editorWrites = ['/submissions/update', '/submissions/toggle-voting', '/editions'];
     if (req.method === 'GET' && staffReads.includes(req.path)) return next();
     if (req.method === 'POST' && (staffWrites.includes(req.path) || (role === 'editor' && editorWrites.includes(req.path)))) return next();
@@ -3409,6 +3409,9 @@ app.get('/api/admin/diagnostics/system-health', (req, res) => {
     // Check directory permissions
     let dataDirWritable = false;
     try {
+      if (!fs.existsSync(DATA_DIR)) {
+        fs.mkdirSync(DATA_DIR, { recursive: true });
+      }
       fs.accessSync(DATA_DIR, fs.constants.R_OK | fs.constants.W_OK);
       dataDirWritable = true;
     } catch {
@@ -3420,7 +3423,9 @@ app.get('/api/admin/diagnostics/system-health', (req, res) => {
       settings: fs.existsSync(SETTINGS_FILE),
       streamConfig: fs.existsSync(STREAM_CONFIG_FILE),
       submissions: fs.existsSync(SUBMISSIONS_FILE),
-      liveViewers: fs.existsSync(LIVE_VIEWERS_FILE)
+      liveViewers: fs.existsSync(LIVE_VIEWERS_FILE),
+      tasks: fs.existsSync(TASKS_FILE),
+      logs: fs.existsSync(LOGS_FILE)
     };
 
     res.json({
@@ -4030,8 +4035,25 @@ app.get('/api/live/status', (req, res) => {
 app.post('/api/live/verify-access', (req, res) => {
   try {
     const { token, email } = req.body || {};
-    const cleanToken = String(token || '').trim();
-    const cleanEmail = String(email || '').trim().toLowerCase();
+    let cleanToken = String(token || '').trim();
+    let cleanEmail = String(email || '').trim().toLowerCase();
+
+    if (!cleanEmail && cleanToken.includes('@')) {
+      cleanEmail = cleanToken.toLowerCase();
+    }
+
+    const config = loadStreamConfig();
+    if (config && config.viewPermission === 'public') {
+      return res.json({
+        authorized: true,
+        user: {
+          name: cleanEmail ? cleanEmail.split('@')[0] : 'Žiūrovas (Vieša transliacija)',
+          email: cleanEmail || 'public.viewer@fest.local',
+          role: 'guest_viewer',
+          token: cleanToken || 'public_pass'
+        }
+      });
+    }
 
     if (!cleanToken && !cleanEmail) {
       return res.status(400).json({ error: 'Nurodykite žetoną arba registruotą el. pašto adresą' });
@@ -4229,21 +4251,54 @@ app.post('/api/admin/stream/status', (req, res) => {
   }
 });
 
-// Keep the later live player URL editor available on the restored backend.
-app.post('/api/admin/stream/iframe-url', (req, res) => {
-  const { iframeUrl, adminEmail } = req.body || {};
-  const caller = String(adminEmail || req.headers['x-admin-email'] || '').trim().toLowerCase();
-  if (!isAuthorizedToManageAccess(caller)) return res.status(403).json({ error: 'Administrator access required' });
-  let url;
-  try { url = new URL(iframeUrl); }
-  catch { return res.status(400).json({ error: 'A valid HTTPS iframe URL is required' }); }
-  if (url.protocol !== 'https:' || url.username || url.password) {
-    return res.status(400).json({ error: 'A valid HTTPS iframe URL is required' });
+// Keep the live player URL and stream configuration editor available on backend.
+app.post(['/api/admin/stream/iframe-url', '/api/admin/stream/settings'], (req, res) => {
+  const { iframeUrl, adminEmail, viewPermission, serverUrl, streamKey, streamState, isLive } = req.body || {};
+  const caller = String(adminEmail || req.headers['x-admin-email'] || (req.adminUser && req.adminUser.email) || '').trim().toLowerCase();
+  if (!isAuthorizedToManageAccess(caller) && (!req.adminUser || req.adminUser.role !== 'admin')) {
+    return res.status(403).json({ error: 'Administrator access required' });
   }
-  const config = { ...loadStreamConfig(), iframeUrl: url.href, updatedAt: new Date().toISOString() };
+
+  const currentConfig = loadStreamConfig();
+  const config = { ...currentConfig };
+
+  if (iframeUrl !== undefined) {
+    let cleanUrl = String(iframeUrl || '').trim();
+    const iframeMatch = cleanUrl.match(/src=["'](https:\/\/[^"']+)["']/i);
+    if (iframeMatch) cleanUrl = iframeMatch[1];
+
+    let url;
+    try { url = new URL(cleanUrl); }
+    catch { return res.status(400).json({ error: 'A valid HTTPS iframe URL is required' }); }
+    if (url.protocol !== 'https:' || url.username || url.password) {
+      return res.status(400).json({ error: 'A valid HTTPS iframe URL is required' });
+    }
+    config.iframeUrl = url.href;
+  }
+
+  const validViewPermissions = ['token_only', 'public', 'restricted'];
+  if (viewPermission && validViewPermissions.includes(viewPermission)) {
+    config.viewPermission = viewPermission;
+  }
+  if (serverUrl) config.serverUrl = String(serverUrl).trim();
+  if (streamKey) config.streamKey = String(streamKey).trim();
+  if (streamState) config.streamState = String(streamState).trim();
+  if (isLive !== undefined) config.isLive = Boolean(isLive);
+
+  config.updatedAt = new Date().toISOString();
   saveStreamConfig(config);
+  syncToFirestore('stream_config', 'default', config).catch(() => {});
   broadcastStreamUpdate('STREAM_STATE_UPDATE', config);
-  res.json({ success: true, iframeUrl: config.iframeUrl });
+
+  recordActivityLog({
+    action: "STREAM_CONFIG_SAVED",
+    category: "stream",
+    adminEmail: caller || PRIMARY_SUPERADMIN_EMAIL,
+    target: "stream_config",
+    details: `Atnaujinti transliacijos nustatymai: URL=${config.iframeUrl}, prieigos režimas=${config.viewPermission || 'token_only'}`
+  });
+
+  res.json({ success: true, iframeUrl: config.iframeUrl, viewPermission: config.viewPermission || 'token_only', streamConfig: config, config });
 });
 
 // API: Get Submissions with RSVP Breakdown for Dashboard
