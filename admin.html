@@ -610,17 +610,30 @@
           </div>
 
           <form id="streamIframeUrlForm" class="content-card" style="margin-bottom:24px;">
-            <h3 class="content-card-title">Transliacijos grotuvo nuoroda</h3>
-            <div class="input-cell">
-              <label for="adminStreamIframeUrlInput">Iframe URL</label>
-              <input type="url" id="adminStreamIframeUrlInput" class="field" placeholder="https://…/iframe" required aria-describedby="streamIframeUrlHelp">
-              <p id="streamIframeUrlHelp" class="content-card-sub">Įklijuokite HTTPS grotuvo nuorodą. Išsaugojus ji automatiškai atsinaujins tiesioginės transliacijos puslapyje.</p>
+            <h3 class="content-card-title">Transliacijos Grotuvo Nuoroda ir Prieigos Režimas</h3>
+            <div class="two-col-grid" style="margin-bottom:12px;">
+              <div class="input-cell">
+                <label for="adminStreamIframeUrlInput">Iframe URL (Grotuvo nuoroda)</label>
+                <input type="url" id="adminStreamIframeUrlInput" class="field" placeholder="https://…/iframe" required aria-describedby="streamIframeUrlHelp">
+                <p id="streamIframeUrlHelp" class="content-card-sub">Įklijuokite HTTPS grotuvo nuorodą arba &lt;iframe&gt; kodą.</p>
+              </div>
+              <div class="input-cell">
+                <label for="adminStreamViewPermissionSelect">Žiūrovų Prieigos Režimas (View Permissions)</label>
+                <select id="adminStreamViewPermissionSelect" class="field">
+                  <option value="token_only">Tik su Cloudflare Signed Token / autorizuotiems žiūrovams (Token Only)</option>
+                  <option value="public">Vieša transliacija visiems be žetono (Public)</option>
+                  <option value="restricted">Tik administratoriams ir komisijai (Restricted)</option>
+                </select>
+                <p class="content-card-sub">Nurodo, ar žiūrovams privalomas prieigos žetonas tiesioginei transliacijai stebėti.</p>
+              </div>
             </div>
             <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:16px;">
-              <button type="submit" id="btnSaveStreamIframeUrl" class="btn-solid btn-sm">Išsaugoti nuorodą</button>
+              <button type="submit" id="btnSaveStreamIframeUrl" class="btn-solid btn-sm">Išsaugoti transliacijos nustatymus</button>
               <button type="button" id="btnResetStreamIframeUrl" class="btn-outline btn-sm">Numatytoji nuoroda</button>
             </div>
-            <p class="content-card-sub" style="margin-top:12px; overflow-wrap:anywhere;">Išsaugota: <span id="lblCurrentIframeUrlDisplay">—</span></p>
+            <p class="content-card-sub" style="margin-top:12px; overflow-wrap:anywhere;">
+              Išsaugota nuoroda: <span id="lblCurrentIframeUrlDisplay">—</span> | Režimas: <strong id="lblCurrentViewPermissionDisplay" style="color:#D4AF37;">Token Only</strong>
+            </p>
           </form>
 
           <!-- Cloudflare Stream & OBS Control -->
@@ -676,28 +689,33 @@
             </div>
 
             <!-- OBS Configuration Credentials Box -->
-            <div class="two-col-grid" style="margin-bottom:12px;">
-              <div class="input-cell">
-                <label for="obsServerUrlInput">OBS Server URL (RTMPS)</label>
-                <div style="display:flex; gap:6px;">
-                  <input type="text" id="obsServerUrlInput" class="field" readonly value="rtmps://live.cloudflare.com:443/live/" style="font-family:monospace; font-size:0.85rem;">
-                  <button type="button" id="btnCopyObsServer" class="btn-outline btn-xs" style="white-space:nowrap; display:inline-flex; align-items:center; gap:4px;">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-                    <span>Kopijuoti</span>
-                  </button>
+            <form id="obsStreamSettingsForm" style="margin-bottom:12px;">
+              <div class="two-col-grid" style="margin-bottom:12px;">
+                <div class="input-cell">
+                  <label for="obsServerUrlInput">OBS Server URL (RTMPS)</label>
+                  <div style="display:flex; gap:6px;">
+                    <input type="text" id="obsServerUrlInput" class="field" value="rtmps://live.cloudflare.com:443/live/" style="font-family:monospace; font-size:0.85rem;">
+                    <button type="button" id="btnCopyObsServer" class="btn-outline btn-xs" style="white-space:nowrap; display:inline-flex; align-items:center; gap:4px;">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                      <span>Kopijuoti</span>
+                    </button>
+                  </div>
+                </div>
+                <div class="input-cell">
+                  <label for="obsStreamKeyInput">OBS Stream Key</label>
+                  <div style="display:flex; gap:6px;">
+                    <input type="text" id="obsStreamKeyInput" class="field" value="6561bd7efd0ad61e9040a08676049c4dk937d1a8b2c545a980c9fabc8502d8af4" style="font-family:monospace; font-size:0.85rem;">
+                    <button type="button" id="btnCopyObsKey" class="btn-outline btn-xs" style="white-space:nowrap; display:inline-flex; align-items:center; gap:4px;">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                      <span>Kopijuoti</span>
+                    </button>
+                  </div>
                 </div>
               </div>
-              <div class="input-cell">
-                <label for="obsStreamKeyInput">OBS Stream Key</label>
-                <div style="display:flex; gap:6px;">
-                  <input type="text" id="obsStreamKeyInput" class="field" readonly value="6561bd7efd0ad61e9040a08676049c4dk937d1a8b2c545a980c9fabc8502d8af4" style="font-family:monospace; font-size:0.85rem;">
-                  <button type="button" id="btnCopyObsKey" class="btn-outline btn-xs" style="white-space:nowrap; display:inline-flex; align-items:center; gap:4px;">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-                    <span>Kopijuoti</span>
-                  </button>
-                </div>
+              <div style="display:flex; gap:8px;">
+                <button type="submit" id="btnSaveObsSettings" class="btn-solid btn-xs">Išsaugoti OBS Nustatymus</button>
               </div>
-            </div>
+            </form>
 
             <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-top:8px;">
               <span style="font-size:0.8rem; color:var(--text-muted);">
@@ -1095,6 +1113,10 @@
             </select>
             <button type="button" id="btnOpenAddTaskModal" class="btn-solid btn-sm" style="display:inline-flex; align-items:center; gap:6px;">
               <span>+ Nauja Užduotis</span>
+            </button>
+            <button type="button" id="btnCleanupTasks" class="btn-outline btn-sm" style="display:inline-flex; align-items:center; gap:6px;">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+              <span>Išvalyti atliktas</span>
             </button>
           </div>
 

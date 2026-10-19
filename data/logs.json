@@ -1,6 +1,28 @@
 {
   "logs": [
     {
+      "id": "log_1792411301370_z98np",
+      "action": "PERMISSIONS_REPAIRED",
+      "category": "settings",
+      "adminEmail": "azuolynasfilmfestival@gmail.com",
+      "adminName": "azuolynasfilmfestival",
+      "target": "filesystem",
+      "details": "Sutvarkyti serverio katalogų leidimai ir duomenų failų prieigos teisės",
+      "timestamp": "2026-10-19T12:01:41.370Z",
+      "status": "success"
+    },
+    {
+      "id": "log_1792411301357_d7p75",
+      "action": "SYSTEM_HEALTH_VERIFIED",
+      "category": "settings",
+      "adminEmail": "azuolynasfilmfestival@gmail.com",
+      "adminName": "azuolynasfilmfestival",
+      "target": "system/verification",
+      "details": "Atlikta pilna serverio diagnostika ir bandomasis paleidimas: 5 iš 5 testų išlaikyti (0 klaidų)",
+      "timestamp": "2026-10-19T12:01:41.357Z",
+      "status": "success"
+    },
+    {
       "id": "log_1791878111836_buchg",
       "action": "SUBMISSION_EMAIL_SENT",
       "category": "submissions",

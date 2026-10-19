@@ -36,6 +36,13 @@ const EMAIL_THEME = {
   logoUrl: "https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media",
   siteUrl: "https://azuolynasinternationalfilmfestival.github.io/",
   adminUrl: "https://azuolynasinternationalfilmfestival.github.io/admin.html",
+  liveStreamUrl: "https://azuolynasinternationalfilmfestival.github.io/live.html",
+  instagramUrl: "https://www.instagram.com/azuolynas.iff",
+  instagramHandle: "@azuolynas.iff",
+  eventDateLt: "2027 m. balandžio 23 d.",
+  eventDateEn: "April 23rd, 2027",
+  venueLt: "Kauno tarptautinė gimnazija (Vytauto pr. 44, Kaunas)",
+  venueEn: "Kaunas International Gymnasium (Vytauto ave. 44, Kaunas, Lithuania)",
   contactEmail: "azuolynasfilmfestival@gmail.com"
 };
 
@@ -165,7 +172,7 @@ const emailTexts = {
       heading: "Sveiki, {{name}}!",
       body: "Nuoširdžiai dėkojame už dalyvavimą! Jūsų filmo paraiška sėkmingai pasiekė Ąžuolyno tarptautinio mokinių filmų festivalio organizacinį komitetą. Mūsų komisija netrukus peržiūrės filmą ir patikrins atitiktį festivalio taisyklėms (iki 180 s trukmė, filmavimas telefonu/planšete, mokinių autorystė).",
       detailsTitle: "Pateiktos paraiškos suvestinė",
-      note: "Oficiali festivalio filmų peržiūra bei laureatų apdovanojimo ceremonija įvyks Kaune 2026 m. balandžio 17 d.",
+      note: "Oficiali festivalio filmų peržiūra bei laureatų apdovanojimo ceremonija vyks Kauno tarptautinėje gimnazijoje 2027 m. balandžio 23 d. Tiesioginę transliaciją galėsite stebėti per https://azuolynasinternationalfilmfestival.github.io/live.html, o naujienas sekite Instagram: @azuolynas.iff.",
       ctaText: "Apsilankyti Festivalio Svetainėje"
     },
     adminNotification: {
@@ -182,25 +189,25 @@ const emailTexts = {
       heading: "Puikios žinios, {{name}}!",
       body: "Džiaugiamės galėdami pranešti, kad jūsų filmas atitiko visus festivalio reikalavimus ir yra oficialiai priimtas į konkursinę programą! Jūsų kūrinį vertins tarptautinė žiuri komisija.",
       detailsTitle: "Priėmimo informacija",
-      note: "Balandžio 17 d. festivalio apdovanojimų ceremonija ir laureatų paskelbimas vyks Kauno tarptautinėje gimnazijoje.",
+      note: "2027 m. balandžio 23 d. festivalio apdovanojimų ceremonija ir laureatų paskelbimas vyks Kauno tarptautinėje gimnazijoje bei tiesioginėje internetinėje transliacijoje (live.html). Sekite @azuolynas.iff.",
       ctaText: "Peržiūrėti Konkurso Programą"
     },
     semiFinalist: {
       sub: "Ąžuolynas Film Fest | Jūsų darbas pateko į PUSFINALĮ!",
       preheader: "Sveikiname! Vertinimo komisija jūsų kūrinį atrinko tarp oficialių pusfinalininkų.",
-      heading: "Sveikiname, {{name}}!",
-      body: "Atrankos komisija itin aukštai įvertino jūsų filmo originalumą, kinematografiją bei temos „Neįprastas žvilgsnis į įprastus dalykus“ atskleidimą. Jūsų darbas officially patenka tarp festivalio PUSFINALININKŲ!",
+      heading: "Sveiki, {{name}}!",
+      body: "Atrankos komisija itin aukštai įvertino jūsų filmo originalumą, kinematografiją bei temos atskleidimą. Jūsų darbas oficialiai patenka tarp festivalio PUSFINALININKŲ!",
       detailsTitle: "Pusfinalio rezultatai",
-      note: "Pusfinalio filmai bus pristatomi festivalio peržiūros programoje 2026 m. balandžio 17 d.",
+      note: "Pusfinalio filmai bus pristatomi festivalio peržiūros programoje 2027 m. balandžio 23 d. Kauno tarptautinėje gimnazijoje bei tiesioginiame eteryje per live.html.",
       ctaText: "Sekti Festivalio Naujienas"
     },
     finalist: {
       sub: "Ąžuolynas Film Fest | Jūs esate FINALE!",
       preheader: "Ypatingas pasiekimas! Jūsų filmas pateko į oficialų finalą ir varžosi dėl ąžuolo statulėlių.",
       heading: "Ypatingas pasiekimas, {{name}}!",
-      body: "Nuoširdžiai sveikiname! Jūsų filmas officially pateko į Ąžuolyno kino festivalio FINALĄ ir pretenduoja į prizines vietas, natūralaus ąžuolo statulėles bei Žiūrovų simpatijų prizą.",
+      body: "Nuoširdžiai sveikiname! Jūsų filmas oficialiai pateko į Ąžuolyno kino festivalio FINALĄ ir pretenduoja į prizines vietas, natūralaus ąžuolo statulėles bei Žiūrovų simpatijų prizą.",
       detailsTitle: "Finalo informacija",
-      note: "Laureatai bus apdovanoti iškilmingoje ceremonijoje Kaune 2026 m. balandžio 17 d.",
+      note: "Laureatai bus apdovanoti iškilmingoje ceremonijoje Kauno tarptautinėje gimnazijoje 2027 m. balandžio 23 d. Stebėkite tiesiogiai per live.html, naujienos Instagram: @azuolynas.iff.",
       ctaText: "Peržiūrėti Finalininkų Programą"
     },
     winner: {
@@ -209,7 +216,7 @@ const emailTexts = {
       heading: "Nuoširdžiausi sveikinimai, {{name}}!",
       body: "Komisijos sprendimu bei žiūrovų balsavimu, džiaugiamės galėdami paskelbti jūsų filmą oficialiu Ąžuolyno tarptautinio mokinių filmų festivalio LAUREATU! Ačiū už jūsų talentą, drąsią režisūrą ir jaunųjų kūrėjų balso stiprinimą.",
       detailsTitle: "Apdovanojimo informacija",
-      note: "Dėl autorinės ąžuolo statulėlės ir diplomų įteikimo bei pristatymo su jumis asmeniškai susisieks organizatoriai.",
+      note: "Dėl autorinės ąžuolo statulėlės ir diplomų įteikimo bei pristatymo su jumis asmeniškai susisieks organizatoriai. Ceremonijos įrašas bus pasiekiamas live.html, sekite @azuolynas.iff.",
       ctaText: "Žiūrėti Laureatų Galeriją"
     },
     rejected: {
@@ -218,7 +225,7 @@ const emailTexts = {
       heading: "Sveiki, {{name}},",
       body: "Nuoširdžiai dėkojame už jūsų filmą ir dalyvavimą festivalyje. Šiais metais sulaukėme itin daug talentingų moksleivių darbų. Nors jūsų filmas šįkart nepateko į trumpąjį konkursinį sąrašą, komisija džiaugiasi jūsų kūrybine drąsa ir linki nenustoti filmuoti!",
       detailsTitle: "Atrankos informacija",
-      note: "Kiekvienas sukurtas filmas yra svarbi patirtis. Nuoširdžiai lauksime jūsų naujų filmų kitų metų festivalyje!",
+      note: "Kiekvienas sukurtas filmas yra svarbi patirtis. Kviečiame stebėti festivalio transliaciją 2027 m. balandžio 23 d. ir sekti mūsų Instagram @azuolynas.iff!",
       ctaText: "Apsilankyti Svetainėje"
     },
     eventReminder: {
@@ -227,16 +234,16 @@ const emailTexts = {
       heading: "Sveiki, {{name}}!",
       body: "Oficialus Ąžuolyno kino festivalio vaizdo įrašas su moksleivių filmų peržiūra ir iškilminga apdovanojimų ceremonija jau paskelbtas mūsų svetainėje!",
       detailsTitle: "Renginio įrašas",
-      note: "Kviečiame patogiai peržiūrėti geriausius mokinių darbus ir ceremonijos akimirkas.",
+      note: "Kviečiame patogiai peržiūrėti geriausius mokinių darbus ir ceremonijos akimirkas. Sekite Instagram: @azuolynas.iff.",
       ctaText: "Žiūrėti Festivalio Įrašą"
     },
     remoteLivePass: {
       sub: "Ąžuolynas Film Fest | Jūsų tiesioginės transliacijos prieiga ir žetonas",
       preheader: "Jūsų asmeninė festivalio ceremonijos tiesioginės transliacijos nuoroda bei balsavimo žetonas.",
       heading: "Sveiki, {{name}}!",
-      body: "Kadangi pažymėjote, kad negalėsite atvykti į festivalio ceremoniją gyvai, paruošėme jums tiesioginę transliacijos prieigą. Renginio metu galėsite stebėti visus konkursinius filmus bei balsuoti už labiausiai patikusį darbą!",
+      body: "Kadangi pažymėjote, kad negalėsite atvykti į festivalio ceremoniją gyvai Kaune, paruošėme jums tiesioginę transliacijos prieigą. 2027 m. balandžio 23 d. galėsite tiesiogiai stebėti visus konkursinius filmus bei balsuoti už labiausiai patikusį darbą!",
       detailsTitle: "Nuotolinio dalyvio prieigos duomenys",
-      note: "Transliacija bus pasiekiama tik su šiuo asmeniniu žetonu arba jūsų registruotu el. paštu.",
+      note: "Transliacija bus pasiekiama 2027 m. balandžio 23 d. su šiuo asmeniniu žetonu arba jūsų registruotu el. paštu per https://azuolynasinternationalfilmfestival.github.io/live.html. Sekite @azuolynas.iff.",
       ctaText: "Atverti Tiesioginę Transliaciją"
     },
     userInvite: {
@@ -274,7 +281,7 @@ const emailTexts = {
       heading: "Hello, {{name}}!",
       body: "Thank you sincerely for participating! Your entry has been safely received by the organizing committee of the Ąžuolynas International Students Film Festival. Our jury will review the film to confirm eligibility (max 180s runtime, smartphone/tablet captured, student-led creation).",
       detailsTitle: "Submission Summary",
-      note: "The gala screening and awards ceremony will take place in Kaunas on April 17th, 2026.",
+      note: "The gala screening and awards ceremony will take place at Kaunas International Gymnasium on April 23rd, 2027. Watch the global live stream at https://azuolynasinternationalfilmfestival.github.io/live.html and follow us on Instagram: @azuolynas.iff.",
       ctaText: "Visit Festival Platform"
     },
     adminNotification: {
@@ -291,7 +298,7 @@ const emailTexts = {
       heading: "Congratulations, {{name}}!",
       body: "We are thrilled to inform you that your work has met all submission criteria (max 3 minutes runtime, captured on mobile phone/tablet, student-directed) and is officially accepted into the festival competition program!",
       detailsTitle: "Acceptance Record",
-      note: "The full event broadcast will premiere directly on our platform on April 17th, 2026.",
+      note: "The full event and ceremony will take place at Kaunas International Gymnasium and stream live on our platform on April 23rd, 2027. Stay tuned via Instagram @azuolynas.iff.",
       ctaText: "Explore Competition Program"
     },
     semiFinalist: {
@@ -300,7 +307,7 @@ const emailTexts = {
       heading: "Exciting news, {{name}}!",
       body: "Our jury was profoundly moved by your creative voice, camera work, and narrative approach to this year's theme. Your work has officially advanced to the festival SEMI-FINALS!",
       detailsTitle: "Semi-Final Status",
-      note: "Semi-final selections will be highlighted in the official festival broadcast on April 17th, 2026.",
+      note: "Semi-final selections will be highlighted in the official festival broadcast on April 23rd, 2027. Watch live at live.html and follow @azuolynas.iff.",
       ctaText: "Follow Festival Updates"
     },
     finalist: {
@@ -309,7 +316,7 @@ const emailTexts = {
       heading: "Tremendous achievement, {{name}}!",
       body: "Warmest congratulations! Your film has officially reached the FINALS of the Ąžuolynas Film Festival and is in direct contention for the Grand Prix, handmade oak statuettes, and the Audience Choice Award.",
       detailsTitle: "Finalist Dossier",
-      note: "Award winners will be officially unveiled during the ceremony in Kaunas on April 17th, 2026.",
+      note: "Award winners will be officially unveiled during the ceremony at Kaunas International Gymnasium and live stream on April 23rd, 2027. Follow Instagram: @azuolynas.iff.",
       ctaText: "View Finalist Showcase"
     },
     winner: {
@@ -318,7 +325,7 @@ const emailTexts = {
       heading: "Bravo, {{name}}!",
       body: "By the decision of our international jury and audience vote, we are deeply honoured to declare your film an official WINNER of the Ąžuolynas International Students Film Festival! Thank you for your inspiring creativity and cinematic boldness.",
       detailsTitle: "Award Record",
-      note: "Our organizing team will reach out personally regarding the delivery of your diploma, medal, and festival award.",
+      note: "Our organizing team will reach out personally regarding the delivery of your diploma, medal, and festival award. Replay will be available on live.html, follow @azuolynas.iff.",
       ctaText: "View Winners Hall of Fame"
     },
     rejected: {
@@ -327,7 +334,7 @@ const emailTexts = {
       heading: "Hello, {{name}},",
       body: "Thank you sincerely for sharing your story with the Ąžuolynas Film Festival. We received a record number of wonderful submissions this season. While your film was not selected for this season's shortlist, our jury was genuinely inspired by your creative passion.",
       detailsTitle: "Selection Record",
-      note: "Keep experimenting and filming! Every project builds mastery. We warmly encourage you to submit to our next edition.",
+      note: "Keep experimenting and filming! Join our live broadcast on April 23rd, 2027, and follow our community on Instagram: @azuolynas.iff.",
       ctaText: "Visit Festival Platform"
     },
     eventReminder: {
@@ -336,16 +343,16 @@ const emailTexts = {
       heading: "Hello, {{name}}!",
       body: "The official video recording of the Ąžuolynas Film Festival—including student screenings and the gala award ceremony—is now live on our website!",
       detailsTitle: "Broadcast Information",
-      note: "Sit back and enjoy the remarkable films crafted by youth creators from around the world.",
+      note: "Sit back and enjoy the remarkable films crafted by youth creators from around the world. Instagram: @azuolynas.iff.",
       ctaText: "Watch Festival Broadcast"
     },
     remoteLivePass: {
       sub: "Ąžuolynas Film Fest | Your Live Stream Access & Personal Token",
       preheader: "Your personal festival ceremony live stream access link and remote voting token.",
       heading: "Hello, {{name}}!",
-      body: "Since you indicated that you are unable to attend the awards ceremony in person, we have generated your exclusive live broadcast pass. During the event, you can watch the stream and cast your vote remotely!",
+      body: "Since you indicated that you are unable to attend the awards ceremony in person, we have generated your exclusive live broadcast pass. On April 23rd, 2027, you can watch the stream and cast your vote remotely!",
       detailsTitle: "Remote Participant Connection Details",
-      note: "The broadcast is protected and accessible only with this personal token or your registered email.",
+      note: "The broadcast airs live on April 23rd, 2027. Accessible with this personal token or your registered email at https://azuolynasinternationalfilmfestival.github.io/live.html. Follow @azuolynas.iff.",
       ctaText: "Open Live Stream Platform"
     },
     userInvite: {
@@ -567,18 +574,49 @@ function buildEmailDocument({ lang, preheader, statusKey, childrenHtml }) {
             </td>
           </tr>
 
-          <!-- EMAIL FOOTER -->
+          <!-- EMAIL FOOTER & FESTIVAL BROADCAST INFO -->
           <tr>
             <td align="center" class="footer-cell" style="padding: 24px 16px 12px 16px; color: #7A9689; font-size: 11px; line-height: 1.6; text-align: center;">
-              <p style="margin: 0 0 6px 0; color: #BAC9C0; font-weight: 600;">
-                Ąžuolynas International Students Film Festival &copy; 2026
+              <!-- Highlights Info Card -->
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color: #081B17; border: 1px solid rgba(111, 165, 138, 0.28); border-radius: 8px; margin-bottom: 20px; padding: 16px; text-align: left;">
+                <tr>
+                  <td>
+                    <div style="font-size: 11px; font-weight: 700; color: #D4AF37; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px;">
+                      ${isLt ? "🎬 RENGINIO DATA, VIETA IR TIESIOGINĖ TRANSLIACIJĄ" : "🎬 FESTIVAL EVENT, VENUE & LIVE STREAM"}
+                    </div>
+                    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="font-size: 12px; line-height: 1.6; color: #BAC9C0;">
+                      <tr>
+                        <td style="padding: 2px 0; color: #7A9689; width: 100px;">${isLt ? "Data:" : "Date:"}</td>
+                        <td style="padding: 2px 0; color: #F8FAF7; font-weight: 600;">${isLt ? "2027 m. balandžio 23 d." : "April 23rd, 2027"}</td>
+                      </tr>
+                      <tr>
+                        <td style="padding: 2px 0; color: #7A9689;">${isLt ? "Vieta:" : "Venue:"}</td>
+                        <td style="padding: 2px 0; color: #F8FAF7;">${isLt ? "Kauno tarptautinė gimnazija (Vytauto pr. 44, Kaunas)" : "Kaunas International Gymnasium (Vytauto ave. 44, Kaunas, Lithuania)"}</td>
+                      </tr>
+                      <tr>
+                        <td style="padding: 2px 0; color: #7A9689;">${isLt ? "Transliacija:" : "Live Stream:"}</td>
+                        <td style="padding: 2px 0;"><a href="${EMAIL_THEME.liveStreamUrl}" target="_blank" style="color: #4ade80; text-decoration: underline; font-weight: 600;">${isLt ? "Stebėti tiesiogiai internetu (Live Player)" : "Watch official live broadcast"} &rarr;</a></td>
+                      </tr>
+                      <tr>
+                        <td style="padding: 2px 0; color: #7A9689;">Instagram:</td>
+                        <td style="padding: 2px 0;"><a href="${EMAIL_THEME.instagramUrl}" target="_blank" style="color: #D4AF37; text-decoration: underline; font-weight: 600;">@azuolynas.iff</a> ${isLt ? "(sekite užkulisius ir atranką)" : "(follow backstage & updates)"}</td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+
+              <p style="margin: 0 0 6px 0; color: #BAC9C0; font-weight: 700; font-size: 12px;">
+                Ąžuolynas International Students Film Festival
               </p>
-              <p style="margin: 0 0 10px 0;">
+              <p style="margin: 0 0 10px 0; color: #7A9689;">
                 Kauno „Ąžuolyno“ kino studija &bull; Kauno tarptautinė gimnazija
               </p>
               <p style="margin: 0 0 12px 0;">
-                <a href="${EMAIL_THEME.siteUrl}" target="_blank" style="color: #9BC4AE; text-decoration: underline; margin: 0 8px;">${isLt ? "Oficiali svetainė" : "Official Website"}</a> &bull;
-                <a href="mailto:${EMAIL_THEME.contactEmail}" style="color: #9BC4AE; text-decoration: underline; margin: 0 8px;">${EMAIL_THEME.contactEmail}</a>
+                <a href="${EMAIL_THEME.siteUrl}" target="_blank" style="color: #9BC4AE; text-decoration: underline; margin: 0 6px;">${isLt ? "Oficiali svetainė" : "Official Website"}</a> &bull;
+                <a href="${EMAIL_THEME.instagramUrl}" target="_blank" style="color: #D4AF37; text-decoration: underline; margin: 0 6px; font-weight: 700;">Instagram: @azuolynas.iff</a> &bull;
+                <a href="${EMAIL_THEME.liveStreamUrl}" target="_blank" style="color: #4ade80; text-decoration: underline; margin: 0 6px;">Live Stream</a> &bull;
+                <a href="mailto:${EMAIL_THEME.contactEmail}" style="color: #9BC4AE; text-decoration: underline; margin: 0 6px;">${EMAIL_THEME.contactEmail}</a>
               </p>
               <p style="margin: 0; font-size: 10px; color: #557064;">
                 ${isLt 

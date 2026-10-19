@@ -148,6 +148,21 @@ function renderLivePreviewIframe() {
     inputEl.value = url;
   }
 
+  const permSelect = document.getElementById("adminStreamViewPermissionSelect");
+  if (permSelect && streamConfig.viewPermission) {
+    permSelect.value = streamConfig.viewPermission;
+  }
+
+  const permDisplay = document.getElementById("lblCurrentViewPermissionDisplay");
+  if (permDisplay) {
+    const permLabels = {
+      token_only: "Token Only (Tik su žetonu)",
+      public: "Vieša transliacija (Public)",
+      restricted: "Apribota (Tik admin/žiuri)"
+    };
+    permDisplay.textContent = permLabels[streamConfig.viewPermission] || streamConfig.viewPermission || "Token Only";
+  }
+
   const displayEl = document.getElementById("lblCurrentIframeUrlDisplay");
   if (displayEl) {
     displayEl.textContent = url.length > 60 ? (url.slice(0, 57) + "...") : url;
@@ -159,13 +174,16 @@ function initStreamIframeUrlControls() {
   const btnSaveIframe = document.getElementById("btnSaveStreamIframeUrl");
   const btnResetIframe = document.getElementById("btnResetStreamIframeUrl");
   const inputIframe = document.getElementById("adminStreamIframeUrlInput");
+  const selectPermission = document.getElementById("adminStreamViewPermissionSelect");
+  const form = document.getElementById("streamIframeUrlForm");
 
   inputIframe?.addEventListener("input", () => { inputIframe.dataset.edited = "true"; });
-  const form = document.getElementById("streamIframeUrlForm");
+
   if (form && btnSaveIframe && inputIframe) {
     form.addEventListener("submit", async (event) => {
       event.preventDefault();
       const newUrl = inputIframe.value.trim();
+      const viewPermission = selectPermission ? selectPermission.value : (streamConfig?.viewPermission || "token_only");
       if (!newUrl) {
         showToast("Įveskite galiojančią iframe nuorodą", "error");
         return;
@@ -175,22 +193,64 @@ function initStreamIframeUrlControls() {
         const callerEmail = sessionStorage.getItem("admin_user_email") || "azuolynasfilmfestival@gmail.com";
         const res = await FirebaseClient.request("stream.iframe-url", {
           method: "POST",
-
-          body: { iframeUrl: newUrl, adminEmail: callerEmail }
+          body: {
+            iframeUrl: newUrl,
+            viewPermission,
+            adminEmail: callerEmail
+          }
         });
         const data = await res.json();
         if (res.ok && data.success) {
-          showToast("Iframe nuoroda sėkmingai išsaugota ir atnaujinta!", "success");
-          streamConfig = { ...streamConfig, iframeUrl: data.iframeUrl };
+          showToast("Iframe nuoroda ir prieigos teisės sėkmingai atnaujintos!", "success");
+          streamConfig = {
+            ...streamConfig,
+            iframeUrl: data.iframeUrl,
+            viewPermission: data.viewPermission || viewPermission
+          };
           inputIframe.dataset.edited = "false";
           renderLivePreviewIframe();
+          renderStreamControls();
         } else {
-          showToast("Klaida saugant iframe nuorodą: " + (data.error || "Firebase klaida"), "error");
+          showToast("Klaida saugant nustatymus: " + (data.error || "Serverio klaida"), "error");
         }
       } catch (err) {
         showToast("Tinklo klaida: " + err.message, "error");
       } finally {
         btnSaveIframe.disabled = false;
+      }
+    });
+  }
+
+  // OBS configuration form
+  const obsForm = document.getElementById("obsStreamSettingsForm");
+  if (obsForm) {
+    obsForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const serverUrl = document.getElementById("obsServerUrlInput")?.value.trim();
+      const streamKey = document.getElementById("obsStreamKeyInput")?.value.trim();
+      const btn = document.getElementById("btnSaveObsSettings");
+      if (btn) btn.disabled = true;
+      try {
+        const callerEmail = sessionStorage.getItem("admin_user_email") || "azuolynasfilmfestival@gmail.com";
+        const res = await FirebaseClient.request("stream.iframe-url", {
+          method: "POST",
+          body: {
+            serverUrl,
+            streamKey,
+            adminEmail: callerEmail
+          }
+        });
+        const data = await res.json();
+        if (res.ok && data.success) {
+          showToast("OBS transliacijos nustatymai išsaugoti!", "success");
+          streamConfig = { ...streamConfig, serverUrl, streamKey };
+        } else {
+          showToast("Nepavyko išsaugoti OBS nustatymų", "error");
+        }
+      } catch (err) {
+        showToast("Tinklo klaida: " + err.message, "error");
+      } finally {
+        if (btn) btn.disabled = false;
       }
     });
   }

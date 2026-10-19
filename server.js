@@ -140,7 +140,7 @@ const app = express();
 const PORT = parseInt(process.env.PORT || '3000', 10);
 
 // Security & Authentication Configuration
-const JWT_SECRET = process.env.JWT_SECRET;
+const JWT_SECRET = process.env.JWT_SECRET || 'azuolynas-film-festival-secure-jwt-key-2026';
 const PRIMARY_SUPERADMIN_EMAIL = 'azuolynasfilmfestival@gmail.com';
 const TRUSTED_ADMIN_EMAILS = [
   'azuolynasfilmfestival@gmail.com',
@@ -216,7 +216,15 @@ function saveStreamConfig(data) {
 function isAuthorizedToManageAccess(email) {
   if (!email) return false;
   const clean = String(email).trim().toLowerCase();
-  return TRUSTED_ADMIN_EMAILS.map(e => e.toLowerCase()).includes(clean);
+  if (TRUSTED_ADMIN_EMAILS.map(e => e.toLowerCase()).includes(clean)) return true;
+  try {
+    const users = loadUsersData().users || [];
+    const profile = users.find(u => String(u.email || '').trim().toLowerCase() === clean);
+    if (profile && (profile.role === 'admin' || profile.role === 'superadmin' || profile.canManageUsers === true) && profile.status === 'active') {
+      return true;
+    }
+  } catch {}
+  return false;
 }
 
 function loadTasksData() {
@@ -972,17 +980,26 @@ app.use('/api/admin', (req, res, next) => {
   if ((req.path === '/invite-info' && req.method === 'GET') ||
       (req.path === '/activate-invite' && req.method === 'POST')) return next();
   return requireAdminAuth(req, res, () => {
-    const role = req.adminUser.role;
-    if (role === 'admin' || req.path === '/token' || req.path === '/record-login') return next();
-    const staffReads = ['/submissions', '/tasks', '/judge-evaluations', '/voting-analytics', '/stream/status', '/live/viewers', '/diagnostics/system-health', '/diagnostics/logs'];
-    const staffWrites = ['/tasks', '/tasks/status', '/tasks/delete', '/judge-evaluation', '/diagnostics/run-verification', '/diagnostics/fix-permissions'];
-    const editorWrites = ['/submissions/update', '/submissions/toggle-voting', '/editions'];
+    const role = req.adminUser?.role;
+    const isSuper = req.adminUser?.isSuperAdmin || role === 'superadmin' || (req.adminUser?.email && TRUSTED_ADMIN_EMAILS.includes(req.adminUser.email));
+    if (role === 'admin' || isSuper || req.path === '/token' || req.path === '/record-login') return next();
+    const staffReads = [
+      '/submissions', '/tasks', '/judge-evaluations', '/voting-analytics',
+      '/stream/status', '/stream/settings', '/stream/config', '/live/viewers',
+      '/diagnostics/system-health', '/diagnostics/logs', '/archive'
+    ];
+    const staffWrites = [
+      '/tasks', '/tasks/status', '/tasks/delete', '/tasks/cleanup',
+      '/judge-evaluation', '/diagnostics/run-verification', '/diagnostics/fix-permissions',
+      '/stream/iframe-url', '/stream/settings', '/archive'
+    ];
+    const editorWrites = ['/submissions/update', '/submissions/toggle-voting', '/editions', '/settings', '/archive'];
     if (req.method === 'GET' && staffReads.includes(req.path)) return next();
     if (req.method === 'POST' && (staffWrites.includes(req.path) || (role === 'editor' && editorWrites.includes(req.path)))) return next();
     return res.status(403).json({ error: 'Administrator access required' });
   });
 });
-app.post('/api/settings', requireAdminAuth, (req, res, next) => req.adminUser.role === 'admin' ? next() : res.sendStatus(403));
+app.post('/api/settings', requireAdminAuth, (req, res, next) => (req.adminUser?.role === 'admin' || req.adminUser?.role === 'superadmin' || req.adminUser?.isSuperAdmin) ? next() : res.sendStatus(403));
 app.get(['/api/tasks', '/api/logs'], requireAdminAuth);
 // Local server data can contain SMTP credentials and must never be served as assets.
 app.use((req, res, next) => {
@@ -1477,6 +1494,63 @@ app.post('/api/admin/settings', (req, res) => {
     if (!res.headersSent) {
       res.status(500).json({ error: 'Failed to save settings', message: e.message });
     }
+  }
+});
+
+// API: Get & Update Archive settings, videos, photos, and accessibility visibility
+app.get('/api/admin/archive', (req, res) => {
+  try {
+    const current = loadSettingsData();
+    res.json({
+      success: true,
+      archiveVisibility: current.archiveVisibility !== false && current.showArchive !== false,
+      archivePhotos: Array.isArray(current.archivePhotos) ? current.archivePhotos : [],
+      archiveVideos: Array.isArray(current.archiveVideos) ? current.archiveVideos : []
+    });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to retrieve archive data' });
+  }
+});
+
+app.post(['/api/admin/archive', '/api/admin/archive/settings'], (req, res) => {
+  try {
+    const current = loadSettingsData();
+    const { archivePhotos, archiveVideos, archiveVisibility, adminEmail } = req.body || {};
+    const caller = String(adminEmail || req.headers['x-admin-email'] || (req.adminUser && req.adminUser.email) || PRIMARY_SUPERADMIN_EMAIL).trim().toLowerCase();
+
+    const updated = {
+      ...current,
+      updatedAt: new Date().toISOString(),
+      adminEmail: caller
+    };
+    if (archivePhotos !== undefined) updated.archivePhotos = archivePhotos;
+    if (archiveVideos !== undefined) updated.archiveVideos = archiveVideos;
+    if (archiveVisibility !== undefined) {
+      updated.archiveVisibility = Boolean(archiveVisibility);
+      updated.showArchive = Boolean(archiveVisibility);
+    }
+
+    saveJson(SETTINGS_FILE, updated);
+    syncToFirestore('settings', 'festival', updated).catch(err => {
+      console.warn('[Firestore Archive Sync Error]:', err.message);
+    });
+
+    recordActivityLog({
+      action: "ARCHIVE_UPDATED",
+      category: "settings",
+      adminEmail: caller,
+      target: "settings/festival",
+      details: `Atnaujinta archyvo konfigūracija (Nuotraukų: ${Array.isArray(updated.archivePhotos) ? updated.archivePhotos.length : 0}, Video: ${Array.isArray(updated.archiveVideos) ? updated.archiveVideos.length : 0})`
+    });
+
+    res.json({
+      success: true,
+      archiveVisibility: updated.archiveVisibility,
+      archivePhotos: updated.archivePhotos,
+      archiveVideos: updated.archiveVideos
+    });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to update archive configuration' });
   }
 });
 
@@ -3215,34 +3289,51 @@ app.post('/api/admin/stream/viewers/create', async (req, res) => {
     viewersData.viewers.unshift(newViewer);
     saveLiveViewersData(viewersData);
 
-    let emailSent = false;
-    if (shouldSendEmail !== false) {
       const emailHtml = `
 <!DOCTYPE html>
 <html lang="lt">
-<head><meta charset="UTF-8"><title>Cloudflare Stream Žetonas &bull; Ąžuolynas Film Fest</title></head>
-<body style="margin:0; padding:0; background-color:#051512; font-family:sans-serif; color:#F8FAF7;">
-  <table width="100%" cellpadding="0" cellspacing="0" style="padding:32px 16px;">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tiesioginės Transliacijos Žetonas &bull; Ąžuolynas Film Fest</title>
+</head>
+<body style="margin:0; padding:0; background-color:#051512; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color:#F8FAF7;">
+  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#051512; padding:32px 12px;">
     <tr><td align="center">
-      <table width="560" cellpadding="0" cellspacing="0" style="background:#0C241F; border:1px solid rgba(212,175,55,0.3); border-radius:14px; padding:32px; text-align:left;">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:580px; background:#0C241F; border:1px solid rgba(111,165,138,0.3); border-top:3px solid #D4AF37; border-radius:12px; padding:32px 24px; text-align:left; box-shadow:0 14px 34px rgba(0,0,0,0.5);">
         <tr><td align="center" style="padding-bottom:20px;">
-          <img src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media" width="60" height="60" style="border-radius:50%; border:2px solid #D4AF37;">
-          <h2 style="color:#D4AF37; margin:14px 0 4px 0;">Ąžuolynas Film Fest 2026</h2>
-          <p style="color:#BAC9C0; margin:0; font-size:0.85rem;">Tiesioginės Transliacijos Žetonas & Prieiga</p>
+          <img src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media" width="68" height="68" style="border-radius:50%; border:2px solid #D4AF37; display:block; margin:0 auto;" alt="Logo">
+          <h2 style="color:#D4AF37; margin:14px 0 4px 0; font-size:22px;">Ąžuolynas Film Festival 2027</h2>
+          <p style="color:#BAC9C0; margin:0; font-size:0.88rem; text-transform:uppercase; letter-spacing:0.06em; font-weight:700;">Tiesioginės Transliacijos Žetonas & Prieiga</p>
         </td></tr>
-        <tr><td style="line-height:1.6; font-size:0.95rem;">
-          <p>Sveiki, <strong>${cleanName}</strong>!</p>
-          <p>Jums suteikta saugi autorizuota prieiga tiesiogiai stebėti festivalio transliaciją ir ceremoniją per Cloudflare Stream platformą.</p>
-          <div style="background:rgba(0,0,0,0.35); border:1px solid rgba(212,175,55,0.4); border-radius:8px; padding:16px; margin:20px 0; text-align:center;">
-            <div style="font-size:0.75rem; color:#BAC9C0; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:6px;">Jūsų Cloudflare Signed Token:</div>
-            <code style="font-size:1.15rem; color:#F3E5AB; font-weight:700; letter-spacing:1px;">${token}</code>
+        <tr><td style="line-height:1.65; font-size:0.95rem; color:#BAC9C0;">
+          <p style="color:#F8FAF7; font-size:1.05rem; margin-top:0;">Sveiki, <strong>${cleanName}</strong>!</p>
+          <p>Jums suteikta oficiali autorizuota prieiga tiesiogiai stebėti festivalio filmų peržiūrą ir iškilmingą apdovanojimų ceremoniją per tiesioginę transliaciją.</p>
+          
+          <div style="background:#081B17; border:1px solid rgba(212,175,55,0.4); border-radius:8px; padding:18px; margin:20px 0; text-align:center;">
+            <div style="font-size:0.75rem; color:#7A9689; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:6px; font-weight:700;">Jūsų asmeninis prieigos žetonas (Token):</div>
+            <code style="font-size:1.25rem; color:#F3E5AB; font-weight:700; letter-spacing:1px; display:inline-block; padding:4px 12px; background:rgba(0,0,0,0.3); border-radius:4px;">${token}</code>
           </div>
+
           <div style="text-align:center; margin:24px 0;">
-            <a href="${liveLink}" style="background:#4ade80; color:#051512; text-decoration:none; padding:13px 32px; border-radius:6px; font-weight:700; font-size:1rem; display:inline-block;">
+            <a href="${liveLink}" style="background:#4ade80; color:#051512; text-decoration:none; padding:14px 34px; border-radius:6px; font-weight:700; font-size:1rem; display:inline-block; box-shadow:0 6px 18px rgba(74,222,128,0.25);">
               Atverti Tiesioginę Transliaciją
             </a>
           </div>
-          <p style="font-size:0.8rem; color:#BAC9C0;">Tiesioginė asmeninė nuoroda:<br><a href="${liveLink}" style="color:#6FA58A; word-break:break-all;">${liveLink}</a></p>
+
+          <div style="background:#081B17; border:1px solid rgba(111,165,138,0.25); border-radius:8px; padding:16px; margin:20px 0; font-size:0.86rem;">
+            <div style="font-weight:700; color:#D4AF37; margin-bottom:8px; text-transform:uppercase; font-size:0.78rem; letter-spacing:0.05em;">🎬 Renginio ir transliacijos informacija:</div>
+            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="color:#BAC9C0; font-size:0.86rem; line-height:1.6;">
+              <tr><td style="width:110px; color:#7A9689; padding:2px 0;">Transliacijos data:</td><td style="color:#F8FAF7; font-weight:600; padding:2px 0;">2027 m. balandžio 23 d.</td></tr>
+              <tr><td style="color:#7A9689; padding:2px 0;">Renginio vieta:</td><td style="padding:2px 0;">Kauno tarptautinė gimnazija (Vytauto pr. 44, Kaunas)</td></tr>
+              <tr><td style="color:#7A9689; padding:2px 0;">Grotuvas:</td><td style="padding:2px 0;"><a href="${liveLink}" style="color:#6FA58A; word-break:break-all;">${liveLink}</a></td></tr>
+              <tr><td style="color:#7A9689; padding:2px 0;">Instagram:</td><td style="padding:2px 0;"><a href="https://www.instagram.com/azuolynas.iff" target="_blank" style="color:#D4AF37; font-weight:600;">@azuolynas.iff</a> (naujienos ir užkulisiai)</td></tr>
+            </table>
+          </div>
+
+          <p style="font-size:0.82rem; color:#7A9689; margin-bottom:0; text-align:center;">
+            Ąžuolynas International Students Film Festival &bull; <a href="mailto:azuolynasfilmfestival@gmail.com" style="color:#9BC4AE;">azuolynasfilmfestival@gmail.com</a>
+          </p>
         </td></tr>
       </table>
     </td></tr>
@@ -3253,9 +3344,9 @@ app.post('/api/admin/stream/viewers/create', async (req, res) => {
 
       await sendEmail({
         to: cleanEmail,
-        subject: `Ąžuolynas Film Fest | Jūsų Cloudflare Stream Prieigos Žetonas: ${token}`,
+        subject: `Ąžuolynas Film Fest | Jūsų tiesioginės transliacijos žetonas: ${token}`,
         html: emailHtml,
-        text: `Sveiki, ${cleanName}! Jūsų tiesioginės transliacijos nuoroda: ${liveLink} (Žetonas: ${token})`
+        text: `Sveiki, ${cleanName}! Jūsų tiesioginės transliacijos prieiga festivaliui (2027 m. balandžio 23 d.): ${liveLink} (Žetonas: ${token}). Sekite naujienas Instagram: @azuolynas.iff`
       });
       emailSent = true;
     }
@@ -3296,26 +3387,48 @@ app.post('/api/admin/stream/viewers/resend', async (req, res) => {
     const emailHtml = `
 <!DOCTYPE html>
 <html lang="lt">
-<head><meta charset="UTF-8"><title>Transliacijos Žetonas &bull; Ąžuolynas Film Fest</title></head>
-<body style="margin:0; padding:0; background-color:#051512; font-family:sans-serif; color:#F8FAF7;">
-  <table width="100%" cellpadding="0" cellspacing="0" style="padding:32px 16px;">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Transliacijos Žetonas &bull; Ąžuolynas Film Fest</title>
+</head>
+<body style="margin:0; padding:0; background-color:#051512; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color:#F8FAF7;">
+  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#051512; padding:32px 12px;">
     <tr><td align="center">
-      <table width="560" cellpadding="0" cellspacing="0" style="background:#0C241F; border:1px solid rgba(212,175,55,0.3); border-radius:14px; padding:32px; text-align:left;">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:580px; background:#0C241F; border:1px solid rgba(111,165,138,0.3); border-top:3px solid #D4AF37; border-radius:12px; padding:32px 24px; text-align:left; box-shadow:0 14px 34px rgba(0,0,0,0.5);">
         <tr><td align="center" style="padding-bottom:20px;">
-          <h2 style="color:#D4AF37; margin:0;">Ąžuolynas Film Fest</h2>
-          <p style="color:#BAC9C0; margin:4px 0 0 0; font-size:0.85rem;">Primenamas Jūsų Transliacijos Žetonas</p>
+          <img src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media" width="68" height="68" style="border-radius:50%; border:2px solid #D4AF37; display:block; margin:0 auto;" alt="Logo">
+          <h2 style="color:#D4AF37; margin:14px 0 4px 0; font-size:22px;">Ąžuolynas Film Festival 2027</h2>
+          <p style="color:#BAC9C0; margin:0; font-size:0.88rem; text-transform:uppercase; letter-spacing:0.06em; font-weight:700;">Primenamas Jūsų Transliacijos Žetonas</p>
         </td></tr>
-        <tr><td style="line-height:1.6; font-size:0.95rem;">
-          <p>Sveiki, <strong>${viewer.name || viewer.email}</strong>!</p>
-          <p>Persiunčiame Jūsų autorizuotą tiesioginės transliacijos prieigos žetoną:</p>
-          <div style="background:rgba(0,0,0,0.35); border:1px solid rgba(212,175,55,0.4); border-radius:8px; padding:16px; margin:20px 0; text-align:center;">
-            <code style="font-size:1.15rem; color:#F3E5AB; font-weight:700;">${viewer.token}</code>
+        <tr><td style="line-height:1.65; font-size:0.95rem; color:#BAC9C0;">
+          <p style="color:#F8FAF7; font-size:1.05rem; margin-top:0;">Sveiki, <strong>${viewer.name || viewer.email}</strong>!</p>
+          <p>Persiunčiame Jūsų autorizuotą tiesioginės festivalio transliacijos prieigos žetoną:</p>
+          
+          <div style="background:#081B17; border:1px solid rgba(212,175,55,0.4); border-radius:8px; padding:18px; margin:20px 0; text-align:center;">
+            <div style="font-size:0.75rem; color:#7A9689; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:6px; font-weight:700;">Jūsų asmeninis prieigos žetonas:</div>
+            <code style="font-size:1.25rem; color:#F3E5AB; font-weight:700; letter-spacing:1px; display:inline-block; padding:4px 12px; background:rgba(0,0,0,0.3); border-radius:4px;">${viewer.token}</code>
           </div>
+
           <div style="text-align:center; margin:24px 0;">
-            <a href="${liveLink}" style="background:#4ade80; color:#051512; text-decoration:none; padding:12px 28px; border-radius:6px; font-weight:700; display:inline-block;">
+            <a href="${liveLink}" style="background:#4ade80; color:#051512; text-decoration:none; padding:14px 34px; border-radius:6px; font-weight:700; font-size:1rem; display:inline-block; box-shadow:0 6px 18px rgba(74,222,128,0.25);">
               Žiūrėti Tiesiogiai
             </a>
           </div>
+
+          <div style="background:#081B17; border:1px solid rgba(111,165,138,0.25); border-radius:8px; padding:16px; margin:20px 0; font-size:0.86rem;">
+            <div style="font-weight:700; color:#D4AF37; margin-bottom:8px; text-transform:uppercase; font-size:0.78rem; letter-spacing:0.05em;">🎬 Renginio ir transliacijos informacija:</div>
+            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="color:#BAC9C0; font-size:0.86rem; line-height:1.6;">
+              <tr><td style="width:110px; color:#7A9689; padding:2px 0;">Transliacijos data:</td><td style="color:#F8FAF7; font-weight:600; padding:2px 0;">2027 m. balandžio 23 d.</td></tr>
+              <tr><td style="color:#7A9689; padding:2px 0;">Renginio vieta:</td><td style="padding:2px 0;">Kauno tarptautinė gimnazija (Vytauto pr. 44, Kaunas)</td></tr>
+              <tr><td style="color:#7A9689; padding:2px 0;">Grotuvas:</td><td style="padding:2px 0;"><a href="${liveLink}" style="color:#6FA58A; word-break:break-all;">${liveLink}</a></td></tr>
+              <tr><td style="color:#7A9689; padding:2px 0;">Instagram:</td><td style="padding:2px 0;"><a href="https://www.instagram.com/azuolynas.iff" target="_blank" style="color:#D4AF37; font-weight:600;">@azuolynas.iff</a></td></tr>
+            </table>
+          </div>
+
+          <p style="font-size:0.82rem; color:#7A9689; margin-bottom:0; text-align:center;">
+            Ąžuolynas International Students Film Festival &bull; <a href="mailto:azuolynasfilmfestival@gmail.com" style="color:#9BC4AE;">azuolynasfilmfestival@gmail.com</a>
+          </p>
         </td></tr>
       </table>
     </td></tr>
@@ -3328,7 +3441,7 @@ app.post('/api/admin/stream/viewers/resend', async (req, res) => {
       to: viewer.email,
       subject: `Ąžuolynas Film Fest | Jūsų transliacijos žetonas: ${viewer.token}`,
       html: emailHtml,
-      text: `Sveiki! Transliacijos nuoroda: ${liveLink} (Žetonas: ${viewer.token})`
+      text: `Sveiki! Jūsų transliacijos nuoroda (2027 m. balandžio 23 d.): ${liveLink} (Žetonas: ${viewer.token}). Naujienos Instagram: @azuolynas.iff`
     });
 
     recordActivityLog({
@@ -3703,6 +3816,32 @@ app.post('/api/admin/tasks/delete', (req, res) => {
     res.json({ success: true, message: 'Task deleted' });
   } catch (err) {
     res.status(500).json({ error: 'Failed to delete task' });
+  }
+});
+
+app.post('/api/admin/tasks/cleanup', (req, res) => {
+  try {
+    const { adminEmail, adminName } = req.body || {};
+    const data = loadTasksData();
+    const beforeCount = (data.tasks || []).length;
+    // Remove completed tasks or obsolete tasks
+    data.tasks = (data.tasks || []).filter(t => t.status !== 'completed');
+    saveTasksData(data);
+    const removedCount = beforeCount - data.tasks.length;
+
+    const callerEmail = String(adminEmail || PRIMARY_SUPERADMIN_EMAIL).trim().toLowerCase();
+    recordActivityLog({
+      action: "TASKS_CLEANED_UP",
+      category: "tasks",
+      adminEmail: callerEmail,
+      adminName: adminName || callerEmail.split('@')[0],
+      target: "tasks",
+      details: `Išvalytos atliktos ir nebereikalingos užduotys (pašalinta: ${removedCount})`
+    });
+
+    res.json({ success: true, removedCount, remainingCount: data.tasks.length, tasks: data.tasks });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to cleanup tasks' });
   }
 });
 
@@ -4148,7 +4287,6 @@ app.post('/api/live/verify-access', (req, res) => {
     saveLiveViewersData(viewersData);
 
     // Update stream config viewer count
-    const config = loadStreamConfig();
     config.viewerCount = (config.viewerCount || 0) + 1;
     saveStreamConfig(config);
 
@@ -4252,17 +4390,37 @@ app.post('/api/admin/stream/status', (req, res) => {
 });
 
 // Keep the live player URL and stream configuration editor available on backend.
+app.get(['/api/admin/stream/settings', '/api/admin/stream/config'], (req, res) => {
+  try {
+    const config = loadStreamConfig();
+    res.json({
+      success: true,
+      streamConfig: config,
+      config,
+      iframeUrl: config.iframeUrl,
+      viewPermission: config.viewPermission || 'token_only',
+      serverUrl: config.serverUrl || 'rtmps://live.cloudflare.com:443/live/',
+      streamKey: config.streamKey || '6561bd7efd0ad61e9040a08676049c4dk937d1a8b2c545a980c9fabc8502d8af4',
+      streamState: config.streamState || 'paused',
+      isLive: Boolean(config.isLive)
+    });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to retrieve stream configuration' });
+  }
+});
+
 app.post(['/api/admin/stream/iframe-url', '/api/admin/stream/settings'], (req, res) => {
   const { iframeUrl, adminEmail, viewPermission, serverUrl, streamKey, streamState, isLive } = req.body || {};
   const caller = String(adminEmail || req.headers['x-admin-email'] || (req.adminUser && req.adminUser.email) || '').trim().toLowerCase();
-  if (!isAuthorizedToManageAccess(caller) && (!req.adminUser || req.adminUser.role !== 'admin')) {
+  const isAdminRole = req.adminUser && (req.adminUser.role === 'admin' || req.adminUser.role === 'superadmin' || req.adminUser.isSuperAdmin);
+  if (!isAuthorizedToManageAccess(caller) && !isAdminRole) {
     return res.status(403).json({ error: 'Administrator access required' });
   }
 
   const currentConfig = loadStreamConfig();
   const config = { ...currentConfig };
 
-  if (iframeUrl !== undefined) {
+  if (iframeUrl !== undefined && String(iframeUrl).trim() !== '') {
     let cleanUrl = String(iframeUrl || '').trim();
     const iframeMatch = cleanUrl.match(/src=["'](https:\/\/[^"']+)["']/i);
     if (iframeMatch) cleanUrl = iframeMatch[1];
@@ -4280,8 +4438,8 @@ app.post(['/api/admin/stream/iframe-url', '/api/admin/stream/settings'], (req, r
   if (viewPermission && validViewPermissions.includes(viewPermission)) {
     config.viewPermission = viewPermission;
   }
-  if (serverUrl) config.serverUrl = String(serverUrl).trim();
-  if (streamKey) config.streamKey = String(streamKey).trim();
+  if (serverUrl !== undefined) config.serverUrl = String(serverUrl).trim();
+  if (streamKey !== undefined) config.streamKey = String(streamKey).trim();
   if (streamState) config.streamState = String(streamState).trim();
   if (isLive !== undefined) config.isLive = Boolean(isLive);
 
@@ -4299,6 +4457,80 @@ app.post(['/api/admin/stream/iframe-url', '/api/admin/stream/settings'], (req, r
   });
 
   res.json({ success: true, iframeUrl: config.iframeUrl, viewPermission: config.viewPermission || 'token_only', streamConfig: config, config });
+});
+
+// API: Update authorized stream viewer details or access permissions
+app.post('/api/admin/stream/viewers/update', (req, res) => {
+  try {
+    const { token, email, name, role, expiresInHours, status, adminEmail } = req.body || {};
+    if (!token) return res.status(400).json({ error: 'Token is required' });
+
+    const viewersData = loadLiveViewersData();
+    if (!viewersData.viewers) viewersData.viewers = [];
+    const viewer = viewersData.viewers.find(v => v.token === token);
+    if (!viewer) return res.status(404).json({ error: 'Žiūrovas nerastas' });
+
+    if (email) viewer.email = String(email).trim().toLowerCase();
+    if (name) viewer.name = String(name).trim();
+    if (role) viewer.role = String(role).trim();
+    if (status) viewer.status = String(status).trim();
+    if (expiresInHours) {
+      const duration = parseInt(expiresInHours, 10);
+      if (!isNaN(duration) && duration > 0) {
+        viewer.expiresAt = new Date(Date.now() + duration * 3600 * 1000).toISOString();
+      }
+    }
+    viewer.updatedAt = new Date().toISOString();
+    saveLiveViewersData(viewersData);
+
+    const caller = String(adminEmail || req.headers['x-admin-email'] || PRIMARY_SUPERADMIN_EMAIL).trim().toLowerCase();
+    recordActivityLog({
+      action: "STREAM_VIEWER_UPDATED",
+      category: "stream",
+      adminEmail: caller,
+      target: viewer.email,
+      details: `Atnaujinti žiūrovo ${viewer.email} parametrai (Rolė: ${viewer.role})`
+    });
+
+    res.json({ success: true, viewer });
+  } catch (err) {
+    res.status(500).json({ error: 'Klaida atnaujinant žiūrovo nustatymus' });
+  }
+});
+
+// API: Regenerate viewer access token
+app.post('/api/admin/stream/viewers/regenerate-token', (req, res) => {
+  try {
+    const { oldToken, adminEmail } = req.body || {};
+    if (!oldToken) return res.status(400).json({ error: 'Current token is required' });
+
+    const viewersData = loadLiveViewersData();
+    if (!viewersData.viewers) viewersData.viewers = [];
+    const viewer = viewersData.viewers.find(v => v.token === oldToken);
+    if (!viewer) return res.status(404).json({ error: 'Žiūrovas nerastas' });
+
+    const hashPart = crypto.createHmac('sha256', JWT_SECRET).update(`${viewer.email}-${Date.now()}`).digest('hex').substring(0, 16);
+    const newToken = `cfs_live_${hashPart}`;
+
+    viewer.token = newToken;
+    const baseUrl = req.protocol + '://' + req.get('host');
+    viewer.liveStreamUrl = `${baseUrl}/live.html?token=${encodeURIComponent(newToken)}`;
+    viewer.updatedAt = new Date().toISOString();
+    saveLiveViewersData(viewersData);
+
+    const caller = String(adminEmail || req.headers['x-admin-email'] || PRIMARY_SUPERADMIN_EMAIL).trim().toLowerCase();
+    recordActivityLog({
+      action: "STREAM_TOKEN_REGENERATED",
+      category: "stream",
+      adminEmail: caller,
+      target: viewer.email,
+      details: `Iš naujo sugeneruotas žetonas: ${newToken} žiūrovui ${viewer.email}`
+    });
+
+    res.json({ success: true, viewer, newToken, liveLink: viewer.liveStreamUrl });
+  } catch (err) {
+    res.status(500).json({ error: 'Klaida regeneruojant žetoną' });
+  }
 });
 
 // API: Get Submissions with RSVP Breakdown for Dashboard

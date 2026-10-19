@@ -13,6 +13,9 @@
     'stream.viewers.resend': '/api/admin/stream/viewers/resend',
     'stream.viewers.delete': '/api/admin/stream/viewers/delete',
     'stream.viewers.create': '/api/admin/stream/viewers/create',
+    'stream.viewers.update': '/api/admin/stream/viewers/update',
+    'stream.viewers.regenerate': '/api/admin/stream/viewers/regenerate-token',
+    'stream.settings': '/api/admin/stream/settings',
     'stream.status': '/api/admin/stream/status',
     'resend-live-link': '/api/admin/resend-live-link'
   };

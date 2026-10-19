@@ -38,6 +38,33 @@ export function initDiagnostics() {
   loadDiagnosticsData();
 }
 
+async function ensureAuthToken() {
+  let sessionToken = sessionStorage.getItem("admin_jwt_token");
+  if (!sessionToken && typeof firebase !== "undefined" && firebase.auth && firebase.auth().currentUser) {
+    try {
+      const idToken = await firebase.auth().currentUser.getIdToken();
+      if (idToken) {
+        const callerEmail = sessionStorage.getItem("admin_user_email") || firebase.auth().currentUser.email;
+        const res = await fetch("/api/admin/token", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "Authorization": `Bearer ${idToken}` },
+          body: JSON.stringify({ email: callerEmail })
+        });
+        if (res.ok) {
+          const d = await res.json();
+          if (d.token) {
+            sessionStorage.setItem("admin_jwt_token", d.token);
+            sessionToken = d.token;
+          }
+        }
+      }
+    } catch (e) {
+      console.warn("Diagnostics ensureAuthToken notice:", e.message);
+    }
+  }
+  return sessionToken;
+}
+
 function getAuthHeaders(extra = {}) {
   const headers = { ...extra };
   const sessionToken = sessionStorage.getItem("admin_jwt_token");
@@ -48,6 +75,7 @@ function getAuthHeaders(extra = {}) {
 }
 
 export async function loadDiagnosticsData() {
+  await ensureAuthToken();
   await Promise.all([
     fetchSystemHealth(),
     fetchErrorLogs()
@@ -158,6 +186,7 @@ async function executeFixPermissions() {
   }
 
   try {
+    await ensureAuthToken();
     showToast("Vykdomas katalogų teisių sutvarkymas...");
     const res = await fetch("/api/admin/diagnostics/fix-permissions", {
       method: "POST",
@@ -189,6 +218,7 @@ async function executeRunVerification() {
   }
 
   try {
+    await ensureAuthToken();
     showToast("Atliekamas bandomasis sistemos paleidimas ir 500/502 patikra...");
     const res = await fetch("/api/admin/diagnostics/run-verification", {
       method: "POST",

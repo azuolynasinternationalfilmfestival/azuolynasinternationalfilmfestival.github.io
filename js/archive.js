@@ -290,6 +290,40 @@ function closeAdminPhotoModal() {
   if (modal) modal.classList.remove("active");
 }
 
+async function persistArchiveData(updates) {
+  const callerEmail = sessionStorage.getItem("admin_user_email") || "azuolynasfilmfestival@gmail.com";
+  const payload = {
+    ...updates,
+    adminEmail: callerEmail
+  };
+
+  // 1. Primary: Save to local server backend API
+  try {
+    const res = await fetch("/api/admin/archive", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+    if (!res.ok) {
+      console.warn("Backend archive save notice:", res.status);
+    }
+  } catch (err) {
+    console.warn("Backend archive save fetch error:", err.message);
+  }
+
+  // 2. Secondary: Sync to Firestore with adminEmail included
+  if (db && typeof db.collection === "function") {
+    try {
+      await db.collection("settings").doc("festival").set({
+        ...updates,
+        adminEmail: callerEmail
+      }, { merge: true });
+    } catch (fsErr) {
+      console.warn("Firestore direct archive sync notice:", fsErr.message);
+    }
+  }
+}
+
 async function saveEditedPhoto() {
   const idInput = document.getElementById("editPhotoId");
   const capInput = document.getElementById("editPhotoCaption");
@@ -320,9 +354,9 @@ async function saveEditedPhoto() {
       return p;
     });
 
-    await db.collection("settings").doc("festival").set({
+    await persistArchiveData({
       archivePhotos: updatedPhotos
-    }, { merge: true });
+    });
 
     archivePhotos = updatedPhotos;
     closeAdminPhotoModal();
@@ -390,9 +424,12 @@ async function saveArchiveVideo() {
       ...archiveVideos
     ];
 
-    await db.collection("settings").doc("festival").set({
+    await persistArchiveData({
       archiveVideos: updatedVideos
-    }, { merge: true });
+    });
+
+    archiveVideos = updatedVideos;
+    renderVideosList();
 
     document.getElementById("arcVidTitle").value = "";
     document.getElementById("arcVidLabel").value = "";
@@ -415,9 +452,11 @@ async function removeArchiveVideo(id) {
   if (!confirm("Ar tikrai norite pašalinti šį vaizdo įrašą?")) return;
   const filtered = archiveVideos.filter((v) => v.id !== id);
   try {
-    await db.collection("settings").doc("festival").set({
+    await persistArchiveData({
       archiveVideos: filtered
-    }, { merge: true });
+    });
+    archiveVideos = filtered;
+    renderVideosList();
     showToast("Vaizdo įrašas pašalintas.");
   } catch (err) {
     showToast("Klaida trinant vaizdo įrašą: " + err.message, "error");
@@ -480,9 +519,12 @@ async function saveArchivePhoto() {
       }
     ];
 
-    await db.collection("settings").doc("festival").set({
+    await persistArchiveData({
       archivePhotos: updatedPhotos
-    }, { merge: true });
+    });
+
+    archivePhotos = updatedPhotos;
+    renderPhotosList();
 
     document.getElementById("arcImgCaption").value = "";
     document.getElementById("arcImgUrl").value = "";
@@ -504,9 +546,11 @@ async function removeArchivePhoto(id) {
   if (!confirm("Ar tikrai norite pašalinti šią nuotrauką?")) return;
   const filtered = archivePhotos.filter((p) => p.id !== id);
   try {
-    await db.collection("settings").doc("festival").set({
+    await persistArchiveData({
       archivePhotos: filtered
-    }, { merge: true });
+    });
+    archivePhotos = filtered;
+    renderPhotosList();
     showToast("Nuotrauka pašalinta.");
   } catch (err) {
     showToast("Klaida trinant nuotrauką: " + err.message, "error");
@@ -523,9 +567,9 @@ async function savePrizesPhoto() {
 
   btn.disabled = true;
   try {
-    await db.collection("settings").doc("festival").set({
+    await persistArchiveData({
       prizesPhotoUrl: url
-    }, { merge: true });
+    });
     showToast("Oficiali prizų nuotrauka atnaujinta!");
   } catch (err) {
     showToast("Klaida atnaujinant prizų nuotrauką: " + err.message, "error");

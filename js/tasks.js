@@ -39,6 +39,38 @@ export function initTasks() {
     saveTaskBtn.addEventListener("click", handleSaveTask);
   }
 
+  const cleanupTasksBtn = document.getElementById("btnCleanupTasks");
+  if (cleanupTasksBtn) {
+    cleanupTasksBtn.addEventListener("click", async () => {
+      if (!confirm("Ar tikrai norite pašalinti visas atliktas užduotis iš sąrašo?")) return;
+      cleanupTasksBtn.disabled = true;
+      try {
+        const callerEmail = sessionStorage.getItem("admin_user_email") || "azuolynasfilmfestival@gmail.com";
+        const sessionToken = sessionStorage.getItem("admin_jwt_token");
+        const headers = { "Content-Type": "application/json" };
+        if (sessionToken) headers.Authorization = `Bearer ${sessionToken}`;
+        headers["x-admin-email"] = callerEmail;
+
+        const res = await fetch("/api/admin/tasks/cleanup", {
+          method: "POST",
+          headers,
+          body: JSON.stringify({ adminEmail: callerEmail })
+        });
+        const data = await res.json();
+        if (res.ok && data.success) {
+          showToast(`Sėkmingai išvalyta užduočių: ${data.removedCount}`, "success");
+          await loadTasks();
+        } else {
+          showToast("Nepavyko išvalyti užduočių", "error");
+        }
+      } catch (err) {
+        showToast("Tinklo klaida: " + err.message, "error");
+      } finally {
+        cleanupTasksBtn.disabled = false;
+      }
+    });
+  }
+
   const filterStatusSelect = document.getElementById("filterTaskStatus");
   if (filterStatusSelect) {
     filterStatusSelect.addEventListener("change", (e) => {

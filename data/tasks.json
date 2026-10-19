@@ -27,20 +27,6 @@
       "createdBy": "azuolynasfilmfestival@gmail.com",
       "createdAt": "2026-10-06T08:15:00.000Z",
       "updatedAt": "2026-10-10T15:53:19.959Z"
-    },
-    {
-      "id": "task_archive_photos",
-      "title": "Sukelti ceremonijos nuotraukas į Archyvo albumą",
-      "description": "Atrinkti aukštos kokybės nuotraukas iš apdovanojimų ir priskirti prie Laureatų bei Prizų albumų.",
-      "assignedTo": "karina.brdar@gmail.com",
-      "assignedName": "Karina Brdar",
-      "assignedRole": "admin",
-      "priority": "medium",
-      "status": "completed",
-      "deadline": "2026-10-01",
-      "createdBy": "azuolynasfilmfestival@gmail.com",
-      "createdAt": "2026-09-28T10:00:00.000Z",
-      "updatedAt": "2026-10-02T12:00:00.000Z"
     }
   ]
 }

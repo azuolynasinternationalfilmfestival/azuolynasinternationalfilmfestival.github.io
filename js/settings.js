@@ -460,7 +460,10 @@ async function saveSettings() {
     // 2. Secondary: Also sync to Firestore if db is available
     if (db && typeof db.collection === "function") {
       try {
-        await db.collection("settings").doc("festival").set(updated, { merge: true });
+        await db.collection("settings").doc("festival").set({
+          ...updated,
+          adminEmail: callerEmail
+        }, { merge: true });
       } catch (fsErr) {
         console.warn("Firestore settings direct sync notice:", fsErr.message);
       }
