@@ -993,7 +993,7 @@ app.use('/api/admin', (req, res, next) => {
       '/judge-evaluation', '/diagnostics/run-verification', '/diagnostics/fix-permissions',
       '/stream/iframe-url', '/stream/settings', '/archive'
     ];
-    const editorWrites = ['/submissions/update', '/submissions/toggle-voting', '/editions', '/settings', '/archive'];
+    const editorWrites = ['/submissions/update', '/submissions/toggle-voting', '/editions', '/archive'];
     if (req.method === 'GET' && staffReads.includes(req.path)) return next();
     if (req.method === 'POST' && (staffWrites.includes(req.path) || (role === 'editor' && editorWrites.includes(req.path)))) return next();
     return res.status(403).json({ error: 'Administrator access required' });
@@ -3289,6 +3289,8 @@ app.post('/api/admin/stream/viewers/create', async (req, res) => {
     viewersData.viewers.unshift(newViewer);
     saveLiveViewersData(viewersData);
 
+    let emailSent = false;
+    if (shouldSendEmail !== false) {
       const emailHtml = `
 <!DOCTYPE html>
 <html lang="lt">

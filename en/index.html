@@ -304,6 +304,44 @@
         </div>
         <div id="dynDates" class="d-none">November 1st – March 26th</div>
 
+        <!-- Hero Submission Deadline Countdown Timer -->
+        <div class="hero-countdown-wrap" id="heroCountdownTimer" aria-live="polite">
+          <div class="hero-countdown-header">
+            <div class="hero-countdown-title-wrap">
+              <div class="hero-countdown-icon" aria-hidden="true">⏱️</div>
+              <div>
+                <div class="hero-countdown-label">Time Remaining Until Submission Deadline:</div>
+                <div class="hero-countdown-sublabel">Submit your entry before March 26th 23:59</div>
+              </div>
+            </div>
+            <div class="hero-countdown-badge-date">
+              <span class="pulse-dot" aria-hidden="true"></span>
+              <span>Deadline: March 26th</span>
+            </div>
+          </div>
+          <div class="hero-countdown-grid">
+            <div class="countdown-unit-box primary-unit">
+              <div class="countdown-digit" data-countdown="days">--</div>
+              <div class="countdown-label" data-countdown="days-label">Days</div>
+            </div>
+            <div class="countdown-unit-box">
+              <div class="countdown-digit" data-countdown="hours">--</div>
+              <div class="countdown-label">Hours</div>
+            </div>
+            <div class="countdown-unit-box">
+              <div class="countdown-digit" data-countdown="minutes">--</div>
+              <div class="countdown-label">Minutes</div>
+            </div>
+            <div class="countdown-unit-box">
+              <div class="countdown-digit" data-countdown="seconds">--</div>
+              <div class="countdown-label">Seconds</div>
+            </div>
+          </div>
+          <div class="countdown-footer-msg" data-countdown="footer-msg">
+            <span>🎬 <strong>Submissions are currently open!</strong> Free entry for student filmmakers.</span>
+          </div>
+        </div>
+
         <div class="cta-flex">
           <a href="#submit" id="heroSubmitBtn" class="btn-solid">Submit Your Film</a>
           <a href="#editions" id="heroEditionsBtn" class="btn-outline">Festival Chronology</a>
@@ -1058,8 +1096,8 @@
         </div>
       </div>
       <div class="share-modal-footer">
-        <a id="igModalGoBtn" href="https://www.instagram.com/" target="_blank" rel="noopener noreferrer" class="btn-solid btn-ig-primary">
-          Open Instagram
+        <a id="igModalGoBtn" href="https://www.instagram.com/azuolynas.iff" target="_blank" rel="noopener noreferrer" class="btn-solid btn-ig-primary">
+          Open Instagram (@azuolynas.iff)
         </a>
         <button type="button" class="btn-outline" onclick="FestivalShare.closeInstagramModal()">
           Close
@@ -1123,6 +1161,7 @@
   <script src="../js/voting-and-winners.js"></script>
   <script src="../js/photo-lightbox.js"></script>
   <script src="../js/burger-menu.js"></script>
+  <script src="../js/countdown.js"></script>
   <script>
     window.addEventListener("error", (e) => {
       console.warn("Script notice:", e.message || e);

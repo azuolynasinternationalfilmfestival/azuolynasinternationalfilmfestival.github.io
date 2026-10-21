@@ -305,6 +305,44 @@
         </div>
         <div id="dynDates" class="d-none">Nuo lapkričio 1 d. iki kovo 26 d.</div>
 
+        <!-- Hero Submission Deadline Countdown Timer -->
+        <div class="hero-countdown-wrap" id="heroCountdownTimer" aria-live="polite">
+          <div class="hero-countdown-header">
+            <div class="hero-countdown-title-wrap">
+              <div class="hero-countdown-icon" aria-hidden="true">⏱️</div>
+              <div>
+                <div class="hero-countdown-label">Iki paraiškų pabaigos termino liko:</div>
+                <div class="hero-countdown-sublabel">Pateikite savo filmą iki kovo 26 d. 23:59</div>
+              </div>
+            </div>
+            <div class="hero-countdown-badge-date">
+              <span class="pulse-dot" aria-hidden="true"></span>
+              <span>Terminas: Kovo 26 d.</span>
+            </div>
+          </div>
+          <div class="hero-countdown-grid">
+            <div class="countdown-unit-box primary-unit">
+              <div class="countdown-digit" data-countdown="days">--</div>
+              <div class="countdown-label" data-countdown="days-label">Dienų</div>
+            </div>
+            <div class="countdown-unit-box">
+              <div class="countdown-digit" data-countdown="hours">--</div>
+              <div class="countdown-label">Valandų</div>
+            </div>
+            <div class="countdown-unit-box">
+              <div class="countdown-digit" data-countdown="minutes">--</div>
+              <div class="countdown-label">Minučių</div>
+            </div>
+            <div class="countdown-unit-box">
+              <div class="countdown-digit" data-countdown="seconds">--</div>
+              <div class="countdown-label">Sekundžių</div>
+            </div>
+          </div>
+          <div class="countdown-footer-msg" data-countdown="footer-msg">
+            <span>🎬 <strong>Paraiškų priėmimas vyksta!</strong> Nemokamas dalyvavimas moksleiviams.</span>
+          </div>
+        </div>
+
         <div class="cta-flex">
           <a href="#submit" id="heroSubmitBtn" class="btn-solid">Pateikti savo filmą</a>
           <a href="#editions" id="heroEditionsBtn" class="btn-outline">FEST Metraščiai</a>
@@ -1063,8 +1101,8 @@
         </div>
       </div>
       <div class="share-modal-footer">
-        <a id="igModalGoBtn" href="https://www.instagram.com/" target="_blank" rel="noopener noreferrer" class="btn-solid btn-ig-primary">
-          Atverti „Instagram“
+        <a id="igModalGoBtn" href="https://www.instagram.com/azuolynas.iff" target="_blank" rel="noopener noreferrer" class="btn-solid btn-ig-primary">
+          Atverti „Instagram“ (@azuolynas.iff)
         </a>
         <button type="button" class="btn-outline" onclick="FestivalShare.closeInstagramModal()">
           Uždaryti
@@ -1128,6 +1166,7 @@
   <script src="../js/voting-and-winners.js"></script>
   <script src="../js/photo-lightbox.js"></script>
   <script src="../js/burger-menu.js"></script>
+  <script src="../js/countdown.js"></script>
   <script>
     window.addEventListener("error", (e) => {
       console.warn("Script notice:", e.message || e);

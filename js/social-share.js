@@ -193,7 +193,7 @@
             : "Highlight copied! Would you like to open Instagram now?"
         );
         if (openNow) {
-          window.open("https://www.instagram.com/", "_blank");
+          window.open("https://www.instagram.com/azuolynas.iff", "_blank");
         }
       }
     },
