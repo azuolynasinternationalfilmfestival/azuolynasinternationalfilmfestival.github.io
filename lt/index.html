@@ -560,7 +560,7 @@
       <div class="container">
         <div class="section-head">
           <div class="section-tag">Retrospektyva</div>
-          <h2 class="section-heading">Festivalio Istorija (2024–2025)</h2>
+          <h2 class="section-heading">Festivalio Istorija (2022–2025)</h2>
           <p class="section-lead-text" style="max-width: 720px; margin: 10px auto 0 auto; color: var(--text-muted); font-size: 0.95rem; text-align: center;">
             Atraskite ankstesnių metų ceremonijų vaizdo įrašus, laureatų akimirkas ir festivalio nuotraukų albumus su patogiu priartinimu, demonstracija bei dalinimosi funkcijomis.
           </p>
@@ -1221,11 +1221,9 @@
     function createMediaEmbed(url) {
       if (!url) return "";
       const cleanUrl = url.trim();
-      if (cleanUrl.includes("youtube.com") || cleanUrl.includes("youtu.be")) {
-        let embed = cleanUrl;
-        if (cleanUrl.includes("watch?v=")) embed = cleanUrl.replace("watch?v=", "embed/");
-        else if (cleanUrl.includes("youtu.be/")) embed = cleanUrl.replace("youtu.be/", "www.youtube.com/embed/");
-        return `<iframe src="${embed}" allowfullscreen class="embed-media"></iframe>`;
+      const ytMatch = cleanUrl.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([\w-]{11})/);
+      if (ytMatch && ytMatch[1]) {
+        return `<iframe src="https://www.youtube-nocookie.com/embed/${ytMatch[1]}" title="Festivalio vaizdo įrašas" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen class="embed-media"></iframe>`;
       }
       return `<video controls playsinline preload="metadata" src="${cleanUrl}" class="embed-media"></video>`;
     }
@@ -1467,12 +1465,22 @@
         {
           title: "Fest 2025",
           label: "2025 m. įrašas",
-          url: "https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/A%CC%A8z%CC%8Cuolynas%20International%20Film%20Festival%202025.mp4?alt=media&token=f62b9379-1600-456c-8d17-6f4e1f062017"
+          url: "https://www.youtube.com/watch?v=HIG7gGCQD7A"
         },
         {
           title: "Fest 2024",
           label: "2024 m. įrašas",
-          url: "https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/The%20A%CC%A8z%CC%8Cuolynas%20Film%20Festival%202024.mp4?alt=media&token=cf0417c4-0ffd-4d70-b318-3f9a5e2c81f0"
+          url: "https://www.youtube.com/watch?v=Wxr4L_o62dM"
+        },
+        {
+          title: "Fest 2023",
+          label: "2023 m. įrašas",
+          url: "https://www.youtube.com/watch?v=D0fC8jApAgk"
+        },
+        {
+          title: "Fest 2022",
+          label: "2022 m. įrašas",
+          url: "https://www.youtube.com/watch?v=2PhesUNKZQA"
         }
       ];
 
@@ -1842,5 +1850,14 @@
       }
     });
   </script>
+  <!-- Floating Actions Cluster (Scroll-to-Top) -->
+  <aside class="floating-actions-cluster" aria-label="Greitoji navigacija į viršų">
+    <button type="button" id="scrollToTopBtn" class="floating-btn floating-btn-top" title="Grįžti į viršų" aria-label="Grįžti į puslapio viršų">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <polyline points="18 15 12 9 6 15"></polyline>
+      </svg>
+      <span class="floating-btn-tooltip">Į viršų</span>
+    </button>
+  </aside>
 </body>
 </html>

@@ -118,18 +118,30 @@ export function initArchive() {
 }
 
 export function syncArchiveState(settingsData) {
-  archiveVideos = Array.isArray(settingsData.archiveVideos) ? settingsData.archiveVideos : [
+  archiveVideos = Array.isArray(settingsData.archiveVideos) && settingsData.archiveVideos.length > 0 ? settingsData.archiveVideos : [
     {
-      id: "default_2025",
+      id: "fest_2025",
       title: "Fest 2025",
       label: "2025 m. įrašas",
-      url: "https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/A%CC%A8z%CC%8Cuolynas%20International%20Film%20Festival%202025.mp4?alt=media&token=f62b9379-1600-456c-8d17-6f4e1f062017"
+      url: "https://www.youtube.com/watch?v=HIG7gGCQD7A"
     },
     {
-      id: "default_2024",
+      id: "fest_2024",
       title: "Fest 2024",
       label: "2024 m. įrašas",
-      url: "https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/The%20A%CC%A8z%CC%8Cuolynas%20Film%20Festival%202024.mp4?alt=media&token=cf0417c4-0ffd-4d70-b318-3f9a5e2c81f0"
+      url: "https://www.youtube.com/watch?v=Wxr4L_o62dM"
+    },
+    {
+      id: "fest_2023",
+      title: "Fest 2023",
+      label: "2023 m. įrašas",
+      url: "https://www.youtube.com/watch?v=D0fC8jApAgk"
+    },
+    {
+      id: "fest_2022",
+      title: "Fest 2022",
+      label: "2022 m. įrašas",
+      url: "https://www.youtube.com/watch?v=2PhesUNKZQA"
     }
   ];
 

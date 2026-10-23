@@ -19,7 +19,41 @@
   "showScreening": true,
   "showSubmit": true,
   "archiveVisibility": true,
-  "recordingVideoUrl": "",
+  "recordingVideoUrl": "https://www.youtube.com/watch?v=HIG7gGCQD7A",
+  "archiveVideos": [
+    {
+      "id": "fest_2025",
+      "year": "2025",
+      "title": "FEST 2025",
+      "label": "2025 m. festivalio įrašas",
+      "labelEn": "2025 Festival Broadcast",
+      "url": "https://www.youtube.com/watch?v=HIG7gGCQD7A"
+    },
+    {
+      "id": "fest_2024",
+      "year": "2024",
+      "title": "FEST 2024",
+      "label": "2024 m. festivalio įrašas",
+      "labelEn": "2024 Festival Broadcast",
+      "url": "https://www.youtube.com/watch?v=Wxr4L_o62dM"
+    },
+    {
+      "id": "fest_2023",
+      "year": "2023",
+      "title": "FEST 2023",
+      "label": "2023 m. festivalio įrašas",
+      "labelEn": "2023 Festival Broadcast",
+      "url": "https://www.youtube.com/watch?v=D0fC8jApAgk"
+    },
+    {
+      "id": "fest_2022",
+      "year": "2022",
+      "title": "FEST 2022",
+      "label": "2022 m. festivalio įrašas",
+      "labelEn": "2022 Festival Broadcast",
+      "url": "https://www.youtube.com/watch?v=2PhesUNKZQA"
+    }
+  ],
   "lt": {
     "heroBadge": "7-asis Tarptautinis Mokinių Filmų Festivalis",
     "topic": "Mano pašaukimas",

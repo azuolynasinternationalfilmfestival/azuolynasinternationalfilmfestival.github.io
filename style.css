@@ -7339,6 +7339,353 @@ svg {
   gap: 12px;
 }
 
+/* ==========================================================================
+   Floating Action Cluster: Scroll-to-Top & Instagram Quick Action
+   ========================================================================== */
+.floating-actions-cluster {
+  position: fixed;
+  bottom: 26px;
+  right: 24px;
+  z-index: 950;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  pointer-events: none;
+}
+
+.floating-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  pointer-events: auto;
+  cursor: pointer;
+  text-decoration: none;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
+  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1),
+              background 0.28s ease,
+              border-color 0.28s ease,
+              opacity 0.28s ease,
+              box-shadow 0.28s ease;
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.floating-btn:focus-visible {
+  outline: 2px solid #D4AF37;
+  outline-offset: 3px;
+}
+
+/* Instagram Floating Button */
+.floating-btn-ig {
+  background: radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285AEB 90%);
+  color: #FFFFFF;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+}
+
+.floating-btn-ig:hover {
+  transform: translateY(-3px) scale(1.08);
+  box-shadow: 0 10px 28px rgba(214, 36, 159, 0.45);
+}
+
+/* Scroll To Top Button */
+.floating-btn-top {
+  background: rgba(12, 36, 31, 0.94);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(212, 175, 55, 0.45);
+  color: #F8FAF7;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(16px);
+  pointer-events: none;
+}
+
+.floating-btn-top.visible {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.floating-btn-top:hover {
+  background: #143d33;
+  color: #D4AF37;
+  border-color: #D4AF37;
+  transform: translateY(-3px);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.55), 0 0 12px rgba(212, 175, 55, 0.25);
+}
+
+.floating-btn-top:active {
+  transform: translateY(0) scale(0.96);
+}
+
+/* Tooltip on hover (desktop only) */
+.floating-btn-tooltip {
+  position: absolute;
+  right: 58px;
+  top: 50%;
+  transform: translateY(-50%) translateX(6px);
+  background: rgba(5, 21, 18, 0.95);
+  backdrop-filter: blur(6px);
+  border: 1px solid rgba(111, 165, 138, 0.3);
+  color: #F8FAF7;
+  padding: 5px 12px;
+  border-radius: 6px;
+  font-size: 0.78rem;
+  font-family: var(--font-ui);
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+}
+
+.floating-btn:hover .floating-btn-tooltip {
+  opacity: 1;
+  transform: translateY(-50%) translateX(0);
+}
+
+@media (max-width: 640px) {
+  .floating-actions-cluster {
+    bottom: 18px;
+    right: 16px;
+    gap: 10px;
+  }
+  .floating-btn {
+    width: 44px;
+    height: 44px;
+  }
+  .floating-btn-tooltip {
+    display: none;
+  }
+}
+
+/* ==========================================================================
+   Admin Submissions Statistics & Charts Dashboard
+   ========================================================================== */
+.stats-dashboard-card {
+  background: var(--surface-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--site-radius, 12px);
+  padding: 22px 24px;
+  margin-bottom: 24px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.28);
+  transition: var(--transition-smooth);
+}
+
+.stats-dashboard-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 20px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid rgba(111, 165, 138, 0.16);
+}
+
+.stats-dashboard-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-cinema);
+  font-size: 1.15rem;
+  color: var(--text-color);
+  font-weight: 700;
+}
+
+.stats-dashboard-title svg {
+  color: #D4AF37;
+}
+
+.stats-charts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+  gap: 18px;
+}
+
+.chart-panel {
+  background: rgba(8, 27, 23, 0.85);
+  border: 1px solid rgba(111, 165, 138, 0.2);
+  border-radius: 8px;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.chart-panel:hover {
+  border-color: rgba(212, 175, 55, 0.4);
+}
+
+.chart-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.chart-panel-title {
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: var(--text-color);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.chart-panel-badge {
+  font-size: 0.72rem;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-weight: 600;
+}
+
+/* Horizontal Progress Bars */
+.chart-bar-row {
+  margin-bottom: 12px;
+}
+
+.chart-bar-row:last-child {
+  margin-bottom: 0;
+}
+
+.chart-bar-meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.82rem;
+  margin-bottom: 5px;
+  color: var(--text-muted);
+}
+
+.chart-bar-meta strong {
+  color: var(--text-color);
+}
+
+.chart-bar-track {
+  width: 100%;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 4px;
+  overflow: hidden;
+  position: relative;
+}
+
+.chart-bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Donut Chart Center & Legends */
+.donut-chart-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  flex-wrap: wrap;
+  padding: 8px 0;
+}
+
+.donut-svg-wrap {
+  position: relative;
+  width: 110px;
+  height: 110px;
+}
+
+.donut-svg-wrap svg {
+  transform: rotate(-90deg);
+}
+
+.donut-center-label {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-cinema);
+  pointer-events: none;
+}
+
+.donut-center-val {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--text-color);
+  line-height: 1;
+}
+
+.donut-center-sub {
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  margin-top: 2px;
+}
+
+.donut-legends {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+  min-width: 130px;
+}
+
+.donut-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+
+.donut-legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.donut-legend-item strong {
+  color: var(--text-color);
+  margin-left: auto;
+  padding-left: 8px;
+}
+
+/* Countries list */
+.country-chart-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.country-chart-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.country-chart-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.82rem;
+}
+
+.country-chart-name {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-color);
+  font-weight: 500;
+}
+
 
 
 
