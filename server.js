@@ -2132,7 +2132,7 @@ app.post('/api/admin/reset-votes', async (req, res) => {
 // ---------------------------------------------------------------------------
 
 // API: Issue session JWT auth token for authenticated admin
-app.post('/api/admin/token', (req, res) => {
+app.post('/api/admin/token', requireAdminAuth, (req, res) => {
   try {
     const { email } = req.body || {};
     if (!email) return res.status(400).json({ error: 'Email is required' });

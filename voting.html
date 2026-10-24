@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="lt">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Žiūrovų Balsavimas | Audience Voting | Ąžuolynas Film Fest</title>
-  <meta name="description" content="Oficialus Ąžuolynas International Students Film Festival žiūrovų simpatijų balsavimas. Išrinkite geriausius filmus.">
+  <title id="vPageTitle">Audience Voting | Ąžuolynas Film Fest</title>
+  <meta name="description" id="vMetaDescription" content="Official Audience Choice Award Voting for the Ąžuolynas International Students Film Festival. Support independent student filmmakers.">
   <link rel="icon" type="image/webp" href="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media">
   <link rel="stylesheet" href="style.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -17,21 +17,50 @@
   <script src="config.js"></script>
   <script src="voting-client.js"></script>
   <style>
+    /* Language switcher */
+    .voting-lang-switch {
+      display: inline-flex;
+      align-items: center;
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(111, 165, 138, 0.3);
+      border-radius: 20px;
+      padding: 3px 5px;
+      gap: 4px;
+    }
+    .voting-lang-btn {
+      background: transparent;
+      border: none;
+      color: #94a3b8;
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 14px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .voting-lang-btn:hover {
+      color: #F8FAF7;
+    }
+    .voting-lang-btn.active {
+      background: #D4AF37;
+      color: #041310;
+    }
+
     .voting-hero {
-      padding: 120px 20px 40px 20px;
+      padding: 110px 20px 36px 20px;
       text-align: center;
-      background: radial-gradient(circle at 50% 20%, rgba(12, 36, 31, 0.9) 0%, rgba(4, 19, 16, 0.98) 100%);
+      background: radial-gradient(circle at 50% 20%, rgba(12, 36, 31, 0.92) 0%, rgba(4, 19, 16, 0.98) 100%);
     }
     .voting-hero-title {
       font-family: var(--font-cinema, Georgia, serif);
       font-size: clamp(2rem, 5vw, 3.2rem);
       color: #F8FAF7;
-      margin: 12px 0;
+      margin: 14px 0 10px 0;
     }
     .voting-hero-sub {
       color: #94a3b8;
-      max-width: 640px;
-      margin: 0 auto 28px auto;
+      max-width: 660px;
+      margin: 0 auto 24px auto;
       font-size: 1.05rem;
       line-height: 1.5;
     }
@@ -61,7 +90,7 @@
       justify-content: center;
       gap: 8px;
       flex-wrap: wrap;
-      margin: 32px 0 24px 0;
+      margin: 28px 0 20px 0;
     }
     .category-tab-btn {
       background: rgba(255, 255, 255, 0.05);
@@ -189,7 +218,7 @@
       gap: 8px;
       transition: all 0.2s ease;
     }
-    .btn-vote-trigger:hover {
+    .btn-vote-trigger:hover:not(:disabled) {
       background: #F3E5AB;
       transform: translateY(-1px);
     }
@@ -198,6 +227,12 @@
       border: 1px solid #4ade80;
       color: #4ade80;
       cursor: default;
+      transform: none;
+    }
+    .btn-vote-trigger:disabled:not(.voted) {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
     }
     /* Animated Live Progress Bar */
     .film-results-wrap {
@@ -245,21 +280,27 @@
   <!-- Header -->
   <header class="site-header">
     <div class="container nav-bar">
-      <a href="lt/index.html" class="logo-wrap">
+      <a href="en/index.html" class="logo-wrap" id="logoLink">
         <img src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media" alt="Ąžuolynas Fest" class="logo-img">
         <span class="logo-text">Ąžuolynas Fest</span>
       </a>
 
-      <nav class="desktop-nav" aria-label="Pagrindinė navigacija">
-        <a href="lt/index.html" class="nav-link">Pradžia</a>
-        <a href="voting.html" class="nav-link active">Balsavimas</a>
-        <a href="live.html" class="nav-link">Transliacija</a>
-        <a href="admin.html" class="nav-link">Valdymas</a>
+      <nav class="desktop-nav" aria-label="Main Navigation">
+        <a href="en/index.html" class="nav-link" id="navHome">Home</a>
+        <a href="voting.html" class="nav-link active" id="navVoting">Voting</a>
+        <a href="live.html" class="nav-link" id="navLive">Live Stream</a>
+        <a href="admin.html" class="nav-link" id="navAdmin">Admin</a>
       </nav>
 
-      <div class="header-actions">
-        <a href="live.html" class="btn-solid btn-sm" style="background:#D4AF37; color:#041310; text-decoration:none; padding:6px 14px; border-radius:4px; font-weight:700;">
-          Žiūrėti Gyvai
+      <div class="header-actions" style="display:flex; align-items:center; gap:12px;">
+        <!-- EN/LT Switcher -->
+        <div class="voting-lang-switch">
+          <button type="button" class="voting-lang-btn active" data-lang="en">EN</button>
+          <button type="button" class="voting-lang-btn" data-lang="lt">LT</button>
+        </div>
+
+        <a href="live.html" class="btn-solid btn-sm" id="btnLiveTop" style="background:#D4AF37; color:#041310; text-decoration:none; padding:6px 14px; border-radius:4px; font-weight:700;">
+          Watch Live
         </a>
       </div>
     </div>
@@ -270,16 +311,16 @@
     <div class="container">
       <div id="votingStatusBadge" class="voting-status-badge status-open">
         <span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:currentColor;"></span>
-        <span id="votingStatusText">Balsavimas Aktyvus</span>
+        <span id="votingStatusText">Voting Active</span>
       </div>
-      <h1 class="voting-hero-title">Žiūrovų Simpatijų Balsavimas</h1>
-      <p class="voting-hero-sub">
-        Palaikykite oficialios atrankos kūrėjus. Kiekvienoje nominacijoje galite atiduoti po vieną balsą. Po balsavimo pamatysite realaus laiko rezultatus.
+      <h1 class="voting-hero-title" id="heroTitle">Audience Choice Award Voting</h1>
+      <p class="voting-hero-sub" id="heroSubtitle">
+        Support official festival filmmakers! You can cast one vote per nomination category. Real-time voting statistics will be revealed once your vote is recorded.
       </p>
 
       <!-- Category Filter Tabs -->
       <div class="category-filter-bar" id="categoryFilterBar">
-        <button type="button" class="category-tab-btn active" data-cat="all">Visos Nominacijos</button>
+        <button type="button" class="category-tab-btn active" data-cat="all">All Categories</button>
       </div>
     </div>
   </section>
@@ -287,13 +328,109 @@
   <!-- Films Grid -->
   <main class="voting-grid" id="votingFilmsContainer" aria-live="polite">
     <div class="voting-empty-state">
-      <p>Kraunami konkursiniai filmai...</p>
+      <p id="loadingNotice">Loading competition films...</p>
     </div>
   </main>
 
   <script src="js/burger-menu.js"></script>
   <script>
     (function() {
+      // 1. Dual-Language Strings Dictionary (Default: EN)
+      const I18N = {
+        en: {
+          pageTitle: "Audience Voting | Ąžuolynas Film Fest",
+          metaDesc: "Official Audience Choice Award Voting for the Ąžuolynas International Students Film Festival. Support independent student filmmakers.",
+          navHome: "Home",
+          navVoting: "Voting",
+          navLive: "Live Stream",
+          navAdmin: "Admin",
+          btnLiveTop: "Watch Live",
+          homeUrl: "en/index.html",
+          statusOpen: "Voting Active",
+          statusClosed: "Voting Closed",
+          heroTitle: "Audience Choice Award Voting",
+          heroSubtitle: "Support official festival filmmakers! You can cast one vote per nomination category. Real-time voting statistics will be revealed once your vote is recorded.",
+          allCategories: "All Categories",
+          loadingNotice: "Loading competition films...",
+          emptyNotice: "No films found in this category yet, or selection is being prepared.",
+          directorLabel: "Director:",
+          btnVote: "Vote for Film",
+          btnVoting: "Recording vote...",
+          btnVoted: "Your vote recorded ✓",
+          btnAlreadyVoted: "Vote cast in this category",
+          votesLabel: "Votes:",
+          anonymousVoter: "Independent Filmmaker",
+          errorVoteFailed: "Failed to cast vote. Please try again."
+        },
+        lt: {
+          pageTitle: "Žiūrovų Balsavimas | Ąžuolynas Film Fest",
+          metaDesc: "Oficialus Ąžuolynas International Students Film Festival žiūrovų simpatijų balsavimas. Išrinkite geriausius filmus.",
+          navHome: "Pradžia",
+          navVoting: "Balsavimas",
+          navLive: "Transliacija",
+          navAdmin: "Valdymas",
+          btnLiveTop: "Žiūrėti Gyvai",
+          homeUrl: "lt/index.html",
+          statusOpen: "Balsavimas Aktyvus",
+          statusClosed: "Balsavimas Uždarytas",
+          heroTitle: "Žiūrovų Simpatijų Balsavimas",
+          heroSubtitle: "Palaikykite oficialios atrankos kūrėjus! Kiekvienoje nominacijoje galite atiduoti po vieną balsą. Realaus laiko rezultatus pamatysite atidavę balsą.",
+          allCategories: "Visos Nominacijos",
+          loadingNotice: "Kraunami konkursiniai filmai...",
+          emptyNotice: "Šioje nominacijoje filmų kol kas nėra arba atranka dar ruošiama.",
+          directorLabel: "Režisierius:",
+          btnVote: "Balsuoti už filmą",
+          btnVoting: "Registruojama...",
+          btnVoted: "Jūsų balsas įskaitytas ✓",
+          btnAlreadyVoted: "Balsas šioje nominacijoje atiduotas",
+          votesLabel: "Balsai:",
+          anonymousVoter: "Nepriklausomas kūrėjas",
+          errorVoteFailed: "Nepavyko atiduoti balso. Bandykite dar kartą."
+        }
+      };
+
+      // Category translation helper
+      const CATEGORY_NAMES = {
+        lt: {
+          "Short Fiction": "Trumpametražis vaidybinis filmas",
+          "Documentary": "Dokumentinis filmas",
+          "Animation": "Animacinis filmas",
+          "Music Video": "Muzikinis klipas",
+          "Experimental": "Eksperimentinis filmas",
+          "Audience Choice": "Žiūrovų simpatija",
+          "Vaidybinis filmas": "Trumpametražis vaidybinis filmas",
+          "Dokumentinis filmas": "Dokumentinis filmas",
+          "Animacija": "Animacinis filmas",
+          "Muzikinis vaizdo klipas": "Muzikinis klipas",
+          "Eksperimentinis": "Eksperimentinis filmas"
+        },
+        en: {
+          "Trumpametražis vaidybinis filmas": "Short Fiction",
+          "Vaidybinis filmas": "Short Fiction",
+          "Dokumentinis filmas": "Documentary",
+          "Animacinis filmas": "Animation",
+          "Animacija": "Animation",
+          "Muzikinis klipas": "Music Video",
+          "Muzikinis vaizdo klipas": "Music Video",
+          "Eksperimentinis filmas": "Experimental",
+          "Eksperimentinis": "Experimental",
+          "Žiūrovų simpatija": "Audience Choice"
+        }
+      };
+
+      // Detect language (Default: EN)
+      function detectLanguage() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const qLang = urlParams.get("lang");
+        if (qLang === "en" || qLang === "lt") return qLang;
+
+        const stored = localStorage.getItem("asiff_preferred_lang");
+        if (stored === "en" || stored === "lt") return stored;
+
+        return "en"; // Default English
+      }
+
+      let currentLang = detectLanguage();
       let currentFilms = [];
       let currentStats = { statsByNomination: {}, filmVoteCounts: {} };
       let selectedCategory = "all";
@@ -302,6 +439,81 @@
       const filterBar = document.getElementById("categoryFilterBar");
       const statusBadge = document.getElementById("votingStatusBadge");
       const statusText = document.getElementById("votingStatusText");
+
+      function setLanguage(lang) {
+        currentLang = lang;
+        try {
+          localStorage.setItem("asiff_preferred_lang", lang);
+        } catch (e) {}
+
+        document.documentElement.lang = lang;
+        applyTranslations();
+        buildCategoryTabs();
+        renderCards();
+      }
+
+      function getCategoryLabel(catRaw) {
+        if (!catRaw || catRaw === "all") return "";
+        const dict = CATEGORY_NAMES[currentLang];
+        if (dict && dict[catRaw]) return dict[catRaw];
+        return catRaw;
+      }
+
+      function applyTranslations() {
+        const t = I18N[currentLang] || I18N.en;
+
+        document.title = t.pageTitle;
+        const meta = document.getElementById("vMetaDescription");
+        if (meta) meta.content = t.metaDesc;
+
+        const homeLink = document.getElementById("logoLink");
+        if (homeLink) homeLink.href = t.homeUrl;
+
+        const navH = document.getElementById("navHome");
+        if (navH) { navH.textContent = t.navHome; navH.href = t.homeUrl; }
+
+        const navV = document.getElementById("navVoting");
+        if (navV) navV.textContent = t.navVoting;
+
+        const navL = document.getElementById("navLive");
+        if (navL) navL.textContent = t.navLive;
+
+        const navA = document.getElementById("navAdmin");
+        if (navA) navA.textContent = t.navAdmin;
+
+        const btnL = document.getElementById("btnLiveTop");
+        if (btnL) btnL.textContent = t.btnLiveTop;
+
+        const hTitle = document.getElementById("heroTitle");
+        if (hTitle) hTitle.textContent = t.heroTitle;
+
+        const hSub = document.getElementById("heroSubtitle");
+        if (hSub) hSub.textContent = t.heroSubtitle;
+
+        const loadNotice = document.getElementById("loadingNotice");
+        if (loadNotice) loadNotice.textContent = t.loadingNotice;
+
+        // Active button toggle
+        document.querySelectorAll(".voting-lang-btn").forEach(btn => {
+          if (btn.getAttribute("data-lang") === currentLang) {
+            btn.classList.add("active");
+          } else {
+            btn.classList.remove("active");
+          }
+        });
+      }
+
+      // Bind Language Switcher Buttons
+      document.querySelectorAll(".voting-lang-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const l = btn.getAttribute("data-lang");
+          if (l && l !== currentLang) {
+            setLanguage(l);
+          }
+        });
+      });
+
+      applyTranslations();
 
       // Initialize Voting Engine
       window.VotingEngine.init({
@@ -315,19 +527,20 @@
           renderCards();
         },
         onSettingsUpdate: (settings) => {
+          const t = I18N[currentLang] || I18N.en;
           if (settings.votingOpen) {
             statusBadge.className = "voting-status-badge status-open";
-            statusText.textContent = "Balsavimas Aktyvus";
+            statusText.textContent = t.statusOpen;
           } else {
             statusBadge.className = "voting-status-badge status-closed";
-            statusText.textContent = "Balsavimas Uždarytas";
+            statusText.textContent = t.statusClosed;
           }
           renderCards();
         },
         onError: (err) => {
           if (window.reportAsiffError) {
             window.reportAsiffError({
-              action: "Balsavimo sistemos sinchronizacija",
+              action: "Balsavimo sistemos sinchronizacija / Voting sync",
               message: err.message,
               code: "VOTING_SYNC_ERR",
               file: "voting.html",
@@ -338,14 +551,16 @@
       });
 
       function buildCategoryTabs() {
+        const t = I18N[currentLang] || I18N.en;
         const categories = new Set();
         currentFilms.forEach(f => {
           if (f.category) categories.add(f.category);
         });
 
-        let html = `<button type="button" class="category-tab-btn ${selectedCategory === 'all' ? 'active' : ''}" data-cat="all">Visos Nominacijos</button>`;
+        let html = `<button type="button" class="category-tab-btn ${selectedCategory === 'all' ? 'active' : ''}" data-cat="all">${t.allCategories}</button>`;
         categories.forEach(cat => {
-          html += `<button type="button" class="category-tab-btn ${selectedCategory === cat ? 'active' : ''}" data-cat="${escapeHtml(cat)}">${escapeHtml(cat)}</button>`;
+          const label = getCategoryLabel(cat);
+          html += `<button type="button" class="category-tab-btn ${selectedCategory === cat ? 'active' : ''}" data-cat="${escapeHtml(cat)}">${escapeHtml(label)}</button>`;
         });
 
         filterBar.innerHTML = html;
@@ -361,6 +576,7 @@
       }
 
       function renderCards() {
+        const t = I18N[currentLang] || I18N.en;
         const filtered = selectedCategory === "all"
           ? currentFilms
           : currentFilms.filter(f => f.category === selectedCategory);
@@ -368,7 +584,7 @@
         if (filtered.length === 0) {
           container.innerHTML = `
             <div class="voting-empty-state">
-              <p>Šioje nominacijoje filmų kol kas nėra arba atranka dar ruošiama.</p>
+              <p>${t.emptyNotice}</p>
             </div>
           `;
           return;
@@ -377,45 +593,50 @@
         const settings = window.VotingEngine.getSettings();
 
         container.innerHTML = filtered.map(film => {
-          const category = film.category || "Bendra nominacija";
-          const hasVotedInCategory = window.VotingEngine.hasUserVotedIn(category);
-          const userVotedThisFilm = window.VotingEngine.getUserVoteFor(category) === film.id;
+          const rawCat = film.category || "General";
+          const localizedCat = getCategoryLabel(rawCat);
+          const hasVotedInCategory = window.VotingEngine.hasUserVotedIn(rawCat);
+          const userVotedThisFilm = window.VotingEngine.getUserVoteFor(rawCat) === film.id;
 
-          const nomStats = currentStats.statsByNomination[category] || { totalVotes: 0, films: {} };
+          // Resolve bilingual fields with automatic fallback
+          const fields = window.VotingEngine.resolveFilmFields(film, currentLang);
+
+          const nomStats = currentStats.statsByNomination[rawCat] || { totalVotes: 0, films: {} };
           const filmVotes = nomStats.films[film.id] || film.votesCount || 0;
           const percentage = nomStats.totalVotes > 0 ? Math.round((filmVotes / nomStats.totalVotes) * 100) : 0;
 
-          const shouldShowResults = settings.showResults === "always" || hasVotedInCategory;
+          // Results appear after vote or if festival admin configured always show
+          const shouldShowResults = settings.showResults === "always" || hasVotedInCategory || !settings.votingOpen;
 
           return `
-            <article class="film-vote-card" data-id="${film.id}" data-category="${escapeHtml(category)}">
+            <article class="film-vote-card" data-id="${film.id}" data-category="${escapeHtml(rawCat)}">
               <div class="film-poster-wrap">
                 ${film.posterUrl 
-                  ? `<img src="${escapeHtml(film.posterUrl)}" alt="${escapeHtml(film.filmTitle || 'Filmo plakatas')}" class="film-poster-img" loading="lazy">` 
-                  : `<div class="film-poster-placeholder"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect><line x1="7" y1="2" x2="7" y2="22"></line><line x1="17" y1="2" x2="17" y2="22"></line><line x1="2" y1="12" x2="22" y2="12"></line></svg><span style="font-size:0.75rem; margin-top:6px;">Festivalio Filmas</span></div>`
+                  ? `<img src="${escapeHtml(film.posterUrl)}" alt="${escapeHtml(fields.title)}" class="film-poster-img" loading="lazy">` 
+                  : `<div class="film-poster-placeholder"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect><line x1="7" y1="2" x2="7" y2="22"></line><line x1="17" y1="2" x2="17" y2="22"></line><line x1="2" y1="12" x2="22" y2="12"></line></svg><span style="font-size:0.75rem; margin-top:6px;">ASIFF Selection</span></div>`
                 }
               </div>
               <div class="film-card-content">
-                <span class="film-nomination-tag">${escapeHtml(category)}</span>
-                <h2 class="film-card-title">${escapeHtml(film.filmTitle || 'Pavadinimas nerastas')}</h2>
-                <p class="film-card-director">Režisierius: <strong>${escapeHtml(film.director || film.name || 'Nežinomas')}</strong></p>
-                <p class="film-card-synopsis">${escapeHtml(film.synopsis || film.description || 'Konkursinės programos dalyvis.')}</p>
+                <span class="film-nomination-tag">${escapeHtml(localizedCat)}</span>
+                <h2 class="film-card-title">${escapeHtml(fields.title)}</h2>
+                <p class="film-card-director">${t.directorLabel} <strong>${escapeHtml(fields.director)}</strong></p>
+                <p class="film-card-synopsis">${escapeHtml(fields.synopsis)}</p>
 
                 <div class="film-vote-action">
                   ${userVotedThisFilm ? `
                     <button type="button" class="btn-vote-trigger voted" disabled>
-                      <span>Jūsų balsas įskaitytas ✓</span>
+                      <span>${t.btnVoted}</span>
                     </button>
                   ` : `
-                    <button type="button" class="btn-vote-trigger" data-action="vote" data-id="${film.id}" data-nomination="${escapeHtml(category)}" ${(!settings.votingOpen || hasVotedInCategory) ? 'disabled' : ''}>
-                      <span>${hasVotedInCategory ? 'Balsas jau atiduotas' : 'Balsuoti už filmą'}</span>
+                    <button type="button" class="btn-vote-trigger" data-action="vote" data-id="${film.id}" data-nomination="${escapeHtml(rawCat)}" ${(!settings.votingOpen || hasVotedInCategory) ? 'disabled' : ''}>
+                      <span>${hasVotedInCategory ? t.btnAlreadyVoted : t.btnVote}</span>
                     </button>
                   `}
 
                   ${shouldShowResults ? `
                     <div class="film-results-wrap">
                       <div class="film-results-meta">
-                        <span>Balsai: <strong>${filmVotes}</strong></span>
+                        <span>${t.votesLabel} <strong>${filmVotes}</strong></span>
                         <span><strong>${percentage}%</strong></span>
                       </div>
                       <div class="film-results-track">
@@ -435,15 +656,15 @@
             const filmId = btn.getAttribute("data-id");
             const nom = btn.getAttribute("data-nomination");
             btn.disabled = true;
-            btn.querySelector("span").textContent = "Registruojama...";
+            btn.querySelector("span").textContent = t.btnVoting;
 
             try {
               await window.VotingEngine.castVote(nom, filmId);
               renderCards();
             } catch (err) {
-              alert(err.message || "Nepavyko atiduoti balso.");
+              alert(err.message || t.errorVoteFailed);
               btn.disabled = false;
-              btn.querySelector("span").textContent = "Balsuoti už filmą";
+              btn.querySelector("span").textContent = t.btnVote;
             }
           });
         });

@@ -380,43 +380,7 @@ export function initAuth(options = {}) {
       await activeAuth.signInWithEmailAndPassword(email, pass);
       showToast("Sėkmingai prisijungta!");
     } catch (err) {
-      console.warn("Direct Firebase auth attempt, checking token session fallback:", err.message);
-      try {
-        const res = await fetch("/api/admin/token", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email })
-        });
-        const data = await res.json();
-        if (res.ok && data.success && data.token) {
-          sessionStorage.setItem("admin_jwt_token", data.token);
-          sessionStorage.setItem("admin_user_email", data.user.email);
-          sessionStorage.setItem("admin_user_role", data.user.role);
-          sessionStorage.setItem("admin_user_name", (data.user.name ? `${data.user.name} ${data.user.surname || ''}` : data.user.email).trim());
-
-          if (loginSection) loginSection.classList.add("d-none");
-          if (panelSection) panelSection.classList.remove("d-none");
-          if (currentUserBadge) currentUserBadge.classList.remove("d-none");
-          if (currentUserName) currentUserName.textContent = data.user.name ? `${data.user.name} ${data.user.surname || ''}`.trim() : data.user.email;
-          if (currentUserRole) {
-            const roleLabels = {
-              admin: data.user.isSuperAdmin ? "Vyr. Administratorius" : "Administratorius",
-              editor: "Redaktorius",
-              judge: "Teisėjas (Komisija)",
-              moderator: "Moderatorius",
-              accountant: "Buhalteris",
-              viewer: "Žiūrovas"
-            };
-            currentUserRole.textContent = roleLabels[data.user.role] || data.user.role;
-          }
-          clearAuthError(authErrMsg);
-          showToast(`Sėkmingai prisijungta kaip ${data.user.name || data.user.email}!`, "success");
-          currentOnLoginSuccess(data.user);
-          return;
-        }
-      } catch (fallbackErr) {
-        console.warn("Token fallback error:", fallbackErr);
-      }
+      console.error("Firebase authentication failed:", err.code, err.message);
       displayAuthError(authErrMsg, err, "Nepavyko prisijungti prie valdymo skydo");
     } finally {
       if (submitBtn) {

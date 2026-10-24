@@ -14,16 +14,12 @@ service cloud.firestore {
     // Top-Level Administrator (Full Management):
     // azuolynasfilmfestival@gmail.com has complete administrative control.
     // Also recognizes co-admin karina.brdar@gmail.com and active admin role in users/{uid}.
+    // Admin email allow-list: strictly enforced via Firebase Auth email claim
     function isSuperAdmin() {
-      return isSignedIn() && (
-        (request.auth.token.email != null && (
-          request.auth.token.email.lower() == 'azuolynasfilmfestival@gmail.com' ||
-          request.auth.token.email.lower() == 'karina.brdar@gmail.com'
-        )) ||
-        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
-         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' &&
-         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.status == 'active')
-      );
+      return isSignedIn() &&
+        request.auth.token.email != null &&
+        (request.auth.token.email.lower() == 'azuolynasfilmfestival@gmail.com' ||
+         request.auth.token.email.lower() == 'karina.brdar@gmail.com');
     }
 
     // Dedicated Judge Role: Evaluation & read-only permissions for applications
@@ -46,23 +42,13 @@ service cloud.firestore {
     // 1. Festival Settings: Public read, Super Admin full control & trusted server sync
     match /settings/{settingId} {
       allow get, list: if true;
-      allow write: if isSuperAdmin() || (
-        incoming().adminEmail != null && (
-          incoming().adminEmail.lower() == 'azuolynasfilmfestival@gmail.com' ||
-          incoming().adminEmail.lower() == 'karina.brdar@gmail.com'
-        )
-      );
+      allow write: if isSuperAdmin();
     }
 
     // 2. Festival Editions: Public read, Super Admin full control
     match /editions/{editionId} {
       allow get, list: if true;
-      allow write: if isSuperAdmin() || (
-        incoming().adminEmail != null && (
-          incoming().adminEmail.lower() == 'azuolynasfilmfestival@gmail.com' ||
-          incoming().adminEmail.lower() == 'karina.brdar@gmail.com'
-        )
-      );
+      allow write: if isSuperAdmin();
     }
 
     // 3. Submissions: Public creation & read, public voting increment, Super Admin full write/edit/delete
@@ -76,18 +62,13 @@ service cloud.firestore {
       // Strict update access: Super Admins can update any field;
       // Public audience can only increment votesCount by exactly +1
       allow update: if isSuperAdmin() || (
+        isSignedIn() &&
         incoming().diff(existing()).affectedKeys().hasOnly(['votesCount']) &&
         incoming().votesCount == (existing().get('votesCount', 0) + 1)
       );
 
       // Full deletion access for Super Admins
       allow delete: if isSuperAdmin();
-
-      // Votes subcollection: Public can cast vote, Super Admin full control
-      match /votes/{voterId} {
-        allow read, write: if true;
-        allow delete: if isSuperAdmin();
-      }
     }
 
     // 4. Stream Configuration: Public read, Super Admin write

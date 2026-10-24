@@ -3,16 +3,48 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Tiesioginė Transliacija | Live Stream | Ąžuolynas Film Fest</title>
-  <meta name="description" content="Oficiali Ąžuolynas International Students Film Festival ceremonijos tiesioginė transliacija su autorizuota prieiga.">
+  <title id="pageTitle">Tiesioginė Transliacija | Ąžuolynas Film Fest</title>
+  <meta name="description" id="metaDescription" content="Oficiali Ąžuolynas International Students Film Festival ceremonijos tiesioginė transliacija su autorizuota prieiga.">
   <link rel="icon" type="image/webp" href="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media">
   <link rel="stylesheet" href="style.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="live.css">
   <script src="error-reporting.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
   <style>
+    /* Language switch bar */
+    .live-lang-switch {
+      position: absolute;
+      top: 20px;
+      right: 24px;
+      display: inline-flex;
+      align-items: center;
+      background: rgba(0, 0, 0, 0.5);
+      border: 1px solid rgba(111, 165, 138, 0.3);
+      border-radius: 20px;
+      padding: 3px 5px;
+      gap: 4px;
+      z-index: 100;
+    }
+    .live-lang-btn {
+      background: transparent;
+      border: none;
+      color: #94a3b8;
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 14px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .live-lang-btn:hover {
+      color: #F8FAF7;
+    }
+    .live-lang-btn.active {
+      background: #D4AF37;
+      color: #041310;
+    }
+
     /* Zero-exposure gate layout */
     .token-gate-viewport {
       min-height: 100vh;
@@ -21,14 +53,15 @@
       align-items: center;
       justify-content: center;
       padding: 24px 16px;
+      position: relative;
       background: radial-gradient(circle at 50% 20%, rgba(12, 36, 31, 0.95) 0%, rgba(4, 19, 16, 0.98) 100%);
     }
     .token-gate-card {
-      background: rgba(8, 27, 23, 0.92);
+      background: rgba(8, 27, 23, 0.94);
       border: 1px solid rgba(212, 175, 55, 0.45);
       border-radius: var(--site-radius, 12px);
-      padding: 36px 32px;
-      max-width: 440px;
+      padding: 40px 32px;
+      max-width: 450px;
       width: 100%;
       box-shadow: 0 20px 60px rgba(0, 0, 0, 0.85);
       text-align: center;
@@ -36,8 +69,8 @@
       -webkit-backdrop-filter: blur(12px);
     }
     .token-gate-icon {
-      width: 56px;
-      height: 56px;
+      width: 58px;
+      height: 58px;
       border-radius: 50%;
       background: rgba(212, 175, 55, 0.12);
       border: 1px solid rgba(212, 175, 55, 0.35);
@@ -92,7 +125,7 @@
       background: rgba(239, 68, 68, 0.15);
       border: 1px solid rgba(239, 68, 68, 0.4);
       color: #fca5a5;
-      padding: 10px 12px;
+      padding: 10px 14px;
       border-radius: 6px;
       font-size: 0.82rem;
       margin-bottom: 16px;
@@ -125,7 +158,7 @@
       transform: none;
     }
     .token-gate-help {
-      margin-top: 20px;
+      margin-top: 22px;
       font-size: 0.78rem;
       color: #64748b;
       line-height: 1.4;
@@ -142,9 +175,10 @@
     .live-player-stage {
       max-width: 1100px;
       margin: 0 auto;
-      padding: 32px 16px 64px 16px;
+      padding: 28px 16px 64px 16px;
       width: 100%;
       box-sizing: border-box;
+      position: relative;
     }
     .live-top-bar {
       display: flex;
@@ -162,8 +196,8 @@
       gap: 12px;
     }
     .live-brand img {
-      width: 38px;
-      height: 38px;
+      width: 40px;
+      height: 40px;
       border-radius: 50%;
     }
     .live-brand-title {
@@ -175,7 +209,12 @@
     .live-brand-sub {
       font-size: 0.75rem;
       color: #94a3b8;
-      margin: 0;
+      margin: 2px 0 0 0;
+    }
+    .live-controls-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
     }
     .live-user-pill {
       display: inline-flex;
@@ -196,7 +235,6 @@
       border-radius: 6px;
       font-size: 0.75rem;
       cursor: pointer;
-      margin-left: 8px;
       transition: background 0.2s ease;
     }
     .live-exit-btn:hover {
@@ -221,7 +259,7 @@
       height: 100%;
       border: none;
     }
-    .stream-offline-card {
+    .stream-offline-overlay {
       position: absolute;
       inset: 0;
       display: flex;
@@ -232,6 +270,7 @@
       color: #F8FAF7;
       text-align: center;
       padding: 24px;
+      z-index: 5;
     }
     .stream-offline-pulse {
       width: 14px;
@@ -240,7 +279,11 @@
       background: #D4AF37;
       box-shadow: 0 0 15px #D4AF37;
       margin-bottom: 14px;
-      animation: pulseDot 2s infinite ease-in-out;
+      animation: asiffPulseDot 2s infinite ease-in-out;
+    }
+    @keyframes asiffPulseDot {
+      0%, 100% { transform: scale(1); opacity: 0.8; }
+      50% { transform: scale(1.3); opacity: 1; }
     }
     .stream-offline-title {
       font-family: var(--font-cinema, Georgia, serif);
@@ -260,9 +303,16 @@
 <body class="site-body">
 
   <!-- =========================================================================
-       INITIAL DOM: STRICT TOKEN GATE ONLY (Zero stream exposure before validation)
+       INITIAL DOM: STRICT ZERO-EXPOSURE TOKEN GATE ONLY
        ========================================================================= -->
   <div id="liveGateContainer" class="token-gate-viewport">
+    
+    <!-- Language Switcher in Gate View -->
+    <div class="live-lang-switch">
+      <button type="button" class="live-lang-btn" data-lang="lt">LT</button>
+      <button type="button" class="live-lang-btn" data-lang="en">EN</button>
+    </div>
+
     <div class="token-gate-card">
       <div class="token-gate-icon" aria-hidden="true">
         <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -271,14 +321,14 @@
         </svg>
       </div>
 
-      <h1 class="token-gate-title">Transliacijos Prieiga</h1>
-      <p class="token-gate-desc">
-        Tiesioginė festivalio transliacija skirta autorizuotiems žiūrovams. Įveskite savo asmeninį prieigos žetoną.
+      <h1 class="token-gate-title" data-i18n="gateTitle">Transliacijos Prieiga</h1>
+      <p class="token-gate-desc" data-i18n="gateDesc">
+        Tiesioginė festivalio transliacija skirta autorizuotiems žiūrovams. Įveskite savo asmeninį prieigos kodą.
       </p>
 
       <form id="tokenGateForm" action="javascript:void(0);">
         <div class="token-input-wrap">
-          <label for="tokenInputField">Asmeninis žetonas (Token) *</label>
+          <label for="tokenInputField" data-i18n="tokenLabel">Asmeninis prieigos kodas *</label>
           <input 
             type="text" 
             id="tokenInputField" 
@@ -292,15 +342,15 @@
         <div id="tokenErrorBox" class="token-error-box d-none" role="alert"></div>
 
         <button type="submit" id="tokenSubmitBtn" class="token-submit-btn">
-          <span>Patvirtinti ir Žiūrėti</span>
+          <span data-i18n="submitBtn">Patvirtinti ir Žiūrėti</span>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
             <polyline points="9 18 15 12 9 6"></polyline>
           </svg>
         </button>
       </form>
 
-      <div class="token-gate-help">
-        Neturite kodo? Pasitikrinkite registracijos patvirtinimo laišką arba kreipkitės: <a href="mailto:azuolynasfilmfestival@gmail.com">azuolynasfilmfestival@gmail.com</a>
+      <div class="token-gate-help" data-i18n="helpText">
+        Neturite kodo? Pasitikrinkite registracijos patvirtinimo el. laišką arba kreipkitės: <a href="mailto:azuolynasfilmfestival@gmail.com">azuolynasfilmfestival@gmail.com</a>
       </div>
     </div>
   </div>
@@ -310,12 +360,154 @@
 
   <script>
     (function() {
+      // 1. Language Dictionary (Zero Provider Names or Technical Codes in Viewer UI!)
+      const I18N = {
+        lt: {
+          pageTitle: "Tiesioginė Transliacija | Ąžuolynas Film Fest",
+          metaDesc: "Oficiali Ąžuolynas International Students Film Festival ceremonijos tiesioginė transliacija su autorizuota prieiga.",
+          gateTitle: "Transliacijos Prieiga",
+          gateDesc: "Tiesioginė festivalio transliacija skirta autorizuotiems žiūrovams. Įveskite savo asmeninį prieigos kodą.",
+          tokenLabel: "Asmeninis prieigos kodas *",
+          tokenPlaceholder: "pvz. asiff_live_...",
+          submitBtn: "Patvirtinti ir Žiūrėti",
+          verifyingBtn: "Tikrinama...",
+          helpText: 'Neturite kodo? Pasitikrinkite registracijos patvirtinimo el. laišką arba kreipkitės: <a href="mailto:azuolynasfilmfestival@gmail.com">azuolynasfilmfestival@gmail.com</a>',
+          headerTitle: "Ąžuolynas Film Fest Ceremonija",
+          headerSub: "Kauno Tarptautinė Gimnazija &bull; Oficiali laureatų apdovanojimų transliacija",
+          defaultViewer: "Autorizuotas žiūrovas",
+          exitBtn: "Atsijungti",
+          streamActive: "Tiesioginis eteris aktyvus",
+          votingBtn: "Atverti Žiūrovų Balsavimą &rarr;",
+          offlineTitle: "Transliacija dar neprasidėjo",
+          offlineDesc: "Apdovanojimų ceremonijos tiesioginis eteris prasidės netrukus. Puslapis automatiškai atsinaujins pradėjus transliaciją.",
+          errExpired: "Šio prieigos kodo galiojimo laikas pasibaigęs.",
+          errRevoked: "Šis prieigos kodas negalioja arba buvo atšauktas.",
+          errMaxUses: "Pasiektas maksimalus šio kodo prisijungimų limitas.",
+          errNotFound: "Prieigos kodas nerastas arba neteisingas. Patikrinkite kodą.",
+          errGeneral: "Nepavyko patvirtinti prieigos. Bandykite dar kartą vėliau."
+        },
+        en: {
+          pageTitle: "Live Stream | Ąžuolynas Film Fest",
+          metaDesc: "Official live stream of the Ąžuolynas International Students Film Festival awards ceremony with authorized access.",
+          gateTitle: "Live Stream Access",
+          gateDesc: "The festival live stream is reserved for authorized viewers. Please enter your personal access code.",
+          tokenLabel: "Personal access code *",
+          tokenPlaceholder: "e.g. asiff_live_...",
+          submitBtn: "Verify & Watch",
+          verifyingBtn: "Verifying...",
+          helpText: 'Don\'t have a code? Check your registration confirmation email or contact: <a href="mailto:azuolynasfilmfestival@gmail.com">azuolynasfilmfestival@gmail.com</a>',
+          headerTitle: "Ąžuolynas Film Fest Ceremony",
+          headerSub: "Kaunas International Gymnasium &bull; Official live awards ceremony",
+          defaultViewer: "Authorized Viewer",
+          exitBtn: "Log out",
+          streamActive: "Live broadcast in progress",
+          votingBtn: "Open Audience Voting &rarr;",
+          offlineTitle: "Broadcast Has Not Started Yet",
+          offlineDesc: "The live ceremony broadcast will begin shortly. This page will automatically update once the stream goes live.",
+          errExpired: "This access code has expired.",
+          errRevoked: "This access code is invalid or has been revoked.",
+          errMaxUses: "The maximum number of connections for this code has been reached.",
+          errNotFound: "Access code not found or incorrect. Please check your code.",
+          errGeneral: "Could not verify access. Please try again later."
+        }
+      };
+
+      // 2. Language Detection
+      function detectLanguage() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const qLang = urlParams.get("lang");
+        if (qLang === "en" || qLang === "lt") return qLang;
+
+        const stored = localStorage.getItem("asiff_preferred_lang") || sessionStorage.getItem("asiff_lang");
+        if (stored === "en" || stored === "lt") return stored;
+
+        // Check referrer
+        const ref = (document.referrer || "").toLowerCase();
+        if (ref.includes("/en/")) return "en";
+        if (ref.includes("/lt/")) return "lt";
+
+        return "lt"; // Default Lithuanian
+      }
+
+      let currentLang = detectLanguage();
+
+      function setLanguage(lang) {
+        currentLang = lang;
+        try {
+          localStorage.setItem("asiff_preferred_lang", lang);
+          sessionStorage.setItem("asiff_lang", lang);
+        } catch (e) {}
+
+        document.documentElement.lang = lang;
+        applyTranslations();
+      }
+
+      function applyTranslations() {
+        const t = I18N[currentLang] || I18N.lt;
+
+        // Meta and Title
+        document.title = t.pageTitle;
+        const meta = document.getElementById("metaDescription");
+        if (meta) meta.content = t.metaDesc;
+
+        // Gate Elements
+        const titleEl = document.querySelector('[data-i18n="gateTitle"]');
+        if (titleEl) titleEl.textContent = t.gateTitle;
+
+        const descEl = document.querySelector('[data-i18n="gateDesc"]');
+        if (descEl) descEl.textContent = t.gateDesc;
+
+        const labelEl = document.querySelector('[data-i18n="tokenLabel"]');
+        if (labelEl) labelEl.textContent = t.tokenLabel;
+
+        const inputEl = document.getElementById("tokenInputField");
+        if (inputEl) inputEl.placeholder = t.tokenPlaceholder;
+
+        const submitSpan = document.querySelector('#tokenSubmitBtn span');
+        if (submitSpan && !document.getElementById("tokenSubmitBtn").disabled) {
+          submitSpan.textContent = t.submitBtn;
+        }
+
+        const helpEl = document.querySelector('[data-i18n="helpText"]');
+        if (helpEl) helpEl.innerHTML = t.helpText;
+
+        // Active Language Switch Buttons
+        document.querySelectorAll(".live-lang-btn").forEach(btn => {
+          if (btn.getAttribute("data-lang") === currentLang) {
+            btn.classList.add("active");
+          } else {
+            btn.classList.remove("active");
+          }
+        });
+
+        // If player is mounted, update stage strings
+        updatePlayerStageTranslations();
+      }
+
+      function bindLangButtons() {
+        document.querySelectorAll(".live-lang-btn").forEach(btn => {
+          btn.addEventListener("click", () => {
+            const lang = btn.getAttribute("data-lang");
+            if (lang && lang !== currentLang) {
+              setLanguage(lang);
+            }
+          });
+        });
+      }
+
+      // Initialize translations
+      applyTranslations();
+      bindLangButtons();
+
+      // Gate & Mount DOM elements
       const gateContainer = document.getElementById("liveGateContainer");
       const playerMount = document.getElementById("livePlayerMount");
       const form = document.getElementById("tokenGateForm");
       const input = document.getElementById("tokenInputField");
       const submitBtn = document.getElementById("tokenSubmitBtn");
       const errorBox = document.getElementById("tokenErrorBox");
+
+      let currentAuth = null;
 
       // Auto-check URL parameters (?token=... or ?pass=...)
       const urlParams = new URLSearchParams(window.location.search);
@@ -345,19 +537,20 @@
       });
 
       async function validateAndMount(token, isSilent = false) {
+        const t = I18N[currentLang] || I18N.lt;
         showError("");
         submitBtn.disabled = true;
-        submitBtn.querySelector("span").textContent = "Tikrinama...";
+        submitBtn.querySelector("span").textContent = t.verifyingBtn;
 
         try {
-          // Compute SHA-256 hash
+          // Compute SHA-256 hash of access token
           const encoder = new TextEncoder();
           const data = encoder.encode(token);
           const hashBuffer = await crypto.subtle.digest("SHA-256", data);
           const hashArray = Array.from(new Uint8Array(hashBuffer));
           const tokenHash = hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
 
-          // 1. Try local server endpoint first if available
+          // 1. Try local server endpoint if available
           let validation = null;
           try {
             const srvRes = await fetch("/api/stream/validate-token", {
@@ -369,7 +562,7 @@
               validation = await srvRes.json();
             } else if (srvRes.status === 403 || srvRes.status === 400) {
               const errData = await srvRes.json();
-              throw new Error(errData.message || getErrorMessage(errData.error));
+              throw new Error(mapErrorCode(errData.error || errData.code));
             }
           } catch (netErr) {
             if (netErr.message && !netErr.message.includes("Failed to fetch")) {
@@ -383,16 +576,16 @@
             const fsRes = await fetch(fsUrl);
             
             if (fsRes.status === 404) {
-              // Also check live_viewers collection for backwards compatibility
+              // Check backwards-compatibility collection
               const fsViewerUrl = `https://firestore.googleapis.com/v1/projects/filmfest-509606/databases/ai-studio-azuolynasinterna-cd7ce36e-5213-4751-8aa0-a7141d397a83/documents/live_viewers/${encodeURIComponent(token)}`;
               const fsVRes = await fetch(fsViewerUrl);
               if (fsVRes.status === 404) {
-                throw new Error("Prieigos žetonas nerastas arba negalioja. Patikrinkite kodą.");
+                throw new Error(t.errNotFound);
               }
               const vDoc = await fsVRes.json();
               validation = {
                 valid: true,
-                label: vDoc.fields?.name?.stringValue || "Žiūrovas",
+                label: vDoc.fields?.name?.stringValue || t.defaultViewer,
                 playbackUrl: "https://customer-auu36r7owuzogvfb.cloudflarestream.com/937d1a8b2c545a980c9fabc8502d8af4/iframe"
               };
             } else if (fsRes.ok) {
@@ -403,22 +596,23 @@
               const currentUses = f.currentUses ? parseInt(f.currentUses.integerValue || "0", 10) : 0;
               const expiresAt = f.expiresAt?.timestampValue ? new Date(f.expiresAt.timestampValue) : null;
 
-              if (!isActive) throw new Error("Šis žetonas buvo atšauktas administratoriaus.");
-              if (expiresAt && expiresAt.getTime() < Date.now()) throw new Error("Šio žetono galiojimo laikas pasibaigęs.");
-              if (currentUses >= maxUses) throw new Error("Viršytas leistinų šio žetono prisijungimų limitas.");
+              if (!isActive) throw new Error(t.errRevoked);
+              if (expiresAt && expiresAt.getTime() < Date.now()) throw new Error(t.errExpired);
+              if (currentUses >= maxUses) throw new Error(t.errMaxUses);
 
               validation = {
                 valid: true,
-                label: f.label?.stringValue || "Žiūrovas",
+                label: f.label?.stringValue || t.defaultViewer,
                 playbackUrl: "https://customer-auu36r7owuzogvfb.cloudflarestream.com/937d1a8b2c545a980c9fabc8502d8af4/iframe",
                 expiresAt: expiresAt ? expiresAt.toISOString() : null
               };
             } else {
-              throw new Error("Nepavyko patikrinti prieigos žetono.");
+              throw new Error(t.errNotFound);
             }
           }
 
           if (validation && validation.valid) {
+            currentAuth = validation;
             sessionStorage.setItem("asiff_verified_token", JSON.stringify({
               token: token,
               label: validation.label,
@@ -427,16 +621,16 @@
 
             mountLivePlayer(validation);
           } else {
-            throw new Error(validation?.message || "Prieiga nesuteikta.");
+            throw new Error(validation?.message || t.errGeneral);
           }
 
         } catch (err) {
           if (!isSilent) {
-            showError(err.message || "Prieiga atmesta. Patikrinkite žetoną.");
+            showError(err.message || t.errNotFound);
           }
           if (window.reportAsiffError) {
             window.reportAsiffError({
-              action: "Transliacijos žetono patvirtinimas",
+              action: "Prieigos kodo patvirtinimas",
               message: err.message || "Token verification failure",
               code: "AUTH_TOKEN_FAILED",
               file: "live.html",
@@ -445,7 +639,7 @@
           }
         } finally {
           submitBtn.disabled = false;
-          submitBtn.querySelector("span").textContent = "Patvirtinti ir Žiūrėti";
+          submitBtn.querySelector("span").textContent = t.submitBtn;
         }
       }
 
@@ -459,43 +653,52 @@
         }
       }
 
-      function getErrorMessage(code) {
+      function mapErrorCode(code) {
+        const t = I18N[currentLang] || I18N.lt;
         switch (code) {
-          case "expired": return "Šio žetono galiojimo laikas pasibaigęs.";
-          case "revoked": return "Šis žetonas buvo atšauktas administratoriaus.";
-          case "max_uses_reached": return "Pasiektas maksimalus leistinų prisijungimų limitas.";
-          case "invalid": return "Neteisingas arba neegzistuojantis žetonas.";
-          default: return "Prieigos klaida. Bandykite vėliau.";
+          case "expired": return t.errExpired;
+          case "revoked": return t.errRevoked;
+          case "max_uses_reached": return t.errMaxUses;
+          case "invalid": return t.errNotFound;
+          default: return t.errNotFound;
         }
       }
 
       function mountLivePlayer(auth) {
-        // Remove token gate completely from DOM
-        gateContainer.remove();
+        if (gateContainer && gateContainer.parentNode) {
+          gateContainer.remove();
+        }
 
+        const t = I18N[currentLang] || I18N.lt;
         const stage = document.createElement("main");
         stage.className = "live-player-stage";
+        stage.id = "livePlayerStage";
         stage.innerHTML = `
           <header class="live-top-bar">
             <div class="live-brand">
               <img src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media" alt="Ąžuolynas Fest">
               <div>
-                <h1 class="live-brand-title">Ąžuolynas Film Fest Ceremonija</h1>
-                <p class="live-brand-sub">Kauno Tarptautinė Gimnazija &bull; Oficiali laureatų apdovanojimų transliacija</p>
+                <h1 class="live-brand-title" id="stageHeaderTitle">${t.headerTitle}</h1>
+                <p class="live-brand-sub" id="stageHeaderSub">${t.headerSub}</p>
               </div>
             </div>
-            <div style="display:flex; align-items:center;">
+            <div class="live-controls-right">
+              <!-- Language Switcher in Player Header -->
+              <div class="live-lang-switch" style="position:static;">
+                <button type="button" class="live-lang-btn ${currentLang === 'lt' ? 'active' : ''}" data-lang="lt">LT</button>
+                <button type="button" class="live-lang-btn ${currentLang === 'en' ? 'active' : ''}" data-lang="en">EN</button>
+              </div>
               <div class="live-user-pill">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-                <span>${escapeHtml(auth.label || "Autorizuotas žiūrovas")}</span>
+                <span id="stageUserLabel">${escapeHtml(auth.label || t.defaultViewer)}</span>
               </div>
-              <button type="button" id="liveExitBtn" class="live-exit-btn">Atsijungti</button>
+              <button type="button" id="liveExitBtn" class="live-exit-btn">${t.exitBtn}</button>
             </div>
           </header>
 
           <div class="player-responsive-wrap" id="playerWrapper">
             <iframe 
-              id="cfPlayerIframe"
+              id="streamPlayerIframe"
               src="${auth.playbackUrl}"
               title="Ąžuolynas Film Festival Live Player"
               allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture; fullscreen"
@@ -506,21 +709,44 @@
           <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-top:16px;">
             <div style="display:flex; align-items:center; gap:8px;">
               <span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:#4ade80;"></span>
-              <span style="font-size:0.85rem; color:#cbd5e1;">Ryšys su Cloudflare Stream transliacija aktyvus</span>
+              <span id="stageLiveNotice" style="font-size:0.85rem; color:#cbd5e1;">${t.streamActive}</span>
             </div>
-            <a href="voting.html" class="btn-solid" style="padding:8px 18px; font-size:0.85rem; background:#D4AF37; color:#041310; text-decoration:none; border-radius:6px; font-weight:700;">
-              Atverti Žiūrovų Balsavimą &rarr;
+            <a href="voting.html" id="stageVotingLink" class="btn-solid" style="padding:8px 18px; font-size:0.85rem; background:#D4AF37; color:#041310; text-decoration:none; border-radius:6px; font-weight:700;">
+              ${t.votingBtn}
             </a>
           </div>
         `;
 
         playerMount.appendChild(stage);
 
+        bindLangButtons();
+
         const exitBtn = stage.querySelector("#liveExitBtn");
         exitBtn.addEventListener("click", () => {
           sessionStorage.removeItem("asiff_verified_token");
           window.location.reload();
         });
+      }
+
+      function updatePlayerStageTranslations() {
+        const stage = document.getElementById("livePlayerStage");
+        if (!stage) return;
+        const t = I18N[currentLang] || I18N.lt;
+
+        const hTitle = stage.querySelector("#stageHeaderTitle");
+        if (hTitle) hTitle.textContent = t.headerTitle;
+
+        const hSub = stage.querySelector("#stageHeaderSub");
+        if (hSub) hSub.innerHTML = t.headerSub;
+
+        const exitBtn = stage.querySelector("#liveExitBtn");
+        if (exitBtn) exitBtn.textContent = t.exitBtn;
+
+        const liveNotice = stage.querySelector("#stageLiveNotice");
+        if (liveNotice) liveNotice.textContent = t.streamActive;
+
+        const votingLink = stage.querySelector("#stageVotingLink");
+        if (votingLink) votingLink.innerHTML = t.votingBtn;
       }
 
       function escapeHtml(str) {
