@@ -13,6 +13,7 @@
     'stream.viewers.resend': '/api/admin/stream/viewers/resend',
     'stream.viewers.delete': '/api/admin/stream/viewers/delete',
     'stream.viewers.create': '/api/admin/stream/viewers/create',
+    'stream.viewers.bulk-create': '/api/admin/stream/viewers/bulk-create',
     'stream.viewers.update': '/api/admin/stream/viewers/update',
     'stream.viewers.regenerate': '/api/admin/stream/viewers/regenerate-token',
     'stream.settings': '/api/admin/stream/settings',

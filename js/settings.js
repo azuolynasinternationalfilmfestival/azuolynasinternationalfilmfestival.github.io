@@ -128,40 +128,48 @@ async function updateGlobalTumbler(patchData, successMsg, toggleInput) {
   if (toggleInput) toggleInput.disabled = true;
 
   try {
-    const callerEmail = sessionStorage.getItem("admin_user_email") || "azuolynasfilmfestival@gmail.com";
+    const callerEmail = (auth && auth.currentUser && auth.currentUser.email)
+      ? auth.currentUser.email.toLowerCase()
+      : (sessionStorage.getItem("admin_user_email") || "azuolynasfilmfestival@gmail.com").toLowerCase();
+
+    // Verify Firebase Auth state for superadmin allow-list
+    if (auth && !auth.currentUser) {
+      throw {
+        code: "auth/unauthenticated",
+        message: "Privalote būti prisijungęs su Firebase Auth administratoriaus paskyra (azuolynasfilmfestival@gmail.com)."
+      };
+    }
+
     const payload = {
       ...patchData,
       adminEmail: callerEmail,
       updatedAt: new Date().toISOString()
     };
 
-    // 1. Primary: Save to local server backend API (always reliable and instant)
-    const res = await fetch("/api/admin/settings", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
-    });
-
-    if (!res.ok) {
-      const errData = await res.json().catch(() => ({}));
-      throw new Error(errData.error || "Nepavyko išsaugoti serverio nustatymo");
+    // 1. Primary: Save directly to Firestore (essential for static GitHub Pages hosting)
+    if (db && typeof db.collection === "function") {
+      await db.collection("settings").doc("festival").set(payload, { merge: true });
+      await db.collection("settings").doc("global").set(payload, { merge: true });
     }
 
-    // 2. Secondary: Safely mirror to Firestore if db is available
-    if (db && typeof db.collection === "function") {
-      try {
-        await db.collection("settings").doc("festival").set(payload, { merge: true });
-      } catch (fsErr) {
-        console.warn("Firestore settings tumbler direct sync notice:", fsErr.message);
-      }
+    // 2. Secondary: Mirror to local Node backend API if available (silent fallback)
+    try {
+      await fetch("/api/admin/settings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+    } catch (apiErr) {
+      // Benign on static hosting (GitHub Pages)
     }
 
     showToast(successMsg, "success");
     window.dispatchEvent(new CustomEvent("refresh-notifications"));
   } catch (err) {
-    console.error("Error updating settings/festival tumbler:", err);
+    console.error("Error updating settings tumbler:", err);
     if (toggleInput) toggleInput.checked = !toggleInput.checked; // Revert switch state on error
-    showToast("Klaida keičiant nustatymą: " + err.message, "error");
+    const errCode = err.code || "ERR_FIRESTORE";
+    showToast(`[${errCode}] Klaida keičiant nustatymą: ${err.message || String(err)}`, "error");
   } finally {
     if (toggleInput) toggleInput.disabled = false;
   }
@@ -445,39 +453,46 @@ async function saveSettings() {
   };
 
   try {
-    const callerEmail = sessionStorage.getItem("admin_user_email") || "azuolynasfilmfestival@gmail.com";
+    const callerEmail = (auth && auth.currentUser && auth.currentUser.email)
+      ? auth.currentUser.email.toLowerCase()
+      : (sessionStorage.getItem("admin_user_email") || "azuolynasfilmfestival@gmail.com").toLowerCase();
 
-    // 1. Primary: Save to local server backend API (always works reliably)
-    const res = await fetch("/api/admin/settings", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        ...updated,
-        adminEmail: callerEmail
-      })
-    });
+    if (auth && !auth.currentUser) {
+      throw {
+        code: "auth/unauthenticated",
+        message: "Privalote būti prisijungęs su Firebase Auth administratoriaus paskyra (azuolynasfilmfestival@gmail.com)."
+      };
+    }
 
-    // 2. Secondary: Also sync to Firestore if db is available
+    const payload = {
+      ...updated,
+      adminEmail: callerEmail,
+      updatedAt: new Date().toISOString()
+    };
+
+    // 1. Primary: Save directly to Firestore for static deployment reliability
     if (db && typeof db.collection === "function") {
-      try {
-        await db.collection("settings").doc("festival").set({
-          ...updated,
-          adminEmail: callerEmail
-        }, { merge: true });
-      } catch (fsErr) {
-        console.warn("Firestore settings direct sync notice:", fsErr.message);
-      }
+      await db.collection("settings").doc("festival").set(payload, { merge: true });
+      await db.collection("settings").doc("global").set(payload, { merge: true });
     }
 
-    if (res.ok) {
-      showToast("Nustatymai sėkmingai išsaugoti!", "success");
-      window.dispatchEvent(new CustomEvent("refresh-notifications"));
-    } else {
-      const err = await res.json().catch(() => ({}));
-      showToast(err.error || "Nepavyko išsaugoti nustatymų", "error");
+    // 2. Secondary: Mirror to local Node backend API if available
+    try {
+      await fetch("/api/admin/settings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+    } catch (apiErr) {
+      // Benign on static hosting
     }
+
+    showToast("Nustatymai sėkmingai išsaugoti!", "success");
+    window.dispatchEvent(new CustomEvent("refresh-notifications"));
   } catch (err) {
-    showToast("Klaida išsaugant nustatymus: " + err.message, "error");
+    console.error("Error saving settings:", err);
+    const errCode = err.code || "ERR_FIRESTORE";
+    showToast(`[${errCode}] Klaida išsaugant nustatymus: ${err.message || String(err)}`, "error");
   } finally {
     btn.disabled = false;
   }

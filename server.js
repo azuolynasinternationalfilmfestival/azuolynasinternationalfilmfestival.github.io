@@ -3252,7 +3252,7 @@ app.get('/api/admin/stream/viewers', (req, res) => {
 // API: Add new viewer & generate secure Cloudflare Signed Token
 app.post('/api/admin/stream/viewers/create', async (req, res) => {
   try {
-    const { email, name, filmTitle, customToken, role, expiresInHours, sendEmail: shouldSendEmail, adminEmail } = req.body || {};
+    const { email, name, filmTitle, customToken, role, expiresInHours, sendEmail: shouldSendEmail, adminEmail, tokenType: rawTokenType, classroomLabel: rawClassroomLabel, maxConcurrentDevices: rawMaxDevices } = req.body || {};
     if (!email || !String(email).includes('@')) {
       return res.status(400).json({ error: 'Reikalingas galiojantis el. pašto adresas / Gmail' });
     }
@@ -3261,15 +3261,19 @@ app.post('/api/admin/stream/viewers/create', async (req, res) => {
     const cleanName = String(name || cleanEmail.split('@')[0]).trim();
     const callerEmail = String(adminEmail || req.headers['x-admin-email'] || PRIMARY_SUPERADMIN_EMAIL).trim().toLowerCase();
     const duration = parseInt(expiresInHours || '48', 10);
+    const tokenType = rawTokenType === 'classroom' ? 'classroom' : 'individual';
+    const classroomLabel = String(rawClassroomLabel || (tokenType === 'classroom' ? cleanName : '')).trim();
+    const maxConcurrentDevices = tokenType === 'classroom' ? Math.max(1, Math.min(100, parseInt(rawMaxDevices || '35', 10))) : 1;
 
     // Generate secure Cloudflare Stream signed token
     let token = String(customToken || '').trim();
     if (!token) {
       // Build cryptographic signed token: cfs_signed_<hex>
       const hashPart = crypto.createHmac('sha256', JWT_SECRET).update(`${cleanEmail}-${Date.now()}`).digest('hex').substring(0, 16);
-      token = `cfs_live_${hashPart}`;
+      token = tokenType === 'classroom' ? `cfs_class_${hashPart}` : `cfs_live_${hashPart}`;
     }
 
+    const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
     const viewersData = loadLiveViewersData();
     if (!viewersData.viewers) viewersData.viewers = [];
 
@@ -3277,14 +3281,21 @@ app.post('/api/admin/stream/viewers/create', async (req, res) => {
     viewersData.viewers = viewersData.viewers.filter(v => v.token !== token);
 
     const baseUrl = req.protocol + '://' + req.get('host');
-    const liveLink = `${baseUrl}/live.html?token=${encodeURIComponent(token)}`;
+    const liveLink = `${baseUrl}/live.html?t=${encodeURIComponent(token)}`;
 
     const newViewer = {
       token,
+      tokenHash,
+      tokenType,
+      classroomLabel: classroomLabel || cleanName,
+      maxConcurrentDevices,
+      maxUses: maxConcurrentDevices,
+      currentUses: 0,
+      activeDevices: 0,
       email: cleanEmail,
       name: cleanName,
-      filmTitle: filmTitle ? String(filmTitle).trim() : 'Žiūrovas (Auditorija)',
-      role: role || 'guest_viewer',
+      filmTitle: filmTitle ? String(filmTitle).trim() : (tokenType === 'classroom' ? 'Klasės transliacija' : 'Žiūrovas (Auditorija)'),
+      role: role || (tokenType === 'classroom' ? 'classroom_viewer' : 'guest_viewer'),
       status: 'authorized',
       createdAt: new Date().toISOString(),
       expiresAt: new Date(Date.now() + duration * 3600 * 1000).toISOString(),
@@ -3294,6 +3305,19 @@ app.post('/api/admin/stream/viewers/create', async (req, res) => {
 
     viewersData.viewers.unshift(newViewer);
     saveLiveViewersData(viewersData);
+
+    // Sync to Firestore stream_tokens collection for decentralized validation
+    syncToFirestore('stream_tokens', tokenHash, {
+      tokenHash: { stringValue: tokenHash },
+      tokenType: { stringValue: tokenType },
+      label: { stringValue: newViewer.classroomLabel || newViewer.name },
+      maxConcurrentDevices: { integerValue: String(maxConcurrentDevices) },
+      maxUses: { integerValue: String(maxConcurrentDevices) },
+      currentUses: { integerValue: "0" },
+      isActive: { booleanValue: true },
+      createdAt: { timestampValue: newViewer.createdAt },
+      expiresAt: { timestampValue: newViewer.expiresAt }
+    }).catch(() => {});
 
     let emailSent = false;
     if (shouldSendEmail !== false) {
@@ -3312,11 +3336,11 @@ app.post('/api/admin/stream/viewers/create', async (req, res) => {
         <tr><td align="center" style="padding-bottom:20px;">
           <img src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media" width="68" height="68" style="border-radius:50%; border:2px solid #D4AF37; display:block; margin:0 auto;" alt="Logo">
           <h2 style="color:#D4AF37; margin:14px 0 4px 0; font-size:22px;">Ąžuolynas Film Festival 2027</h2>
-          <p style="color:#BAC9C0; margin:0; font-size:0.88rem; text-transform:uppercase; letter-spacing:0.06em; font-weight:700;">Tiesioginės Transliacijos Žetonas & Prieiga</p>
+          <p style="color:#BAC9C0; margin:0; font-size:0.88rem; text-transform:uppercase; letter-spacing:0.06em; font-weight:700;">${tokenType === 'classroom' ? 'Mokyklos / Klasės Transliacijos Prieiga' : 'Tiesioginės Transliacijos Žetonas & Prieiga'}</p>
         </td></tr>
         <tr><td style="line-height:1.65; font-size:0.95rem; color:#BAC9C0;">
           <p style="color:#F8FAF7; font-size:1.05rem; margin-top:0;">Sveiki, <strong>${cleanName}</strong>!</p>
-          <p>Jums suteikta oficiali autorizuota prieiga tiesiogiai stebėti festivalio filmų peržiūrą ir iškilmingą apdovanojimų ceremoniją per tiesioginę transliaciją.</p>
+          <p>${tokenType === 'classroom' ? `Jūsų klasei suteikta autorizuota tiesioginės transliacijos prieiga (${maxConcurrentDevices} įrenginiams vienu metu). Mokytojai gali transliuoti per projektorių arba mokiniai gali stebėti per savo įrenginius.` : 'Jums suteikta oficiali autorizuota prieiga tiesiogiai stebėti festivalio filmų peržiūrą ir iškilmingą apdovanojimų ceremoniją per tiesioginę transliaciją.'}</p>
           
           <div style="background:#081B17; border:1px solid rgba(212,175,55,0.4); border-radius:8px; padding:18px; margin:20px 0; text-align:center;">
             <div style="font-size:0.75rem; color:#7A9689; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:6px; font-weight:700;">Jūsų asmeninis prieigos žetonas (Token):</div>
@@ -3364,7 +3388,7 @@ app.post('/api/admin/stream/viewers/create', async (req, res) => {
       category: "stream",
       adminEmail: callerEmail,
       target: cleanEmail,
-      details: `Sugeneruotas Cloudflare Signed Token (${token}) žiūrovui ${cleanName} (${cleanEmail}). Laiškas išsiųstas: ${emailSent ? 'Taip' : 'Ne'}`
+      details: `Sugeneruotas ${tokenType.toUpperCase()} žetonas (${token}) ${cleanName} (${cleanEmail}). Maks. įrenginių: ${maxConcurrentDevices}. Laiškas: ${emailSent ? 'Taip' : 'Ne'}`
     });
 
     res.json({
@@ -3376,6 +3400,92 @@ app.post('/api/admin/stream/viewers/create', async (req, res) => {
   } catch (err) {
     console.error('Error creating stream viewer token:', err);
     res.status(500).json({ error: 'Nepavyko sugeneruoti žiūrovo žetono' });
+  }
+});
+
+// API: Bulk generate classroom/teacher tokens
+app.post('/api/admin/stream/viewers/bulk-create', async (req, res) => {
+  try {
+    const { items, adminEmail, expiresInHours } = req.body || {};
+    if (!Array.isArray(items) || items.length === 0) {
+      return res.status(400).json({ error: 'Nėra duomenų masiniam generavimui' });
+    }
+
+    const callerEmail = String(adminEmail || req.headers['x-admin-email'] || PRIMARY_SUPERADMIN_EMAIL).trim().toLowerCase();
+    const duration = parseInt(expiresInHours || '48', 10);
+    const viewersData = loadLiveViewersData();
+    if (!viewersData.viewers) viewersData.viewers = [];
+
+    const createdList = [];
+    const baseUrl = req.protocol + '://' + req.get('host');
+
+    for (const item of items) {
+      const cleanName = String(item.name || item.label || 'Mokytojas / Klasė').trim();
+      const cleanEmail = String(item.email || `klase_${Date.now()}_${Math.random().toString(36).substring(2, 6)}@mokykla.lt`).trim().toLowerCase();
+      const classroomLabel = String(item.classroomLabel || item.label || cleanName).trim();
+      const maxDevices = Math.max(1, Math.min(100, parseInt(item.maxConcurrentDevices || '35', 10)));
+
+      const hashPart = crypto.createHmac('sha256', JWT_SECRET).update(`${cleanEmail}-${Date.now()}-${Math.random()}`).digest('hex').substring(0, 16);
+      const token = `cfs_class_${hashPart}`;
+      const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
+      const liveLink = `${baseUrl}/live.html?t=${encodeURIComponent(token)}`;
+
+      const newViewer = {
+        token,
+        tokenHash,
+        tokenType: 'classroom',
+        classroomLabel,
+        maxConcurrentDevices: maxDevices,
+        maxUses: maxDevices,
+        currentUses: 0,
+        activeDevices: 0,
+        email: cleanEmail,
+        name: cleanName,
+        filmTitle: 'Klasės transliacija',
+        role: 'classroom_viewer',
+        status: 'authorized',
+        createdAt: new Date().toISOString(),
+        expiresAt: new Date(Date.now() + duration * 3600 * 1000).toISOString(),
+        lastActive: new Date().toISOString(),
+        liveStreamUrl: liveLink
+      };
+
+      viewersData.viewers = viewersData.viewers.filter(v => v.token !== token);
+      viewersData.viewers.unshift(newViewer);
+      createdList.push(newViewer);
+
+      // Async sync to Firestore stream_tokens
+      syncToFirestore('stream_tokens', tokenHash, {
+        tokenHash: { stringValue: tokenHash },
+        tokenType: { stringValue: 'classroom' },
+        label: { stringValue: classroomLabel },
+        maxConcurrentDevices: { integerValue: String(maxDevices) },
+        maxUses: { integerValue: String(maxDevices) },
+        currentUses: { integerValue: "0" },
+        isActive: { booleanValue: true },
+        createdAt: { timestampValue: newViewer.createdAt },
+        expiresAt: { timestampValue: newViewer.expiresAt }
+      }).catch(() => {});
+    }
+
+    saveLiveViewersData(viewersData);
+
+    recordActivityLog({
+      action: "BULK_CLASSROOM_TOKENS_GENERATED",
+      category: "stream",
+      adminEmail: callerEmail,
+      target: "classroom_tokens",
+      details: `Sugeneruota ${createdList.length} naujų klasės prieigos žetonų.`
+    });
+
+    res.json({
+      success: true,
+      count: createdList.length,
+      viewers: createdList
+    });
+  } catch (err) {
+    console.error('Error bulk creating classroom tokens:', err);
+    res.status(500).json({ error: 'Nepavyko sugeneruoti klasės žetonų' });
   }
 });
 
@@ -5112,19 +5222,24 @@ app.post('/api/stream/validate-token', (req, res) => {
       return res.status(403).json({ valid: false, error: 'expired', message: 'Šio žetono galiojimo laikas pasibaigęs.' });
     }
 
-    const maxUses = viewer.maxUses || 10;
+    const isClassroom = viewer.tokenType === 'classroom';
+    const maxAllowed = isClassroom ? (viewer.maxConcurrentDevices || 35) : (viewer.maxUses || 5);
     const currentUses = (viewer.currentUses || 0) + 1;
-    if (currentUses > maxUses) {
+    if (!isClassroom && currentUses > maxAllowed) {
       return res.status(403).json({ valid: false, error: 'max_uses_reached', message: 'Viršytas leistinų prisijungimų limitas.' });
     }
 
     viewer.currentUses = currentUses;
+    viewer.activeDevices = Math.min(maxAllowed, (viewer.activeDevices || 0) + 1);
     viewer.lastAccessAt = new Date().toISOString();
     saveLiveViewersData(viewersData);
 
     res.json({
       valid: true,
-      label: viewer.name || viewer.email || 'Žiūrovas',
+      tokenType: viewer.tokenType || (isClassroom ? 'classroom' : 'individual'),
+      maxDevices: maxAllowed,
+      activeDevices: viewer.activeDevices,
+      label: viewer.classroomLabel || viewer.name || viewer.email || (isClassroom ? 'Klasės transliacija' : 'Žiūrovas'),
       playbackUrl: 'https://customer-auu36r7owuzogvfb.cloudflarestream.com/937d1a8b2c545a980c9fabc8502d8af4/iframe',
       expiresAt: viewer.expiresAt || null
     });

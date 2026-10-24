@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="referrer" content="no-referrer">
   <title id="pageTitle">Tiesioginė Transliacija | Ąžuolynas Film Fest</title>
   <meta name="description" id="metaDescription" content="Oficiali Ąžuolynas International Students Film Festival ceremonijos tiesioginė transliacija su autorizuota prieiga.">
   <link rel="icon" type="image/webp" href="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media">
@@ -12,19 +13,15 @@
   <link rel="stylesheet" href="live.css">
   <script src="error-reporting.js"></script>
   <style>
-    /* Language switch bar */
+    /* Language switcher component */
     .live-lang-switch {
-      position: absolute;
-      top: 20px;
-      right: 24px;
       display: inline-flex;
       align-items: center;
-      background: rgba(0, 0, 0, 0.5);
-      border: 1px solid rgba(111, 165, 138, 0.3);
+      background: rgba(0, 0, 0, 0.45);
+      border: 1px solid rgba(111, 165, 138, 0.35);
       border-radius: 20px;
-      padding: 3px 5px;
-      gap: 4px;
-      z-index: 100;
+      padding: 2px 4px;
+      gap: 3px;
     }
     .live-lang-btn {
       background: transparent;
@@ -56,6 +53,12 @@
       position: relative;
       background: radial-gradient(circle at 50% 20%, rgba(12, 36, 31, 0.95) 0%, rgba(4, 19, 16, 0.98) 100%);
     }
+    .gate-top-lang {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      z-index: 10;
+    }
     .token-gate-card {
       background: rgba(8, 27, 23, 0.94);
       border: 1px solid rgba(212, 175, 55, 0.45);
@@ -67,6 +70,7 @@
       text-align: center;
       backdrop-filter: blur(12px);
       -webkit-backdrop-filter: blur(12px);
+      box-sizing: border-box;
     }
     .token-gate-icon {
       width: 58px;
@@ -171,84 +175,128 @@
       text-decoration: underline;
     }
 
-    /* Live Player Mounted Stage */
+    /* =========================================================================
+       LIVE PLAYER MOUNTED STAGE (Strict non-overlapping responsive flow)
+       ========================================================================= */
     .live-player-stage {
       max-width: 1100px;
       margin: 0 auto;
-      padding: 28px 16px 64px 16px;
+      padding: 20px 16px 48px 16px;
       width: 100%;
       box-sizing: border-box;
-      position: relative;
+      display: flex;
+      flex-direction: column;
     }
-    .live-top-bar {
+
+    /* Row 1: Festival Branding Header */
+    .live-brand-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 14px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid rgba(111, 165, 138, 0.15);
+    }
+    .live-brand-logo {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      border: 1px solid rgba(212, 175, 55, 0.4);
+    }
+    .live-brand-info {
+      flex: 1;
+      min-width: 0;
+    }
+    .live-brand-title {
+      font-family: var(--font-cinema, Georgia, serif);
+      font-size: clamp(1.1rem, 3.5vw, 1.45rem);
+      color: #F8FAF7;
+      margin: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .live-brand-sub {
+      font-size: clamp(0.72rem, 2.5vw, 0.8rem);
+      color: #94a3b8;
+      margin: 3px 0 0 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* Row 2: Compact Action Toolbar (Wraps cleanly on small screens, NEVER overlaps player) */
+    .live-toolbar-row {
       display: flex;
       align-items: center;
       justify-content: space-between;
       flex-wrap: wrap;
-      gap: 16px;
-      margin-bottom: 24px;
-      padding-bottom: 18px;
-      border-bottom: 1px solid rgba(111, 165, 138, 0.2);
+      gap: 10px;
+      background: rgba(8, 27, 23, 0.7);
+      border: 1px solid rgba(111, 165, 138, 0.25);
+      border-radius: 8px;
+      padding: 8px 12px;
+      margin-bottom: 16px;
+      box-sizing: border-box;
     }
-    .live-brand {
+    .live-toolbar-left {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 8px;
     }
-    .live-brand img {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-    }
-    .live-brand-title {
-      font-family: var(--font-cinema, Georgia, serif);
-      font-size: 1.25rem;
-      color: #F8FAF7;
-      margin: 0;
-    }
-    .live-brand-sub {
-      font-size: 0.75rem;
-      color: #94a3b8;
-      margin: 2px 0 0 0;
-    }
-    .live-controls-right {
+    .live-toolbar-right {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 8px;
+      flex-wrap: wrap;
     }
     .live-user-pill {
       display: inline-flex;
       align-items: center;
-      gap: 8px;
-      background: rgba(111, 165, 138, 0.15);
+      gap: 6px;
+      background: rgba(111, 165, 138, 0.18);
       border: 1px solid rgba(111, 165, 138, 0.35);
-      padding: 6px 14px;
-      border-radius: 20px;
-      font-size: 0.8rem;
+      padding: 4px 10px;
+      border-radius: 16px;
+      font-size: 0.76rem;
       color: #F8FAF7;
+      max-width: 240px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .live-user-pill.classroom {
+      background: rgba(212, 175, 55, 0.15);
+      border-color: rgba(212, 175, 55, 0.4);
+      color: #F3E5AB;
     }
     .live-exit-btn {
       background: transparent;
       border: 1px solid rgba(239, 68, 68, 0.4);
       color: #f87171;
-      padding: 5px 12px;
+      padding: 4px 10px;
       border-radius: 6px;
-      font-size: 0.75rem;
+      font-size: 0.74rem;
       cursor: pointer;
       transition: background 0.2s ease;
+      white-space: nowrap;
     }
     .live-exit-btn:hover {
       background: rgba(239, 68, 68, 0.15);
     }
+
+    /* Row 3: 16:9 Video Stage Container */
     .player-responsive-wrap {
       position: relative;
+      width: 100%;
       padding-top: 56.25%; /* 16:9 Aspect Ratio */
       background: #000000;
-      border-radius: 12px;
+      border-radius: 10px;
       overflow: hidden;
-      border: 1px solid rgba(212, 175, 55, 0.3);
-      box-shadow: 0 18px 50px rgba(0, 0, 0, 0.8);
-      margin-bottom: 24px;
+      border: 1px solid rgba(212, 175, 55, 0.35);
+      box-shadow: 0 16px 45px rgba(0, 0, 0, 0.85);
+      margin-bottom: 16px;
     }
     .player-responsive-wrap iframe,
     .player-responsive-wrap video {
@@ -259,6 +307,8 @@
       height: 100%;
       border: none;
     }
+
+    /* Stream Offline State Overlay */
     .stream-offline-overlay {
       position: absolute;
       inset: 0;
@@ -269,15 +319,15 @@
       background: radial-gradient(circle, #081B17 0%, #030d0b 100%);
       color: #F8FAF7;
       text-align: center;
-      padding: 24px;
+      padding: 20px;
       z-index: 5;
     }
     .stream-offline-pulse {
       width: 14px;
       height: 14px;
       border-radius: 50%;
-      background: #D4AF37;
-      box-shadow: 0 0 15px #D4AF37;
+      background: #eab308;
+      box-shadow: 0 0 15px #eab308;
       margin-bottom: 14px;
       animation: asiffPulseDot 2s infinite ease-in-out;
     }
@@ -287,30 +337,117 @@
     }
     .stream-offline-title {
       font-family: var(--font-cinema, Georgia, serif);
-      font-size: 1.35rem;
+      font-size: clamp(1.1rem, 3vw, 1.35rem);
       color: #D4AF37;
       margin: 0 0 8px 0;
     }
     .stream-offline-desc {
-      font-size: 0.88rem;
+      font-size: clamp(0.78rem, 2.5vw, 0.88rem);
       color: #94a3b8;
       max-width: 480px;
       line-height: 1.5;
-      margin: 0;
+      margin: 0 0 16px 0;
+    }
+    .stream-retry-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.74rem;
+      color: #cbd5e1;
+      background: rgba(255, 255, 255, 0.06);
+      padding: 4px 10px;
+      border-radius: 12px;
+      border: 1px solid rgba(111, 165, 138, 0.2);
+    }
+
+    /* Row 4: Status Bar & Action Controls */
+    .live-bottom-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .live-status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 0.82rem;
+      font-weight: 500;
+    }
+    .live-status-pill.is-live {
+      background: rgba(74, 222, 128, 0.15);
+      border: 1px solid rgba(74, 222, 128, 0.4);
+      color: #4ade80;
+    }
+    .live-status-pill.is-offline {
+      background: rgba(234, 179, 8, 0.15);
+      border: 1px solid rgba(234, 179, 8, 0.4);
+      color: #facc15;
+    }
+    .live-status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+    .live-bottom-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .btn-fullscreen {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(111, 165, 138, 0.35);
+      color: #cbd5e1;
+      padding: 7px 12px;
+      border-radius: 6px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+    .btn-fullscreen:hover {
+      background: rgba(212, 175, 55, 0.2);
+      border-color: #D4AF37;
+      color: #F8FAF7;
+    }
+    .btn-voting-direct {
+      background: #D4AF37;
+      color: #041310;
+      padding: 7px 16px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      text-decoration: none;
+      border-radius: 6px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: background 0.2s ease;
+    }
+    .btn-voting-direct:hover {
+      background: #F3E5AB;
     }
   </style>
 </head>
 <body class="site-body">
 
   <!-- =========================================================================
-       INITIAL DOM: STRICT ZERO-EXPOSURE TOKEN GATE ONLY
+       GATE VIEWPORT: CLEAN INITIAL TOKEN GATE
        ========================================================================= -->
   <div id="liveGateContainer" class="token-gate-viewport">
     
-    <!-- Language Switcher in Gate View -->
-    <div class="live-lang-switch">
-      <button type="button" class="live-lang-btn" data-lang="lt">LT</button>
-      <button type="button" class="live-lang-btn" data-lang="en">EN</button>
+    <div class="gate-top-lang">
+      <div class="live-lang-switch">
+        <button type="button" class="live-lang-btn" data-lang="lt">LT</button>
+        <button type="button" class="live-lang-btn" data-lang="en">EN</button>
+      </div>
     </div>
 
     <div class="token-gate-card">
@@ -323,12 +460,12 @@
 
       <h1 class="token-gate-title" data-i18n="gateTitle">Transliacijos Prieiga</h1>
       <p class="token-gate-desc" data-i18n="gateDesc">
-        Tiesioginė festivalio transliacija skirta autorizuotiems žiūrovams. Įveskite savo asmeninį prieigos kodą.
+        Tiesioginė festivalio transliacija skirta autorizuotiems žiūrovams ir klasėms. Įveskite savo asmeninį arba klasės prieigos kodą.
       </p>
 
       <form id="tokenGateForm" action="javascript:void(0);">
         <div class="token-input-wrap">
-          <label for="tokenInputField" data-i18n="tokenLabel">Asmeninis prieigos kodas *</label>
+          <label for="tokenInputField" data-i18n="tokenLabel">Prieigos kodas (Token) *</label>
           <input 
             type="text" 
             id="tokenInputField" 
@@ -360,14 +497,14 @@
 
   <script>
     (function() {
-      // 1. Language Dictionary (Zero Provider Names or Technical Codes in Viewer UI!)
+      // 1. Language Dictionary (Zero Provider Names or Technical Codes in Viewer UI)
       const I18N = {
         lt: {
           pageTitle: "Tiesioginė Transliacija | Ąžuolynas Film Fest",
           metaDesc: "Oficiali Ąžuolynas International Students Film Festival ceremonijos tiesioginė transliacija su autorizuota prieiga.",
           gateTitle: "Transliacijos Prieiga",
-          gateDesc: "Tiesioginė festivalio transliacija skirta autorizuotiems žiūrovams. Įveskite savo asmeninį prieigos kodą.",
-          tokenLabel: "Asmeninis prieigos kodas *",
+          gateDesc: "Tiesioginė festivalio transliacija skirta autorizuotiems žiūrovams ir klasėms. Įveskite asmeninį arba klasės prieigos kodą.",
+          tokenLabel: "Prieigos kodas *",
           tokenPlaceholder: "pvz. asiff_live_...",
           submitBtn: "Patvirtinti ir Žiūrėti",
           verifyingBtn: "Tikrinama...",
@@ -375,11 +512,16 @@
           headerTitle: "Ąžuolynas Film Fest Ceremonija",
           headerSub: "Kauno Tarptautinė Gimnazija &bull; Oficiali laureatų apdovanojimų transliacija",
           defaultViewer: "Autorizuotas žiūrovas",
+          classroomLabel: "Klasės prieiga",
           exitBtn: "Atsijungti",
-          streamActive: "Tiesioginis eteris aktyvus",
-          votingBtn: "Atverti Žiūrovų Balsavimą &rarr;",
+          streamLive: "Tiesioginis eteris aktyvus",
+          streamOffline: "Transliacija dar neprasidėjo",
+          streamStarting: "Signalas ruošiamas...",
           offlineTitle: "Transliacija dar neprasidėjo",
-          offlineDesc: "Apdovanojimų ceremonijos tiesioginis eteris prasidės netrukus. Puslapis automatiškai atsinaujins pradėjus transliaciją.",
+          offlineDesc: "Apdovanojimų ceremonijos tiesioginis eteris prasidės netrukus. Puslapis automatiškai atnaujins vaizdą prasidėjus transliacijai.",
+          autoRetryText: "Automatinis signalo tikrinimas kas 5 s...",
+          btnFullscreen: "Visas ekranas",
+          btnVoting: "Žiūrovų Balsavimas &rarr;",
           errExpired: "Šio prieigos kodo galiojimo laikas pasibaigęs.",
           errRevoked: "Šis prieigos kodas negalioja arba buvo atšauktas.",
           errMaxUses: "Pasiektas maksimalus šio kodo prisijungimų limitas.",
@@ -390,8 +532,8 @@
           pageTitle: "Live Stream | Ąžuolynas Film Fest",
           metaDesc: "Official live stream of the Ąžuolynas International Students Film Festival awards ceremony with authorized access.",
           gateTitle: "Live Stream Access",
-          gateDesc: "The festival live stream is reserved for authorized viewers. Please enter your personal access code.",
-          tokenLabel: "Personal access code *",
+          gateDesc: "The festival live stream is reserved for authorized viewers and classrooms. Enter your personal or classroom code.",
+          tokenLabel: "Access code *",
           tokenPlaceholder: "e.g. asiff_live_...",
           submitBtn: "Verify & Watch",
           verifyingBtn: "Verifying...",
@@ -399,11 +541,16 @@
           headerTitle: "Ąžuolynas Film Fest Ceremony",
           headerSub: "Kaunas International Gymnasium &bull; Official live awards ceremony",
           defaultViewer: "Authorized Viewer",
+          classroomLabel: "Classroom Access",
           exitBtn: "Log out",
-          streamActive: "Live broadcast in progress",
-          votingBtn: "Open Audience Voting &rarr;",
+          streamLive: "Live broadcast in progress",
+          streamOffline: "Broadcast has not started yet",
+          streamStarting: "Broadcast signal connecting...",
           offlineTitle: "Broadcast Has Not Started Yet",
-          offlineDesc: "The live ceremony broadcast will begin shortly. This page will automatically update once the stream goes live.",
+          offlineDesc: "The live ceremony broadcast will begin shortly. This player will automatically connect once the stream begins.",
+          autoRetryText: "Auto-checking signal every 5s...",
+          btnFullscreen: "Fullscreen",
+          btnVoting: "Audience Voting &rarr;",
           errExpired: "This access code has expired.",
           errRevoked: "This access code is invalid or has been revoked.",
           errMaxUses: "The maximum number of connections for this code has been reached.",
@@ -412,7 +559,7 @@
         }
       };
 
-      // 2. Language Detection
+      // 2. Language Detection & State
       function detectLanguage() {
         const urlParams = new URLSearchParams(window.location.search);
         const qLang = urlParams.get("lang");
@@ -421,15 +568,17 @@
         const stored = localStorage.getItem("asiff_preferred_lang") || sessionStorage.getItem("asiff_lang");
         if (stored === "en" || stored === "lt") return stored;
 
-        // Check referrer
         const ref = (document.referrer || "").toLowerCase();
         if (ref.includes("/en/")) return "en";
         if (ref.includes("/lt/")) return "lt";
 
-        return "lt"; // Default Lithuanian
+        return "lt";
       }
 
       let currentLang = detectLanguage();
+      let isStreamLive = false;
+      let checkTimer = null;
+      let currentAuth = null;
 
       function setLanguage(lang) {
         currentLang = lang;
@@ -445,12 +594,10 @@
       function applyTranslations() {
         const t = I18N[currentLang] || I18N.lt;
 
-        // Meta and Title
         document.title = t.pageTitle;
         const meta = document.getElementById("metaDescription");
         if (meta) meta.content = t.metaDesc;
 
-        // Gate Elements
         const titleEl = document.querySelector('[data-i18n="gateTitle"]');
         if (titleEl) titleEl.textContent = t.gateTitle;
 
@@ -471,7 +618,6 @@
         const helpEl = document.querySelector('[data-i18n="helpText"]');
         if (helpEl) helpEl.innerHTML = t.helpText;
 
-        // Active Language Switch Buttons
         document.querySelectorAll(".live-lang-btn").forEach(btn => {
           if (btn.getAttribute("data-lang") === currentLang) {
             btn.classList.add("active");
@@ -480,7 +626,6 @@
           }
         });
 
-        // If player is mounted, update stage strings
         updatePlayerStageTranslations();
       }
 
@@ -495,11 +640,10 @@
         });
       }
 
-      // Initialize translations
       applyTranslations();
       bindLangButtons();
 
-      // Gate & Mount DOM elements
+      // Elements
       const gateContainer = document.getElementById("liveGateContainer");
       const playerMount = document.getElementById("livePlayerMount");
       const form = document.getElementById("tokenGateForm");
@@ -507,11 +651,9 @@
       const submitBtn = document.getElementById("tokenSubmitBtn");
       const errorBox = document.getElementById("tokenErrorBox");
 
-      let currentAuth = null;
-
-      // Auto-check URL parameters (?token=... or ?pass=...)
+      // Auto-check URL parameters (?t=CODE, ?token=CODE, or ?pass=CODE)
       const urlParams = new URLSearchParams(window.location.search);
-      const queryToken = urlParams.get("token") || urlParams.get("pass");
+      const queryToken = urlParams.get("t") || urlParams.get("token") || urlParams.get("pass");
 
       // Check session storage cache
       const cachedSession = sessionStorage.getItem("asiff_verified_token");
@@ -543,7 +685,7 @@
         submitBtn.querySelector("span").textContent = t.verifyingBtn;
 
         try {
-          // Compute SHA-256 hash of access token
+          // Compute SHA-256 hash
           const encoder = new TextEncoder();
           const data = encoder.encode(token);
           const hashBuffer = await crypto.subtle.digest("SHA-256", data);
@@ -570,13 +712,12 @@
             }
           }
 
-          // 2. If not validated via local route, query Firestore stream_tokens document directly
+          // 2. Query Firestore stream_tokens document directly
           if (!validation) {
             const fsUrl = `https://firestore.googleapis.com/v1/projects/filmfest-509606/databases/ai-studio-azuolynasinterna-cd7ce36e-5213-4751-8aa0-a7141d397a83/documents/stream_tokens/${tokenHash}`;
             const fsRes = await fetch(fsUrl);
             
             if (fsRes.status === 404) {
-              // Check backwards-compatibility collection
               const fsViewerUrl = `https://firestore.googleapis.com/v1/projects/filmfest-509606/databases/ai-studio-azuolynasinterna-cd7ce36e-5213-4751-8aa0-a7141d397a83/documents/live_viewers/${encodeURIComponent(token)}`;
               const fsVRes = await fetch(fsViewerUrl);
               if (fsVRes.status === 404) {
@@ -585,6 +726,7 @@
               const vDoc = await fsVRes.json();
               validation = {
                 valid: true,
+                tokenType: "individual",
                 label: vDoc.fields?.name?.stringValue || t.defaultViewer,
                 playbackUrl: "https://customer-auu36r7owuzogvfb.cloudflarestream.com/937d1a8b2c545a980c9fabc8502d8af4/iframe"
               };
@@ -592,17 +734,20 @@
               const doc = await fsRes.json();
               const f = doc.fields || {};
               const isActive = f.isActive ? f.isActive.booleanValue !== false : true;
-              const maxUses = f.maxUses ? parseInt(f.maxUses.integerValue || "1", 10) : 1;
+              const maxUses = f.maxUses ? parseInt(f.maxUses.integerValue || "1", 10) : (f.maxConcurrentDevices ? parseInt(f.maxConcurrentDevices.integerValue || "35", 10) : 35);
               const currentUses = f.currentUses ? parseInt(f.currentUses.integerValue || "0", 10) : 0;
               const expiresAt = f.expiresAt?.timestampValue ? new Date(f.expiresAt.timestampValue) : null;
+              const tokenType = f.tokenType?.stringValue || (maxUses > 1 ? "classroom" : "individual");
 
               if (!isActive) throw new Error(t.errRevoked);
               if (expiresAt && expiresAt.getTime() < Date.now()) throw new Error(t.errExpired);
-              if (currentUses >= maxUses) throw new Error(t.errMaxUses);
+              if (currentUses >= maxUses && tokenType !== "classroom") throw new Error(t.errMaxUses);
 
               validation = {
                 valid: true,
-                label: f.label?.stringValue || t.defaultViewer,
+                tokenType: tokenType,
+                maxDevices: maxUses,
+                label: f.label?.stringValue || (tokenType === "classroom" ? t.classroomLabel : t.defaultViewer),
                 playbackUrl: "https://customer-auu36r7owuzogvfb.cloudflarestream.com/937d1a8b2c545a980c9fabc8502d8af4/iframe",
                 expiresAt: expiresAt ? expiresAt.toISOString() : null
               };
@@ -615,9 +760,17 @@
             currentAuth = validation;
             sessionStorage.setItem("asiff_verified_token", JSON.stringify({
               token: token,
+              tokenType: validation.tokenType,
+              maxDevices: validation.maxDevices,
               label: validation.label,
               expiresAt: validation.expiresAt
             }));
+
+            // Strip token parameter from browser URL bar to prevent link leakage
+            if (window.history && window.history.replaceState) {
+              const cleanUrl = window.location.pathname + (window.location.search ? window.location.search.replace(/[?&](t|token|pass)=[^&]+/g, "").replace(/^&/, "?") : "");
+              window.history.replaceState({}, document.title, cleanUrl || window.location.pathname);
+            }
 
             mountLivePlayer(validation);
           } else {
@@ -673,29 +826,42 @@
         const stage = document.createElement("main");
         stage.className = "live-player-stage";
         stage.id = "livePlayerStage";
+
+        const isClassroom = auth.tokenType === "classroom";
+        const badgeLabel = isClassroom 
+          ? `🏫 ${escapeHtml(auth.label || t.classroomLabel)} (${auth.maxDevices || 35})`
+          : `👤 ${escapeHtml(auth.label || t.defaultViewer)}`;
+
         stage.innerHTML = `
-          <header class="live-top-bar">
-            <div class="live-brand">
-              <img src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media" alt="Ąžuolynas Fest">
-              <div>
-                <h1 class="live-brand-title" id="stageHeaderTitle">${t.headerTitle}</h1>
-                <p class="live-brand-sub" id="stageHeaderSub">${t.headerSub}</p>
-              </div>
+          <!-- Row 1: Festival Branding Header -->
+          <div class="live-brand-row">
+            <img 
+              src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media" 
+              alt="Ąžuolynas Fest" 
+              class="live-brand-logo">
+            <div class="live-brand-info">
+              <h1 class="live-brand-title" id="stageHeaderTitle">${t.headerTitle}</h1>
+              <p class="live-brand-sub" id="stageHeaderSub">${t.headerSub}</p>
             </div>
-            <div class="live-controls-right">
-              <!-- Language Switcher in Player Header -->
-              <div class="live-lang-switch" style="position:static;">
+          </div>
+
+          <!-- Row 2: Compact Action Toolbar (Never overlaps the video player!) -->
+          <div class="live-toolbar-row">
+            <div class="live-toolbar-left">
+              <div class="live-lang-switch">
                 <button type="button" class="live-lang-btn ${currentLang === 'lt' ? 'active' : ''}" data-lang="lt">LT</button>
                 <button type="button" class="live-lang-btn ${currentLang === 'en' ? 'active' : ''}" data-lang="en">EN</button>
               </div>
-              <div class="live-user-pill">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-                <span id="stageUserLabel">${escapeHtml(auth.label || t.defaultViewer)}</span>
+            </div>
+            <div class="live-toolbar-right">
+              <div class="live-user-pill ${isClassroom ? 'classroom' : ''}" id="stageUserLabel" title="${escapeHtml(auth.label || '')}">
+                ${badgeLabel}
               </div>
               <button type="button" id="liveExitBtn" class="live-exit-btn">${t.exitBtn}</button>
             </div>
-          </header>
+          </div>
 
+          <!-- Row 3: 16:9 Video Stage Container -->
           <div class="player-responsive-wrap" id="playerWrapper">
             <iframe 
               id="streamPlayerIframe"
@@ -704,28 +870,70 @@
               allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture; fullscreen"
               allowfullscreen>
             </iframe>
+
+            <!-- Offline Overlay (Initially hidden if live, shown if broadcast not yet started) -->
+            <div id="streamOfflineOverlay" class="stream-offline-overlay d-none">
+              <div class="stream-offline-pulse"></div>
+              <h2 class="stream-offline-title" id="offlineTitle">${t.offlineTitle}</h2>
+              <p class="stream-offline-desc" id="offlineDesc">${t.offlineDesc}</p>
+              <div class="stream-retry-badge" id="offlineRetry">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+                <span>${t.autoRetryText}</span>
+              </div>
+            </div>
           </div>
 
-          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-top:16px;">
-            <div style="display:flex; align-items:center; gap:8px;">
-              <span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:#4ade80;"></span>
-              <span id="stageLiveNotice" style="font-size:0.85rem; color:#cbd5e1;">${t.streamActive}</span>
+          <!-- Row 4: Unified Status Bar & Controls (Single source of truth) -->
+          <div class="live-bottom-bar">
+            <div id="unifiedStatusPill" class="live-status-pill is-offline">
+              <span class="live-status-dot"></span>
+              <span id="unifiedStatusText">${t.streamOffline}</span>
             </div>
-            <a href="voting.html" id="stageVotingLink" class="btn-solid" style="padding:8px 18px; font-size:0.85rem; background:#D4AF37; color:#041310; text-decoration:none; border-radius:6px; font-weight:700;">
-              ${t.votingBtn}
-            </a>
+
+            <div class="live-bottom-actions">
+              <button type="button" id="btnFullscreenToggle" class="btn-fullscreen">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
+                <span id="btnFullscreenLabel">${t.btnFullscreen}</span>
+              </button>
+
+              <a href="voting.html" id="stageVotingLink" class="btn-voting-direct">
+                ${t.btnVoting}
+              </a>
+            </div>
           </div>
         `;
 
         playerMount.appendChild(stage);
-
         bindLangButtons();
 
+        // Bind Exit button
         const exitBtn = stage.querySelector("#liveExitBtn");
         exitBtn.addEventListener("click", () => {
           sessionStorage.removeItem("asiff_verified_token");
           window.location.reload();
         });
+
+        // Bind Fullscreen Toggle
+        const fsBtn = stage.querySelector("#btnFullscreenToggle");
+        const playerWrap = stage.querySelector("#playerWrapper");
+        if (fsBtn && playerWrap) {
+          fsBtn.addEventListener("click", () => {
+            if (!document.fullscreenElement) {
+              if (playerWrap.requestFullscreen) {
+                playerWrap.requestFullscreen();
+              } else if (playerWrap.webkitRequestFullscreen) {
+                playerWrap.webkitRequestFullscreen();
+              }
+            } else {
+              if (document.exitFullscreen) {
+                document.exitFullscreen();
+              }
+            }
+          });
+        }
+
+        // Start Stream State Monitor & Auto-retry
+        startStreamStateMonitor();
       }
 
       function updatePlayerStageTranslations() {
@@ -742,11 +950,86 @@
         const exitBtn = stage.querySelector("#liveExitBtn");
         if (exitBtn) exitBtn.textContent = t.exitBtn;
 
-        const liveNotice = stage.querySelector("#stageLiveNotice");
-        if (liveNotice) liveNotice.textContent = t.streamActive;
+        const fsLabel = stage.querySelector("#btnFullscreenLabel");
+        if (fsLabel) fsLabel.textContent = t.btnFullscreen;
 
         const votingLink = stage.querySelector("#stageVotingLink");
-        if (votingLink) votingLink.innerHTML = t.votingBtn;
+        if (votingLink) votingLink.innerHTML = t.btnVoting;
+
+        const offTitle = stage.querySelector("#offlineTitle");
+        if (offTitle) offTitle.textContent = t.offlineTitle;
+
+        const offDesc = stage.querySelector("#offlineDesc");
+        if (offDesc) offDesc.textContent = t.offlineDesc;
+
+        const offRetry = stage.querySelector("#offlineRetry span");
+        if (offRetry) offRetry.textContent = t.autoRetryText;
+
+        updateStreamStatusUI(isStreamLive);
+      }
+
+      function updateStreamStatusUI(isLive) {
+        const t = I18N[currentLang] || I18N.lt;
+        const pill = document.getElementById("unifiedStatusPill");
+        const text = document.getElementById("unifiedStatusText");
+        const overlay = document.getElementById("streamOfflineOverlay");
+
+        isStreamLive = isLive;
+
+        if (pill && text) {
+          if (isLive) {
+            pill.className = "live-status-pill is-live";
+            text.textContent = t.streamLive;
+            if (overlay) overlay.classList.add("d-none");
+          } else {
+            pill.className = "live-status-pill is-offline";
+            text.textContent = t.streamOffline;
+            // Show friendly offline overlay if broadcast hasn't started
+            if (overlay) overlay.classList.remove("d-none");
+          }
+        }
+      }
+
+      // Stream State Monitor & Auto-Reconnect
+      function startStreamStateMonitor() {
+        if (checkTimer) clearInterval(checkTimer);
+
+        async function checkStatus() {
+          try {
+            // Check festival settings document in Firestore for live broadcast trigger
+            const fsUrl = `https://firestore.googleapis.com/v1/projects/filmfest-509606/databases/ai-studio-azuolynasinterna-cd7ce36e-5213-4751-8aa0-a7141d397a83/documents/settings/festival`;
+            const res = await fetch(fsUrl);
+            if (res.ok) {
+              const doc = await res.json();
+              const f = doc.fields || {};
+              const liveFlag = f.streamLive ? f.streamLive.booleanValue === true : (f.broadcastActive ? f.broadcastActive.booleanValue === true : false);
+              
+              const wasOffline = !isStreamLive;
+              updateStreamStatusUI(liveFlag);
+
+              // If stream just went live from offline, refresh iframe automatically without page reload
+              if (wasOffline && liveFlag) {
+                const iframe = document.getElementById("streamPlayerIframe");
+                if (iframe && currentAuth) {
+                  iframe.src = currentAuth.playbackUrl;
+                }
+              }
+            }
+          } catch (e) {
+            // Fallback: check overlay API
+            try {
+              const res = await fetch("/api/broadcast/overlay");
+              if (res.ok) {
+                const data = await res.json();
+                const liveFlag = data.isLive === true || data.streamLive === true;
+                updateStreamStatusUI(liveFlag);
+              }
+            } catch (err) {}
+          }
+        }
+
+        checkStatus();
+        checkTimer = setInterval(checkStatus, 5000);
       }
 
       function escapeHtml(str) {

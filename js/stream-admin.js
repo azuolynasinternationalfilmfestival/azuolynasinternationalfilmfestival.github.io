@@ -35,13 +35,25 @@ export function initStreamAdmin() {
   const viewerSearchInput = document.getElementById("filterSignedViewersSearch");
   if (viewerSearchInput) viewerSearchInput.addEventListener("input", renderAuthorizedViewersTable);
 
-  // 5. Add Viewer & Generate Signed Token Form
+  const viewerTypeFilter = document.getElementById("filterSignedViewersType");
+  if (viewerTypeFilter) viewerTypeFilter.addEventListener("change", renderAuthorizedViewersTable);
+
+  // 5. Classroom vs Individual Radio Handlers
+  initViewerTypeToggles();
+
+  // 6. Bulk Classroom Tokens Drawer & Actions
+  initBulkClassroomHandlers();
+
+  // 7. QR Modal Actions
+  initTokenQrModalHandlers();
+
+  // 8. Add Viewer & Generate Signed Token Form
   initViewerTokenForm();
 
-  // 6. Iframe URL edit & save handlers
+  // 9. Iframe URL edit & save handlers
   initStreamIframeUrlControls();
 
-  // 7. Refresh button
+  // 10. Refresh button
   const refreshBtn = document.getElementById("btnRefreshStreamAdmin");
   if (refreshBtn) {
     refreshBtn.addEventListener("click", () => {
@@ -298,6 +310,167 @@ function renderStreamControls() {
 }
 
 // ============================================================================
+// CLASSROOM & TOKEN TYPE TOGGLES & BULK ACTIONS
+// ============================================================================
+function initViewerTypeToggles() {
+  const radioIndiv = document.getElementById("viewerTypeIndividual");
+  const radioClass = document.getElementById("viewerTypeClassroom");
+  const classroomRow = document.getElementById("classroomSettingsRow");
+  const lblName = document.getElementById("lblViewerName");
+  const roleSelect = document.getElementById("newViewerRole");
+
+  function updateState() {
+    const isClassroom = radioClass && radioClass.checked;
+    if (classroomRow) {
+      classroomRow.style.display = isClassroom ? "grid" : "none";
+    }
+    if (lblName) {
+      lblName.textContent = isClassroom ? "Mokytojo Vardas, Pavardė *" : "Žiūrovo Vardas, Pavardė *";
+    }
+    if (roleSelect && isClassroom) {
+      roleSelect.value = "classroom_viewer";
+    }
+  }
+
+  if (radioIndiv) radioIndiv.addEventListener("change", updateState);
+  if (radioClass) radioClass.addEventListener("change", updateState);
+  updateState();
+}
+
+function initBulkClassroomHandlers() {
+  const toggleBtn = document.getElementById("btnToggleBulkClassroomBox");
+  const drawer = document.getElementById("bulkClassroomDrawer");
+  const runBtn = document.getElementById("btnRunBulkClassroomGenerate");
+  const exportBtn = document.getElementById("btnExportClassroomCsv");
+
+  if (toggleBtn && drawer) {
+    toggleBtn.addEventListener("click", () => {
+      drawer.classList.toggle("d-none");
+    });
+  }
+
+  if (runBtn) {
+    runBtn.addEventListener("click", runBulkClassroomGenerate);
+  }
+
+  if (exportBtn) {
+    exportBtn.addEventListener("click", exportClassroomTokensCsv);
+  }
+}
+
+function initTokenQrModalHandlers() {
+  const modal = document.getElementById("tokenQrModal");
+  const closeBtn = document.getElementById("closeTokenQrModalBtn");
+  const cancelBtn = document.getElementById("btnCancelTokenQrModal");
+  const copyLinkBtn = document.getElementById("btnCopyTokenQrLink");
+  const printBtn = document.getElementById("btnPrintTokenQr");
+
+  if (closeBtn) closeBtn.addEventListener("click", closeTokenQrModal);
+  if (cancelBtn) cancelBtn.addEventListener("click", closeTokenQrModal);
+
+  if (modal) {
+    modal.addEventListener("click", (e) => {
+      if (e.target === modal) closeTokenQrModal();
+    });
+  }
+
+  if (copyLinkBtn) {
+    copyLinkBtn.addEventListener("click", () => {
+      const input = document.getElementById("tokenQrDirectLinkInput");
+      if (input && input.value) {
+        navigator.clipboard.writeText(input.value).then(() => {
+          showToast("Transliacijos nuoroda nukopijuota į iškarpinę!", "success");
+        }).catch(() => {
+          showToast("Nepavyko nukopijuoti", "error");
+        });
+      }
+    });
+  }
+
+  if (printBtn) {
+    printBtn.addEventListener("click", () => {
+      const printArea = document.getElementById("tokenQrPrintableArea");
+      const name = document.getElementById("tokenQrTargetName")?.textContent || "Prieiga";
+      const link = document.getElementById("tokenQrDirectLinkInput")?.value || "";
+      if (!printArea) return;
+
+      const printWin = window.open("", "_blank", "width=640,height=700");
+      if (printWin) {
+        printWin.document.write(`
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <title>Ąžuolynas Film Fest - ${name}</title>
+            <style>
+              body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; text-align: center; padding: 40px; margin: 0; }
+              .card { border: 2px dashed #041310; border-radius: 12px; padding: 30px; max-width: 440px; margin: 0 auto; }
+              h1 { font-size: 20px; color: #041310; margin-bottom: 6px; }
+              p { color: #475569; font-size: 14px; margin: 4px 0 20px 0; }
+              .link { font-family: monospace; font-size: 12px; word-break: break-all; margin-top: 14px; color: #1e293b; }
+            </style>
+          </head>
+          <body>
+            <div class="card">
+              <h1>ĄŽUOLYNAS FILM FESTIVAL 2027</h1>
+              <p>Mokyklos / Klasės Transliacijos QR Prieiga<br><strong>${name}</strong></p>
+              ${printArea.innerHTML}
+              <div class="link">Tiesioginė nuoroda: ${link}</div>
+            </div>
+            <script>window.onload = function() { window.print(); };</script>
+          </body>
+          </html>
+        `);
+        printWin.document.close();
+      }
+    });
+  }
+}
+
+export function openTokenQrModal(viewer) {
+  const modal = document.getElementById("tokenQrModal");
+  if (!modal || !viewer) return;
+
+  const targetName = document.getElementById("tokenQrTargetName");
+  const typeBadge = document.getElementById("tokenQrTypeBadge");
+  const codeDisplay = document.getElementById("tokenQrCodeDisplay");
+  const linkInput = document.getElementById("tokenQrDirectLinkInput");
+  const qrContainer = document.getElementById("tokenQrCanvasContainer");
+
+  const isClassroom = viewer.tokenType === "classroom";
+  const nameLabel = isClassroom ? (viewer.classroomLabel || viewer.name || "Klasės peržiūra") : (viewer.name || viewer.email || "Žiūrovas");
+  const maxDevices = viewer.maxConcurrentDevices || (isClassroom ? 35 : 1);
+  const liveLink = `${window.location.origin}/live.html?t=${encodeURIComponent(viewer.token)}`;
+
+  if (targetName) targetName.textContent = nameLabel;
+  if (typeBadge) {
+    if (isClassroom) {
+      typeBadge.textContent = `🏫 Klasė (${maxDevices} įrenginiai)`;
+      typeBadge.style.background = "rgba(212,175,55,0.2)";
+      typeBadge.style.color = "#F3E5AB";
+      typeBadge.style.borderColor = "rgba(212,175,55,0.4)";
+    } else {
+      typeBadge.textContent = "👤 Individualus žiūrovas (1 įr.)";
+      typeBadge.style.background = "rgba(111,165,138,0.2)";
+      typeBadge.style.color = "#9BC4AE";
+      typeBadge.style.borderColor = "rgba(111,165,138,0.4)";
+    }
+  }
+  if (codeDisplay) codeDisplay.textContent = viewer.token;
+  if (linkInput) linkInput.value = liveLink;
+
+  if (qrContainer && window.FestivalQR) {
+    window.FestivalQR.render(liveLink, qrContainer, { size: 190 });
+  }
+
+  modal.classList.remove("d-none");
+}
+
+export function closeTokenQrModal() {
+  const modal = document.getElementById("tokenQrModal");
+  if (modal) modal.classList.add("d-none");
+}
+
+// ============================================================================
 // AUTHORIZED VIEWERS & CLOUDFLARE SIGNED TOKENS LIST
 // ============================================================================
 export function renderAuthorizedViewersTable() {
@@ -305,25 +478,30 @@ export function renderAuthorizedViewersTable() {
   if (!tableBody) return;
 
   const searchVal = (document.getElementById("filterSignedViewersSearch")?.value || "").toLowerCase().trim();
+  const typeFilter = document.getElementById("filterSignedViewersType")?.value || "all";
 
   // Metrics
   const totalViewersElem = document.getElementById("statStreamTotalViewers");
   if (totalViewersElem) totalViewersElem.textContent = authorizedViewers.length;
 
   const filtered = authorizedViewers.filter(v => {
+    if (typeFilter === "classroom" && v.tokenType !== "classroom") return false;
+    if (typeFilter === "individual" && v.tokenType === "classroom") return false;
+
     if (!searchVal) return true;
     const matchEmail = (v.email || "").toLowerCase().includes(searchVal);
     const matchName = (v.name || "").toLowerCase().includes(searchVal);
+    const matchClass = (v.classroomLabel || "").toLowerCase().includes(searchVal);
     const matchToken = (v.token || "").toLowerCase().includes(searchVal);
     const matchRole = (v.role || "").toLowerCase().includes(searchVal);
-    return matchEmail || matchName || matchToken || matchRole;
+    return matchEmail || matchName || matchClass || matchToken || matchRole;
   });
 
   if (filtered.length === 0) {
     tableBody.innerHTML = `
       <tr>
         <td colspan="6" style="text-align:center; padding:32px 16px; color:var(--text-muted);">
-          Autorizuotų žiūrovų su Prieigos žetonass nerasta. Pasinaudokite žemiau esančia forma naujam žiūrovui pridėti.
+          Autorizuotų žiūrovų su Prieigos žetonais nerasta. Pasinaudokite aukščiau esančia forma naujam žiūrovui ar klasei pridėti.
         </td>
       </tr>
     `;
@@ -331,24 +509,37 @@ export function renderAuthorizedViewersTable() {
   }
 
   tableBody.innerHTML = filtered.map(viewer => {
-    const liveLink = viewer.liveStreamUrl || `${window.location.origin}/live.html?token=${encodeURIComponent(viewer.token)}`;
-    const roleLabel = viewer.role === "vip" ? "VIP Svečias" : viewer.role === "press" ? "Žiniasklaida (Press)" : viewer.role === "remote_participant" ? "Nuotolinis dalyvis" : "Žiūrovas (Auditorija)";
+    const liveLink = `${window.location.origin}/live.html?t=${encodeURIComponent(viewer.token)}`;
+    const isClassroom = viewer.tokenType === "classroom";
     const dateFormatted = viewer.createdAt ? new Date(viewer.createdAt).toLocaleDateString("lt-LT") : "—";
+    const maxDevices = viewer.maxConcurrentDevices || (isClassroom ? 35 : 1);
+    const activeDevices = viewer.activeDevices || 0;
 
     return `
       <tr>
         <td>
-          <strong style="color:var(--text-color);">${escapeHtml(viewer.name || viewer.email)}</strong>
-          <div style="font-size:0.75rem; color:var(--text-muted);">${escapeHtml(roleLabel)} &bull; Sukurta: ${dateFormatted}</div>
+          ${isClassroom ? `
+            <strong style="color:#F3E5AB; font-size:0.92rem;">🏫 ${escapeHtml(viewer.classroomLabel || viewer.name)}</strong>
+            <div style="font-size:0.75rem; color:var(--text-muted);">${escapeHtml(viewer.email)} &bull; ${escapeHtml(viewer.name)}</div>
+          ` : `
+            <strong style="color:var(--text-color); font-size:0.92rem;">👤 ${escapeHtml(viewer.name || viewer.email)}</strong>
+            <div style="font-size:0.75rem; color:var(--text-muted);">${escapeHtml(viewer.email)} &bull; Sukurta: ${dateFormatted}</div>
+          `}
         </td>
         <td>
-          <a href="mailto:${escapeHtml(viewer.email)}" style="color:var(--accent-light); font-size:0.85rem;">
-            ${escapeHtml(viewer.email)}
-          </a>
+          ${isClassroom ? `
+            <span class="badge" style="background:rgba(212,175,55,0.18); color:#F3E5AB; border:1px solid rgba(212,175,55,0.4); font-size:0.75rem;">
+              🏫 Klasė (${activeDevices}/${maxDevices} įr.)
+            </span>
+          ` : `
+            <span class="badge" style="background:rgba(111,165,138,0.18); color:#9BC4AE; border:1px solid rgba(111,165,138,0.35); font-size:0.75rem;">
+              👤 1 įrenginys
+            </span>
+          `}
         </td>
         <td>
           <div style="display:flex; align-items:center; gap:6px;">
-            <code style="background:rgba(0,0,0,0.35); padding:3px 8px; border-radius:4px; color:#F3E5AB; font-size:0.8rem; border:1px solid rgba(212,175,55,0.3);">
+            <code style="background:rgba(0,0,0,0.35); padding:3px 8px; border-radius:4px; color:#F3E5AB; font-size:0.78rem; border:1px solid rgba(212,175,55,0.3);">
               ${escapeHtml(viewer.token)}
             </code>
             <button type="button" class="btn-icon-copy btn-copy-raw-token" data-token="${escapeHtml(viewer.token)}" title="Kopijuoti žetoną">
@@ -363,17 +554,20 @@ export function renderAuthorizedViewersTable() {
         </td>
         <td>
           <div style="display:flex; align-items:center; gap:6px;">
-            <input type="text" readonly value="${escapeHtml(liveLink)}" style="background:rgba(0,0,0,0.3); border:1px solid var(--border-color); color:var(--text-muted); padding:3px 6px; font-size:0.75rem; width:140px; border-radius:4px;" title="${escapeHtml(liveLink)}">
+            <input type="text" readonly value="${escapeHtml(liveLink)}" style="background:rgba(0,0,0,0.3); border:1px solid var(--border-color); color:var(--text-muted); padding:3px 6px; font-size:0.75rem; width:130px; border-radius:4px;" title="${escapeHtml(liveLink)}">
             <button type="button" class="btn-outline btn-xs btn-copy-viewer-link" data-link="${escapeHtml(liveLink)}" title="Kopijuoti nuorodą">
               <span>Kopijuoti</span>
             </button>
           </div>
         </td>
         <td style="text-align:right;">
-          <div style="display:inline-flex; align-items:center; gap:6px;">
-            <button type="button" class="btn-solid btn-xs btn-resend-viewer-token" data-token="${escapeHtml(viewer.token)}" title="Išsiųsti el. laišką su žetonu">
+          <div style="display:inline-flex; align-items:center; gap:5px;">
+            <button type="button" class="btn-solid btn-xs btn-open-qr-row" data-token="${escapeHtml(viewer.token)}" style="background:#D4AF37; color:#041310; font-weight:700;" title="Rodyti QR kodą ir nuorodą">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+              <span>QR</span>
+            </button>
+            <button type="button" class="btn-outline btn-xs btn-resend-viewer-token" data-token="${escapeHtml(viewer.token)}" title="Išsiųsti el. laišką su žetonu">
               <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
-              <span>Siųsti</span>
             </button>
             <button type="button" class="btn-outline btn-xs btn-delete-viewer" data-token="${escapeHtml(viewer.token)}" style="color:#f87171; border-color:rgba(239,68,68,0.3);" title="Pašalinti prieigą">
               &times;
@@ -385,6 +579,14 @@ export function renderAuthorizedViewersTable() {
   }).join("");
 
   // Attach event handlers
+  tableBody.querySelectorAll(".btn-open-qr-row").forEach(btn => {
+    btn.onclick = () => {
+      const tok = btn.getAttribute("data-token");
+      const v = authorizedViewers.find(x => x.token === tok);
+      if (v) openTokenQrModal(v);
+    };
+  });
+
   tableBody.querySelectorAll(".btn-copy-raw-token").forEach(btn => {
     btn.onclick = () => {
       const tok = btn.getAttribute("data-token");
@@ -412,7 +614,6 @@ export function renderAuthorizedViewersTable() {
         showToast("Siunčiamas transliacijos žetono laiškas...");
         const res = await FirebaseClient.request("stream.viewers.resend", {
           method: "POST",
-
           body: { token }
         });
         if (res.ok) {
@@ -435,7 +636,6 @@ export function renderAuthorizedViewersTable() {
       try {
         const res = await FirebaseClient.request("stream.viewers.delete", {
           method: "POST",
-
           body: { token }
         });
         if (res.ok) {
@@ -472,29 +672,38 @@ function initViewerTokenForm() {
       const expiresInHours = document.getElementById("newViewerExpires")?.value || "48";
       const sendEmail = document.getElementById("newViewerSendEmail")?.checked === true;
 
+      const isClassroom = document.getElementById("viewerTypeClassroom")?.checked === true;
+      const tokenType = isClassroom ? "classroom" : "individual";
+      const classroomLabel = document.getElementById("newViewerClassroomLabel")?.value.trim() || "";
+      const maxConcurrentDevices = isClassroom 
+        ? Math.max(1, Math.min(100, parseInt(document.getElementById("newViewerMaxDevices")?.value || "35", 10)))
+        : 1;
+
       const res = await FirebaseClient.request("stream.viewers.create", {
         method: "POST",
-
         body: {
           email,
           name,
           customToken,
           role,
           expiresInHours,
-          sendEmail
+          sendEmail,
+          tokenType,
+          classroomLabel,
+          maxConcurrentDevices
         }
       });
 
       if (res.ok) {
         const data = await res.json();
-        showToast(`Prieigos žetonas sėkmingai sugeneruotas žiūrovui ${email}!`, "success");
+        showToast(`Prieigos žetonas sėkmingai sugeneruotas: ${data.viewer?.token}!`, "success");
         form.reset();
         await fetchAuthorizedViewers();
         renderAuthorizedViewersTable();
 
-        // Prompt or show generated token link
-        if (data.liveLink) {
-          navigator.clipboard?.writeText(data.liveLink).catch(() => {});
+        // Open QR & Direct Link modal automatically
+        if (data.viewer) {
+          openTokenQrModal(data.viewer);
         }
       } else {
         const err = await res.json();
@@ -505,10 +714,112 @@ function initViewerTokenForm() {
     } finally {
       if (btn) {
         btn.disabled = false;
-        btn.textContent = "Sugeneruoti Prieigos Žetoną ir Išsiųsti";
+        btn.textContent = "Sugeneruoti Prieigos Žetoną";
       }
     }
   };
+}
+
+// Bulk generate from pasted lines
+async function runBulkClassroomGenerate() {
+  const textarea = document.getElementById("bulkClassroomInput");
+  const text = (textarea?.value || "").trim();
+  if (!text) {
+    showToast("Įklijuokite bent vieną mokytojo / klasės eilutę", "error");
+    return;
+  }
+
+  const lines = text.split("\n").map(l => l.trim()).filter(Boolean);
+  const items = [];
+
+  for (const line of lines) {
+    const parts = line.split(",").map(p => p.trim());
+    if (parts.length >= 1) {
+      const name = parts[0] || "Mokytojas";
+      const classroomLabel = parts[1] || name;
+      const email = (parts[2] && parts[2].includes("@")) ? parts[2] : `mokytojas_${Date.now()}_${Math.random().toString(36).substring(2, 6)}@mokykla.lt`;
+      const maxConcurrentDevices = parts[3] ? parseInt(parts[3], 10) : 35;
+
+      items.push({
+        name,
+        classroomLabel,
+        email,
+        maxConcurrentDevices: isNaN(maxConcurrentDevices) ? 35 : maxConcurrentDevices,
+        tokenType: "classroom"
+      });
+    }
+  }
+
+  if (items.length === 0) {
+    showToast("Nepavyko nuskaityti eilučių", "error");
+    return;
+  }
+
+  const btn = document.getElementById("btnRunBulkClassroomGenerate");
+  if (btn) btn.disabled = true;
+
+  try {
+    showToast(`Generuojami ${items.length} klasių prieigos žetonai...`, "info");
+    const res = await FirebaseClient.request("stream.viewers.bulk-create", {
+      method: "POST",
+      body: { items }
+    });
+
+    if (res.ok) {
+      const data = await res.json();
+      showToast(`Sėkmingai sugeneruoti ${data.count} klasės žetonai!`, "success");
+      if (textarea) textarea.value = "";
+      await fetchAuthorizedViewers();
+      renderAuthorizedViewersTable();
+    } else {
+      const err = await res.json();
+      showToast(err.error || "Klaida generuojant žetonus", "error");
+    }
+  } catch (err) {
+    showToast("Ryšio klaida", "error");
+  } finally {
+    if (btn) btn.disabled = false;
+  }
+}
+
+// CSV Export for Classroom tokens
+function exportClassroomTokensCsv() {
+  const classrooms = authorizedViewers.filter(v => v.tokenType === "classroom");
+  const listToExport = classrooms.length > 0 ? classrooms : authorizedViewers;
+
+  if (listToExport.length === 0) {
+    showToast("Nėra autorizuotų žetonų eksportavimui", "error");
+    return;
+  }
+
+  const headers = ["Mokytojas / Klasė", "El. Paštas", "Cloudflare Signed Token", "Tiesioginė Nuoroda", "Maks. Įrenginiai", "Galioja Iki"];
+  const rows = listToExport.map(v => {
+    const liveLink = `${window.location.origin}/live.html?t=${encodeURIComponent(v.token)}`;
+    const label = v.classroomLabel || v.name || "";
+    const devices = v.maxConcurrentDevices || 35;
+    const expires = v.expiresAt || "";
+    return [
+      `"${label.replace(/"/g, '""')}"`,
+      `"${(v.email || '').replace(/"/g, '""')}"`,
+      `"${(v.token || '').replace(/"/g, '""')}"`,
+      `"${liveLink}"`,
+      devices,
+      `"${expires}"`
+    ].join(",");
+  });
+
+  const csvContent = "\uFEFF" + [headers.join(","), ...rows].join("\r\n");
+  const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `asiff-klasiu-zetonai-${new Date().toISOString().slice(0, 10)}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+
+  showToast(`Eksportuota ${listToExport.length} žetonų į CSV failą!`, "success");
 }
 
 // ============================================================================

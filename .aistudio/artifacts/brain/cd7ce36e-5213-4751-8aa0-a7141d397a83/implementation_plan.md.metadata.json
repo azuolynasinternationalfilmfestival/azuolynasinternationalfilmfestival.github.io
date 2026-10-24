@@ -1,6 +1,6 @@
 {
-  "summary":  "Updated implementation plan incorporating the 3 required changes: atomic Firestore batch/transaction for voting + strict security rules, real Firebase Auth admin enforcement with email allow-list, secret redaction in ?debug=1 diagnostics, and confirmation of zero Cloudflare PEM/keys in client files.",
-  "updatedAt":  "2026-10-24T06:19:09.699443473Z",
+  "summary":  "Implementation plan for resolving live.html layout overlap and unified stream status, implementing Classroom/Teacher multi-device tokens with QR modal and CSV bulk export, fixing Firestore admin settings persistence with raw error code toasts, and rebuilding the admin Diagnostics suite into a genuine Firebase + GitHub Pages + Cloudflare Worker test bench.",
+  "updatedAt":  "2026-10-24T07:57:56.349012788Z",
   "requestFeedback":  true,
   "userFacing":  true
 }

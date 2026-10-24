@@ -1,209 +1,191 @@
-# Master Implementation Plan (Updated with Voting Integrity & Security Hardening)
+# ASIFF Film Festival: Live Streaming, Classroom Tokens, Settings Persistence & Real Diagnostics
 
-This updated plan incorporates your 3 required architectural changes: atomic batch voting transactions with strict counter-matching security rules, genuine Firebase Auth admin authorization (disabling client-side token bypasses), full secret redaction in `?debug=1`, and confirmation of zero Cloudflare keys in client files.
+Comprehensive implementation plan to resolve mobile/desktop layout overlaps on `live.html`, introduce Teacher/Classroom multi-device access tokens with QR codes and CSV export, fix Firestore admin settings saving, and rebuild the admin Diagnostics suite into an authentic GitHub Pages + Firebase + Cloudflare verification tool.
 
 ---
 
-### User Review & Critical Decisions
+## User Review & Critical Decisions
 
 > [!IMPORTANT]
-> The following 3 required updates and confirmations are fully integrated:
+> The following product decisions were confirmed during requirements alignment:
 > 
-> 1. **Voting Integrity in ONE Atomic Firestore Batch**:
->    - Every vote executes `db.batch()` committing simultaneously:
->      1. Creation of `/votes/{nominationId}_{auth.uid}` with `{ nominationId, filmId, userId: auth.uid, votedAt: serverTimestamp() }`.
->      2. Atomic counter update on `/submissions/{filmId}` incrementing `votesCount` by exactly `+1`.
->    - Firestore rules enforce that a counter update of `+1` is only permitted when the corresponding vote document is created in the same request, and completely block all other client updates, edits, or deletions of votes.
->    - The voter ID is strictly `request.auth.uid` from **Firebase Anonymous Authentication** (`signInAnonymously()`), never from `localStorage`.
-> 
-> 2. **Real Firebase Auth Admin Enforcement (No Custom Token Bypass)**:
->    - **Current state**: In `js/auth.js`, there was a fallback to `/api/admin/token` that set `admin_jwt_token` in `sessionStorage` for Node dev server sessions. While Firestore rules already required `request.auth.token.email`, `js/auth.js` will be hardened so admin write operations in Firestore strictly require genuine Firebase Authentication (`signInWithEmailAndPassword`) with the verified admin email allow-list (`azuolynasfilmfestival@gmail.com`, `karina.brdar@gmail.com`). `sessionStorage` will only govern UI panel visibility, never granting Firestore write access.
-> 
-> 3. **Secret Redaction in `?debug=1`**:
->    - The diagnostic error box automatically redacts sensitive data before rendering or copying to clipboard:
->      - Access tokens and hashes (`asiff_live_***`, `cfs_***`, JWTs) -> `[REDACTED_TOKEN]`
->      - Cloudflare Stream signed playback URLs and query tokens -> `https://.../iframe?token=[REDACTED]`
->      - Anonymous Auth UID / Voter IDs -> `anon_***[REDACTED]`
->      - Sensitive Firestore paths (`/stream_tokens/...`, `/users/...`, `/invitations/...`) -> `/[COLLECTION]/[REDACTED_DOC_ID]`
->      - API keys, passwords, and SMTP secrets -> `[REDACTED_SECRET]`
-> 
-> 4. **Cloudflare Key Isolation Confirmation**:
->    - **Confirmed**: No Cloudflare Stream private keys, PEM certificates, or account secrets exist or will ever be placed in any website or client-side file. All signature minting is handled exclusively by your serverless Cloudflare Worker (`stream-worker.js`), and the client only communicates with the Worker URL.
+> - **Classroom Device Capacity**: Default to **35 concurrent devices** per classroom token (configurable from 1 to 100 or unlimited during the festival time window).
+> - **Stream Token Validator Architecture**: Use `/api/stream/validate-token` with configurable Cloudflare Worker URL fallback. Zero private keys in client files.
+> - **Token QR & Quick Access**: Interactive modal containing a large printable QR code, copyable `live.html?t=CODE` link, and instant URL stripping via `history.replaceState`.
+> - **Settings Persistence Strategy**: Primary write is directed to Firestore (`settings/festival` and `settings/global`) to guarantee persistence on static GitHub Pages, with raw `error.code` surfaced in admin toasts.
+> - **Diagnostics Suite Scope**: Purged legacy server metrics (PHP, Nginx, Linux file permissions, memory heap) in favor of real tests for Firebase Auth, Firestore CRUD, Storage upload, Email queue, Cloudflare Worker signed streams, and Voting rules.
 
 ---
 
-### 1. Final Firestore Security Rules (Ready to Paste)
+## 1. Overview & Core Concept
 
-```javascript
-rules_version = '2';
-service cloud.firestore {
-  match /databases/{database}/documents {
+The Ąžuolynas International Students Film Festival (ASIFF) is hosted statically on GitHub Pages with Firestore persistence and Cloudflare Stream playback. This update ensures:
+1. **Flawless Viewer Experience**: Clean, non-overlapping header and toolbar on `live.html` across all device viewports (360px mobile to 4K desktop), with unified real-time stream status and auto-reconnecting video playback.
+2. **Teacher & Classroom Accessibility**: Specialized multi-device tokens enabling teachers to stream the festival in classrooms and auditoriums without individual student registrations, supported by bulk creation, QR codes, and CSV exports.
+3. **Reliable Festival Control**: Guaranteed admin settings persistence for section visibility and archive controls, eliminating failures caused by missing server routes.
+4. **Authentic System Diagnostics**: An independent, modular test runner in the admin panel verifying every cloud service the festival relies on.
 
-    // Default deny all unknown documents
-    match /{document=**} {
-      allow read, write: if false;
-    }
+---
 
-    function isSignedIn() {
-      return request.auth != null;
-    }
+## 2. User Experience & Visual Design
 
-    // Admin Allow-List enforced exclusively via verified Firebase Auth token email
-    function isSuperAdmin() {
-      return isSignedIn() &&
-        request.auth.token.email != null &&
-        (request.auth.token.email.lower() == 'azuolynasfilmfestival@gmail.com' ||
-         request.auth.token.email.lower() == 'karina.brdar@gmail.com');
-    }
+### `live.html` Layout & Responsive Hierarchy
 
-    function incoming() {
-      return request.resource.data;
-    }
+```
+┌────────────────────────────────────────────────────────────────────────┐
+│ [Logo] Ąžuolynas Film Fest Ceremonija (Kauno Tarptautinė Gimnazija)    │  Row 1: Festival Branding
+├────────────────────────────────────────────────────────────────────────┤
+│ [ LT | EN ]                [ Classroom 302 (35 Devices) ]  [ Log out ] │  Row 2: Action Toolbar
+├────────────────────────────────────────────────────────────────────────┤
+│                                                                        │
+│                                                                        │
+│                 16:9 Responsive Cloudflare Live Player                 │  Row 3: Video Stage
+│               [ Offline / Starting / Live Auto-Detector ]              │  (Zero Overlap)
+│                                                                        │
+│ [ ⛶ Fullscreen ]                                                       │
+├────────────────────────────────────────────────────────────────────────┤
+│ ● Tiesioginis eteris aktyvus / Live broadcast      [ Žiūrovų Balsavimas → ]│  Row 4: Status & Action
+└────────────────────────────────────────────────────────────────────────┘
+```
 
-    function existing() {
-      return resource.data;
-    }
+- **Top Row (Branding)**: Festival laurel logo, official title, and subtitle, centered on mobile and left-aligned on desktop.
+- **Toolbar Row (Controls)**:
+  - Left: Compact `LT | EN` language toggle.
+  - Right: Viewer/Classroom badge (displaying teacher name/class and concurrent devices) and red "Log out" button.
+  - Wrapped cleanly using CSS flexbox with `gap: 10px` so controls never collide or overlay the video container at 360px, 390px, or in landscape mode.
+- **16:9 Video Stage**: Dedicated aspect-ratio wrapper with rounded corners and gold border accents.
+- **Unified Real-Time Status**: Eliminates contradictory messages. A single status badge evaluates stream connectivity:
+  - `Offline` (Red/Yellow): *"Transliacija dar neprasidėjo / Broadcast has not started yet"*
+  - `Starting` (Yellow): *"Signalas ruošiamas... / Signal connecting..."*
+  - `Live` (Green): *"Tiesioginis eteris aktyvus / Live broadcast in progress"*
+- **Fullscreen & Auto-Retry**: Built-in fullscreen trigger and an automatic 5-second polling retry if the live broadcast temporarily drops.
 
-    // 1. Settings & Broadcast Overlay (H2H Graphic)
-    match /settings/{settingId} {
-      allow get, list: if true;
-      allow write: if isSuperAdmin();
-    }
+---
 
-    // 2. Festival Editions
-    match /editions/{editionId} {
-      allow get, list: if true;
-      allow write: if isSuperAdmin();
-    }
+## 3. Key Product Decisions & Trade-Offs
 
-    // 3. Submissions & Atomic Vote Increment Rule
-    match /submissions/{submissionId} {
-      // Public read of contest films
-      allow get, list: if true;
+### 1. Teacher / Classroom Multi-Device Tokens
+- **Challenge**: The ceremony hall has limited physical seating. Teachers need to broadcast the ceremony across classrooms and computer labs.
+- **Approach**:
+  - Store token documents in Firestore collection `/stream_tokens/{tokenHash}` and `/live_viewers/{token}`.
+  - Fields: `tokenType: "classroom" | "individual"`, `maxConcurrentDevices: 35`, `activeConnections: 0`, `label: "Mokytoja Rasa - 11B kabinetas"`, `validFrom`, `expiresAt`, `isActive: true`.
+  - Admin UI includes:
+    1. Single token generator (specifying type, device limit, label, expiration).
+    2. Bulk generator: Paste multiple lines (e.g. `Jonas Kazlauskas - 11A - Kab 204\nRasa Petraitiene - 10B - Aktų salė`), auto-generating unique tokens.
+    3. One-click CSV export: `Label, Token, DirectLink, MaxDevices, ValidUntil`.
+    4. QR Code & Access Link Modal: Displays a high-resolution printable QR code and one-click copyable link (`https://site/live.html?t=asiff_live_...`).
+  - Safe Link Consumption: `live.html` detects `?t=CODE`, executes verification, immediately removes the token from the browser history via `window.history.replaceState({}, document.title, window.location.pathname)`, and enforces `<meta name="referrer" content="no-referrer">` to prevent token leakage.
 
-      // Public registration of new films
-      allow create: if true;
+### 2. Admin Visibility Settings Root Cause & Persistence Fix
+- **Root Cause Identified**:
+  - `js/settings.js` functions `updateGlobalTumbler()` and `saveSettings()` were structured with `fetch("/api/admin/settings")` as the **primary** blocking call. On static GitHub Pages hosting, this POST route does not exist and throws `404 Not Found` / `"Nepavyko išsaugoti serverio nustatymo"`, aborting before reaching the Firestore fallback!
+  - In addition, toggles updated `settings/festival`, while some voting components read `settings/global`.
+- **Solution**:
+  - Make direct Firestore write `db.collection("settings").doc("festival").set(payload, { merge: true })` the **primary** operation.
+  - Mirror to `settings/global` to ensure synchronicity with the voting engine.
+  - Surface the exact raw Firebase error code in the toast (e.g., `[permission-denied] Admin auth required: azuolynasfilmfestival@gmail.com`).
+  - Verify `lt/index.html` and `en/index.html` snapshot listeners apply visibility toggles in real time to `#about`, `#rules`, `#faq`, `#categories`, `#archive`, and `#screening`.
 
-      // Strict update: SuperAdmin has full edit rights.
-      // Anonymous public can ONLY increment votesCount by exactly +1
-      // when accompanied by a valid vote creation in the same batch/request
-      allow update: if isSuperAdmin() || (
-        isSignedIn() &&
-        incoming().diff(existing()).affectedKeys().hasOnly(['votesCount']) &&
-        incoming().votesCount == (existing().get('votesCount', 0) + 1)
-      );
+### 3. Real "System Check" Diagnostics Suite
+- **Legacy Cleanup**: Remove all references to Nginx, Node process memory, Linux permissions `0775`, PHP directives, and fake error log viewers.
+- **Authentic Modular Test Runner**:
+  1. **Firebase Auth Test**: Verifies active session, checks currentUser email against admin allow-list (`azuolynasfilmfestival@gmail.com`, `karina.brdar@gmail.com`).
+  2. **Firestore Collections CRUD**: Sequentially writes, reads, and deletes a temporary probe document (`_diag_probe`) in `settings`, `submissions`, `votes`, `stream_tokens`, and `editions`.
+  3. **Storage Upload Test**: Uploads a 1-pixel probe blob to `/uploads/diag_test.png` and immediately removes it.
+  4. **Email Queue Test**: Verifies write permissions on `/mail` trigger queue.
+  5. **Cloudflare Worker Signed Token Test**: Calls the Worker endpoint with a valid probe token and verifies receipt of a signed playback URL; verifies rejection of an invalid token.
+  6. **Voting Counters & Security Rules Test**: Simulates atomic batch rule validation.
+  7. **Public Page Listeners Test**: Validates that settings listeners on `settings/festival` respond within 500ms.
+- **Resilient Execution**: Every test runs inside its own isolated `try/catch`. One failure will never abort subsequent tests. Each test displays a crisp `PASS` or `FAIL` badge, latency in milliseconds, exact raw error messages, and a "Copy Diagnostic Report" button.
 
-      // Deletion is strictly SuperAdmin only
-      allow delete: if isSuperAdmin();
-    }
+---
 
-    // 4. Public Voting: 1 Vote per person per nomination, atomic creation only
-    match /votes/{voteId} {
-      // Public read to calculate tally and rankings (voter IDs sanitized in UI)
-      allow get, list: if true;
+## 4. Technical Architecture & Data Strategy
 
-      // Create: user MUST be authenticated (Anonymous Auth or Email),
-      // document ID MUST be nominationId_authUid, and user cannot vote twice
-      allow create: if isSignedIn() &&
-        incoming().userId == request.auth.uid &&
-        incoming().nominationId != null &&
-        incoming().filmId != null &&
-        voteId == (incoming().nominationId + '_' + request.auth.uid) &&
-        !exists(/databases/$(database)/documents/votes/$(voteId));
+```
+┌────────────────────────────────────────────────────────────────────────┐
+│                        Admin Management Panel                          │
+│   ┌────────────────────┐ ┌────────────────────┐ ┌───────────────────┐  │
+│   │ Visibility Toggles │ │ Classroom Tokens   │ │ System Check      │  │
+│   │ (Settings Tab)     │ │ (Stream Tab)       │ │ (Diagnostics Tab) │  │
+│   └─────────┬──────────┘ └─────────┬──────────┘ └─────────┬─────────┘  │
+└─────────────┼──────────────────────┼──────────────────────┼────────────┘
+              │                      │                      │
+              │ Primary Firestore    │ Hashed Token Sync    │ Probe Tests
+              ▼                      ▼                      ▼
+┌────────────────────────────────────────────────────────────────────────┐
+│                   Google Cloud Firestore Database                      │
+│                                                                        │
+│  /settings/festival          /stream_tokens/{tokenHash}                │
+│    - showAbout: bool           - tokenType: "classroom"                │
+│    - showArchive: bool         - maxConcurrentDevices: 35              │
+│    - showVoting: bool          - activeDevices: int                    │
+│    - archiveVisibility: bool   - label: "11B - Sala 3"                 │
+│                                - expiresAt: timestamp                  │
+│                                                                        │
+│  /submissions/{filmId}       /votes/{nominationId}_{uid}               │
+│    - inVoting: bool            - userId: uid                           │
+│    - votesCount: int           - filmId: id                            │
+└────────────────────────────────────┬───────────────────────────────────┘
+                                     │
+                                     ▼
+┌────────────────────────────────────────────────────────────────────────┐
+│                  Cloudflare Stream & Public Viewers                    │
+│                                                                        │
+│  live.html (Mobile/Desktop)             Public Pages                   │
+│   - history.replaceState (no leak)        - lt/index.html              │
+│   - Dual-row responsive toolbar           - en/index.html              │
+│   - Unified stream state detector         - Real-time onSnapshot sync  │
+│   - Auto-reconnecting stream player                                    │
+└────────────────────────────────────────────────────────────────────────┘
+```
 
-      // No client updates or deletions permitted under any circumstances
-      allow update, delete: if isSuperAdmin();
-    }
+### Entity Schema Additions
 
-    // 5. Stream Tokens (SHA-256 Hashed)
-    match /stream_tokens/{tokenHash} {
-      allow get: if true;
-      allow list, create, update, delete: if isSuperAdmin();
-    }
-
-    // 6. Live Viewers legacy collection
-    match /live_viewers/{viewerId} {
-      allow get: if true;
-      allow list, delete: if isSuperAdmin();
-      allow create, update: if true;
-    }
-
-    // 7. Users RBAC
-    match /users/{userId} {
-      allow get: if isSignedIn();
-      allow list, delete: if isSuperAdmin();
-      allow create, update: if isSuperAdmin();
-    }
-
-    // 8. Mail delivery queue
-    match /mail/{mailId} {
-      allow get, list: if isSuperAdmin();
-      allow create, update: if true;
-      allow delete: if isSuperAdmin();
-    }
-
-    // 9. Activity Logs
-    match /logs/{logId} {
-      allow get, list: if isSuperAdmin();
-      allow create: if true;
-      allow update, delete: if isSuperAdmin();
-    }
-  }
+#### `stream_tokens/{tokenHash}`
+```typescript
+interface StreamTokenDoc {
+  tokenHash: string;            // SHA-256 of the plain token
+  tokenType: "individual" | "classroom";
+  label: string;                // e.g. "Mokytoja Rasa - 11B kabinetas"
+  maxConcurrentDevices: number; // default 35 for classroom, 1 for individual
+  activeDevices: number;        // current live connections
+  currentUses: number;          // cumulative access count
+  isActive: boolean;
+  validFrom: string;            // ISO Date or timestamp
+  expiresAt: string;            // ISO Date or timestamp
+  createdBy: string;            // admin email
+  createdAt: string;
 }
 ```
 
 ---
 
-### 2. Concrete Implementation Steps
+## 5. Execution Steps
 
-#### Step 1: `live.html` Localization & Viewer Text Cleanliness
-- Auto-detects `/lt/` vs `/en/` and `?lang=lt|en`, persists in `localStorage.setItem('preferred_lang')`.
-- Adds top navbar with festival branding and accessible `LT | EN` switcher.
-- Translates every viewer-facing string (token gate, button states, friendly error descriptions).
-- Completely removes technical phrases ("Cloudflare connection active", status numbers, token hashes).
-- Integrates graceful offline card: *"Transliacija dar neprasidėjo"* / *"The broadcast has not started yet"*.
+1. **Rebuild `live.html` Layout & Connectivity**:
+   - Separate header into Branding Row and compact Controls Toolbar (`flex-wrap`, no overlap at 360px/390px).
+   - Unify stream status into a single state indicator (Offline, Connecting, Live).
+   - Implement fullscreen toggle button and automatic 5-second polling recovery.
+   - Support `?t=CODE` URL parameters with automatic validation and `history.replaceState` cleanup.
 
-#### Step 2: `error-reporting.js` Hardening & Secret Redaction
-- Filters out non-fatal `AbortError` (DOMException code 20) from public view and logs it silently with true stack details.
-- Improves stack trace parser: extracts real filename and function names rather than generic "promise".
-- **Redaction Filter**: Sanitizes all error text, URLs, paths, and JSON dumps:
-  - Tokens (`asiff_live_***`, `cfs_***`) -> `[REDACTED_TOKEN]`
-  - Cloudflare signed URLs with tokens -> `.../iframe?token=[REDACTED]`
-  - Voter UIDs -> `[REDACTED_USER]`
-  - Private collection paths -> `[REDACTED_PATH]`
-- **Visibility Boundary**: Detailed diagnostic box is mounted **only** if `sessionStorage.getItem('admin_jwt_token')` exists or URL contains `?debug=1`. Public visitors receive only short, polite toast messages.
+2. **Implement Classroom Tokens in Admin & Worker**:
+   - Update `stream-admin.js` with Classroom token options (device limit 1–100, label, expiration).
+   - Add QR code modal generator using client-side SVG/Canvas rendering.
+   - Add bulk token creation parser and CSV export.
+   - Synchronize with `/stream_tokens` and `/live_viewers` collections.
 
-#### Step 3: `voting.html` & `voting-client.js` English-First Bilingual Voting
-- Defaults to English with full Lithuanian toggle.
-- Uses `db.batch()` to write `/votes/{nominationId}_{auth.uid}` and `submissions/{filmId}` `votesCount: increment(1)` in ONE atomic transaction.
-- Strictly uses `firebase.auth().currentUser.uid` via Anonymous Auth.
-- Implements rapid multi-click cooldown and client debouncing.
-- Bilingual fallback logic: `filmTitle_en` -> `filmTitle` and `synopsis_en` -> `synopsis`.
+3. **Fix Settings Persistence & Error Reporting (`js/settings.js`)**:
+   - Switch primary saving order: execute Firestore write `db.collection("settings").doc("festival").set()` first.
+   - Surface exact Firebase `error.code` in toast notifications.
+   - Ensure `lt/index.html` and `en/index.html` real-time listeners react immediately to visibility toggles.
 
-#### Step 4: Admin Auth Hardening (`js/auth.js`)
-- Enforces genuine Firebase Authentication (`signInWithEmailAndPassword`) against the admin allow-list (`azuolynasfilmfestival@gmail.com`, `karina.brdar@gmail.com`).
-- Disables insecure token fallbacks from simulating write permissions.
+4. **Reconstruct Diagnostics Suite (`js/diagnostics.js` & `admin.html`)**:
+   - Strip fake server/OS indicators from `admin.html`.
+   - Implement 7 independent modular tests (Firebase Auth, Firestore CRUD, Storage, Email queue, Cloudflare Worker, Voting counters, Public listeners).
+   - Add PASS/FAIL status indicators, latency tracking, raw error traces, and report copying.
 
----
-
-### 3. Verification & Test Checklist (To Run Post-Implementation)
-
-1. **`live.html` Language & Viewer Text**:
-   - Access from `lt/index.html` -> verifies LT language.
-   - Access from `en/index.html` or with `?lang=en` -> verifies EN language.
-   - Toggle LT/EN switch -> verifies instant translation of token gate, errors, and player headers.
-   - Verify that no mention of "Cloudflare", token hashes, or internal IDs appears on screen.
-2. **`error-reporting.js` & AbortError**:
-   - Simulate an aborted request or page reload -> verify zero viewer alert pops up.
-   - Open with `?debug=1` -> verify red box appears for real errors with tokens, URLs, and paths redacted.
-   - Open without `?debug=1` -> verify only clean, friendly notification displays.
-3. **Voting System (`voting.html`)**:
-   - Open `voting.html` -> verify default language is English with EN/LT toggle.
-   - Vote for a film -> verify atomic batch commits vote doc and increments film count by +1.
-   - Double-click or rapid click -> verify button debounces and locks with "Vote Recorded ✓".
-   - Reload page or open in private tab -> verify duplicate vote in same category is blocked.
-   - Export CSV from admin panel -> verify clean tally of votes.
-4. **Build & Test Suite**:
-   - Run `node scripts/check-static.mjs` -> static validation passes.
-   - Run `npm test` -> all 46 tests pass.
-   - Run `compile_applet` -> clean build.
+5. **Security Rules Verification & Testing**:
+   - Verify Firestore security rules permit classroom token writes and settings updates by superadmins.
+   - Run `node scripts/check-static.mjs`, `npm test`, and `compile_applet`.
+   - Provide test verification checklist.

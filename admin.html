@@ -4,6 +4,7 @@
   <script src="error-reporting.js"></script>
   <script src="h2h-export.js"></script>
   <script src="admin-dashboard.js"></script>
+  <script src="qr-code.js"></script>
   <script src="js/server-api.js"></script>
   <script src="js/firebase-client.js"></script>
   <meta charset="UTF-8">
@@ -863,17 +864,43 @@
 
             <!-- Add Viewer / Generate Token Form -->
             <form id="formAddStreamViewer" style="background:rgba(12, 38, 31, 0.5); border:1px solid var(--border-color); border-radius:var(--site-radius); padding:16px; margin-bottom:18px;">
-              <h4 style="font-size:0.9rem; color:#D4AF37; margin:0 0 12px 0;">+ Priskirti Žiūrovą & Sugeneruoti Cloudflare Signed Token</h4>
-              <div class="two-col-grid" style="margin-bottom:12px;">
-                <div class="input-cell">
-                  <label for="newViewerEmail">Žiūrovo Gmail / El. Pašto Adresas *</label>
-                  <input type="email" id="newViewerEmail" class="field" placeholder="ziurovas@gmail.com" required>
-                </div>
-                <div class="input-cell">
-                  <label for="newViewerName">Žiūrovo Vardas / Pavardė</label>
-                  <input type="text" id="newViewerName" class="field" placeholder="pvz. Jonas Kazlauskas">
+              <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:12px;">
+                <h4 style="font-size:0.9rem; color:#D4AF37; margin:0;">+ Priskirti Žiūrovą / Klasę & Sugeneruoti Prieigos Žetoną</h4>
+                <div style="display:flex; gap:12px; align-items:center;">
+                  <label style="cursor:pointer; font-size:0.82rem; color:var(--text-color); display:flex; align-items:center; gap:5px; margin:0;">
+                    <input type="radio" name="viewerTypeRadio" id="viewerTypeIndividual" value="individual" checked style="accent-color:#D4AF37;">
+                    <span>👤 Individualus žiūrovas</span>
+                  </label>
+                  <label style="cursor:pointer; font-size:0.82rem; color:#F3E5AB; display:flex; align-items:center; gap:5px; margin:0; font-weight:600;">
+                    <input type="radio" name="viewerTypeRadio" id="viewerTypeClassroom" value="classroom" style="accent-color:#D4AF37;">
+                    <span>🏫 Mokytojas / Klasė (Multi-device)</span>
+                  </label>
                 </div>
               </div>
+
+              <div class="two-col-grid" style="margin-bottom:12px;">
+                <div class="input-cell">
+                  <label for="newViewerEmail">El. Paštas / Gmail *</label>
+                  <input type="email" id="newViewerEmail" class="field" placeholder="mokytojas@mokykla.lt arba ziurovas@gmail.com" required>
+                </div>
+                <div class="input-cell">
+                  <label for="newViewerName" id="lblViewerName">Žiūrovo arba Mokytojo Vardas, Pavardė *</label>
+                  <input type="text" id="newViewerName" class="field" placeholder="pvz. Jonas Kazlauskas" required>
+                </div>
+              </div>
+
+              <!-- Classroom Specific Row (Enabled for classroom) -->
+              <div id="classroomSettingsRow" class="two-col-grid" style="margin-bottom:12px; background:rgba(212,175,55,0.08); padding:12px; border-radius:6px; border:1px solid rgba(212,175,55,0.25);">
+                <div class="input-cell">
+                  <label for="newViewerClassroomLabel" style="color:#F3E5AB;">Klasės / Kabineto Pavadinimas</label>
+                  <input type="text" id="newViewerClassroomLabel" class="field" placeholder="pvz. 8B klasė, 204 kab. (Projektorius)">
+                </div>
+                <div class="input-cell">
+                  <label for="newViewerMaxDevices" style="color:#F3E5AB;">Maks. Įrenginių Skaičius Vienu Metu (Standartas: 35)</label>
+                  <input type="number" id="newViewerMaxDevices" class="field" min="1" max="100" value="35">
+                </div>
+              </div>
+
               <div class="two-col-grid" style="margin-bottom:12px;">
                 <div class="input-cell">
                   <label for="newViewerCustomToken">Custom Token Pavadinimas (Neprivaloma, tuščias = automatinis signed token)</label>
@@ -884,6 +911,7 @@
                     <label for="newViewerRole">Prieigos Rolė</label>
                     <select id="newViewerRole" class="field">
                       <option value="guest_viewer" selected>Žiūrovas (Auditorija)</option>
+                      <option value="classroom_viewer">Klasės / Mokyklos Prieiga</option>
                       <option value="remote_participant">Nuotolinis dalyvis</option>
                       <option value="vip">VIP Svečias</option>
                       <option value="press">Žiniasklaida (Press)</option>
@@ -907,22 +935,64 @@
                 </label>
                 <button type="submit" id="btnAddStreamViewerSubmit" class="btn-solid btn-sm" style="display:inline-flex; align-items:center; gap:6px;">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
-                  <span>Sugeneruoti Prieigos Žetoną ir Išsiųsti</span>
+                  <span>Sugeneruoti Prieigos Žetoną</span>
                 </button>
               </div>
             </form>
 
+            <!-- Bulk Classroom Tokens Generator Accordion -->
+            <div style="background:rgba(8, 27, 23, 0.65); border:1px solid rgba(212,175,55,0.3); border-radius:var(--site-radius); padding:14px; margin-bottom:18px;">
+              <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:10px;">
+                <div>
+                  <h4 style="font-size:0.88rem; color:#D4AF37; margin:0;">🏫 Masinis Mokytojų ir Klasių Žetonų Generavimas & CSV Eksportas</h4>
+                  <p style="margin:2px 0 0 0; font-size:0.78rem; color:var(--text-muted);">
+                    Įklijuokite mokytojų sąrašą (po vieną eilutę: Vardas Pavardė, Klasė / Kabinetas, El. paštas, Įrenginių skaičius).
+                  </p>
+                </div>
+                <div style="display:flex; gap:8px;">
+                  <button type="button" id="btnToggleBulkClassroomBox" class="btn-outline btn-xs">
+                    <span>Atverti / Paslėpti Įvestį</span>
+                  </button>
+                  <button type="button" id="btnExportClassroomCsv" class="btn-solid btn-xs" style="background:#D4AF37; color:#041310; font-weight:700;">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                    <span>Eksportuoti Klasių CSV</span>
+                  </button>
+                </div>
+              </div>
+
+              <div id="bulkClassroomDrawer" class="d-none" style="margin-top:10px; padding-top:10px; border-top:1px solid rgba(111,165,138,0.2);">
+                <label for="bulkClassroomInput" style="font-size:0.75rem; color:#BAC9C0; display:block; margin-bottom:6px;">
+                  Formatas: <code>Mokytojo Vardas, Klasė, mokytojas@mokykla.lt, 35</code> (vienas įrašas eilutėje):
+                </label>
+                <textarea id="bulkClassroomInput" class="field" rows="4" style="font-family:monospace; font-size:0.8rem; margin-bottom:10px;" placeholder="Jonas Kazlauskas, 8B klasė (204 kab.), j.kazlauskas@mokykla.lt, 35
+Rasa Petrauskienė, 10A klasė (301 kab.), r.petrauskiene@mokykla.lt, 35
+Tomas Vaitkus, Aktų salė (Projektorius), t.vaitkus@mokykla.lt, 100"></textarea>
+                <div style="display:flex; justify-content:flex-end; gap:8px;">
+                  <button type="button" id="btnRunBulkClassroomGenerate" class="btn-solid btn-sm" style="background:#4ade80; color:#041310; font-weight:700;">
+                    Vykdyti Masinį Generavimą
+                  </button>
+                </div>
+              </div>
+            </div>
+
             <!-- Authorized Viewers List Toolbar & Table -->
-            <div class="table-toolbar" style="margin-bottom:14px;">
-              <input type="text" id="filterSignedViewersSearch" class="field toolbar-search" placeholder="Ieškoti autorizuotų žiūrovų pagal el. paštą, vardą ar žetoną...">
+            <div class="table-toolbar" style="margin-bottom:14px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+              <input type="text" id="filterSignedViewersSearch" class="field toolbar-search" placeholder="Ieškoti pagal el. paštą, vardą, klasę ar žetoną...">
+              <div style="display:flex; gap:8px; align-items:center;">
+                <select id="filterSignedViewersType" class="field toolbar-select" style="min-width:140px;">
+                  <option value="all" selected>Visi tipai</option>
+                  <option value="classroom">Tik klasės (🏫)</option>
+                  <option value="individual">Tik individualūs (👤)</option>
+                </select>
+              </div>
             </div>
 
             <div class="table-box">
               <table class="clean-table">
                 <thead>
                   <tr>
-                    <th>Žiūrovas</th>
-                    <th>El. Paštas (Gmail)</th>
+                    <th>Žiūrovas / Klasė</th>
+                    <th>Tipas & Įrenginiai</th>
                     <th>Cloudflare Signed Token</th>
                     <th>Statusas</th>
                     <th>Asmeninė Nuoroda</th>
@@ -1370,54 +1440,50 @@
           <div class="content-card" style="margin-bottom:20px; border:1px solid rgba(111,165,138,0.35);">
             <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:14px;">
               <div>
-                <h3 class="content-card-title" style="margin-bottom:4px;">Serverio Klaidų Šalinimo Planas & Diagnostika</h3>
+                <h3 class="content-card-title" style="margin-bottom:4px;">Sistemos Debesijos Tarnybų Diagnostika & Verifikacija</h3>
                 <p class="content-card-sub" style="margin-bottom:0;">
-                  Serverio logų (error.log, Nginx, Node) analizė, katalogų teisių sutvarkymas, atminties ribų (memory_limit) ir Cloudflare Stream CORS parametrų verifikacija.
+                  Realaus laiko Firebase Auth, Firestore duomenų bazės, Storage saugyklos, Mail eilės ir Cloudflare Stream būklės tikrinimas.
                 </p>
               </div>
               <div style="display:flex; gap:8px; flex-wrap:wrap;">
                 <button type="button" id="btnRefreshDiagLogs" class="btn-outline btn-xs" style="display:inline-flex; align-items:center; gap:5px;">
                   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
-                  <span>Atnaujinti Žurnalus</span>
-                </button>
-                <button type="button" id="btnFixPermissions" class="btn-outline btn-xs" style="color:#F3E5AB; border-color:rgba(212,175,55,0.4); display:inline-flex; align-items:center; gap:5px;">
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-                  <span>Sutvarkyti Katalogų Teises</span>
+                  <span>Atnaujinti</span>
                 </button>
                 <button type="button" id="btnRunVerification" class="btn-solid btn-xs" style="background:#4ade80; color:#051512; font-weight:700; display:inline-flex; align-items:center; gap:5px;">
                   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                  <span>Paleisti Sistemos Verifikacijos Testą</span>
+                  <span>Paleisti Sistemos Tikrinimą (7 Testai)</span>
                 </button>
               </div>
             </div>
           </div>
 
-          <!-- Diagnostic Metrics Cards -->
+          <!-- Cloud Diagnostic Metrics Cards -->
           <div class="voting-stat-grid" style="margin-bottom:20px;">
             <div class="metric-card">
-              <div class="metric-label">Heap Atmintis (Node/PHP)</div>
-              <div class="metric-num" id="diagMetricHeap" style="color:#60a5fa;">0 MB</div>
-              <div style="font-size:0.75rem; color:var(--text-muted); margin-top:4px;">Optimalus limitas: 512MB</div>
+              <div class="metric-label">Firebase Auth</div>
+              <div class="metric-num" id="diagMetricAuth" style="color:#4ade80;">Aktyvus</div>
+              <div style="font-size:0.75rem; color:var(--text-muted); margin-top:4px;">Superadmin allow-list apsauga</div>
             </div>
             <div class="metric-card">
-              <div class="metric-label">RSS Atminties Rezervas</div>
-              <div class="metric-num" id="diagMetricTotal" style="color:#F3E5AB;">0 MB</div>
-              <div style="font-size:0.75rem; color:var(--text-muted); margin-top:4px;">Rezervuotas limitas</div>
+              <div class="metric-label">Firestore Kolekcijos</div>
+              <div class="metric-num" id="diagMetricFirestore" style="color:#60a5fa;">Sveika</div>
+              <div style="font-size:0.75rem; color:var(--text-muted); margin-top:4px;">settings / submissions / votes / tokens</div>
             </div>
             <div class="metric-card">
-              <div class="metric-label">Katalogų Leidimai (data/)</div>
-              <div class="metric-num" id="diagMetricPermissions" style="color:#4ade80;">0775 (Aktyvus)</div>
-              <div style="font-size:0.75rem; color:var(--text-muted); margin-top:4px;">Pilnas skaitymas/rašymas</div>
+              <div class="metric-label">Firebase Storage Saugykla</div>
+              <div class="metric-num" id="diagMetricStorage" style="color:#4ade80;">Prieinama</div>
+              <div style="font-size:0.75rem; color:var(--text-muted); margin-top:4px;">Filmų vaizdo įrašai ir plakatai</div>
             </div>
             <div class="metric-card">
-              <div class="metric-label">Cloudflare Stream CORS</div>
+              <div class="metric-label">Cloudflare Stream</div>
               <div class="metric-num" id="diagMetricCors" style="color:#4ade80;">Aktyvus</div>
-              <div style="font-size:0.75rem; color:var(--text-muted); margin-top:4px;">Cross-Origin suderinta</div>
+              <div style="font-size:0.75rem; color:var(--text-muted); margin-top:4px;">Signed URL & CORS apsauga</div>
             </div>
             <div class="metric-card">
-              <div class="metric-label">Serverio Būklė (500/502)</div>
+              <div class="metric-label">Kliento Klaidų Magistralė</div>
               <div class="metric-num" id="diagMetricHttpErrors" style="color:#4ade80;">0 klaidų</div>
-              <div style="font-size:0.75rem; color:var(--text-muted); margin-top:4px;">Visi maršrutai atsako 200 OK</div>
+              <div style="font-size:0.75rem; color:var(--text-muted); margin-top:4px;">Nėra neapdorotų atmestų pažadų</div>
             </div>
           </div>
 
@@ -2265,6 +2331,68 @@
 
       <div style="display:flex; justify-content:flex-end;">
         <button type="button" class="btn-outline btn-sm" id="cancelPasswordResetBtn">Uždaryti</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 9. LIVE TOKEN QR CODE & ACCESS LINK MODAL -->
+  <div id="tokenQrModal" class="admin-modal-overlay d-none">
+    <div class="admin-modal-card" style="max-width:520px; text-align:center;">
+      <div class="admin-modal-header" style="text-align:left;">
+        <div>
+          <h3 class="admin-modal-title" style="margin:0; font-size:1.15rem; color:#D4AF37;">📱 Transliacijos Prieiga ir QR Kodas</h3>
+          <span style="font-size:0.75rem; color:var(--text-muted);">Mokytojų klasėms ir individualiems žiūrovams</span>
+        </div>
+        <button type="button" id="closeTokenQrModalBtn" style="background:transparent; border:none; color:var(--text-muted); font-size:1.5rem; cursor:pointer;">&times;</button>
+      </div>
+
+      <div style="margin:16px 0;">
+        <div style="background:rgba(8, 27, 23, 0.7); border:1px solid rgba(111,165,138,0.3); border-radius:8px; padding:12px; margin-bottom:14px; text-align:left;">
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+            <div>
+              <span style="font-size:0.72rem; color:#7A9689; text-transform:uppercase; letter-spacing:0.05em; font-weight:700;">Gavėjas / Paskirtis:</span>
+              <div id="tokenQrTargetName" style="font-size:1rem; font-weight:700; color:#F8FAF7;">Jonas Kazlauskas - 8B klasė</div>
+            </div>
+            <span id="tokenQrTypeBadge" class="badge" style="background:rgba(212,175,55,0.2); color:#F3E5AB; border:1px solid rgba(212,175,55,0.4); font-size:0.76rem;">
+              🏫 Klasė (35 įrenginiai)
+            </span>
+          </div>
+          <div style="margin-top:8px; font-size:0.78rem; color:#BAC9C0;">
+            Žetonas: <code id="tokenQrCodeDisplay" style="color:#F3E5AB; background:rgba(0,0,0,0.4); padding:2px 6px; border-radius:4px; font-weight:700;">cfs_class_...</code>
+          </div>
+        </div>
+
+        <!-- Rendered QR Canvas Container -->
+        <div id="tokenQrPrintableArea" style="background:#FFFFFF; padding:18px; border-radius:10px; display:inline-block; margin:6px auto 14px auto; box-shadow:0 8px 30px rgba(0,0,0,0.6); text-align:center;">
+          <div id="tokenQrCanvasContainer"></div>
+          <div style="margin-top:8px; font-family:-apple-system, BlinkMacSystemFont, sans-serif; font-size:0.8rem; font-weight:700; color:#041310; letter-spacing:0.04em;">
+            ĄŽUOLYNAS FILM FESTIVAL 2027
+          </div>
+          <div id="tokenQrPrintLabel" style="font-family:-apple-system, BlinkMacSystemFont, sans-serif; font-size:0.72rem; color:#334155; margin-top:2px;">
+            Nuskenuokite kameros programėle
+          </div>
+        </div>
+
+        <!-- Direct Link input -->
+        <div style="text-align:left; margin-top:8px;">
+          <label style="font-size:0.75rem; color:#BAC9C0; display:block; margin-bottom:5px; font-weight:600;">
+            Tiesioginė Prieigos Nuoroda (automatiškai aktyvuoja žetoną ir paslepia jį iš adreso):
+          </label>
+          <div style="display:flex; gap:8px;">
+            <input type="text" id="tokenQrDirectLinkInput" class="field" readonly style="font-family:monospace; font-size:0.8rem; background:rgba(0,0,0,0.4);">
+            <button type="button" id="btnCopyTokenQrLink" class="btn-solid btn-sm" style="white-space:nowrap; background:#4ade80; color:#041310; font-weight:700;">
+              Kopijuoti Nuorodą
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-top:16px; border-top:1px solid rgba(111,165,138,0.2); padding-top:14px;">
+        <button type="button" id="btnPrintTokenQr" class="btn-outline btn-sm" style="color:#D4AF37; border-color:#D4AF37; display:inline-flex; align-items:center; gap:6px;">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+          <span>Spausdinti QR Kortelę</span>
+        </button>
+        <button type="button" class="btn-outline btn-sm" id="btnCancelTokenQrModal">Uždaryti</button>
       </div>
     </div>
   </div>
