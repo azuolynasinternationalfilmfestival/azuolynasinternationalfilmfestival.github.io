@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <script src="../error-reporting.js"></script>
+  <script src="../now-playing.js"></script>
   <script src="../js/server-api.js"></script>
   <meta charset="UTF-8">
   <link rel="preconnect" href="https://firebasestorage.googleapis.com">
@@ -113,6 +115,7 @@
 
       <!-- Header actions: Quick Submit CTA, Language switch, Burger button -->
       <div class="header-actions">
+        <a href="../voting.html" class="btn-outline btn-nav-cta" style="border-color:#D4AF37; color:#F8FAF7; text-decoration:none;">Voting</a>
         <a href="#submit" class="btn-solid btn-nav-cta">Submit Film</a>
         <div class="lang-switch">
           <a href="../lt/index.html" class="lang-btn">LT</a>
@@ -218,10 +221,10 @@
       <div class="drawer-group">
         <div class="drawer-section-title">Program & Events</div>
         <ul class="drawer-nav-list">
-          <li id="drawerNavLinkVoting" class="d-none">
-            <a href="#competition" class="drawer-nav-link">
+          <li id="drawerNavLinkVoting">
+            <a href="../voting.html" class="drawer-nav-link highlight">
               <span class="drawer-nav-text">Audience Voting</span>
-              <span class="drawer-nav-badge" style="background:#e06d6d; color:#fff;">Live</span>
+              <span class="drawer-nav-badge" style="background:#D4AF37; color:#041310; font-weight:700;">New</span>
             </a>
           </li>
           <li id="drawerNavLinkScreening">

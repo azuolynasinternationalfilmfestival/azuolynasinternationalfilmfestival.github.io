@@ -103,10 +103,22 @@ async function fetchErrorLogs() {
     const res = await fetch("/api/admin/diagnostics/logs", {
       headers: getAuthHeaders()
     });
+    let srvLogs = [];
     if (res.ok) {
       const data = await res.json();
-      errorLogs = data.logs || [];
+      srvLogs = data.logs || [];
     }
+
+    // Merge with client-side errors if available
+    const clientLogs = (typeof window !== "undefined" && window.getAsiffErrorLogs) ? window.getAsiffErrorLogs() : [];
+    const formattedClientLogs = clientLogs.map(c => ({
+      timestamp: c.timestamp,
+      level: "ERROR",
+      source: c.file || "BrowserClient",
+      message: `${c.action}: ${c.message} (${c.functionName})`
+    }));
+
+    errorLogs = [...formattedClientLogs, ...srvLogs].slice(0, 50);
   } catch (err) {
     console.warn("Diagnostics fetch logs notice:", err);
   }

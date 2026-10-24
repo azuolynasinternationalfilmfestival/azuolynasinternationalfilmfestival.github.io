@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="lt">
 <head>
+  <script src="error-reporting.js"></script>
+  <script src="h2h-export.js"></script>
+  <script src="admin-dashboard.js"></script>
   <script src="js/server-api.js"></script>
   <script src="js/firebase-client.js"></script>
   <meta charset="UTF-8">
@@ -186,8 +189,14 @@
 
       <!-- SIDEBAR NAVIGATION SECTIONS -->
       <nav class="admin-sidebar-nav">
+        <div class="admin-sidebar-section-title">Apžvalga & Statistika</div>
+        <button id="tabDashboardBtn" class="admin-sidebar-nav-item active">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+          <span>Statistika & Suvestinė</span>
+        </button>
+
         <div class="admin-sidebar-section-title">Turinys & Filmai</div>
-        <button id="tabSubmissionsBtn" class="admin-sidebar-nav-item active">
+        <button id="tabSubmissionsBtn" class="admin-sidebar-nav-item">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
           <span>Paraiškos</span>
         </button>
@@ -202,6 +211,11 @@
           <span>Transliacija & RSVP</span>
         </button>
 
+        <button id="tabGraphicsBtn" class="admin-sidebar-nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
+          <span>Grafika & H2H Eksportas</span>
+        </button>
+
         <button id="tabEditionsBtn" class="admin-sidebar-nav-item">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
           <span>Metų Leidiniai & 2027</span>
@@ -213,11 +227,6 @@
         </button>
 
         <div class="admin-sidebar-section-title">Komanda & Organizavimas</div>
-        <button id="tabTasksBtn" class="admin-sidebar-nav-item">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"></path><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
-          <span>Užduotys (Tasks)</span>
-        </button>
-
         <button id="tabUsersBtn" class="admin-sidebar-nav-item d-none">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
           <span>Vartotojai & Prieiga</span>
@@ -286,8 +295,118 @@
           <div><strong>Profilaktikos režimas yra ĮJUNGTAS:</strong> Vieša svetainės prieiga lankytojams apribota. Lankytojai mato informacinį profilaktikos pranešimą. Tik autorizuoti administratoriai gali pasiekti valdymo skydą.</div>
         </div>
 
+        <!-- 0. STATISTIKA & SUVESTINĖ (DASHBOARD TAB) -->
+        <div id="dashboardTab">
+          <div class="content-card" style="margin-bottom:18px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:14px;">
+              <div>
+                <h3 class="content-card-title" style="margin-bottom:4px;">Paraiškų Statistika & Analitika</h3>
+                <p class="content-card-sub" style="margin-bottom:0;">
+                  Realaus laiko vizualūs grafikai pagal kategorijas, dalyvavimo formatą (gyvai/nuotoliu) bei šalis.
+                </p>
+              </div>
+              <div style="display:flex; align-items:center; gap:10px;">
+                <select id="dashYearSelect" class="field toolbar-select" style="min-width:140px;">
+                  <option value="2026">2026 m. leidimas</option>
+                  <option value="2027">2027 m. leidimas</option>
+                  <option value="all">Visi metai</option>
+                </select>
+                <button type="button" id="btnRefreshDashboard" class="btn-outline btn-sm" title="Atnaujinti duomenis">
+                  <span>Atnaujinti</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Summary Metric Cards -->
+          <div class="stat-grid-compact" style="margin-bottom:20px;">
+            <div class="stat-card-compact" style="border-left: 3px solid #D4AF37;">
+              <div class="stat-card-compact-header">
+                <span class="stat-card-compact-title">Visos Paraiškos</span>
+                <span class="badge" style="background:rgba(212,175,55,0.2); color:#D4AF37;">Filmai</span>
+              </div>
+              <div class="stat-card-compact-body">
+                <div class="stat-card-compact-num" id="dashTotal">0</div>
+                <div class="stat-card-compact-sub">Registruoti konkursiniai darbai</div>
+              </div>
+            </div>
+
+            <div class="stat-card-compact" style="border-left: 3px solid #4ade80;">
+              <div class="stat-card-compact-header">
+                <span class="stat-card-compact-title" style="color:#4ade80;">Dalyvauja Gyvai</span>
+                <span class="badge badge-accepted">Kaunas RSVP</span>
+              </div>
+              <div class="stat-card-compact-body">
+                <div class="stat-card-compact-num" id="dashInPerson" style="color:#4ade80;">0</div>
+                <div class="stat-card-compact-sub">Atvyks į ceremoniją</div>
+              </div>
+            </div>
+
+            <div class="stat-card-compact" style="border-left: 3px solid #60a5fa;">
+              <div class="stat-card-compact-header">
+                <span class="stat-card-compact-title" style="color:#60a5fa;">Nuotolinė Prieiga</span>
+                <span class="badge" style="background:rgba(59,130,246,0.2); color:#60a5fa;">Stream</span>
+              </div>
+              <div class="stat-card-compact-body">
+                <div class="stat-card-compact-num" id="dashRemote" style="color:#60a5fa;">0</div>
+                <div class="stat-card-compact-sub">Žiūrės transliaciją</div>
+              </div>
+            </div>
+
+            <div class="stat-card-compact" style="border-left: 3px solid #c084fc;">
+              <div class="stat-card-compact-header">
+                <span class="stat-card-compact-title" style="color:#c084fc;">Atrankoje / Priimti</span>
+                <span class="badge" style="background:rgba(192,132,252,0.2); color:#c084fc;">Statusas</span>
+              </div>
+              <div class="stat-card-compact-body">
+                <div class="stat-card-compact-num" id="dashAccepted" style="color:#c084fc;">0</div>
+                <div class="stat-card-compact-sub"><span id="dashVoting">0</span> balsavime</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Charts Grid: Categories, Attendance Donut, Countries -->
+          <div class="stats-charts-grid" style="margin-bottom:24px;">
+            <!-- 1. Categories Progress Bars -->
+            <div class="chart-panel">
+              <div class="chart-panel-header">
+                <div class="chart-panel-title">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+                  <span>Pagal Kategorijas</span>
+                </div>
+                <span class="chart-panel-badge badge">Žanrai</span>
+              </div>
+              <div id="dashCategoryList" style="display:flex; flex-direction:column; gap:12px;"></div>
+            </div>
+
+            <!-- 2. Attendance Donut Chart -->
+            <div class="chart-panel">
+              <div class="chart-panel-header">
+                <div class="chart-panel-title">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                  <span>Dalyvavimo Formatas</span>
+                </div>
+                <span class="chart-panel-badge badge">Gyvai / Online</span>
+              </div>
+              <div id="dashAttendanceContainer"></div>
+            </div>
+
+            <!-- 3. Country Distribution Leaderboard -->
+            <div class="chart-panel">
+              <div class="chart-panel-header">
+                <div class="chart-panel-title">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+                  <span>Geografija & Šalys</span>
+                </div>
+                <span class="chart-panel-badge badge">Top šalys</span>
+              </div>
+              <div id="dashCountryList" class="country-chart-list"></div>
+            </div>
+          </div>
+        </div>
+
         <!-- 1. SUBMISSIONS TAB -->
-        <div id="submissionsTab">
+        <div id="submissionsTab" class="d-none">
           <!-- Compact Participant & Viewer Statistics Grid -->
           <div class="stat-grid-compact">
             <div class="stat-card-compact">
@@ -1080,47 +1199,81 @@
           </div>
         </div>
 
-        <!-- 5. TASKS TAB (UŽDUOČIŲ SISTEMA REDAKTORIAMS IR TEISĖJAMS) -->
-        <div id="tasksTab" class="d-none">
-          <div class="voting-stat-grid" style="margin-bottom:18px;">
-            <div class="metric-card">
-              <div class="metric-label">Laukiamos Užduotys</div>
-              <div class="metric-num" id="taskStatPending" style="color:#F3E5AB;">0</div>
-            </div>
-            <div class="metric-card">
-              <div class="metric-label">Vykdomos Užduotys</div>
-              <div class="metric-num" id="taskStatInProgress" style="color:#93c5fd;">0</div>
-            </div>
-            <div class="metric-card">
-              <div class="metric-label">Atliktos Užduotys</div>
-              <div class="metric-num" id="taskStatCompleted" style="color:#4ade80;">0</div>
+        <!-- 5. BROADCAST GRAPHICS (H2H GRAPHIC) TAB -->
+        <div id="graphicsTab" class="d-none">
+          <div class="content-card" style="margin-bottom:18px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px;">
+              <div>
+                <h3 class="content-card-title" style="margin-bottom:4px;">Transliacijos Grafika (H2H Graphic, CasparCG, OBS)</h3>
+                <p class="content-card-sub" style="margin-bottom:0;">
+                  Valdykite tiesioginio eterio titrus (Now Playing / Next Up) bei eksportuokite duomenis tiesioginės transliacijos grafikos sistemoms.
+                </p>
+              </div>
+              <div style="display:flex; align-items:center; gap:8px;">
+                <button type="button" id="btnDownloadH2hJson" class="btn-solid btn-sm" style="background:#D4AF37; color:#041310; font-weight:700;">
+                  Atsisiųsti H2H JSON
+                </button>
+                <button type="button" id="btnDownloadH2hCsv" class="btn-outline btn-sm">
+                  Atsisiųsti Rundown CSV
+                </button>
+                <button type="button" id="btnDownloadVotingCsv" class="btn-outline btn-sm">
+                  Atsisiųsti Balsavimo CSV
+                </button>
+              </div>
             </div>
           </div>
 
-          <div class="table-toolbar" style="margin-bottom:18px;">
-            <input type="text" id="filterTaskSearch" class="field toolbar-search" placeholder="Ieškoti užduočių pagal pavadinimą ar vykdytoją...">
-            <select id="filterTaskStatus" class="field toolbar-select">
-              <option value="all">Visos būsenos</option>
-              <option value="pending">Laukiama</option>
-              <option value="in_progress">Vykdoma</option>
-              <option value="completed">Atlikta</option>
-            </select>
-            <select id="filterTaskRole" class="field toolbar-select">
-              <option value="all">Visos rolės</option>
-              <option value="editor">Redaktorius</option>
-              <option value="judge">Teisėjas</option>
-              <option value="admin">Administratorius</option>
-            </select>
-            <button type="button" id="btnOpenAddTaskModal" class="btn-solid btn-sm" style="display:inline-flex; align-items:center; gap:6px;">
-              <span>+ Nauja Užduotis</span>
-            </button>
-            <button type="button" id="btnCleanupTasks" class="btn-outline btn-sm" style="display:inline-flex; align-items:center; gap:6px;">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-              <span>Išvalyti atliktas</span>
-            </button>
-          </div>
+          <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(320px, 1fr)); gap:18px; margin-bottom:20px;">
+            <!-- Controller card -->
+            <div class="chart-panel">
+              <div class="chart-panel-header">
+                <span class="chart-panel-title">Tiesioginio Eterio Valdymas</span>
+                <span class="badge" style="background:rgba(239,68,68,0.2); color:#fca5a5;">Live Eteris</span>
+              </div>
 
-          <div id="tasksContainer" class="task-grid"></div>
+              <div class="input-cell" style="margin-bottom:14px;">
+                <label for="graphicsNowPlayingSelect">Dabar rodomas filmas (Now Playing) *</label>
+                <select id="graphicsNowPlayingSelect" class="field"></select>
+              </div>
+
+              <div class="input-cell" style="margin-bottom:14px;">
+                <label for="graphicsNextSelect">Sekantis filmas (Next Up)</label>
+                <select id="graphicsNextSelect" class="field"></select>
+              </div>
+
+              <div style="display:flex; align-items:center; gap:8px; margin-bottom:18px;">
+                <input type="checkbox" id="graphicsPublicVisible" checked style="width:16px; height:16px; accent-color:#D4AF37;">
+                <label for="graphicsPublicVisible" style="font-size:0.85rem; color:#F8FAF7; cursor:pointer;">
+                  Rodyti „Dabar ekrane“ juostelę viešoje svetainėje
+                </label>
+              </div>
+
+              <button type="button" id="btnSaveBroadcastOverlay" class="btn-solid btn-full" style="background:#4ade80; color:#041310; font-weight:700;">
+                Išsaugoti Eterio Titrus
+              </button>
+            </div>
+
+            <!-- Live Preview -->
+            <div class="chart-panel">
+              <div class="chart-panel-header">
+                <span class="chart-panel-title">Titrų Peržiūra (Lower Third Preview)</span>
+                <span class="badge badge-accepted">1080p Preview</span>
+              </div>
+
+              <div style="background:#000; border-radius:8px; padding:20px; border:1px solid rgba(212,175,55,0.3); min-height:160px; display:flex; flex-direction:column; justify-content:flex-end;">
+                <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;">
+                  <span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:#ef4444; animation:pulseDot 1.5s infinite;"></span>
+                  <span style="font-size:0.68rem; color:#fca5a5; font-weight:700; letter-spacing:0.06em;">DABAR ETERIS</span>
+                </div>
+                <h4 id="previewOverlayTitle" style="color:#F8FAF7; margin:0 0 4px 0; font-family:var(--font-cinema); font-size:1.15rem;">Filmo Pavadinimas</h4>
+                <p id="previewOverlayDirector" style="color:#D4AF37; margin:0; font-size:0.82rem;">Režisierius: Vardas Pavardė &bull; Lietuva</p>
+              </div>
+
+              <div style="margin-top:14px; font-size:0.75rem; color:#94a3b8; line-height:1.4;">
+                API Šaltinis grafikos programoms: <code style="background:rgba(255,255,255,0.1); padding:2px 6px; border-radius:3px; color:#F8FAF7;">GET /api/broadcast/overlay</code>
+              </div>
+            </div>
+          </div>
         </div>
 
         <!-- 6. USERS TAB (RESTRICTED TO 1-2 TRUSTED ADMINS) -->

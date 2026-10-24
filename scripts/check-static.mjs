@@ -10,7 +10,9 @@ function check(file) {
   assert.equal(result.status, 0, result.stderr);
 }
 try {
-  for (const name of ['server.js', 'config.js', 'email-templates.js']) check(path.join(root, name));
+  for (const name of fs.readdirSync(root)) {
+    if (name.endsWith('.js')) check(path.join(root, name));
+  }
   for (const name of fs.readdirSync(path.join(root,'js'))) {
     if (!name.endsWith('.js')) continue;
     const file=path.join(root,'js',name); check(file);

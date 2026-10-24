@@ -109,19 +109,26 @@ service cloud.firestore {
       allow delete: if isSuperAdmin();
     }
 
-    // 6. Tasks Management: Staff read, Super Admin & Staff write
-    match /tasks/{taskId} {
-      allow get, list: if isSuperAdmin() || isJudge() || isSignedIn();
-      allow create, update: if isSuperAdmin() || isSignedIn();
-      allow delete: if isSuperAdmin();
+    // 5b. Stream Hashed Tokens: Public verification get, Super Admin full control
+    match /stream_tokens/{tokenHash} {
+      allow get: if true;
+      allow list, create, update, delete: if isSuperAdmin();
     }
 
-    // 7. Global Anti-Fraud Vote Audit
-    match /votes_audit/{auditId} {
-      allow get: if true;
-      allow list: if isSuperAdmin() || isJudge();
-      allow create: if true;
+    // 5c. Public Voting: 1 vote per person per nomination enforced by doc ID = nominationId_uid
+    match /votes/{voteId} {
+      allow get, list: if true;
+      allow create: if isSignedIn() &&
+        incoming().userId == request.auth.uid &&
+        incoming().nominationId != null &&
+        incoming().filmId != null &&
+        voteId == (incoming().nominationId + '_' + request.auth.uid);
       allow update, delete: if isSuperAdmin();
+    }
+
+    // 6. Tasks Management (Deprecated - Super Admin only)
+    match /tasks/{taskId} {
+      allow read, write: if isSuperAdmin();
     }
 
     // 8. User Accounts (RBAC):

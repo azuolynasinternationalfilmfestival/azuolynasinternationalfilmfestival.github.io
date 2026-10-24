@@ -5009,7 +5009,134 @@ app.get('/api/admin/live/viewers', (req, res) => {
   }
 });
 
-// Friendly aliases for Live stream, Stream Overlay & 2027 pages
+// API: Broadcast Overlay (H2H Graphic & Now Playing)
+let broadcastOverlayCache = {
+  nowPlaying: null,
+  nextFilm: null,
+  isPublicVisible: true,
+  updatedAt: new Date().toISOString()
+};
+
+app.get('/api/broadcast/overlay', (req, res) => {
+  try {
+    const settings = loadSettingsData();
+    if (settings.broadcast_overlay) {
+      broadcastOverlayCache = { ...broadcastOverlayCache, ...settings.broadcast_overlay };
+    }
+    const subsData = loadSubmissionsData();
+    const films = subsData.submissions || [];
+    
+    // Group nominations
+    const nominationsMap = {};
+    films.forEach(f => {
+      const cat = f.category || "Bendra nominacija";
+      if (!nominationsMap[cat]) nominationsMap[cat] = [];
+      nominationsMap[cat].push({
+        id: f.id,
+        filmTitle: f.filmTitle,
+        director: f.name || f.director,
+        country: f.country || "Lietuva",
+        votesCount: f.votesCount || 0
+      });
+    });
+
+    const nominations = Object.keys(nominationsMap).map(k => ({
+      title: k,
+      category: k,
+      films: nominationsMap[k]
+    }));
+
+    res.json({
+      ...broadcastOverlayCache,
+      nominations
+    });
+  } catch (err) {
+    res.json(broadcastOverlayCache);
+  }
+});
+
+app.post('/api/broadcast/overlay', (req, res) => {
+  try {
+    const { nowPlaying, nextFilm, isPublicVisible } = req.body || {};
+    broadcastOverlayCache = {
+      nowPlaying: nowPlaying || null,
+      nextFilm: nextFilm || null,
+      isPublicVisible: isPublicVisible !== false,
+      updatedAt: new Date().toISOString()
+    };
+    try {
+      const settings = loadSettingsData();
+      settings.broadcast_overlay = broadcastOverlayCache;
+      saveSettingsData(settings);
+    } catch (e) {}
+
+    res.json({ success: true, overlay: broadcastOverlayCache });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to update broadcast overlay' });
+  }
+});
+
+// API: Stream Token Validator (Cloudflare Stream Playback Gate)
+app.post('/api/stream/validate-token', (req, res) => {
+  try {
+    const { token, tokenHash } = req.body || {};
+    const cleanToken = (token || '').trim();
+    if (!cleanToken) {
+      return res.status(400).json({ valid: false, error: 'invalid', message: 'Nurodykite prieigos žetoną.' });
+    }
+
+    const computedHash = crypto.createHash('sha256').update(cleanToken).digest('hex');
+
+    const viewersData = loadLiveViewersData();
+    const viewers = viewersData.viewers || [];
+    const viewer = viewers.find(v => v.token === cleanToken || v.tokenHash === computedHash || v.tokenHash === tokenHash);
+
+    if (!viewer) {
+      const subsData = loadSubmissionsData();
+      const sub = (subsData.submissions || []).find(s => s.liveToken === cleanToken);
+      if (sub) {
+        return res.json({
+          valid: true,
+          label: sub.name || 'Dalyvis',
+          playbackUrl: 'https://customer-auu36r7owuzogvfb.cloudflarestream.com/937d1a8b2c545a980c9fabc8502d8af4/iframe'
+        });
+      }
+      return res.status(403).json({ valid: false, error: 'invalid', message: 'Prieigos žetonas nerastas arba negalioja.' });
+    }
+
+    if (viewer.status === 'revoked' || viewer.isActive === false) {
+      return res.status(403).json({ valid: false, error: 'revoked', message: 'Šis žetonas buvo atšauktas administratoriaus.' });
+    }
+
+    if (viewer.expiresAt && new Date(viewer.expiresAt).getTime() < Date.now()) {
+      return res.status(403).json({ valid: false, error: 'expired', message: 'Šio žetono galiojimo laikas pasibaigęs.' });
+    }
+
+    const maxUses = viewer.maxUses || 10;
+    const currentUses = (viewer.currentUses || 0) + 1;
+    if (currentUses > maxUses) {
+      return res.status(403).json({ valid: false, error: 'max_uses_reached', message: 'Viršytas leistinų prisijungimų limitas.' });
+    }
+
+    viewer.currentUses = currentUses;
+    viewer.lastAccessAt = new Date().toISOString();
+    saveLiveViewersData(viewersData);
+
+    res.json({
+      valid: true,
+      label: viewer.name || viewer.email || 'Žiūrovas',
+      playbackUrl: 'https://customer-auu36r7owuzogvfb.cloudflarestream.com/937d1a8b2c545a980c9fabc8502d8af4/iframe',
+      expiresAt: viewer.expiresAt || null
+    });
+  } catch (err) {
+    res.status(500).json({ valid: false, error: 'server_error', message: err.message });
+  }
+});
+
+// Friendly aliases for Voting, Live stream, Stream Overlay & 2027 pages
+app.get('/voting', (req, res) => {
+  res.sendFile(path.join(__dirname, 'voting.html'));
+});
 app.get('/live', (req, res) => {
   res.sendFile(path.join(__dirname, 'live.html'));
 });
