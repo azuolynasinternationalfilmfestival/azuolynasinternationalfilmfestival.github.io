@@ -27,7 +27,7 @@ const EMAIL_THEME = {
   boxBg: "#081B17",
   accent: "#6FA58A",
   accentLight: "#9BC4AE",
-  accentGold: "#D4AF37",
+  accentGold: "#F8FAFC",
   textLight: "#F8FAF7",
   textMuted: "#BAC9C0",
   textDim: "#7A9689",
@@ -114,9 +114,9 @@ const STATUS_BADGES = {
   },
   userInvite: {
     icon: "🔑",
-    color: "#D4AF37",
-    bg: "rgba(212, 175, 55, 0.18)",
-    border: "#D4AF37",
+    color: "#F8FAFC",
+    bg: "rgba(255, 255, 255, 0.12)",
+    border: "rgba(255, 255, 255, 0.3)",
     labelLt: "KOMANDOS KVIETIMAS",
     labelEn: "TEAM INVITATION"
   },
@@ -581,7 +581,7 @@ function buildEmailDocument({ lang, preheader, statusKey, childrenHtml }) {
               <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color: #081B17; border: 1px solid rgba(111, 165, 138, 0.28); border-radius: 8px; margin-bottom: 20px; padding: 16px; text-align: left;">
                 <tr>
                   <td>
-                    <div style="font-size: 11px; font-weight: 700; color: #D4AF37; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px;">
+                    <div style="font-size: 11px; font-weight: 700; color: #F8FAFC; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px;">
                       ${isLt ? "🎬 RENGINIO DATA, VIETA IR TIESIOGINĖ TRANSLIACIJĄ" : "🎬 FESTIVAL EVENT, VENUE & LIVE STREAM"}
                     </div>
                     <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="font-size: 12px; line-height: 1.6; color: #BAC9C0;">
@@ -599,7 +599,7 @@ function buildEmailDocument({ lang, preheader, statusKey, childrenHtml }) {
                       </tr>
                       <tr>
                         <td style="padding: 2px 0; color: #7A9689;">Instagram:</td>
-                        <td style="padding: 2px 0;"><a href="${EMAIL_THEME.instagramUrl}" target="_blank" style="color: #D4AF37; text-decoration: underline; font-weight: 600;">@azuolynas.iff</a> ${isLt ? "(sekite užkulisius ir atranką)" : "(follow backstage & updates)"}</td>
+                        <td style="padding: 2px 0;"><a href="${EMAIL_THEME.instagramUrl}" target="_blank" style="color: #9BC4AE; text-decoration: underline; font-weight: 600;">@azuolynas.iff</a> ${isLt ? "(sekite užkulisius ir atranką)" : "(follow backstage & updates)"}</td>
                       </tr>
                     </table>
                   </td>
@@ -614,7 +614,7 @@ function buildEmailDocument({ lang, preheader, statusKey, childrenHtml }) {
               </p>
               <p style="margin: 0 0 12px 0;">
                 <a href="${EMAIL_THEME.siteUrl}" target="_blank" style="color: #9BC4AE; text-decoration: underline; margin: 0 6px;">${isLt ? "Oficiali svetainė" : "Official Website"}</a> &bull;
-                <a href="${EMAIL_THEME.instagramUrl}" target="_blank" style="color: #D4AF37; text-decoration: underline; margin: 0 6px; font-weight: 700;">Instagram: @azuolynas.iff</a> &bull;
+                <a href="${EMAIL_THEME.instagramUrl}" target="_blank" style="color: #9BC4AE; text-decoration: underline; margin: 0 6px; font-weight: 700;">Instagram: @azuolynas.iff</a> &bull;
                 <a href="${EMAIL_THEME.liveStreamUrl}" target="_blank" style="color: #4ade80; text-decoration: underline; margin: 0 6px;">Live Stream</a> &bull;
                 <a href="mailto:${EMAIL_THEME.contactEmail}" style="color: #9BC4AE; text-decoration: underline; margin: 0 6px;">${EMAIL_THEME.contactEmail}</a>
               </p>
@@ -912,7 +912,7 @@ function generateInviteEmailHtml(p1, p2, p3) {
 
   let metaRows = "";
   metaRows += buildMetaRow(isLt ? "Gavėjas:" : "Invitee:", `<b>${escapeHtml(inviteeName)}</b> (<a href="mailto:${escapeHtml(email)}" style="color:#9BC4AE; text-decoration:none;">${escapeHtml(email)}</a>)`);
-  metaRows += buildMetaRow(isLt ? "Priskirta rolė:" : "Assigned Role:", `<span style="color:#D4AF37; font-weight:700; text-transform:uppercase; letter-spacing:0.04em;">🛡️ ${escapeHtml(roleDisplay)}</span>`);
+  metaRows += buildMetaRow(isLt ? "Priskirta rolė:" : "Assigned Role:", `<span style="color:#34D399; font-weight:700; text-transform:uppercase; letter-spacing:0.04em;">🛡️ ${escapeHtml(roleDisplay)}</span>`);
   if (data.invitedBy) {
     metaRows += buildMetaRow(isLt ? "Pakvietė:" : "Invited By:", escapeHtml(data.invitedBy));
   }
@@ -926,8 +926,8 @@ function generateInviteEmailHtml(p1, p2, p3) {
       ${t.body}
     </p>
 
-    <div style="background-color: #081B17; border: 1px solid rgba(212, 175, 55, 0.4); border-radius: 8px; padding: 20px; margin: 20px 0; text-align: center;">
-      <p style="margin: 0 0 6px 0; font-size: 11px; font-weight: 700; color: #D4AF37; text-transform: uppercase; letter-spacing: 0.1em;">
+    <div style="background-color: #081B17; border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 4px; padding: 20px; margin: 20px 0; text-align: center;">
+      <p style="margin: 0 0 6px 0; font-size: 11px; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: 0.1em;">
         ${isLt ? "Jūsų unikalus patvirtinimo kodas:" : "Your Unique Verification Code:"}
       </p>
       <div style="font-family: 'Courier New', Courier, monospace; font-size: 28px; font-weight: 800; letter-spacing: 8px; color: #F8FAF7; padding: 8px 0;">
@@ -938,7 +938,7 @@ function generateInviteEmailHtml(p1, p2, p3) {
       </p>
     </div>
 
-    <div style="background-color: #081B17; border: 1px solid rgba(111,165,138,0.22); border-radius: 6px; padding: 18px 20px; margin: 18px 0;">
+    <div style="background-color: #081B17; border: 1px solid rgba(111,165,138,0.22); border-radius: 4px; padding: 18px 20px; margin: 18px 0;">
       <p style="margin: 0 0 12px 0; font-weight: 700; color: #9BC4AE; font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em;">
         ${t.detailsTitle}
       </p>
@@ -949,8 +949,8 @@ function generateInviteEmailHtml(p1, p2, p3) {
 
     <table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center" class="cta-table" style="margin: 24px auto 14px auto;">
       <tr>
-        <td align="center" style="border-radius: 6px; background-color: #17453B; border: 1px solid #D4AF37;">
-          <a href="${inviteUrl}" target="_blank" class="btn-primary" style="display: inline-block; padding: 14px 32px; font-size: 13px; font-weight: 800; color: #F8FAF7; text-decoration: none; border-radius: 6px; letter-spacing: 0.04em;">
+        <td align="center" style="border-radius: 4px; background-color: #17453B; border: 1px solid rgba(255,255,255,0.3);">
+          <a href="${inviteUrl}" target="_blank" class="btn-primary" style="display: inline-block; padding: 14px 32px; font-size: 13px; font-weight: 800; color: #F8FAF7; text-decoration: none; border-radius: 4px; letter-spacing: 0.04em;">
             ${escapeHtml(t.ctaText)} &rarr;
           </a>
         </td>

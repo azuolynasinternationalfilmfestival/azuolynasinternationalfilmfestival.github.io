@@ -4,12 +4,13 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="referrer" content="no-referrer">
-  <title id="pageTitle">Tiesioginė Transliacija | Ąžuolynas Film Fest</title>
-  <meta name="description" id="metaDescription" content="Oficiali Ąžuolynas International Students Film Festival ceremonijos tiesioginė transliacija su autorizuota prieiga.">
+  <title id="pageTitle">Tiesioginė Transliacija | AISFF</title>
+  <meta name="description" id="metaDescription" content="Oficiali Ąžuolynas International Students Film Festival (AISFF) ceremonijos tiesioginė transliacija su autorizuota prieiga.">
   <link rel="icon" type="image/webp" href="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media">
-  <link rel="stylesheet" href="style.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="live.css">
   <script src="error-reporting.js"></script>
   <style>
@@ -17,29 +18,31 @@
     .live-lang-switch {
       display: inline-flex;
       align-items: center;
-      background: rgba(0, 0, 0, 0.45);
-      border: 1px solid rgba(111, 165, 138, 0.35);
-      border-radius: 20px;
-      padding: 2px 4px;
-      gap: 3px;
+      background: #000000;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 2px;
+      padding: 2px;
+      gap: 2px;
     }
     .live-lang-btn {
       background: transparent;
       border: none;
-      color: #94a3b8;
-      font-size: 0.75rem;
+      color: #94A3B8;
+      font-size: 0.72rem;
       font-weight: 700;
-      padding: 4px 10px;
-      border-radius: 14px;
+      letter-spacing: 0.08em;
+      padding: 4px 8px;
+      border-radius: 2px;
       cursor: pointer;
-      transition: all 0.2s ease;
+      transition: all 0.15s ease;
+      font-family: 'JetBrains Mono', monospace;
     }
     .live-lang-btn:hover {
-      color: #F8FAF7;
+      color: #FFFFFF;
     }
     .live-lang-btn.active {
-      background: #D4AF37;
-      color: #041310;
+      background: #FFFFFF;
+      color: #070908;
     }
 
     /* Zero-exposure gate layout */
@@ -49,53 +52,54 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 24px 16px;
+      padding: 32px 16px;
       position: relative;
-      background: radial-gradient(circle at 50% 20%, rgba(12, 36, 31, 0.95) 0%, rgba(4, 19, 16, 0.98) 100%);
+      background: radial-gradient(circle at 50% 15%, #0F1E19 0%, #070908 75%);
     }
     .gate-top-lang {
       position: absolute;
-      top: 20px;
-      right: 20px;
+      top: 24px;
+      right: 24px;
       z-index: 10;
     }
     .token-gate-card {
-      background: rgba(8, 27, 23, 0.94);
-      border: 1px solid rgba(212, 175, 55, 0.45);
-      border-radius: var(--site-radius, 12px);
-      padding: 40px 32px;
-      max-width: 450px;
+      background: #0B110E;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 2px;
+      padding: 44px 36px;
+      max-width: 460px;
       width: 100%;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.85);
-      text-align: center;
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
+      box-shadow: 0 30px 80px rgba(0, 0, 0, 0.95);
+      text-align: left;
       box-sizing: border-box;
     }
     .token-gate-icon {
-      width: 58px;
-      height: 58px;
-      border-radius: 50%;
-      background: rgba(212, 175, 55, 0.12);
-      border: 1px solid rgba(212, 175, 55, 0.35);
-      color: #D4AF37;
+      width: 44px;
+      height: 44px;
+      border-radius: 2px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #FFFFFF;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      margin-bottom: 20px;
+      margin-bottom: 24px;
     }
     .token-gate-title {
-      font-family: var(--font-cinema, Georgia, serif);
-      font-size: 1.45rem;
-      color: #F8FAF7;
+      font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #FFFFFF;
+      letter-spacing: -0.02em;
+      text-transform: uppercase;
       margin: 0 0 10px 0;
-      letter-spacing: 0.03em;
     }
     .token-gate-desc {
+      font-family: 'Inter', sans-serif;
       font-size: 0.88rem;
-      color: #94a3b8;
-      line-height: 1.5;
-      margin: 0 0 24px 0;
+      color: #94A3B8;
+      line-height: 1.6;
+      margin: 0 0 28px 0;
     }
     .token-input-wrap {
       margin-bottom: 16px;
@@ -103,34 +107,38 @@
     }
     .token-input-wrap label {
       display: block;
-      font-size: 0.8rem;
-      color: #cbd5e1;
-      margin-bottom: 6px;
-      font-weight: 500;
+      font-size: 0.72rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      font-family: 'JetBrains Mono', monospace;
+      color: #E2E8F0;
+      margin-bottom: 8px;
+      font-weight: 600;
     }
     .token-input-field {
       width: 100%;
       padding: 12px 14px;
-      background: rgba(0, 0, 0, 0.45);
-      border: 1px solid rgba(111, 165, 138, 0.35);
-      border-radius: 6px;
-      color: #F8FAF7;
-      font-size: 1rem;
-      letter-spacing: 0.05em;
+      background: #050706;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 2px;
+      color: #FFFFFF;
+      font-size: 0.95rem;
+      font-family: 'JetBrains Mono', monospace;
+      letter-spacing: 0.02em;
       outline: none;
-      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+      transition: border-color 0.15s ease;
       box-sizing: border-box;
     }
     .token-input-field:focus {
-      border-color: #D4AF37;
-      box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.2);
+      border-color: #FFFFFF;
+      box-shadow: 0 0 0 1px #FFFFFF;
     }
     .token-error-box {
-      background: rgba(239, 68, 68, 0.15);
+      background: rgba(239, 68, 68, 0.1);
       border: 1px solid rgba(239, 68, 68, 0.4);
-      color: #fca5a5;
+      color: #FCA5A5;
       padding: 10px 14px;
-      border-radius: 6px;
+      border-radius: 2px;
       font-size: 0.82rem;
       margin-bottom: 16px;
       text-align: left;
@@ -138,41 +146,45 @@
     }
     .token-submit-btn {
       width: 100%;
-      padding: 13px;
-      background: #D4AF37;
-      color: #041310;
-      font-size: 0.95rem;
+      padding: 13px 16px;
+      background: #FFFFFF;
+      color: #070908;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.85rem;
       font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
       border: none;
-      border-radius: 6px;
+      border-radius: 2px;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 8px;
-      transition: background-color 0.2s ease, transform 0.2s ease;
+      gap: 10px;
+      transition: background-color 0.15s ease, transform 0.15s ease;
     }
     .token-submit-btn:hover {
-      background: #F3E5AB;
-      transform: translateY(-1px);
+      background: #E2E8F0;
     }
     .token-submit-btn:disabled {
-      opacity: 0.6;
+      opacity: 0.5;
       cursor: not-allowed;
       transform: none;
     }
     .token-gate-help {
-      margin-top: 22px;
+      margin-top: 24px;
       font-size: 0.78rem;
-      color: #64748b;
-      line-height: 1.4;
+      color: #64748B;
+      line-height: 1.5;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      padding-top: 16px;
     }
     .token-gate-help a {
-      color: #D4AF37;
-      text-decoration: none;
+      color: #E2E8F0;
+      text-decoration: underline;
     }
     .token-gate-help a:hover {
-      text-decoration: underline;
+      color: #FFFFFF;
     }
 
     /* =========================================================================
@@ -192,26 +204,29 @@
     .live-brand-row {
       display: flex;
       align-items: center;
-      gap: 14px;
-      margin-bottom: 14px;
-      padding-bottom: 14px;
-      border-bottom: 1px solid rgba(111, 165, 138, 0.15);
+      gap: 16px;
+      margin-bottom: 20px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
     }
     .live-brand-logo {
       width: 44px;
       height: 44px;
-      border-radius: 50%;
+      border-radius: 2px;
       flex-shrink: 0;
-      border: 1px solid rgba(212, 175, 55, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.2);
     }
     .live-brand-info {
       flex: 1;
       min-width: 0;
     }
     .live-brand-title {
-      font-family: var(--font-cinema, Georgia, serif);
-      font-size: clamp(1.1rem, 3.5vw, 1.45rem);
-      color: #F8FAF7;
+      font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-size: clamp(1.2rem, 3.5vw, 1.55rem);
+      font-weight: 700;
+      color: #FFFFFF;
+      letter-spacing: -0.02em;
+      text-transform: uppercase;
       margin: 0;
       white-space: nowrap;
       overflow: hidden;
@@ -219,25 +234,26 @@
     }
     .live-brand-sub {
       font-size: clamp(0.72rem, 2.5vw, 0.8rem);
-      color: #94a3b8;
-      margin: 3px 0 0 0;
+      color: #94A3B8;
+      letter-spacing: 0.04em;
+      margin: 4px 0 0 0;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
     }
 
-    /* Row 2: Compact Action Toolbar (Wraps cleanly on small screens, NEVER overlaps player) */
+    /* Row 2: Compact Action Toolbar */
     .live-toolbar-row {
       display: flex;
       align-items: center;
       justify-content: space-between;
       flex-wrap: wrap;
-      gap: 10px;
-      background: rgba(8, 27, 23, 0.7);
-      border: 1px solid rgba(111, 165, 138, 0.25);
-      border-radius: 8px;
-      padding: 8px 12px;
-      margin-bottom: 16px;
+      gap: 12px;
+      background: #0B110E;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 2px;
+      padding: 10px 14px;
+      margin-bottom: 20px;
       box-sizing: border-box;
     }
     .live-toolbar-left {
@@ -255,35 +271,40 @@
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      background: rgba(111, 165, 138, 0.18);
-      border: 1px solid rgba(111, 165, 138, 0.35);
-      padding: 4px 10px;
-      border-radius: 16px;
-      font-size: 0.76rem;
-      color: #F8FAF7;
-      max-width: 240px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      padding: 5px 12px;
+      border-radius: 2px;
+      font-size: 0.74rem;
+      font-family: 'JetBrains Mono', monospace;
+      color: #FFFFFF;
+      max-width: 260px;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
     }
     .live-user-pill.classroom {
-      background: rgba(212, 175, 55, 0.15);
-      border-color: rgba(212, 175, 55, 0.4);
-      color: #F3E5AB;
+      background: rgba(52, 211, 153, 0.1);
+      border-color: rgba(52, 211, 153, 0.35);
+      color: #34D399;
     }
     .live-exit-btn {
       background: transparent;
-      border: 1px solid rgba(239, 68, 68, 0.4);
-      color: #f87171;
-      padding: 4px 10px;
-      border-radius: 6px;
-      font-size: 0.74rem;
+      border: 1px solid rgba(239, 68, 68, 0.35);
+      color: #F87171;
+      padding: 5px 12px;
+      border-radius: 2px;
+      font-size: 0.72rem;
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
       cursor: pointer;
-      transition: background 0.2s ease;
+      transition: background 0.15s ease;
       white-space: nowrap;
     }
     .live-exit-btn:hover {
-      background: rgba(239, 68, 68, 0.15);
+      background: rgba(239, 68, 68, 0.12);
     }
 
     /* Row 3: 16:9 Video Stage Container */
@@ -292,11 +313,11 @@
       width: 100%;
       padding-top: 56.25%; /* 16:9 Aspect Ratio */
       background: #000000;
-      border-radius: 10px;
+      border-radius: 2px;
       overflow: hidden;
-      border: 1px solid rgba(212, 175, 55, 0.35);
-      box-shadow: 0 16px 45px rgba(0, 0, 0, 0.85);
-      margin-bottom: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.95);
+      margin-bottom: 20px;
     }
     .player-responsive-wrap iframe,
     .player-responsive-wrap video {
@@ -316,48 +337,52 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      background: radial-gradient(circle, #081B17 0%, #030d0b 100%);
-      color: #F8FAF7;
+      background: radial-gradient(circle, #0F1E19 0%, #070908 100%);
+      color: #FFFFFF;
       text-align: center;
-      padding: 20px;
+      padding: 24px;
       z-index: 5;
     }
     .stream-offline-pulse {
-      width: 14px;
-      height: 14px;
+      width: 10px;
+      height: 10px;
       border-radius: 50%;
-      background: #eab308;
-      box-shadow: 0 0 15px #eab308;
-      margin-bottom: 14px;
+      background: #FFFFFF;
+      box-shadow: 0 0 16px rgba(255, 255, 255, 0.8);
+      margin-bottom: 16px;
       animation: asiffPulseDot 2s infinite ease-in-out;
     }
     @keyframes asiffPulseDot {
-      0%, 100% { transform: scale(1); opacity: 0.8; }
-      50% { transform: scale(1.3); opacity: 1; }
+      0%, 100% { transform: scale(1); opacity: 0.6; }
+      50% { transform: scale(1.4); opacity: 1; }
     }
     .stream-offline-title {
-      font-family: var(--font-cinema, Georgia, serif);
-      font-size: clamp(1.1rem, 3vw, 1.35rem);
-      color: #D4AF37;
-      margin: 0 0 8px 0;
+      font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-size: clamp(1.15rem, 3vw, 1.4rem);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      text-transform: uppercase;
+      color: #FFFFFF;
+      margin: 0 0 10px 0;
     }
     .stream-offline-desc {
-      font-size: clamp(0.78rem, 2.5vw, 0.88rem);
-      color: #94a3b8;
+      font-size: clamp(0.82rem, 2.5vw, 0.9rem);
+      color: #94A3B8;
       max-width: 480px;
-      line-height: 1.5;
-      margin: 0 0 16px 0;
+      line-height: 1.6;
+      margin: 0 0 20px 0;
     }
     .stream-retry-badge {
       display: inline-flex;
       align-items: center;
       gap: 6px;
       font-size: 0.74rem;
-      color: #cbd5e1;
-      background: rgba(255, 255, 255, 0.06);
-      padding: 4px 10px;
-      border-radius: 12px;
-      border: 1px solid rgba(111, 165, 138, 0.2);
+      font-family: 'JetBrains Mono', monospace;
+      color: #94A3B8;
+      background: rgba(255, 255, 255, 0.04);
+      padding: 6px 12px;
+      border-radius: 2px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
     }
 
     /* Row 4: Status Bar & Action Controls */
@@ -366,30 +391,33 @@
       justify-content: space-between;
       align-items: center;
       flex-wrap: wrap;
-      gap: 12px;
+      gap: 14px;
     }
     .live-status-pill {
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      padding: 6px 12px;
-      border-radius: 20px;
-      font-size: 0.82rem;
-      font-weight: 500;
+      padding: 6px 14px;
+      border-radius: 2px;
+      font-size: 0.76rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
     }
     .live-status-pill.is-live {
-      background: rgba(74, 222, 128, 0.15);
-      border: 1px solid rgba(74, 222, 128, 0.4);
-      color: #4ade80;
+      background: rgba(52, 211, 153, 0.12);
+      border: 1px solid rgba(52, 211, 153, 0.4);
+      color: #34D399;
     }
     .live-status-pill.is-offline {
-      background: rgba(234, 179, 8, 0.15);
-      border: 1px solid rgba(234, 179, 8, 0.4);
-      color: #facc15;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #94A3B8;
     }
     .live-status-dot {
-      width: 8px;
-      height: 8px;
+      width: 7px;
+      height: 7px;
       border-radius: 50%;
       background: currentColor;
     }
@@ -400,39 +428,45 @@
       flex-wrap: wrap;
     }
     .btn-fullscreen {
-      background: rgba(255, 255, 255, 0.08);
-      border: 1px solid rgba(111, 165, 138, 0.35);
-      color: #cbd5e1;
-      padding: 7px 12px;
-      border-radius: 6px;
-      font-size: 0.82rem;
+      background: #0B110E;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #E2E8F0;
+      padding: 8px 14px;
+      border-radius: 2px;
+      font-size: 0.78rem;
+      font-family: 'Space Grotesk', sans-serif;
       font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
-      gap: 6px;
-      transition: all 0.2s ease;
+      gap: 8px;
+      transition: all 0.15s ease;
     }
     .btn-fullscreen:hover {
-      background: rgba(212, 175, 55, 0.2);
-      border-color: #D4AF37;
-      color: #F8FAF7;
+      background: rgba(255, 255, 255, 0.08);
+      border-color: #FFFFFF;
+      color: #FFFFFF;
     }
     .btn-voting-direct {
-      background: #D4AF37;
-      color: #041310;
-      padding: 7px 16px;
-      font-size: 0.82rem;
+      background: #FFFFFF;
+      color: #070908;
+      padding: 8px 18px;
+      font-size: 0.78rem;
+      font-family: 'Space Grotesk', sans-serif;
       font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
       text-decoration: none;
-      border-radius: 6px;
+      border-radius: 2px;
       display: inline-flex;
       align-items: center;
-      gap: 6px;
-      transition: background 0.2s ease;
+      gap: 8px;
+      transition: background 0.15s ease;
     }
     .btn-voting-direct:hover {
-      background: #F3E5AB;
+      background: #E2E8F0;
     }
   </style>
 </head>
@@ -500,8 +534,8 @@
       // 1. Language Dictionary (Zero Provider Names or Technical Codes in Viewer UI)
       const I18N = {
         lt: {
-          pageTitle: "Tiesioginė Transliacija | Ąžuolynas Film Fest",
-          metaDesc: "Oficiali Ąžuolynas International Students Film Festival ceremonijos tiesioginė transliacija su autorizuota prieiga.",
+          pageTitle: "Tiesioginė Transliacija | AISFF",
+          metaDesc: "Oficiali Ąžuolynas International Students Film Festival (AISFF) ceremonijos tiesioginė transliacija su autorizuota prieiga.",
           gateTitle: "Transliacijos Prieiga",
           gateDesc: "Tiesioginė festivalio transliacija skirta autorizuotiems žiūrovams ir klasėms. Įveskite asmeninį arba klasės prieigos kodą.",
           tokenLabel: "Prieigos kodas *",
@@ -509,8 +543,8 @@
           submitBtn: "Patvirtinti ir Žiūrėti",
           verifyingBtn: "Tikrinama...",
           helpText: 'Neturite kodo? Pasitikrinkite registracijos patvirtinimo el. laišką arba kreipkitės: <a href="mailto:azuolynasfilmfestival@gmail.com">azuolynasfilmfestival@gmail.com</a>',
-          headerTitle: "Ąžuolynas Film Fest Ceremonija",
-          headerSub: "Kauno Tarptautinė Gimnazija &bull; Oficiali laureatų apdovanojimų transliacija",
+          headerTitle: "AISFF Ceremonija",
+          headerSub: "Ąžuolynas International Student Film Festival &bull; Oficiali laureatų apdovanojimų transliacija",
           defaultViewer: "Autorizuotas žiūrovas",
           classroomLabel: "Klasės prieiga",
           exitBtn: "Atsijungti",
@@ -529,8 +563,8 @@
           errGeneral: "Nepavyko patvirtinti prieigos. Bandykite dar kartą vėliau."
         },
         en: {
-          pageTitle: "Live Stream | Ąžuolynas Film Fest",
-          metaDesc: "Official live stream of the Ąžuolynas International Students Film Festival awards ceremony with authorized access.",
+          pageTitle: "Live Stream | AISFF",
+          metaDesc: "Official live stream of the Ąžuolynas International Students Film Festival (AISFF) awards ceremony with authorized access.",
           gateTitle: "Live Stream Access",
           gateDesc: "The festival live stream is reserved for authorized viewers and classrooms. Enter your personal or classroom code.",
           tokenLabel: "Access code *",
@@ -538,8 +572,8 @@
           submitBtn: "Verify & Watch",
           verifyingBtn: "Verifying...",
           helpText: 'Don\'t have a code? Check your registration confirmation email or contact: <a href="mailto:azuolynasfilmfestival@gmail.com">azuolynasfilmfestival@gmail.com</a>',
-          headerTitle: "Ąžuolynas Film Fest Ceremony",
-          headerSub: "Kaunas International Gymnasium &bull; Official live awards ceremony",
+          headerTitle: "AISFF Ceremony",
+          headerSub: "Ąžuolynas International Student Film Festival &bull; Official live awards broadcast",
           defaultViewer: "Authorized Viewer",
           classroomLabel: "Classroom Access",
           exitBtn: "Log out",
@@ -837,7 +871,7 @@
           <div class="live-brand-row">
             <img 
               src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media" 
-              alt="Ąžuolynas Fest" 
+              alt="AISFF" 
               class="live-brand-logo">
             <div class="live-brand-info">
               <h1 class="live-brand-title" id="stageHeaderTitle">${t.headerTitle}</h1>
@@ -866,7 +900,7 @@
             <iframe 
               id="streamPlayerIframe"
               src="${auth.playbackUrl}"
-              title="Ąžuolynas Film Festival Live Player"
+              title="AISFF Live Player"
               allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture; fullscreen"
               allowfullscreen>
             </iframe>

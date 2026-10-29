@@ -1148,21 +1148,21 @@ app.use((req, res, next) => {
     .m-logo {
       width: 64px;
       height: 64px;
-      border-radius: 50%;
+      border-radius: 2px;
       margin: 0 auto 18px;
-      border: 2px solid #D4AF37;
+      border: 1px solid rgba(255, 255, 255, 0.2);
     }
     .m-badge {
       display: inline-block;
-      background: rgba(212, 175, 55, 0.15);
-      border: 1px solid #D4AF37;
-      color: #F3E5AB;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #F8FAFC;
       font-size: 0.75rem;
       font-weight: 700;
       letter-spacing: 0.1em;
       text-transform: uppercase;
       padding: 4px 12px;
-      border-radius: 20px;
+      border-radius: 2px;
       margin-bottom: 16px;
     }
     .m-title {
@@ -1190,8 +1190,8 @@ app.use((req, res, next) => {
       gap: 10px;
     }
     .m-admin-link {
-      color: #D4AF37;
-      text-decoration: none;
+      color: #FFFFFF;
+      text-decoration: underline;
       font-weight: 600;
       transition: opacity 0.2s;
     }
@@ -1637,15 +1637,15 @@ app.post('/api/admin/email/test', async (req, res) => {
       <table width="560" cellpadding="0" cellspacing="0" style="background:#0C241F; border:1px solid rgba(111,165,138,0.3); border-radius:14px; padding:32px; text-align:left;">
         <tr><td align="center" style="padding-bottom:16px;">
           <img src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media" width="60" height="60" style="border-radius:50%; border:2px solid #6FA58A;">
-          <h2 style="color:#6FA58A; margin:12px 0 4px 0;">Ąžuolynas Film Fest</h2>
+          <h2 style="color:#FFFFFF; margin:12px 0 4px 0; letter-spacing:0.02em;">AISFF</h2>
           <p style="color:#BAC9C0; margin:0; font-size:0.85rem;">Sistemos El. Pašto Tarnybos Patikrinimas</p>
         </td></tr>
         <tr><td style="line-height:1.6; font-size:0.95rem; color:#F8FAF7;">
           <p>Sveiki!</p>
-          <p>Tai yra sėkmingas bandomasis pranešimas iš <strong>Ąžuolynas Film Fest</strong> serverio el. pašto siuntėjo tarnybos.</p>
-          <div style="background:rgba(0,0,0,0.35); border:1px solid rgba(111,165,138,0.3); border-radius:8px; padding:16px; margin:20px 0;">
+          <p>Tai yra sėkmingas bandomasis pranešimas iš <strong>AISFF</strong> serverio el. pašto siuntėjo tarnybos.</p>
+          <div style="background:rgba(0,0,0,0.35); border:1px solid rgba(255,255,255,0.15); border-radius:2px; padding:16px; margin:20px 0;">
             <p style="margin:0 0 6px 0; font-size:0.8rem; color:#BAC9C0;">SMTP Tarnyba: <strong style="color:#4ade80;">${cfg.host}:${cfg.port}</strong></p>
-            <p style="margin:0 0 6px 0; font-size:0.8rem; color:#BAC9C0;">Siuntėjo adresas: <strong style="color:#F3E5AB;">${cfg.user}</strong></p>
+            <p style="margin:0 0 6px 0; font-size:0.8rem; color:#BAC9C0;">Siuntėjo adresas: <strong style="color:#FFFFFF;">${cfg.user}</strong></p>
             <p style="margin:0; font-size:0.8rem; color:#BAC9C0;">Išsiuntimo laikas: <strong>${new Date().toLocaleString('lt-LT')}</strong></p>
           </div>
           <p style="font-size:0.85rem; color:#BAC9C0;">Jei gavote šį laišką, el. pašto siuntėjas veikia nepriekaištingai.</p>
@@ -2975,11 +2975,11 @@ app.post('/api/admin/users/send-password-reset', async (req, res) => {
   <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#051512; padding:32px 16px;">
     <tr>
       <td align="center">
-        <table width="560" cellpadding="0" cellspacing="0" style="background:#0C241F; border:1px solid rgba(212,175,55,0.3); border-radius:14px; overflow:hidden; padding:32px; text-align:left;">
+        <table width="560" cellpadding="0" cellspacing="0" style="background:#0B110E; border:1px solid rgba(255,255,255,0.15); border-radius:4px; overflow:hidden; padding:32px; text-align:left;">
           <tr>
             <td align="center" style="padding-bottom:24px;">
-              <img src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media" alt="Logo" width="60" height="60" style="border-radius:50%; border:2px solid #D4AF37;">
-              <h2 style="color:#D4AF37; margin:14px 0 4px 0; font-size:1.4rem;">Ąžuolynas Film Fest</h2>
+              <img src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media" alt="Logo" width="60" height="60" style="border-radius:2px; border:1px solid rgba(255,255,255,0.2);">
+              <h2 style="color:#FFFFFF; margin:14px 0 4px 0; font-size:1.4rem; letter-spacing:0.02em;">AISFF</h2>
               <p style="color:#BAC9C0; margin:0; font-size:0.85rem;">Valdymo Skydo Slaptažodžio Atstatymas</p>
             </td>
           </tr>
@@ -2988,12 +2988,12 @@ app.post('/api/admin/users/send-password-reset', async (req, res) => {
               <p>Sveiki, <strong>${userName}</strong>!</p>
               <p>Jūsų paskyrai <strong>${cleanEmail}</strong> buvo sugeneruota saugi slaptažodžio atstatymo nuoroda. Spustelėkite žemiau esantį mygtuką, kad nustatytumėte naują slaptažodį:</p>
               <div style="text-align:center; margin:28px 0;">
-                <a href="${resetUrl}" style="background:#D4AF37; color:#051512; font-weight:700; text-decoration:none; padding:12px 28px; border-radius:6px; display:inline-block; font-size:0.95rem;">
+                <a href="${resetUrl}" style="background:#FFFFFF; color:#070908; font-weight:700; text-decoration:none; padding:12px 28px; border-radius:2px; display:inline-block; font-size:0.95rem;">
                   Nustatyti Naują Slaptažodį
                 </a>
               </div>
-              <p style="font-size:0.82rem; color:#BAC9C0;">Arba nukopijuokite šią nuorodą į naršyklę:<br><a href="${resetUrl}" style="color:#6FA58A; word-break:break-all;">${resetUrl}</a></p>
-              <div style="background:rgba(0,0,0,0.25); border-left:3px solid #D4AF37; padding:10px 14px; margin:20px 0; font-size:0.8rem; color:#BAC9C0;">
+              <p style="font-size:0.82rem; color:#BAC9C0;">Arba nukopijuokite šią nuorodą į naršyklę:<br><a href="${resetUrl}" style="color:#34D399; word-break:break-all;">${resetUrl}</a></p>
+              <div style="background:rgba(255,255,255,0.05); border-left:3px solid #34D399; padding:10px 14px; margin:20px 0; font-size:0.8rem; color:#BAC9C0;">
                 ⏱ Nuoroda galioja <strong>24 valandas</strong>. Jei jūs neprašėte slaptažodžio keitimo, ignoruokite šį laišką.
               </div>
             </td>
@@ -3332,34 +3332,34 @@ app.post('/api/admin/stream/viewers/create', async (req, res) => {
 <body style="margin:0; padding:0; background-color:#051512; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color:#F8FAF7;">
   <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#051512; padding:32px 12px;">
     <tr><td align="center">
-      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:580px; background:#0C241F; border:1px solid rgba(111,165,138,0.3); border-top:3px solid #D4AF37; border-radius:12px; padding:32px 24px; text-align:left; box-shadow:0 14px 34px rgba(0,0,0,0.5);">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:580px; background:#0B110E; border:1px solid rgba(255,255,255,0.15); border-top:3px solid #34D399; border-radius:4px; padding:32px 24px; text-align:left; box-shadow:0 14px 34px rgba(0,0,0,0.5);">
         <tr><td align="center" style="padding-bottom:20px;">
-          <img src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media" width="68" height="68" style="border-radius:50%; border:2px solid #D4AF37; display:block; margin:0 auto;" alt="Logo">
-          <h2 style="color:#D4AF37; margin:14px 0 4px 0; font-size:22px;">Ąžuolynas Film Festival 2027</h2>
+          <img src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media" width="68" height="68" style="border-radius:2px; border:1px solid rgba(255,255,255,0.2); display:block; margin:0 auto;" alt="Logo">
+          <h2 style="color:#FFFFFF; margin:14px 0 4px 0; font-size:22px; letter-spacing:0.02em;">AISFF 2027</h2>
           <p style="color:#BAC9C0; margin:0; font-size:0.88rem; text-transform:uppercase; letter-spacing:0.06em; font-weight:700;">${tokenType === 'classroom' ? 'Mokyklos / Klasės Transliacijos Prieiga' : 'Tiesioginės Transliacijos Žetonas & Prieiga'}</p>
         </td></tr>
         <tr><td style="line-height:1.65; font-size:0.95rem; color:#BAC9C0;">
           <p style="color:#F8FAF7; font-size:1.05rem; margin-top:0;">Sveiki, <strong>${cleanName}</strong>!</p>
           <p>${tokenType === 'classroom' ? `Jūsų klasei suteikta autorizuota tiesioginės transliacijos prieiga (${maxConcurrentDevices} įrenginiams vienu metu). Mokytojai gali transliuoti per projektorių arba mokiniai gali stebėti per savo įrenginius.` : 'Jums suteikta oficiali autorizuota prieiga tiesiogiai stebėti festivalio filmų peržiūrą ir iškilmingą apdovanojimų ceremoniją per tiesioginę transliaciją.'}</p>
           
-          <div style="background:#081B17; border:1px solid rgba(212,175,55,0.4); border-radius:8px; padding:18px; margin:20px 0; text-align:center;">
+          <div style="background:#070908; border:1px solid rgba(255,255,255,0.2); border-radius:2px; padding:18px; margin:20px 0; text-align:center;">
             <div style="font-size:0.75rem; color:#7A9689; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:6px; font-weight:700;">Jūsų asmeninis prieigos žetonas (Token):</div>
-            <code style="font-size:1.25rem; color:#F3E5AB; font-weight:700; letter-spacing:1px; display:inline-block; padding:4px 12px; background:rgba(0,0,0,0.3); border-radius:4px;">${token}</code>
+            <code style="font-size:1.25rem; color:#FFFFFF; font-weight:700; letter-spacing:1px; display:inline-block; padding:4px 12px; background:rgba(255,255,255,0.06); border-radius:2px;">${token}</code>
           </div>
 
           <div style="text-align:center; margin:24px 0;">
-            <a href="${liveLink}" style="background:#4ade80; color:#051512; text-decoration:none; padding:14px 34px; border-radius:6px; font-weight:700; font-size:1rem; display:inline-block; box-shadow:0 6px 18px rgba(74,222,128,0.25);">
+            <a href="${liveLink}" style="background:#1A3E32; border:1px solid rgba(255,255,255,0.25); color:#FFFFFF; text-decoration:none; padding:14px 34px; border-radius:2px; font-weight:700; font-size:1rem; display:inline-block; box-shadow:0 6px 18px rgba(0,0,0,0.3);">
               Atverti Tiesioginę Transliaciją
             </a>
           </div>
 
-          <div style="background:#081B17; border:1px solid rgba(111,165,138,0.25); border-radius:8px; padding:16px; margin:20px 0; font-size:0.86rem;">
-            <div style="font-weight:700; color:#D4AF37; margin-bottom:8px; text-transform:uppercase; font-size:0.78rem; letter-spacing:0.05em;">🎬 Renginio ir transliacijos informacija:</div>
+          <div style="background:#070908; border:1px solid rgba(255,255,255,0.1); border-radius:2px; padding:16px; margin:20px 0; font-size:0.86rem;">
+            <div style="font-weight:700; color:#F8FAFC; margin-bottom:8px; text-transform:uppercase; font-size:0.78rem; letter-spacing:0.05em;">🎬 Renginio ir transliacijos informacija:</div>
             <table width="100%" cellpadding="0" cellspacing="0" border="0" style="color:#BAC9C0; font-size:0.86rem; line-height:1.6;">
               <tr><td style="width:110px; color:#7A9689; padding:2px 0;">Transliacijos data:</td><td style="color:#F8FAF7; font-weight:600; padding:2px 0;">2027 m. balandžio 23 d.</td></tr>
               <tr><td style="color:#7A9689; padding:2px 0;">Renginio vieta:</td><td style="padding:2px 0;">Kauno tarptautinė gimnazija (Vytauto pr. 44, Kaunas)</td></tr>
-              <tr><td style="color:#7A9689; padding:2px 0;">Grotuvas:</td><td style="padding:2px 0;"><a href="${liveLink}" style="color:#6FA58A; word-break:break-all;">${liveLink}</a></td></tr>
-              <tr><td style="color:#7A9689; padding:2px 0;">Instagram:</td><td style="padding:2px 0;"><a href="https://www.instagram.com/azuolynas.iff" target="_blank" style="color:#D4AF37; font-weight:600;">@azuolynas.iff</a> (naujienos ir užkulisiai)</td></tr>
+              <tr><td style="color:#7A9689; padding:2px 0;">Grotuvas:</td><td style="padding:2px 0;"><a href="${liveLink}" style="color:#34D399; word-break:break-all;">${liveLink}</a></td></tr>
+              <tr><td style="color:#7A9689; padding:2px 0;">Instagram:</td><td style="padding:2px 0;"><a href="https://www.instagram.com/azuolynas.iff" target="_blank" style="color:#9BC4AE; font-weight:600;">@azuolynas.iff</a> (naujienos ir užkulisiai)</td></tr>
             </table>
           </div>
 
@@ -3513,34 +3513,34 @@ app.post('/api/admin/stream/viewers/resend', async (req, res) => {
 <body style="margin:0; padding:0; background-color:#051512; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color:#F8FAF7;">
   <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#051512; padding:32px 12px;">
     <tr><td align="center">
-      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:580px; background:#0C241F; border:1px solid rgba(111,165,138,0.3); border-top:3px solid #D4AF37; border-radius:12px; padding:32px 24px; text-align:left; box-shadow:0 14px 34px rgba(0,0,0,0.5);">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:580px; background:#0B110E; border:1px solid rgba(255,255,255,0.15); border-top:3px solid #34D399; border-radius:4px; padding:32px 24px; text-align:left; box-shadow:0 14px 34px rgba(0,0,0,0.5);">
         <tr><td align="center" style="padding-bottom:20px;">
-          <img src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media" width="68" height="68" style="border-radius:50%; border:2px solid #D4AF37; display:block; margin:0 auto;" alt="Logo">
-          <h2 style="color:#D4AF37; margin:14px 0 4px 0; font-size:22px;">Ąžuolynas Film Festival 2027</h2>
+          <img src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media" width="68" height="68" style="border-radius:2px; border:1px solid rgba(255,255,255,0.2); display:block; margin:0 auto;" alt="Logo">
+          <h2 style="color:#FFFFFF; margin:14px 0 4px 0; font-size:22px; letter-spacing:0.02em;">AISFF 2027</h2>
           <p style="color:#BAC9C0; margin:0; font-size:0.88rem; text-transform:uppercase; letter-spacing:0.06em; font-weight:700;">Primenamas Jūsų Transliacijos Žetonas</p>
         </td></tr>
         <tr><td style="line-height:1.65; font-size:0.95rem; color:#BAC9C0;">
           <p style="color:#F8FAF7; font-size:1.05rem; margin-top:0;">Sveiki, <strong>${viewer.name || viewer.email}</strong>!</p>
           <p>Persiunčiame Jūsų autorizuotą tiesioginės festivalio transliacijos prieigos žetoną:</p>
           
-          <div style="background:#081B17; border:1px solid rgba(212,175,55,0.4); border-radius:8px; padding:18px; margin:20px 0; text-align:center;">
+          <div style="background:#070908; border:1px solid rgba(255,255,255,0.2); border-radius:2px; padding:18px; margin:20px 0; text-align:center;">
             <div style="font-size:0.75rem; color:#7A9689; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:6px; font-weight:700;">Jūsų asmeninis prieigos žetonas:</div>
-            <code style="font-size:1.25rem; color:#F3E5AB; font-weight:700; letter-spacing:1px; display:inline-block; padding:4px 12px; background:rgba(0,0,0,0.3); border-radius:4px;">${viewer.token}</code>
+            <code style="font-size:1.25rem; color:#FFFFFF; font-weight:700; letter-spacing:1px; display:inline-block; padding:4px 12px; background:rgba(255,255,255,0.06); border-radius:2px;">${viewer.token}</code>
           </div>
 
           <div style="text-align:center; margin:24px 0;">
-            <a href="${liveLink}" style="background:#4ade80; color:#051512; text-decoration:none; padding:14px 34px; border-radius:6px; font-weight:700; font-size:1rem; display:inline-block; box-shadow:0 6px 18px rgba(74,222,128,0.25);">
+            <a href="${liveLink}" style="background:#1A3E32; border:1px solid rgba(255,255,255,0.25); color:#FFFFFF; text-decoration:none; padding:14px 34px; border-radius:2px; font-weight:700; font-size:1rem; display:inline-block; box-shadow:0 6px 18px rgba(0,0,0,0.3);">
               Žiūrėti Tiesiogiai
             </a>
           </div>
 
-          <div style="background:#081B17; border:1px solid rgba(111,165,138,0.25); border-radius:8px; padding:16px; margin:20px 0; font-size:0.86rem;">
-            <div style="font-weight:700; color:#D4AF37; margin-bottom:8px; text-transform:uppercase; font-size:0.78rem; letter-spacing:0.05em;">🎬 Renginio ir transliacijos informacija:</div>
+          <div style="background:#070908; border:1px solid rgba(255,255,255,0.1); border-radius:2px; padding:16px; margin:20px 0; font-size:0.86rem;">
+            <div style="font-weight:700; color:#F8FAFC; margin-bottom:8px; text-transform:uppercase; font-size:0.78rem; letter-spacing:0.05em;">🎬 Renginio ir transliacijos informacija:</div>
             <table width="100%" cellpadding="0" cellspacing="0" border="0" style="color:#BAC9C0; font-size:0.86rem; line-height:1.6;">
               <tr><td style="width:110px; color:#7A9689; padding:2px 0;">Transliacijos data:</td><td style="color:#F8FAF7; font-weight:600; padding:2px 0;">2027 m. balandžio 23 d.</td></tr>
               <tr><td style="color:#7A9689; padding:2px 0;">Renginio vieta:</td><td style="padding:2px 0;">Kauno tarptautinė gimnazija (Vytauto pr. 44, Kaunas)</td></tr>
-              <tr><td style="color:#7A9689; padding:2px 0;">Grotuvas:</td><td style="padding:2px 0;"><a href="${liveLink}" style="color:#6FA58A; word-break:break-all;">${liveLink}</a></td></tr>
-              <tr><td style="color:#7A9689; padding:2px 0;">Instagram:</td><td style="padding:2px 0;"><a href="https://www.instagram.com/azuolynas.iff" target="_blank" style="color:#D4AF37; font-weight:600;">@azuolynas.iff</a></td></tr>
+              <tr><td style="color:#7A9689; padding:2px 0;">Grotuvas:</td><td style="padding:2px 0;"><a href="${liveLink}" style="color:#34D399; word-break:break-all;">${liveLink}</a></td></tr>
+              <tr><td style="color:#7A9689; padding:2px 0;">Instagram:</td><td style="padding:2px 0;"><a href="https://www.instagram.com/azuolynas.iff" target="_blank" style="color:#9BC4AE; font-weight:600;">@azuolynas.iff</a></td></tr>
             </table>
           </div>
 
@@ -5177,8 +5177,10 @@ app.post('/api/broadcast/overlay', (req, res) => {
     try {
       const settings = loadSettingsData();
       settings.broadcast_overlay = broadcastOverlayCache;
-      saveSettingsData(settings);
-    } catch (e) {}
+      saveJson(SETTINGS_FILE, settings);
+    } catch (e) {
+      console.warn('[Overlay Save Notice]:', e.message);
+    }
 
     res.json({ success: true, overlay: broadcastOverlayCache });
   } catch (err) {

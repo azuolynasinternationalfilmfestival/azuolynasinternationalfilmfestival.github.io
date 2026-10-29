@@ -145,7 +145,7 @@ export function renderVotingLeaderboard() {
 
     return `
       <tr>
-        <td style="font-weight:700; color:${index === 0 ? '#F3E5AB' : index === 1 ? '#cbd5e1' : index === 2 ? '#fbbf24' : 'var(--text-muted)'}; width:40px; text-align:center;">
+        <td style="font-weight:700; color:${index === 0 ? '#FFFFFF' : index === 1 ? '#cbd5e1' : index === 2 ? '#94a3b8' : 'var(--text-muted)'}; width:40px; text-align:center;">
           #${index + 1}
         </td>
         <td>
@@ -155,7 +155,7 @@ export function renderVotingLeaderboard() {
           <div style="font-size:0.75rem; color:var(--text-muted);">${escapeHtml(film.author || '')} &bull; ${escapeHtml(film.school || '')}</div>
         </td>
         <td>
-          <span class="badge" style="background:rgba(111,165,138,0.15); color:var(--accent-light); font-size:0.72rem;">
+          <span class="badge" style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); color:var(--accent-light); font-size:0.72rem; border-radius:2px;">
             ${escapeHtml(film.category || 'Nenurodyta')}
           </span>
         </td>
@@ -165,7 +165,7 @@ export function renderVotingLeaderboard() {
         </td>
         <td style="text-align:center;">
           ${jScore !== null ? `
-            <span class="badge" style="background:rgba(212,175,55,0.2); color:#F3E5AB; font-weight:700; font-size:0.85rem;">
+            <span class="badge" style="background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.2); color:#FFFFFF; font-weight:700; font-size:0.85rem; border-radius:2px;">
               ${jScore} / 10
             </span>
             <span style="font-size:0.7rem; color:var(--text-muted); display:block;">(${jCount} teisėjai)</span>
@@ -186,7 +186,7 @@ export function renderVotingLeaderboard() {
               Vertinti (Komisija)
             </button>
             ${!isWinner ? `
-              <button type="button" class="btn-outline btn-xs btn-declare-winner" data-film-id="${film.id}" style="color:#F3E5AB; border-color:#D4AF37;">
+              <button type="button" class="btn-outline btn-xs btn-declare-winner" data-film-id="${film.id}" style="color:#FFFFFF; border-color:rgba(255,255,255,0.25); border-radius:2px;">
                 Paskelbti laimėtoju
               </button>
             ` : ''}

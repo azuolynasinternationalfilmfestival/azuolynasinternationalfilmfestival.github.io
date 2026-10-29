@@ -58,7 +58,7 @@ function renderEmptyState() {
       <p style="margin:0 auto 16px auto; max-width:540px; font-size:0.84rem; color:#94a3b8; line-height:1.5;">
         Tikrina realią debesijos infrastruktūrą: Firebase Auth, Firestore duomenų bazės kolekcijas (settings, submissions, votes, stream_tokens), Storage saugyklą, el. pašto eilę ir Cloudflare Worker transliacijos validatorius.
       </p>
-      <button type="button" id="btnEmptyRunCheck" class="btn-solid btn-sm" style="background:#D4AF37; color:#041310; font-weight:700; padding:8px 18px;">
+      <button type="button" id="btnEmptyRunCheck" class="btn-solid btn-sm" style="background:#FFFFFF; color:#070908; font-weight:700; padding:8px 18px; border-radius:2px;">
         Paleisti Sistemos Tikrinimą (Run System Check)
       </button>
     </div>
@@ -89,7 +89,7 @@ export async function runFullSystemCheck() {
     container.classList.remove("d-none");
     container.innerHTML = `
       <div style="background:rgba(8,27,23,0.85); border:1px solid rgba(111,165,138,0.3); border-radius:10px; padding:20px; text-align:center;">
-        <div style="display:inline-block; width:28px; height:28px; border:3px solid rgba(212,175,55,0.3); border-top-color:#D4AF37; border-radius:50%; animation:spin 0.8s linear infinite; margin-bottom:10px;"></div>
+        <div style="display:inline-block; width:28px; height:28px; border:3px solid rgba(255,255,255,0.2); border-top-color:#34D399; border-radius:50%; animation:spin 0.8s linear infinite; margin-bottom:10px;"></div>
         <div style="font-size:0.9rem; color:#F8FAF7; font-weight:600;">Tikrinamos debesijos tarnybos...</div>
         <div style="font-size:0.75rem; color:#94a3b8; margin-top:4px;" id="diagCurrentTestStep">Ruošiama...</div>
       </div>
@@ -324,7 +324,7 @@ function renderTestResults() {
               FAIL: ${failedCount}
             </span>
           ` : ''}
-          <button type="button" id="btnCopyDiagReport" class="btn-outline btn-xs" style="margin-left:6px; color:#D4AF37; border-color:#D4AF37;">
+          <button type="button" id="btnCopyDiagReport" class="btn-outline btn-xs" style="margin-left:6px; color:#FFFFFF; border-color:rgba(255,255,255,0.3); border-radius:2px;">
             <span>Kopijuoti ataskaitą</span>
           </button>
         </div>

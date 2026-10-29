@@ -1,6 +1,6 @@
 {
-  "summary":  "Implementation plan for resolving live.html layout overlap and unified stream status, implementing Classroom/Teacher multi-device tokens with QR modal and CSV bulk export, fixing Firestore admin settings persistence with raw error code toasts, and rebuilding the admin Diagnostics suite into a genuine Firebase + GitHub Pages + Cloudflare Worker test bench.",
-  "updatedAt":  "2026-10-24T07:57:56.349012788Z",
+  "summary":  "Plan to remove the home page live banner, eliminate all yellow/gold colors in favor of an Architectural Platinum Monochrome and Crisp Silver palette, strictly enforce Space Grotesk and Inter typography, preserve a discreet live stream link in the top navigation, and elevate the overall aesthetic into a prestigious art-house cinema institution.",
+  "updatedAt":  "2026-10-28T17:10:33.205445263Z",
   "requestFeedback":  true,
   "userFacing":  true
 }

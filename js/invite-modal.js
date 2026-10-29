@@ -371,18 +371,18 @@ async function dispatchInvitationViaFirebaseCloudFunctions({
             <h2 style="color:#6FA58A;">Kvietimas prisijungti prie Kauno Tarptautinės Gimnazijos kino festivalio komandos</h2>
             <p>Sveiki, <b>${fullName}</b>!</p>
             <p>Jums suteikta prieiga prie festivalio valdymo platformos su role: <b>${role.toUpperCase()}</b>.</p>
-            <div style="background:#0C241F; border:1px solid #D4AF37; padding:16px; border-radius:6px; margin:16px 0; text-align:center;">
-              <p style="margin:0; font-size:12px; color:#D4AF37; text-transform:uppercase;">Aktyvavimo patvirtinimo kodas:</p>
-              <h1 style="margin:8px 0; font-size:32px; letter-spacing:6px; color:#ffffff;">${code}</h1>
+            <div style="background:#0B110E; border:1px solid rgba(255,255,255,0.2); padding:16px; border-radius:2px; margin:16px 0; text-align:center;">
+              <p style="margin:0; font-size:12px; color:#94A3B8; text-transform:uppercase; letter-spacing:0.08em;">Aktyvavimo patvirtinimo kodas:</p>
+              <h1 style="margin:8px 0; font-size:32px; letter-spacing:6px; color:#ffffff; font-family:monospace;">${code}</h1>
             </div>
-            <p><a href="${inviteUrl}" style="display:inline-block; background:#17453B; color:#ffffff; padding:12px 24px; text-decoration:none; border-radius:4px; font-weight:bold;">Aktyvuoti paskyrą &rarr;</a></p>
+            <p><a href="${inviteUrl}" style="display:inline-block; background:#1A3E32; border:1px solid rgba(255,255,255,0.2); color:#ffffff; padding:12px 24px; text-decoration:none; border-radius:2px; font-weight:bold;">Aktyvuoti paskyrą &rarr;</a></p>
           </div>
         `;
       }
 
       const emailSubject = lang === "en"
-        ? "Ąžuolynas Film Fest | Staff Team Invitation (Kaunas International Gymnasium)"
-        : "Ąžuolynas Film Fest | Kvietimas prisijungti prie komandos (Kauno Tarptautinė Gimnazija)";
+        ? "AISFF | Staff Team Invitation (Kaunas International Gymnasium)"
+        : "AISFF | Kvietimas prisijungti prie komandos (Kauno Tarptautinė Gimnazija)";
       const plainTextContent = lang === "en"
         ? `Hello ${fullName}! You have been officially invited to join the staff committee of the Ąžuolynas Film Festival with role: ${role.toUpperCase()}. Verification code: ${code}. Activation link: ${inviteUrl}`
         : `Sveiki, ${fullName}! Jums suteikta prieiga prie festivalio valdymo platformos su role: ${role.toUpperCase()}. Aktyvavimo kodas: ${code}. Aktyvavimo nuoroda: ${inviteUrl}`;

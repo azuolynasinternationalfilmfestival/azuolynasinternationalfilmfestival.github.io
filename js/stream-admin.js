@@ -287,9 +287,9 @@ function renderStreamControls() {
       badge.innerHTML = `<span class="pulse-dot" style="width:6px; height:6px;"></span><span>LIVE Transliacija Aktyvi</span>`;
     } else if (state === "paused") {
       badge.className = "status-pill";
-      badge.style.background = "rgba(245, 158, 11, 0.2)";
-      badge.style.color = "#fbbf24";
-      badge.style.border = "1px solid rgba(245, 158, 11, 0.4)";
+      badge.style.background = "rgba(255, 255, 255, 0.08)";
+      badge.style.color = "#E2E8F0";
+      badge.style.border = "1px solid rgba(255, 255, 255, 0.2)";
       badge.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg><span>PAUSED Pristabdyta</span>`;
     } else {
       badge.className = "status-pill status-rejected";
@@ -445,9 +445,9 @@ export function openTokenQrModal(viewer) {
   if (typeBadge) {
     if (isClassroom) {
       typeBadge.textContent = `🏫 Klasė (${maxDevices} įrenginiai)`;
-      typeBadge.style.background = "rgba(212,175,55,0.2)";
-      typeBadge.style.color = "#F3E5AB";
-      typeBadge.style.borderColor = "rgba(212,175,55,0.4)";
+      typeBadge.style.background = "rgba(255,255,255,0.08)";
+      typeBadge.style.color = "#FFFFFF";
+      typeBadge.style.borderColor = "rgba(255,255,255,0.2)";
     } else {
       typeBadge.textContent = "👤 Individualus žiūrovas (1 įr.)";
       typeBadge.style.background = "rgba(111,165,138,0.2)";
@@ -519,7 +519,7 @@ export function renderAuthorizedViewersTable() {
       <tr>
         <td>
           ${isClassroom ? `
-            <strong style="color:#F3E5AB; font-size:0.92rem;">🏫 ${escapeHtml(viewer.classroomLabel || viewer.name)}</strong>
+            <strong style="color:#FFFFFF; font-size:0.92rem;">🏫 ${escapeHtml(viewer.classroomLabel || viewer.name)}</strong>
             <div style="font-size:0.75rem; color:var(--text-muted);">${escapeHtml(viewer.email)} &bull; ${escapeHtml(viewer.name)}</div>
           ` : `
             <strong style="color:var(--text-color); font-size:0.92rem;">👤 ${escapeHtml(viewer.name || viewer.email)}</strong>
@@ -528,18 +528,18 @@ export function renderAuthorizedViewersTable() {
         </td>
         <td>
           ${isClassroom ? `
-            <span class="badge" style="background:rgba(212,175,55,0.18); color:#F3E5AB; border:1px solid rgba(212,175,55,0.4); font-size:0.75rem;">
+            <span class="badge" style="background:rgba(255,255,255,0.08); color:#FFFFFF; border:1px solid rgba(255,255,255,0.2); font-size:0.75rem; border-radius:2px;">
               🏫 Klasė (${activeDevices}/${maxDevices} įr.)
             </span>
           ` : `
-            <span class="badge" style="background:rgba(111,165,138,0.18); color:#9BC4AE; border:1px solid rgba(111,165,138,0.35); font-size:0.75rem;">
+            <span class="badge" style="background:rgba(111,165,138,0.18); color:#9BC4AE; border:1px solid rgba(111,165,138,0.35); font-size:0.75rem; border-radius:2px;">
               👤 1 įrenginys
             </span>
           `}
         </td>
         <td>
           <div style="display:flex; align-items:center; gap:6px;">
-            <code style="background:rgba(0,0,0,0.35); padding:3px 8px; border-radius:4px; color:#F3E5AB; font-size:0.78rem; border:1px solid rgba(212,175,55,0.3);">
+            <code style="background:rgba(0,0,0,0.35); padding:3px 8px; border-radius:2px; color:#FFFFFF; font-size:0.78rem; border:1px solid rgba(255,255,255,0.15);">
               ${escapeHtml(viewer.token)}
             </code>
             <button type="button" class="btn-icon-copy btn-copy-raw-token" data-token="${escapeHtml(viewer.token)}" title="Kopijuoti žetoną">
@@ -562,7 +562,7 @@ export function renderAuthorizedViewersTable() {
         </td>
         <td style="text-align:right;">
           <div style="display:inline-flex; align-items:center; gap:5px;">
-            <button type="button" class="btn-solid btn-xs btn-open-qr-row" data-token="${escapeHtml(viewer.token)}" style="background:#D4AF37; color:#041310; font-weight:700;" title="Rodyti QR kodą ir nuorodą">
+            <button type="button" class="btn-solid btn-xs btn-open-qr-row" data-token="${escapeHtml(viewer.token)}" style="background:#FFFFFF; color:#070908; font-weight:700; border-radius:2px;" title="Rodyti QR kodą ir nuorodą">
               <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
               <span>QR</span>
             </button>
@@ -908,7 +908,7 @@ export function renderRsvpTable() {
         </td>
         <td>${rsvpBadge}</td>
         <td>
-          <code style="background:rgba(0,0,0,0.35); padding:3px 8px; border-radius:4px; color:#F3E5AB; font-size:0.8rem; border:1px solid rgba(212,175,55,0.25);">
+          <code style="background:rgba(0,0,0,0.35); padding:3px 8px; border-radius:2px; color:#FFFFFF; font-size:0.8rem; border:1px solid rgba(255,255,255,0.15);">
             ${escapeHtml(token)}
           </code>
         </td>

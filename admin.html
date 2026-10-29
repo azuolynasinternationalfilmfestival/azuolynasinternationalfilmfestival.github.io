@@ -9,8 +9,11 @@
   <script src="js/firebase-client.js"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Valdymo Skydas | Ąžuolynas Film Fest</title>
+  <title>Valdymo Skydas | AISFF</title>
   <link rel="icon" type="image/webp" href="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
@@ -78,7 +81,7 @@
       <!-- Account Activation Wrapper (when invited with token/code) -->
       <div id="activationFormWrapper" class="d-none">
         <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px;">
-          <div style="width:36px; height:36px; border-radius:50%; background:rgba(212,175,55,0.2); border:1px solid #D4AF37; display:flex; align-items:center; justify-content:center; color:#D4AF37;">
+          <div style="width:36px; height:36px; border-radius:2px; background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.2); display:flex; align-items:center; justify-content:center; color:#FFFFFF;">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><polyline points="16 11 18 13 22 9"></polyline></svg>
           </div>
           <div>
@@ -87,7 +90,7 @@
           </div>
         </div>
         <p style="font-size:0.84rem; color:var(--text-muted); margin-bottom:16px;">
-          Sveiki! Jums suteikta prieiga prie Ąžuolynas Fest valdymo platformos. Patvirtinkite 6 skaitmenų kodą ir nustatykite slaptažodį.
+          Sveiki! Jums suteikta prieiga prie AISFF valdymo platformos. Patvirtinkite 6 skaitmenų kodą ir nustatykite slaptažodį.
         </p>
 
         <form id="activationForm" action="javascript:void(0);" onsubmit="event.preventDefault(); return false;">
@@ -128,7 +131,7 @@
       <!-- Password Reset Confirmation Wrapper (when user visits with ?reset=TOKEN) -->
       <div id="passwordResetConfirmWrapper" class="d-none">
         <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px;">
-          <div style="width:36px; height:36px; border-radius:50%; background:rgba(212,175,55,0.2); border:1px solid #D4AF37; display:flex; align-items:center; justify-content:center; color:#D4AF37;">
+          <div style="width:36px; height:36px; border-radius:2px; background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.2); display:flex; align-items:center; justify-content:center; color:#FFFFFF;">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
           </div>
           <div>
@@ -172,7 +175,7 @@
       <div class="admin-sidebar-header">
         <img src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media" alt="Logo" class="admin-brand-logo">
         <div style="display:flex; flex-direction:column; line-height:1.2;">
-          <span class="admin-brand-title" style="font-size:1.05rem;">Ąžuolynas Fest</span>
+          <span class="admin-brand-title" style="font-size:1.05rem;">AISFF</span>
           <span style="font-size:0.72rem; color:var(--accent-light);">Valdymo Skydas</span>
         </div>
       </div>
@@ -291,7 +294,7 @@
       </header>
 
       <div class="admin-workspace-body container">
-        <div id="maintenanceActiveAlert" class="drop-alert d-none" style="margin-bottom:18px; background:rgba(212,175,55,0.18); border-color:#D4AF37; color:#F3E5AB; display:flex; align-items:flex-start; gap:8px;">
+        <div id="maintenanceActiveAlert" class="drop-alert d-none" style="margin-bottom:18px; background:rgba(255,255,255,0.06); border-color:rgba(255,255,255,0.2); color:#FFFFFF; display:flex; align-items:flex-start; gap:8px;">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0; margin-top:2px;"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
           <div><strong>Profilaktikos režimas yra ĮJUNGTAS:</strong> Vieša svetainės prieiga lankytojams apribota. Lankytojai mato informacinį profilaktikos pranešimą. Tik autorizuoti administratoriai gali pasiekti valdymo skydą.</div>
         </div>
@@ -321,10 +324,10 @@
 
           <!-- Summary Metric Cards -->
           <div class="stat-grid-compact" style="margin-bottom:20px;">
-            <div class="stat-card-compact" style="border-left: 3px solid #D4AF37;">
+            <div class="stat-card-compact" style="border-left: 3px solid #FFFFFF;">
               <div class="stat-card-compact-header">
                 <span class="stat-card-compact-title">Visos Paraiškos</span>
-                <span class="badge" style="background:rgba(212,175,55,0.2); color:#D4AF37;">Filmai</span>
+                <span class="badge" style="background:rgba(255,255,255,0.1); color:#FFFFFF;">Filmai</span>
               </div>
               <div class="stat-card-compact-body">
                 <div class="stat-card-compact-num" id="dashTotal">0</div>
@@ -466,16 +469,16 @@
               </div>
             </div>
 
-            <div class="stat-card-compact" style="border-left: 3px solid #F3E5AB;">
+            <div class="stat-card-compact" style="border-left: 3px solid #CBD5E1;">
               <div class="stat-card-compact-header">
-                <span class="stat-card-compact-title" style="color:#F3E5AB;">
+                <span class="stat-card-compact-title" style="color:#CBD5E1;">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect><line x1="7" y1="2" x2="7" y2="22"></line><line x1="17" y1="2" x2="17" y2="22"></line><line x1="2" y1="12" x2="22" y2="12"></line></svg>
                   <span>Priimti / Balsavime</span>
                 </span>
-                <span class="badge" style="background:rgba(212,175,55,0.2); color:#F3E5AB; font-size:0.68rem; padding:1px 6px;">Atranka</span>
+                <span class="badge" style="background:rgba(255,255,255,0.08); color:#E2E8F0; font-size:0.68rem; padding:1px 6px;">Atranka</span>
               </div>
               <div class="stat-card-compact-body">
-                <div class="stat-card-compact-num" id="statVoting" style="color:#F3E5AB;">0</div>
+                <div class="stat-card-compact-num" id="statVoting" style="color:#FFFFFF;">0</div>
                 <div class="stat-card-compact-sub"><span id="statAccepted">0</span> priimti</div>
               </div>
             </div>
@@ -562,27 +565,27 @@
               </div>
             </div>
 
-            <div class="stat-card-compact" style="border-left:3px solid #F3E5AB;">
+            <div class="stat-card-compact" style="border-left:3px solid #CBD5E1;">
               <div class="stat-card-compact-header">
                 <span class="stat-card-compact-title" style="display:inline-flex; align-items:center; gap:6px;">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:#F3E5AB;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:#CBD5E1;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
                   <span>Vidutinis Balas</span>
                 </span>
-                <span class="badge" style="background:rgba(212,175,55,0.2); color:#F3E5AB; font-size:0.68rem; padding:1px 6px;">Iš 10</span>
+                <span class="badge" style="background:rgba(255,255,255,0.08); color:#E2E8F0; font-size:0.68rem; padding:1px 6px;">Iš 10</span>
               </div>
               <div class="stat-card-compact-body">
-                <div class="stat-card-compact-num" id="statOverallAvgScore" style="color:#F3E5AB;">—</div>
+                <div class="stat-card-compact-num" id="statOverallAvgScore" style="color:#FFFFFF;">—</div>
                 <div class="stat-card-compact-sub">Bendras vidurkis</div>
               </div>
             </div>
 
-            <div class="stat-card-compact" style="border-left:3px solid #D4AF37;">
+            <div class="stat-card-compact" style="border-left:3px solid #34D399;">
               <div class="stat-card-compact-header">
                 <span class="stat-card-compact-title" style="display:inline-flex; align-items:center; gap:6px;">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:#D4AF37;"><circle cx="12" cy="8" r="7"></circle><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline></svg>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:#34D399;"><circle cx="12" cy="8" r="7"></circle><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline></svg>
                   <span>Lyderis</span>
                 </span>
-                <span class="badge" style="background:rgba(212,175,55,0.2); color:#D4AF37; font-size:0.68rem; padding:1px 6px;">1 vieta</span>
+                <span class="badge" style="background:rgba(52,211,153,0.12); color:#34D399; font-size:0.68rem; padding:1px 6px;">1 vieta</span>
               </div>
               <div class="stat-card-compact-body">
                 <div class="stat-card-compact-num" id="statTopRankedFilm" style="font-size:1.15rem; font-family:var(--font-cinema); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">—</div>
@@ -752,7 +755,7 @@
               <button type="button" id="btnResetStreamIframeUrl" class="btn-outline btn-sm">Numatytoji nuoroda</button>
             </div>
             <p class="content-card-sub" style="margin-top:12px; overflow-wrap:anywhere;">
-              Išsaugota nuoroda: <span id="lblCurrentIframeUrlDisplay">—</span> | Režimas: <strong id="lblCurrentViewPermissionDisplay" style="color:#D4AF37;">Token Only</strong>
+              Išsaugota nuoroda: <span id="lblCurrentIframeUrlDisplay">—</span> | Režimas: <strong id="lblCurrentViewPermissionDisplay" style="color:#FFFFFF;">Token Only</strong>
             </p>
           </form>
 
@@ -797,7 +800,7 @@
                   <span class="pulse-dot" style="width:6px; height:6px; background:#fff;"></span>
                   <span>Nustatyti LIVE (Vyksta transliacija)</span>
                 </button>
-                <button type="button" id="btnSetStreamPaused" class="btn-outline btn-sm" style="color:#fbbf24; border-color:rgba(245,158,11,0.5); display:inline-flex; align-items:center; gap:6px;">
+                <button type="button" id="btnSetStreamPaused" class="btn-outline btn-sm" style="color:#CBD5E1; border-color:rgba(255,255,255,0.25); display:inline-flex; align-items:center; gap:6px;">
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>
                   <span>Nustatyti PAUSED (Pristabdyta)</span>
                 </button>
@@ -865,14 +868,14 @@
             <!-- Add Viewer / Generate Token Form -->
             <form id="formAddStreamViewer" style="background:rgba(12, 38, 31, 0.5); border:1px solid var(--border-color); border-radius:var(--site-radius); padding:16px; margin-bottom:18px;">
               <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:12px;">
-                <h4 style="font-size:0.9rem; color:#D4AF37; margin:0;">+ Priskirti Žiūrovą / Klasę & Sugeneruoti Prieigos Žetoną</h4>
+                <h4 style="font-size:0.9rem; color:#FFFFFF; margin:0;">+ Priskirti Žiūrovą / Klasę & Sugeneruoti Prieigos Žetoną</h4>
                 <div style="display:flex; gap:12px; align-items:center;">
                   <label style="cursor:pointer; font-size:0.82rem; color:var(--text-color); display:flex; align-items:center; gap:5px; margin:0;">
-                    <input type="radio" name="viewerTypeRadio" id="viewerTypeIndividual" value="individual" checked style="accent-color:#D4AF37;">
+                    <input type="radio" name="viewerTypeRadio" id="viewerTypeIndividual" value="individual" checked style="accent-color:#34D399;">
                     <span>👤 Individualus žiūrovas</span>
                   </label>
-                  <label style="cursor:pointer; font-size:0.82rem; color:#F3E5AB; display:flex; align-items:center; gap:5px; margin:0; font-weight:600;">
-                    <input type="radio" name="viewerTypeRadio" id="viewerTypeClassroom" value="classroom" style="accent-color:#D4AF37;">
+                  <label style="cursor:pointer; font-size:0.82rem; color:#E2E8F0; display:flex; align-items:center; gap:5px; margin:0; font-weight:600;">
+                    <input type="radio" name="viewerTypeRadio" id="viewerTypeClassroom" value="classroom" style="accent-color:#34D399;">
                     <span>🏫 Mokytojas / Klasė (Multi-device)</span>
                   </label>
                 </div>
@@ -890,13 +893,13 @@
               </div>
 
               <!-- Classroom Specific Row (Enabled for classroom) -->
-              <div id="classroomSettingsRow" class="two-col-grid" style="margin-bottom:12px; background:rgba(212,175,55,0.08); padding:12px; border-radius:6px; border:1px solid rgba(212,175,55,0.25);">
+              <div id="classroomSettingsRow" class="two-col-grid" style="margin-bottom:12px; background:rgba(255,255,255,0.04); padding:12px; border-radius:2px; border:1px solid rgba(255,255,255,0.12);">
                 <div class="input-cell">
-                  <label for="newViewerClassroomLabel" style="color:#F3E5AB;">Klasės / Kabineto Pavadinimas</label>
+                  <label for="newViewerClassroomLabel" style="color:#CBD5E1;">Klasės / Kabineto Pavadinimas</label>
                   <input type="text" id="newViewerClassroomLabel" class="field" placeholder="pvz. 8B klasė, 204 kab. (Projektorius)">
                 </div>
                 <div class="input-cell">
-                  <label for="newViewerMaxDevices" style="color:#F3E5AB;">Maks. Įrenginių Skaičius Vienu Metu (Standartas: 35)</label>
+                  <label for="newViewerMaxDevices" style="color:#CBD5E1;">Maks. Įrenginių Skaičius Vienu Metu (Standartas: 35)</label>
                   <input type="number" id="newViewerMaxDevices" class="field" min="1" max="100" value="35">
                 </div>
               </div>
@@ -941,10 +944,10 @@
             </form>
 
             <!-- Bulk Classroom Tokens Generator Accordion -->
-            <div style="background:rgba(8, 27, 23, 0.65); border:1px solid rgba(212,175,55,0.3); border-radius:var(--site-radius); padding:14px; margin-bottom:18px;">
+            <div style="background:#0B110E; border:1px solid rgba(255,255,255,0.12); border-radius:2px; padding:14px; margin-bottom:18px;">
               <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:10px;">
                 <div>
-                  <h4 style="font-size:0.88rem; color:#D4AF37; margin:0;">🏫 Masinis Mokytojų ir Klasių Žetonų Generavimas & CSV Eksportas</h4>
+                  <h4 style="font-size:0.88rem; color:#FFFFFF; margin:0;">🏫 Masinis Mokytojų ir Klasių Žetonų Generavimas & CSV Eksportas</h4>
                   <p style="margin:2px 0 0 0; font-size:0.78rem; color:var(--text-muted);">
                     Įklijuokite mokytojų sąrašą (po vieną eilutę: Vardas Pavardė, Klasė / Kabinetas, El. paštas, Įrenginių skaičius).
                   </p>
@@ -953,7 +956,7 @@
                   <button type="button" id="btnToggleBulkClassroomBox" class="btn-outline btn-xs">
                     <span>Atverti / Paslėpti Įvestį</span>
                   </button>
-                  <button type="button" id="btnExportClassroomCsv" class="btn-solid btn-xs" style="background:#D4AF37; color:#041310; font-weight:700;">
+                  <button type="button" id="btnExportClassroomCsv" class="btn-solid btn-xs" style="background:#FFFFFF; color:#070908; font-weight:700;">
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
                     <span>Eksportuoti Klasių CSV</span>
                   </button>
@@ -1279,8 +1282,12 @@ Tomas Vaitkus, Aktų salė (Projektorius), t.vaitkus@mokykla.lt, 100"></textarea
                   Valdykite tiesioginio eterio titrus (Now Playing / Next Up) bei eksportuokite duomenis tiesioginės transliacijos grafikos sistemoms.
                 </p>
               </div>
-              <div style="display:flex; align-items:center; gap:8px;">
-                <button type="button" id="btnDownloadH2hJson" class="btn-solid btn-sm" style="background:#D4AF37; color:#041310; font-weight:700;">
+              <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                <button type="button" id="btnDownloadH2hHtml" class="btn-solid btn-sm" style="background:#FFFFFF; color:#070908; font-weight:700; display:inline-flex; align-items:center; gap:6px;">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                  <span>Atsisiųsti H2H HTML (OBS)</span>
+                </button>
+                <button type="button" id="btnDownloadH2hJson" class="btn-outline btn-sm">
                   Atsisiųsti H2H JSON
                 </button>
                 <button type="button" id="btnDownloadH2hCsv" class="btn-outline btn-sm">
@@ -1312,7 +1319,7 @@ Tomas Vaitkus, Aktų salė (Projektorius), t.vaitkus@mokykla.lt, 100"></textarea
               </div>
 
               <div style="display:flex; align-items:center; gap:8px; margin-bottom:18px;">
-                <input type="checkbox" id="graphicsPublicVisible" checked style="width:16px; height:16px; accent-color:#D4AF37;">
+                <input type="checkbox" id="graphicsPublicVisible" checked style="width:16px; height:16px; accent-color:#34D399;">
                 <label for="graphicsPublicVisible" style="font-size:0.85rem; color:#F8FAF7; cursor:pointer;">
                   Rodyti „Dabar ekrane“ juostelę viešoje svetainėje
                 </label>
@@ -1330,13 +1337,13 @@ Tomas Vaitkus, Aktų salė (Projektorius), t.vaitkus@mokykla.lt, 100"></textarea
                 <span class="badge badge-accepted">1080p Preview</span>
               </div>
 
-              <div style="background:#000; border-radius:8px; padding:20px; border:1px solid rgba(212,175,55,0.3); min-height:160px; display:flex; flex-direction:column; justify-content:flex-end;">
+              <div style="background:#000; border-radius:2px; padding:20px; border:1px solid rgba(255,255,255,0.15); min-height:160px; display:flex; flex-direction:column; justify-content:flex-end;">
                 <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;">
                   <span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:#ef4444; animation:pulseDot 1.5s infinite;"></span>
                   <span style="font-size:0.68rem; color:#fca5a5; font-weight:700; letter-spacing:0.06em;">DABAR ETERIS</span>
                 </div>
                 <h4 id="previewOverlayTitle" style="color:#F8FAF7; margin:0 0 4px 0; font-family:var(--font-cinema); font-size:1.15rem;">Filmo Pavadinimas</h4>
-                <p id="previewOverlayDirector" style="color:#D4AF37; margin:0; font-size:0.82rem;">Režisierius: Vardas Pavardė &bull; Lietuva</p>
+                <p id="previewOverlayDirector" style="color:#CBD5E1; margin:0; font-size:0.82rem;">Režisierius: Vardas Pavardė &bull; Lietuva</p>
               </div>
 
               <div style="margin-top:14px; font-size:0.75rem; color:#94a3b8; line-height:1.4;">
@@ -1591,18 +1598,18 @@ Tomas Vaitkus, Aktų salė (Projektorius), t.vaitkus@mokykla.lt, 100"></textarea
           </div>
 
           <!-- 2027 Theme & Date Preset Quick-Buttons -->
-          <div class="content-card" style="border:1px solid rgba(212,175,55,0.35); background:rgba(12,38,32,0.45); margin-bottom:14px;">
+          <div class="content-card" style="border:1px solid rgba(255,255,255,0.12); background:#0B110E; border-radius:2px; margin-bottom:14px;">
             <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:10px;">
               <div>
-                <strong style="color:#F3E5AB; font-size:0.95rem;">🎯 Festivalio Temos & Datų Greitieji Šablonai</strong>
+                <strong style="color:#FFFFFF; font-size:0.95rem;">🎯 Festivalio Temos & Datų Greitieji Šablonai</strong>
                 <div style="font-size:0.8rem; color:var(--text-muted);">Vienu paspaudimu nustatykite temą („Mano pašaukimas“) ir oficialias datas (Lapkričio 1 d. &bull; Kovo 26 d. &bull; Balandžio 23 d.):</div>
               </div>
             </div>
             <div style="display:flex; flex-wrap:wrap; gap:8px;">
-              <button type="button" class="btn-solid btn-xs" id="btnThemePresetPurpose" style="background:linear-gradient(135deg, #1f5847, #134e4a);">
+              <button type="button" class="btn-solid btn-xs" id="btnThemePresetPurpose" style="background:#1A3E32; color:#FFFFFF; border:1px solid rgba(255,255,255,0.15);">
                 ✨ Nustatyti temą: „Mano pašaukimas“ &bull; My Purpose
               </button>
-              <button type="button" class="btn-solid btn-xs" id="btnDatePreset2027" style="background:linear-gradient(135deg, #D4AF37, #b8972e); color:#051512; font-weight:700;">
+              <button type="button" class="btn-solid btn-xs" id="btnDatePreset2027" style="background:#FFFFFF; color:#070908; font-weight:700;">
                 📅 Nustatyti oficialias datas: Lapkričio 1 d. &bull; Kovo 26 d. &bull; Balandžio 23 d.
               </button>
             </div>
@@ -1795,7 +1802,7 @@ Tomas Vaitkus, Aktų salė (Projektorius), t.vaitkus@mokykla.lt, 100"></textarea
         <h4 id="judgeEvalFilmTitle" style="color:var(--text-color); margin:0 0 4px 0; font-family:var(--font-cinema); font-size:1.2rem;">Filmas</h4>
         <div style="display:flex; align-items:center; justify-content:space-between; background:rgba(12,38,32,0.6); padding:10px 14px; border-radius:var(--site-radius); border:1px solid rgba(111,165,138,0.25);">
           <span style="font-size:0.85rem; color:var(--text-muted);">Vidutinis balas:</span>
-          <span id="judgeEvalAverageDisplay" style="font-size:1.2rem; font-weight:700; color:#F3E5AB;">8.0 / 10</span>
+          <span id="judgeEvalAverageDisplay" style="font-size:1.2rem; font-weight:700; color:#FFFFFF;">8.0 / 10</span>
         </div>
       </div>
 
@@ -2318,8 +2325,8 @@ Tomas Vaitkus, Aktų salė (Projektorius), t.vaitkus@mokykla.lt, 100"></textarea
         </div>
 
         <!-- Generated Link Container -->
-        <div id="pwdResetDirectLinkContainer" class="d-none" style="background:rgba(0,0,0,0.35); border:1px solid rgba(212,175,55,0.35); border-radius:var(--site-radius); padding:14px; margin-top:14px;">
-          <label style="font-size:0.75rem; color:#D4AF37; text-transform:uppercase; font-weight:700; display:block; margin-bottom:6px;">
+        <div id="pwdResetDirectLinkContainer" class="d-none" style="background:rgba(0,0,0,0.35); border:1px solid rgba(255,255,255,0.15); border-radius:var(--site-radius); padding:14px; margin-top:14px;">
+          <label style="font-size:0.75rem; color:#FFFFFF; text-transform:uppercase; font-weight:700; display:block; margin-bottom:6px;">
             Sugeneruotas Vienkartinis Linkas (Galioja 24 val.):
           </label>
           <div style="display:flex; gap:8px;">
@@ -2340,33 +2347,33 @@ Tomas Vaitkus, Aktų salė (Projektorius), t.vaitkus@mokykla.lt, 100"></textarea
     <div class="admin-modal-card" style="max-width:520px; text-align:center;">
       <div class="admin-modal-header" style="text-align:left;">
         <div>
-          <h3 class="admin-modal-title" style="margin:0; font-size:1.15rem; color:#D4AF37;">📱 Transliacijos Prieiga ir QR Kodas</h3>
+          <h3 class="admin-modal-title" style="margin:0; font-size:1.15rem; color:#FFFFFF;">📱 Transliacijos Prieiga ir QR Kodas</h3>
           <span style="font-size:0.75rem; color:var(--text-muted);">Mokytojų klasėms ir individualiems žiūrovams</span>
         </div>
         <button type="button" id="closeTokenQrModalBtn" style="background:transparent; border:none; color:var(--text-muted); font-size:1.5rem; cursor:pointer;">&times;</button>
       </div>
 
       <div style="margin:16px 0;">
-        <div style="background:rgba(8, 27, 23, 0.7); border:1px solid rgba(111,165,138,0.3); border-radius:8px; padding:12px; margin-bottom:14px; text-align:left;">
+        <div style="background:rgba(8, 27, 23, 0.7); border:1px solid rgba(111,165,138,0.3); border-radius:2px; padding:12px; margin-bottom:14px; text-align:left;">
           <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
             <div>
               <span style="font-size:0.72rem; color:#7A9689; text-transform:uppercase; letter-spacing:0.05em; font-weight:700;">Gavėjas / Paskirtis:</span>
               <div id="tokenQrTargetName" style="font-size:1rem; font-weight:700; color:#F8FAF7;">Jonas Kazlauskas - 8B klasė</div>
             </div>
-            <span id="tokenQrTypeBadge" class="badge" style="background:rgba(212,175,55,0.2); color:#F3E5AB; border:1px solid rgba(212,175,55,0.4); font-size:0.76rem;">
+            <span id="tokenQrTypeBadge" class="badge" style="background:rgba(52,211,153,0.12); color:#34D399; border:1px solid rgba(52,211,153,0.35); font-size:0.76rem;">
               🏫 Klasė (35 įrenginiai)
             </span>
           </div>
           <div style="margin-top:8px; font-size:0.78rem; color:#BAC9C0;">
-            Žetonas: <code id="tokenQrCodeDisplay" style="color:#F3E5AB; background:rgba(0,0,0,0.4); padding:2px 6px; border-radius:4px; font-weight:700;">cfs_class_...</code>
+            Žetonas: <code id="tokenQrCodeDisplay" style="color:#34D399; background:rgba(0,0,0,0.4); padding:2px 6px; border-radius:2px; font-weight:700;">cfs_class_...</code>
           </div>
         </div>
 
         <!-- Rendered QR Canvas Container -->
-        <div id="tokenQrPrintableArea" style="background:#FFFFFF; padding:18px; border-radius:10px; display:inline-block; margin:6px auto 14px auto; box-shadow:0 8px 30px rgba(0,0,0,0.6); text-align:center;">
+        <div id="tokenQrPrintableArea" style="background:#FFFFFF; padding:18px; border-radius:2px; display:inline-block; margin:6px auto 14px auto; box-shadow:0 8px 30px rgba(0,0,0,0.6); text-align:center;">
           <div id="tokenQrCanvasContainer"></div>
           <div style="margin-top:8px; font-family:-apple-system, BlinkMacSystemFont, sans-serif; font-size:0.8rem; font-weight:700; color:#041310; letter-spacing:0.04em;">
-            ĄŽUOLYNAS FILM FESTIVAL 2027
+            AISFF 2027
           </div>
           <div id="tokenQrPrintLabel" style="font-family:-apple-system, BlinkMacSystemFont, sans-serif; font-size:0.72rem; color:#334155; margin-top:2px;">
             Nuskenuokite kameros programėle
@@ -2388,7 +2395,7 @@ Tomas Vaitkus, Aktų salė (Projektorius), t.vaitkus@mokykla.lt, 100"></textarea
       </div>
 
       <div style="display:flex; justify-content:space-between; align-items:center; margin-top:16px; border-top:1px solid rgba(111,165,138,0.2); padding-top:14px;">
-        <button type="button" id="btnPrintTokenQr" class="btn-outline btn-sm" style="color:#D4AF37; border-color:#D4AF37; display:inline-flex; align-items:center; gap:6px;">
+        <button type="button" id="btnPrintTokenQr" class="btn-outline btn-sm" style="color:#FFFFFF; border-color:rgba(255,255,255,0.3); display:inline-flex; align-items:center; gap:6px;">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
           <span>Spausdinti QR Kortelę</span>
         </button>

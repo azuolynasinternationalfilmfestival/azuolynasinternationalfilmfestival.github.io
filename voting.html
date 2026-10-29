@@ -3,12 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title id="vPageTitle">Audience Voting | Ąžuolynas Film Fest</title>
-  <meta name="description" id="vMetaDescription" content="Official Audience Choice Award Voting for the Ąžuolynas International Students Film Festival. Support independent student filmmakers.">
+  <title id="vPageTitle">Audience Voting | AISFF</title>
+  <meta name="description" id="vMetaDescription" content="Official Audience Choice Award Voting for AISFF - Ąžuolynas International Student Film Festival. Support independent student filmmakers.">
   <link rel="icon" type="image/webp" href="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media">
   <link rel="stylesheet" href="style.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <script src="error-reporting.js"></script>
   <!-- Firebase Compat SDK for Static Browser Execution -->
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
@@ -21,20 +22,21 @@
     .voting-lang-switch {
       display: inline-flex;
       align-items: center;
-      background: rgba(0, 0, 0, 0.4);
-      border: 1px solid rgba(111, 165, 138, 0.3);
-      border-radius: 20px;
-      padding: 3px 5px;
-      gap: 4px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border-color);
+      border-radius: 2px;
+      padding: 2px 4px;
+      gap: 3px;
     }
     .voting-lang-btn {
       background: transparent;
       border: none;
       color: #94a3b8;
-      font-size: 0.75rem;
-      font-weight: 700;
-      padding: 4px 10px;
-      border-radius: 14px;
+      font-size: 0.72rem;
+      font-family: var(--font-mono);
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 1px;
       cursor: pointer;
       transition: all 0.2s ease;
     }
@@ -42,98 +44,106 @@
       color: #F8FAF7;
     }
     .voting-lang-btn.active {
-      background: #D4AF37;
-      color: #041310;
+      background: var(--surface-light);
+      color: #FFFFFF;
+      box-shadow: inset 0 0 0 1px var(--border-light);
     }
 
     .voting-hero {
-      padding: 110px 20px 36px 20px;
-      text-align: center;
-      background: radial-gradient(circle at 50% 20%, rgba(12, 36, 31, 0.92) 0%, rgba(4, 19, 16, 0.98) 100%);
+      padding: 80px 20px 36px 20px;
+      text-align: left;
+      border-bottom: 1px solid var(--border-color);
+      background: var(--surface-color);
     }
     .voting-hero-title {
-      font-family: var(--font-cinema, Georgia, serif);
-      font-size: clamp(2rem, 5vw, 3.2rem);
-      color: #F8FAF7;
+      font-family: var(--font-display, sans-serif);
+      font-size: clamp(2.4rem, 5.5vw, 4.2rem);
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      text-transform: uppercase;
+      color: #FFFFFF;
       margin: 14px 0 10px 0;
     }
     .voting-hero-sub {
       color: #94a3b8;
-      max-width: 660px;
-      margin: 0 auto 24px auto;
-      font-size: 1.05rem;
-      line-height: 1.5;
+      max-width: 720px;
+      margin: 0 0 24px 0;
+      font-size: 1rem;
+      line-height: 1.6;
     }
     .voting-status-badge {
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      padding: 6px 16px;
-      border-radius: 20px;
-      font-size: 0.85rem;
+      padding: 4px 12px;
+      border-radius: 2px;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
       font-weight: 600;
-      letter-spacing: 0.04em;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
     }
     .status-open {
-      background: rgba(74, 222, 128, 0.15);
-      border: 1px solid rgba(74, 222, 128, 0.4);
-      color: #4ade80;
+      background: rgba(52, 211, 153, 0.12);
+      border: 1px solid rgba(52, 211, 153, 0.35);
+      color: #34d399;
     }
     .status-closed {
-      background: rgba(239, 68, 68, 0.15);
-      border: 1px solid rgba(239, 68, 68, 0.4);
+      background: rgba(239, 68, 68, 0.12);
+      border: 1px solid rgba(239, 68, 68, 0.35);
       color: #f87171;
     }
     .category-filter-bar {
       display: flex;
       align-items: center;
-      justify-content: center;
+      justify-content: flex-start;
       gap: 8px;
       flex-wrap: wrap;
       margin: 28px 0 20px 0;
     }
     .category-tab-btn {
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(111, 165, 138, 0.25);
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border-color);
       color: #cbd5e1;
       padding: 8px 18px;
-      border-radius: 20px;
-      font-size: 0.85rem;
+      border-radius: 2px;
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
       cursor: pointer;
       transition: all 0.2s ease;
     }
     .category-tab-btn:hover {
-      border-color: #D4AF37;
-      color: #F8FAF7;
+      border-color: rgba(255, 255, 255, 0.3);
+      color: #FFFFFF;
     }
     .category-tab-btn.active {
-      background: #D4AF37;
-      border-color: #D4AF37;
-      color: #041310;
+      background: #FFFFFF;
+      border-color: #FFFFFF;
+      color: #070908;
       font-weight: 700;
     }
     .voting-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
-      gap: 24px;
-      max-width: 1200px;
+      gap: 20px;
+      max-width: var(--container-max);
       margin: 0 auto;
-      padding: 0 16px 80px 16px;
+      padding: 36px 20px 80px 20px;
     }
     .film-vote-card {
-      background: rgba(8, 27, 23, 0.88);
-      border: 1px solid rgba(111, 165, 138, 0.22);
-      border-radius: 12px;
+      background: var(--surface-card);
+      border: 1px solid var(--border-color);
+      border-radius: 2px;
       overflow: hidden;
       display: flex;
       flex-direction: column;
-      transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+      transition: border-color 0.2s ease;
       position: relative;
     }
     .film-vote-card:hover {
-      transform: translateY(-4px);
-      border-color: rgba(212, 175, 55, 0.45);
-      box-shadow: 0 14px 40px rgba(0, 0, 0, 0.5);
+      border-color: rgba(255, 255, 255, 0.3);
     }
     .film-poster-wrap {
       width: 100%;
@@ -141,6 +151,7 @@
       background: #020b08;
       position: relative;
       overflow: hidden;
+      border-bottom: 1px solid var(--border-color);
     }
     .film-poster-img {
       width: 100%;
@@ -149,7 +160,7 @@
       transition: transform 0.3s ease;
     }
     .film-vote-card:hover .film-poster-img {
-      transform: scale(1.03);
+      transform: scale(1.02);
     }
     .film-poster-placeholder {
       width: 100%;
@@ -158,7 +169,7 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      background: linear-gradient(135deg, #061e18 0%, #030f0c 100%);
+      background: #0a0f0d;
       color: #64748b;
     }
     .film-card-content {
@@ -168,19 +179,21 @@
       flex: 1;
     }
     .film-nomination-tag {
-      font-size: 0.72rem;
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
       text-transform: uppercase;
       letter-spacing: 0.08em;
-      color: #D4AF37;
+      color: var(--accent-mint);
       margin-bottom: 6px;
-      font-weight: 700;
+      font-weight: 600;
     }
     .film-card-title {
-      font-family: var(--font-cinema, Georgia, serif);
+      font-family: var(--font-display, sans-serif);
       font-size: 1.25rem;
-      color: #F8FAF7;
+      font-weight: 700;
+      color: #FFFFFF;
       margin: 0 0 6px 0;
-      line-height: 1.3;
+      line-height: 1.25;
     }
     .film-card-director {
       font-size: 0.85rem;
@@ -188,9 +201,9 @@
       margin: 0 0 12px 0;
     }
     .film-card-synopsis {
-      font-size: 0.82rem;
+      font-size: 0.84rem;
       color: #cbd5e1;
-      line-height: 1.5;
+      line-height: 1.6;
       margin-bottom: 18px;
       flex: 1;
       display: -webkit-box;
@@ -201,16 +214,19 @@
     .film-vote-action {
       margin-top: auto;
       padding-top: 14px;
-      border-top: 1px solid rgba(111, 165, 138, 0.15);
+      border-top: 1px solid var(--border-color);
     }
     .btn-vote-trigger {
       width: 100%;
       padding: 10px;
-      background: #D4AF37;
-      color: #041310;
+      background: #FFFFFF;
+      color: #070908;
       font-weight: 700;
-      border: none;
-      border-radius: 6px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      font-size: 0.8rem;
+      border: 1px solid #FFFFFF;
+      border-radius: 2px;
       cursor: pointer;
       display: flex;
       align-items: center;
@@ -219,18 +235,19 @@
       transition: all 0.2s ease;
     }
     .btn-vote-trigger:hover:not(:disabled) {
-      background: #F3E5AB;
+      background: #E2E8F0;
+      border-color: #E2E8F0;
       transform: translateY(-1px);
     }
     .btn-vote-trigger.voted {
-      background: rgba(74, 222, 128, 0.2);
-      border: 1px solid #4ade80;
-      color: #4ade80;
+      background: rgba(52, 211, 153, 0.15);
+      border: 1px solid #34d399;
+      color: #34d399;
       cursor: default;
       transform: none;
     }
     .btn-vote-trigger:disabled:not(.voted) {
-      opacity: 0.6;
+      opacity: 0.5;
       cursor: not-allowed;
       transform: none;
     }
@@ -243,24 +260,25 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      font-size: 0.8rem;
+      font-size: 0.78rem;
+      font-family: var(--font-mono);
       margin-bottom: 5px;
       color: #94a3b8;
     }
     .film-results-meta strong {
-      color: #D4AF37;
+      color: #FFFFFF;
     }
     .film-results-track {
       width: 100%;
-      height: 8px;
+      height: 6px;
       background: rgba(255, 255, 255, 0.08);
-      border-radius: 4px;
+      border-radius: 1px;
       overflow: hidden;
     }
     .film-results-fill {
       height: 100%;
-      background: linear-gradient(90deg, #D4AF37 0%, #4ade80 100%);
-      border-radius: 4px;
+      background: var(--accent-mint);
+      border-radius: 1px;
       width: 0%;
       transition: width 0.8s cubic-bezier(0.16, 1, 0.3, 1);
     }
@@ -269,9 +287,9 @@
       text-align: center;
       padding: 60px 20px;
       color: #94a3b8;
-      background: rgba(8, 27, 23, 0.5);
-      border-radius: 12px;
-      border: 1px dashed rgba(111, 165, 138, 0.25);
+      background: var(--surface-card);
+      border-radius: 2px;
+      border: 1px solid var(--border-color);
     }
   </style>
 </head>
@@ -280,9 +298,9 @@
   <!-- Header -->
   <header class="site-header">
     <div class="container nav-bar">
-      <a href="en/index.html" class="logo-wrap" id="logoLink">
-        <img src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media" alt="Ąžuolynas Fest" class="logo-img">
-        <span class="logo-text">Ąžuolynas Fest</span>
+      <a href="en/index.html" class="logo-wrap" id="logoLink" title="AISFF">
+        <img src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media" alt="AISFF" class="logo-img">
+        <span class="logo-text">AISFF</span>
       </a>
 
       <nav class="desktop-nav" aria-label="Main Navigation">
@@ -299,8 +317,8 @@
           <button type="button" class="voting-lang-btn" data-lang="lt">LT</button>
         </div>
 
-        <a href="live.html" class="btn-solid btn-sm" id="btnLiveTop" style="background:#D4AF37; color:#041310; text-decoration:none; padding:6px 14px; border-radius:4px; font-weight:700;">
-          Watch Live
+        <a href="live.html" class="btn-solid btn-sm" id="btnLiveTop" style="padding:6px 14px; text-decoration:none;">
+          Live Stream
         </a>
       </div>
     </div>

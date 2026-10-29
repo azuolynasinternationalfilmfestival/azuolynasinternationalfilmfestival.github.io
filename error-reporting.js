@@ -134,12 +134,12 @@
         -webkit-backdrop-filter: blur(8px);
       }
       .asiff-toast-card {
-        background: rgba(18, 24, 22, 0.95);
-        border: 1px solid rgba(212, 175, 55, 0.4);
-        border-left: 4px solid #D4AF37;
-        border-radius: 8px;
+        background: rgba(11, 17, 14, 0.96);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        border-left: 3px solid #34D399;
+        border-radius: 2px;
         padding: 12px 16px;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
         color: #f8fafc;
         pointer-events: auto;
         animation: asiffErrorSlideIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
@@ -165,7 +165,7 @@
         background: rgba(239, 68, 68, 0.25);
         color: #fca5a5;
         padding: 2px 7px;
-        border-radius: 4px;
+        border-radius: 2px;
         border: 1px solid rgba(239, 68, 68, 0.4);
       }
       .asiff-error-time {
@@ -196,7 +196,7 @@
         word-break: break-word;
         background: rgba(0, 0, 0, 0.4);
         padding: 6px 8px;
-        border-radius: 4px;
+        border-radius: 2px;
         border: 1px solid rgba(239, 68, 68, 0.2);
         margin-bottom: 8px;
         max-height: 90px;
@@ -213,7 +213,7 @@
       .asiff-error-location span {
         background: rgba(255, 255, 255, 0.08);
         padding: 2px 6px;
-        border-radius: 4px;
+        border-radius: 2px;
         font-family: monospace;
       }
       .asiff-error-footer {
@@ -223,13 +223,13 @@
         gap: 8px;
       }
       .asiff-error-btn-copy {
-        background: rgba(212, 175, 55, 0.2);
-        border: 1px solid #D4AF37;
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.2);
         color: #F8FAF7;
         font-size: 0.75rem;
         font-weight: 600;
         padding: 5px 10px;
-        border-radius: 4px;
+        border-radius: 2px;
         cursor: pointer;
         display: inline-flex;
         align-items: center;
@@ -237,8 +237,8 @@
         transition: all 0.2s ease;
       }
       .asiff-error-btn-copy:hover {
-        background: #D4AF37;
-        color: #041310;
+        background: #FFFFFF;
+        color: #070908;
       }
       .asiff-error-count {
         font-size: 0.72rem;

@@ -27,6 +27,7 @@ import { initVotingAnalytics, loadVotingAnalytics } from "./voting-analytics.js"
 import { initStreamAdmin, loadStreamData } from "./stream-admin.js";
 import { initNotificationsLog, loadActivityLogs } from "./notifications-log.js";
 import { initDiagnostics, loadDiagnosticsData } from "./diagnostics.js";
+import { showToast } from "./ui-feedback.js";
 
 function bootAdmin() {
   // 1. Initialize Authentication FIRST so the login interface is immediately responsive
@@ -50,6 +51,7 @@ function bootAdmin() {
         }
         try { loadDiagnosticsData(); } catch (e) { console.error("loadDiagnosticsData error:", e); }
         try { subscribeSettings(); } catch (e) { console.error("subscribeSettings error:", e); }
+        try { if (window.refreshBroadcastOverlaySelects) window.refreshBroadcastOverlaySelects(); } catch (e) {}
       },
       onLogout: () => {
         try { evaluateUserManagementAccess(null); } catch (e) { console.error(e); }
@@ -171,41 +173,99 @@ function initGraphicsManager() {
   const previewTitle = document.getElementById("previewOverlayTitle");
   const previewDir = document.getElementById("previewOverlayDirector");
 
+  const btnH2hHtml = document.getElementById("btnDownloadH2hHtml");
   const btnH2hJson = document.getElementById("btnDownloadH2hJson");
   const btnH2hCsv = document.getElementById("btnDownloadH2hCsv");
   const btnVotingCsv = document.getElementById("btnDownloadVotingCsv");
 
+  let allFilms = [];
+
+  async function fetchSubmissionsSafe() {
+    // 1. Try FirebaseClient request first (authenticated)
+    if (window.FirebaseClient && typeof window.FirebaseClient.request === "function") {
+      try {
+        const res = await window.FirebaseClient.request("submissions");
+        if (res && res.ok) {
+          const data = await res.json();
+          if (Array.isArray(data.submissions) && data.submissions.length > 0) {
+            return data.submissions;
+          }
+        }
+      } catch (err) {
+        console.warn("[Graphics] FirebaseClient submissions notice:", err.message);
+      }
+    }
+
+    // 2. Try with session token if present
+    try {
+      const token = sessionStorage.getItem("admin_session_token");
+      const headers = token ? { "Authorization": `Bearer ${token}` } : {};
+      const res = await fetch("/api/admin/submissions", { headers });
+      if (res.ok) {
+        const data = await res.json();
+        if (Array.isArray(data.submissions)) return data.submissions;
+      }
+    } catch (e) {}
+
+    // 3. Fallback to public submissions endpoint
+    try {
+      const res = await fetch("/api/submissions");
+      if (res.ok) {
+        const data = await res.json();
+        if (Array.isArray(data.submissions)) return data.submissions;
+      }
+    } catch (e) {}
+
+    return [];
+  }
+
   async function populateSelects() {
     try {
-      const res = await fetch("/api/admin/submissions");
-      let films = [];
-      if (res.ok) {
-        const d = await res.json();
-        films = d.submissions || [];
-      }
+      allFilms = await fetchSubmissionsSafe();
 
       if (npSelect && nextSelect) {
-        const optionsHtml = '<option value="">-- Nepasirinkta --</option>' + 
-          films.map(f => `<option value="${f.id}">${(f.filmTitle || 'Be pavadinimo')} (${f.category || 'Kat.'} - ${f.name || ''})</option>`).join("");
-        
         const curNp = npSelect.value;
         const curNext = nextSelect.value;
-        npSelect.innerHTML = optionsHtml;
-        nextSelect.innerHTML = optionsHtml;
-        if (curNp) npSelect.value = curNp;
-        if (curNext) nextSelect.value = curNext;
+
+        if (allFilms.length === 0) {
+          npSelect.innerHTML = '<option value="">-- Nėra pateiktų filmų --</option>';
+          nextSelect.innerHTML = '<option value="">-- Nėra pateiktų filmų --</option>';
+        } else {
+          const optionsHtml = '<option value="">-- Nepasirinkta --</option>' + 
+            allFilms.map(f => {
+              const title = f.filmTitle || f.title || "Be pavadinimo";
+              const cat = f.category || "Bendroji";
+              const author = f.name || f.director || "";
+              return `<option value="${f.id}">${escapeHtml(title)} (${escapeHtml(cat)} - ${escapeHtml(author)})</option>`;
+            }).join("");
+
+          npSelect.innerHTML = optionsHtml;
+          nextSelect.innerHTML = optionsHtml;
+
+          if (curNp) npSelect.value = curNp;
+          if (curNext) nextSelect.value = curNext;
+        }
       }
 
+      // Fetch active broadcast overlay settings
       try {
         const bRes = await fetch("/api/broadcast/overlay");
         if (bRes.ok) {
           const bData = await bRes.json();
-          if (bData.nowPlaying && bData.nowPlaying.id && npSelect) npSelect.value = bData.nowPlaying.id;
-          if (bData.nextFilm && bData.nextFilm.id && nextSelect) nextSelect.value = bData.nextFilm.id;
-          if (publicCb && typeof bData.isPublicVisible === "boolean") publicCb.checked = bData.isPublicVisible;
+          if (bData.nowPlaying && bData.nowPlaying.id && npSelect) {
+            npSelect.value = bData.nowPlaying.id;
+          }
+          if (bData.nextFilm && bData.nextFilm.id && nextSelect) {
+            nextSelect.value = bData.nextFilm.id;
+          }
+          if (publicCb && typeof bData.isPublicVisible === "boolean") {
+            publicCb.checked = bData.isPublicVisible;
+          }
           updatePreview(bData.nowPlaying);
         }
-      } catch (e) {}
+      } catch (e) {
+        console.warn("[Graphics] Overlay fetch note:", e.message);
+      }
 
     } catch (e) {
       console.warn("populateSelects error:", e);
@@ -224,49 +284,68 @@ function initGraphicsManager() {
     }
   }
 
+  // Interactive live preview updates when dropdown selection changes
+  if (npSelect) {
+    npSelect.addEventListener("change", () => {
+      const selectedId = npSelect.value;
+      const f = allFilms.find(x => x.id === selectedId);
+      if (f) {
+        updatePreview({
+          title: f.filmTitle || f.title,
+          director: f.name || f.director,
+          category: f.category
+        });
+      } else {
+        updatePreview(null);
+      }
+    });
+  }
+
   if (saveBtn) {
     saveBtn.addEventListener("click", async () => {
       saveBtn.disabled = true;
       saveBtn.textContent = "Saugoma...";
       try {
-        const res = await fetch("/api/admin/submissions");
-        let films = [];
-        if (res.ok) {
-          const d = await res.json();
-          films = d.submissions || [];
+        // If allFilms empty, attempt one quick re-fetch
+        if (allFilms.length === 0) {
+          allFilms = await fetchSubmissionsSafe();
         }
 
-        const npFilm = films.find(f => f.id === npSelect.value);
-        const nextFilm = films.find(f => f.id === nextSelect.value);
+        const npFilm = allFilms.find(f => f.id === npSelect.value);
+        const nextFilm = allFilms.find(f => f.id === nextSelect.value);
 
         const payload = {
           nowPlaying: npFilm ? {
             id: npFilm.id,
-            title: npFilm.filmTitle,
-            director: npFilm.name || npFilm.director,
-            category: npFilm.category,
+            title: npFilm.filmTitle || npFilm.title || "Filmas",
+            director: npFilm.name || npFilm.director || "Autorius",
+            category: npFilm.category || "Bendroji",
             country: npFilm.country || "Lietuva"
           } : null,
           nextFilm: nextFilm ? {
             id: nextFilm.id,
-            title: nextFilm.filmTitle,
-            director: nextFilm.name || nextFilm.director,
-            category: nextFilm.category,
+            title: nextFilm.filmTitle || nextFilm.title || "Filmas",
+            director: nextFilm.name || nextFilm.director || "Autorius",
+            category: nextFilm.category || "Bendroji",
             country: nextFilm.country || "Lietuva"
           } : null,
           isPublicVisible: publicCb ? publicCb.checked : true
         };
 
-        await fetch("/api/broadcast/overlay", {
+        const res = await fetch("/api/broadcast/overlay", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload)
         });
 
-        updatePreview(payload.nowPlaying);
-        alert("Eterio nustatymai sėkmingai išsaugoti!");
+        if (res.ok) {
+          updatePreview(payload.nowPlaying);
+          showToast("Eterio titrai (Now Playing & Next) sėkmingai išsaugoti!", "success");
+        } else {
+          showToast("Nepavyko išsaugoti eterio titrų", "error");
+        }
       } catch (err) {
-        alert("Klaida išsaugant eterio duomenis: " + err.message);
+        showToast("Klaida išsaugant eterio duomenis: " + err.message, "error");
       } finally {
         saveBtn.disabled = false;
         saveBtn.textContent = "Išsaugoti Eterio Titrus";
@@ -274,22 +353,50 @@ function initGraphicsManager() {
     });
   }
 
+  // Standalone HTML Download for OBS Browser Source
+  if (btnH2hHtml) {
+    btnH2hHtml.addEventListener("click", async () => {
+      try {
+        const res = await fetch("/api/broadcast/overlay");
+        const data = res.ok ? await res.json() : {};
+        if (window.H2HExport && typeof window.H2HExport.downloadOBSHtml === "function") {
+          window.H2HExport.downloadOBSHtml(data, `asiff-h2h-overlay-${new Date().toISOString().slice(0, 10)}.html`);
+          showToast("H2H HTML failas sugeneruotas ir atsisiųstas OBS šaltiniui!", "success");
+        } else {
+          showToast("H2H eksportuotojas nepasiekiamas", "error");
+        }
+      } catch (e) {
+        showToast("Klaida atsisiunčiant H2H HTML: " + e.message, "error");
+      }
+    });
+  }
+
   if (btnH2hJson) {
     btnH2hJson.addEventListener("click", async () => {
-      const res = await fetch("/api/broadcast/overlay");
-      const data = res.ok ? await res.json() : {};
-      if (window.H2HExport) {
-        window.H2HExport.downloadJSON(data);
+      try {
+        const res = await fetch("/api/broadcast/overlay");
+        const data = res.ok ? await res.json() : {};
+        if (window.H2HExport && typeof window.H2HExport.downloadJSON === "function") {
+          window.H2HExport.downloadJSON(data, `asiff-h2h-graphics-${new Date().toISOString().slice(0, 10)}.json`);
+          showToast("H2H JSON grafikos duomenys sėkmingai atsisiųsti!", "success");
+        }
+      } catch (e) {
+        showToast("Klaida eksportuojant JSON", "error");
       }
     });
   }
 
   if (btnH2hCsv) {
     btnH2hCsv.addEventListener("click", async () => {
-      const res = await fetch("/api/broadcast/overlay");
-      const data = res.ok ? await res.json() : {};
-      if (window.H2HExport) {
-        window.H2HExport.downloadCSV(data);
+      try {
+        const res = await fetch("/api/broadcast/overlay");
+        const data = res.ok ? await res.json() : {};
+        if (window.H2HExport && typeof window.H2HExport.downloadCSV === "function") {
+          window.H2HExport.downloadCSV(data, `asiff-rundown-${new Date().toISOString().slice(0, 10)}.csv`);
+          showToast("Transliacijos Rundown CSV atsisiųstas!", "success");
+        }
+      } catch (e) {
+        showToast("Klaida eksportuojant CSV", "error");
       }
     });
   }
@@ -297,13 +404,14 @@ function initGraphicsManager() {
   if (btnVotingCsv) {
     btnVotingCsv.addEventListener("click", async () => {
       try {
-        const res = await fetch("/api/admin/submissions");
-        const d = res.ok ? await res.json() : { submissions: [] };
+        if (allFilms.length === 0) {
+          allFilms = await fetchSubmissionsSafe();
+        }
         const rows = [["ID", "FILM_TITLE", "DIRECTOR", "CATEGORY", "VOTES", "STATUS"]];
-        (d.submissions || []).forEach(f => {
-          rows.push([f.id, f.filmTitle, f.name, f.category, f.votesCount || 0, f.status]);
+        allFilms.forEach(f => {
+          rows.push([f.id, f.filmTitle || f.title, f.name || f.director, f.category, f.votesCount || 0, f.status || "pateikta"]);
         });
-        const csv = rows.map(r => r.map(c => `"${String(c || '').replace(/"/g, '""')}"`).join(",")).join("\r\n");
+        const csv = "\uFEFF" + rows.map(r => r.map(c => `"${String(c || '').replace(/"/g, '""')}"`).join(",")).join("\r\n");
         const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
         const url = URL.createObjectURL(blob);
         const a = document.createElement("a");
@@ -312,11 +420,24 @@ function initGraphicsManager() {
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        showToast("Balsavimo statistikos CSV atsisiųstas!", "success");
       } catch (e) {
-        alert("Klaida eksportuojant CSV: " + e.message);
+        showToast("Klaida eksportuojant CSV: " + e.message, "error");
       }
     });
   }
 
+  function escapeHtml(str) {
+    if (!str) return "";
+    return String(str)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  }
+
+  window.refreshBroadcastOverlaySelects = populateSelects;
   populateSelects();
 }

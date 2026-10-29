@@ -80,6 +80,32 @@
     "targetAudience": "Students (10–18 yrs)",
     "recordingPlaceholder": "The official festival recording and live stream replay will be published here on April 23rd, 2027."
   },
+  "smtp": {
+    "host": "smtp.gmail.com",
+    "port": 587,
+    "secure": false,
+    "user": "azuolynasfilmfestival@gmail.com",
+    "pass": "bthtxgbqciafowzd",
+    "from": "azuolynasfilmfestival@gmail.com"
+  },
   "adminEmail": "azuolynasfilmfestival@gmail.com",
-  "updatedAt": "2026-10-13T07:30:16.573Z"
+  "updatedAt": "2026-10-13T07:30:16.573Z",
+  "broadcast_overlay": {
+    "nowPlaying": {
+      "id": "sub_test_01",
+      "title": "Vilties Šviesa",
+      "director": "Mantas Petraitis",
+      "category": "Category II (14-18)",
+      "country": "Lietuva"
+    },
+    "nextFilm": {
+      "id": "sub_test_02",
+      "title": "Echoes of Silence",
+      "director": "Sofia Rossi",
+      "category": "Category II (14-18)",
+      "country": "Lietuva"
+    },
+    "isPublicVisible": true,
+    "updatedAt": "2026-10-28T17:04:01.198Z"
+  }
 }

@@ -218,7 +218,7 @@ export function renderTasksList() {
     const isCompleted = t.status === "completed";
     const isInProgress = t.status === "in_progress";
     
-    let statusBadge = `<span class="badge" style="background:rgba(212,175,55,0.2); color:#F3E5AB;">Laukiama</span>`;
+    let statusBadge = `<span class="badge" style="background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.18); color:#F8FAFC; border-radius:2px;">Laukiama</span>`;
     if (isInProgress) {
       statusBadge = `<span class="badge" style="background:rgba(96,165,250,0.2); color:#93c5fd;">Vykdoma</span>`;
     } else if (isCompleted) {

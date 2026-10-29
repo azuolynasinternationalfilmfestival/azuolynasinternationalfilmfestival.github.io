@@ -1,6 +1,40 @@
 {
   "submissions": [
     {
+      "id": "4xX5d34CwR8Yg1jikRmS",
+      "name": "Dominikphotofficial",
+      "email": "info@dominikphotofficial.lt",
+      "age": 14,
+      "category": "Category II (14-18)",
+      "location": "test",
+      "institution": "test",
+      "filmTitle": "test",
+      "deviceModel": "test",
+      "synopsis": "test",
+      "videoUrl": "https://firebasestorage.googleapis.com/v0/b/filmfest-509606.firebasestorage.app/o/submissions%2F1793291231808_Dominikphotofficial.mp4?alt=media&token=367e2787-8143-4009-ad4f-336064098d29",
+      "videoDurationSeconds": 10,
+      "storagePath": "submissions/1793291231808_Dominikphotofficial.mp4",
+      "attendanceType": "in_person",
+      "liveToken": "live_wpwsitqf_mvtrarg2",
+      "liveStreamUrl": "https://ais-dev-oir7g4voofuqcfbqbtl27l-841022470701.europe-west2.run.app/live.html?token=live_wpwsitqf_mvtrarg2",
+      "votesCount": 0,
+      "inVoting": false,
+      "status": "submitted",
+      "submissionLang": "lt",
+      "submittedAt": "2026-10-29T16:27:13.694Z",
+      "notificationResults": {
+        "receipt": {
+          "success": true,
+          "smtpAttempted": true,
+          "smtpSent": true,
+          "firestoreQueued": false,
+          "messageId": "<ffa2ac17-200c-01d6-fe0c-a331bc80a686@gmail.com>",
+          "error": null,
+          "timestamp": "2026-10-29T16:27:14.552Z"
+        }
+      }
+    },
+    {
       "id": "sub_1791878093822_6684dc",
       "name": "Aistė Jonaitė",
       "email": "aiste@pavyzdys.lt",

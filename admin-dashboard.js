@@ -118,7 +118,7 @@
 
     const sortedCats = Object.entries(catCounts).sort((a, b) => b[1] - a[1]);
 
-    const palette = ["#D4AF37", "#4ade80", "#60a5fa", "#f87171", "#c084fc", "#fb923c"];
+    const palette = ["#FFFFFF", "#34D399", "#60a5fa", "#f87171", "#c084fc", "#94a3b8"];
 
     container.innerHTML = sortedCats.map(([cat, count], idx) => {
       const pct = Math.round((count / total) * 100);
@@ -218,7 +218,7 @@
             <span style="font-size:0.8rem; color:#F8FAF7; font-weight:600;">${count} filmai (${pct}%)</span>
           </div>
           <div class="chart-bar-track">
-            <div class="chart-bar-fill" style="width:${pct}%; background:#D4AF37;"></div>
+            <div class="chart-bar-fill" style="width:${pct}%; background:#34D399;"></div>
           </div>
         </div>
       `;

@@ -4,19 +4,19 @@
   <script src="js/server-api.js"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>OBS Stream Graphics Overlay | Ąžuolynas Film Fest</title>
+  <title>OBS Stream Graphics Overlay | AISFF</title>
   <link rel="icon" type="image/webp" href="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Cinzel:wght@600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&family=Space+Grotesk:wght@600;700;800&display=swap" rel="stylesheet">
   <style>
     :root {
-      --gold: #D4AF37;
-      --gold-light: #F3E5AB;
-      --emerald-dark: #051512;
-      --emerald-card: rgba(12, 36, 31, 0.92);
-      --accent: #6FA58A;
-      --accent-light: #9BC4AE;
+      --platinum: #FFFFFF;
+      --silver: #E2E8F0;
+      --emerald-dark: #070908;
+      --emerald-card: rgba(11, 17, 14, 0.95);
+      --accent: #1A3E32;
+      --accent-light: #34D399;
     }
 
     * {
@@ -30,7 +30,7 @@
     body {
       background: transparent;
       color: #fff;
-      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-family: 'Inter', sans-serif;
       width: 100vw;
       height: 100vh;
       overflow: hidden;
@@ -42,13 +42,12 @@
 
     /* Lower-Third Overlay Banner Container */
     .overlay-banner-wrapper {
-      background: linear-gradient(135deg, rgba(8, 26, 22, 0.95) 0%, rgba(12, 38, 32, 0.95) 100%);
-      border: 1px solid rgba(212, 175, 55, 0.4);
-      border-left: 6px solid var(--gold);
-      border-radius: 12px;
-      padding: 20px 26px;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.85);
-      backdrop-filter: blur(12px);
+      background: #070908;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-left: 4px solid #FFFFFF;
+      border-radius: 2px;
+      padding: 22px 28px;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.95);
       width: 100%;
       max-width: 1100px;
       margin: 0 auto;
@@ -65,7 +64,7 @@
       justify-content: space-between;
       align-items: center;
       margin-bottom: 14px;
-      border-bottom: 1px solid rgba(111, 165, 138, 0.25);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
       padding-bottom: 10px;
     }
 
@@ -78,16 +77,16 @@
     .overlay-brand img {
       width: 32px;
       height: 32px;
-      border-radius: 50%;
-      border: 1px solid var(--gold);
+      border-radius: 2px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
     }
 
     .overlay-title {
-      font-family: 'Cinzel', serif;
+      font-family: 'Space Grotesk', sans-serif;
       font-size: 1.25rem;
-      font-weight: 800;
-      color: var(--gold-light);
-      letter-spacing: 0.04em;
+      font-weight: 700;
+      color: #FFFFFF;
+      letter-spacing: -0.02em;
       text-transform: uppercase;
     }
 
@@ -95,15 +94,16 @@
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      background: rgba(239, 68, 68, 0.2);
-      border: 1px solid rgba(239, 68, 68, 0.45);
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid rgba(239, 68, 68, 0.5);
       color: #f87171;
       padding: 4px 10px;
-      border-radius: 999px;
-      font-size: 0.75rem;
+      border-radius: 2px;
+      font-size: 0.72rem;
+      font-family: 'JetBrains Mono', monospace;
       font-weight: 700;
       text-transform: uppercase;
-      letter-spacing: 0.05em;
+      letter-spacing: 0.08em;
     }
 
     .overlay-pulse-dot {
@@ -130,25 +130,25 @@
       display: flex;
       align-items: center;
       gap: 14px;
-      background: rgba(5, 21, 18, 0.65);
-      border: 1px solid rgba(111, 165, 138, 0.2);
-      border-radius: 8px;
+      background: #0B110E;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 2px;
       padding: 8px 14px;
       transition: all 0.4s ease;
     }
 
     .leaderboard-row.leader {
-      border-color: rgba(212, 175, 55, 0.6);
-      background: linear-gradient(90deg, rgba(30, 24, 8, 0.75) 0%, rgba(12, 38, 32, 0.6) 100%);
+      border-color: rgba(52, 211, 153, 0.5);
+      background: rgba(52, 211, 153, 0.06);
     }
 
     .row-rank {
-      font-family: 'Cinzel', serif;
+      font-family: 'Space Grotesk', sans-serif;
       font-size: 1.1rem;
       font-weight: 800;
       width: 32px;
       text-align: center;
-      color: var(--gold-light);
+      color: #FFFFFF;
     }
 
     .row-info {
@@ -174,35 +174,36 @@
 
     .row-author {
       font-size: 0.75rem;
-      color: var(--accent-light);
+      color: #94A3B8;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
     }
 
     .row-leader-badge {
-      background: rgba(212, 175, 55, 0.2);
-      border: 1px solid var(--gold);
-      color: var(--gold-light);
+      background: rgba(52, 211, 153, 0.15);
+      border: 1px solid #34D399;
+      color: #34D399;
       font-size: 0.65rem;
       padding: 2px 6px;
-      border-radius: 4px;
+      border-radius: 2px;
       font-weight: 700;
       text-transform: uppercase;
+      font-family: 'JetBrains Mono', monospace;
     }
 
     .row-progress-container {
       height: 6px;
       background: rgba(255, 255, 255, 0.1);
-      border-radius: 999px;
+      border-radius: 2px;
       overflow: hidden;
       position: relative;
     }
 
     .row-progress-bar {
       height: 100%;
-      background: linear-gradient(90deg, var(--accent) 0%, var(--gold) 100%);
-      border-radius: 999px;
+      background: linear-gradient(90deg, #1A3E32 0%, #34D399 100%);
+      border-radius: 2px;
       transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
@@ -214,13 +215,14 @@
     .row-votes-num {
       font-size: 1.1rem;
       font-weight: 800;
-      color: var(--gold-light);
-      font-family: 'Cinzel', serif;
+      color: #FFFFFF;
+      font-family: 'Space Grotesk', sans-serif;
     }
 
     .row-votes-percent {
       font-size: 0.72rem;
-      color: var(--accent-light);
+      color: #94A3B8;
+      font-family: 'JetBrains Mono', monospace;
     }
 
     .overlay-footer-row {
@@ -229,7 +231,10 @@
       align-items: center;
       margin-top: 12px;
       font-size: 0.75rem;
-      color: var(--accent-light);
+      color: #94A3B8;
+      font-family: 'JetBrains Mono', monospace;
+      padding-top: 10px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
     }
   </style>
 </head>
@@ -241,8 +246,8 @@
       <div class="overlay-brand">
         <img src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media" alt="Logo">
         <div>
-          <div class="overlay-title">Ąžuolynas Film Fest &bull; Tiesioginiai Rezultatai</div>
-          <div style="font-size:0.75rem; color:var(--accent-light);">Žiūrovų simpatijų apdovanojimas (Live Voting)</div>
+          <div class="overlay-title">AISFF &bull; Tiesioginiai Rezultatai</div>
+          <div style="font-size:0.75rem; color:#94A3B8;">Žiūrovų simpatijų apdovanojimas (Live Voting)</div>
         </div>
       </div>
 
@@ -251,7 +256,7 @@
           <span class="overlay-pulse-dot"></span>
           <span>Tiesiogiai Ekrane</span>
         </div>
-        <div style="font-size:0.85rem; font-weight:700; color:var(--gold-light);">
+        <div style="font-size:0.85rem; font-weight:700; color:#FFFFFF; font-family:'JetBrains Mono', monospace;">
           Balsų suma: <span id="overlayTotalVotes">0</span>
         </div>
       </div>
@@ -259,14 +264,14 @@
 
     <!-- Real-Time Dynamic Leaderboard Rows -->
     <div class="leaderboard-items" id="overlayLeaderboardRows">
-      <div style="text-align:center; padding:16px; color:var(--accent-light); font-size:0.88rem;">
+      <div style="text-align:center; padding:16px; color:#94A3B8; font-size:0.88rem;">
         Kraunami realaus laiko balsavimo duomenys...
       </div>
     </div>
 
     <div class="overlay-footer-row">
       <span>Balsuokite savo įrenginyje: <strong>azuolynasinternationalfilmfestival.github.io/live</strong></span>
-      <span>Kauno Tarptautinė Gimnazija &bull; Ąžuolynas FEST</span>
+      <span>Kauno Tarptautinė Gimnazija &bull; AISFF</span>
     </div>
   </div>
 
