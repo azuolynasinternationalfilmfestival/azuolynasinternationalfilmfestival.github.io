@@ -2,7 +2,7 @@
   "isLive": true,
   "streamState": "paused",
   "serverUrl": "rtmps://live.cloudflare.com:443/live/",
-  "streamKey": "6561bd7efd0ad61e9040a08676049c4dk937d1a8b2c545a980c9fabc8502d8af4",
+  "streamKey": "",
   "iframeUrl": "https://youtube.com/embed/test",
   "viewerCount": 16,
   "votingActive": true,

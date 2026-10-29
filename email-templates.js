@@ -39,6 +39,10 @@ const EMAIL_THEME = {
   liveStreamUrl: "https://azuolynasinternationalfilmfestival.github.io/live.html",
   instagramUrl: "https://www.instagram.com/azuolynas.iff",
   instagramHandle: "@azuolynas.iff",
+  themeLt: "Mano pašaukimas",
+  themeEn: "My Purpose",
+  submissionPeriodLt: "Lapkričio 1 d. – Kovo 26 d.",
+  submissionPeriodEn: "November 1st – March 26th",
   eventDateLt: "2027 m. balandžio 23 d.",
   eventDateEn: "April 23rd, 2027",
   venueLt: "Kauno tarptautinė gimnazija (Vytauto pr. 44, Kaunas)",
@@ -149,7 +153,7 @@ const STATUS_BADGES = {
 const emailTexts = {
   lt: {
     accessRequest: {
-      sub: "Ąžuolynas Film Fest | Nauja prieigos užklausa!",
+      sub: "AISFF | Nauja prieigos užklausa!",
       preheader: "Pateikta nauja užklausa prieigai prie festivalio valdymo skydo.",
       heading: "Gauta nauja prieigos užklausa",
       body: "Festivalio platformoje pateikta nauja užklausa dėl prieigos prie valdymo skydo teisių. Prašome peržiūrėti kandidato duomenis ir nuspręsti dėl prieigos suteikimo.",
@@ -158,99 +162,99 @@ const emailTexts = {
       ctaText: "Peržiūrėti Valdymo Skyde"
     },
     accessGranted: {
-      sub: "Ąžuolynas Film Fest | Jums suteikta valdymo skydo prieiga",
+      sub: "AISFF | Jums suteikta valdymo skydo prieiga",
       preheader: "Jūsų prieigos užklausa patvirtinta. Dabar galite prisijungti prie festivalio valdymo skydo.",
       heading: "Sveikiname, {{name}}!",
-      body: "Pranešame, kad jūsų prieigos užklausa prie Ąžuolyno tarptautinio mokinių filmų festivalio valdymo sistemos buvo sėkmingai patvirtinta!",
+      body: "Pranešame, kad jūsų prieigos užklausa prie AISFF (Kauno tarptautinė gimnazija) valdymo sistemos buvo sėkmingai patvirtinta!",
       detailsTitle: "Paskyros prieigos informacija",
       note: "Prisijunkite naudodami savo registruotą el. pašto adresą arba susietą Google paskyrą.",
       ctaText: "Prisijungti prie Valdymo Skydo"
     },
     submissionReceived: {
-      sub: "Ąžuolynas Film Fest | Filmo paraiška sėkmingai gauta!",
-      preheader: "Dėkojame už paraišką! Jūsų filmas sėkmingai pasiekė festivalio atrankos komisiją.",
+      sub: "AISFF | Filmo paraiška sėkmingai gauta!",
+      preheader: "Dėkojame už paraišką 2027 m. temai „Mano pašaukimas“! Jūsų filmas pasiekė atrankos komisiją.",
       heading: "Sveiki, {{name}}!",
-      body: "Nuoširdžiai dėkojame už dalyvavimą! Jūsų filmo paraiška sėkmingai pasiekė Ąžuolyno tarptautinio mokinių filmų festivalio organizacinį komitetą. Mūsų komisija netrukus peržiūrės filmą ir patikrins atitiktį festivalio taisyklėms (iki 180 s trukmė, filmavimas telefonu/planšete, mokinių autorystė).",
+      body: "Nuoširdžiai dėkojame už dalyvavimą! Jūsų filmo paraiška 2027 m. festivalio temai „Mano pašaukimas“ sėkmingai pasiekė AISFF organizacinį komitetą. Komisija netrukus peržiūrės filmą ir patikrins atitiktį festivalio taisyklėms (iki 180 s trukmė, filmavimas tik išmaniuoju telefonu/planšete, mokinių autorystė).",
       detailsTitle: "Pateiktos paraiškos suvestinė",
-      note: "Oficiali festivalio filmų peržiūra bei laureatų apdovanojimo ceremonija vyks Kauno tarptautinėje gimnazijoje 2027 m. balandžio 23 d. Tiesioginę transliaciją galėsite stebėti per https://azuolynasinternationalfilmfestival.github.io/live.html, o naujienas sekite Instagram: @azuolynas.iff.",
+      note: "Oficiali 2027 m. festivalio filmų peržiūra bei laureatų apdovanojimo ceremonija vyks Kauno tarptautinėje gimnazijoje 2027 m. balandžio 23 d. Tiesioginę transliaciją galėsite stebėti per https://azuolynasinternationalfilmfestival.github.io/live.html, o naujienas sekite Instagram: @azuolynas.iff.",
       ctaText: "Apsilankyti Festivalio Svetainėje"
     },
     adminNotification: {
-      sub: "Nauja paraiška festivaliui!",
-      preheader: "Užregistruota nauja dalyvio paraiška festivalio duomenų bazėje.",
+      sub: "AISFF | Nauja dalyvio paraiška festivaliui!",
+      preheader: "Užregistruota nauja dalyvio paraiška 2027 m. temai „Mano pašaukimas“.",
       heading: "Gauta nauja filmo paraiška",
-      body: "Festivalio sistemoje ką tik sėkmingai užregistruota nauja mokinio paraiška. Žemiau pateikiami visi autoriaus, techninės įrangos, failo trukmės bei filmo duomenys.",
+      body: "Festivalio sistemoje ką tik sėkmingai užregistruota nauja mokinio paraiška 2027 m. temai „Mano pašaukimas“. Žemiau pateikiami visi autoriaus, techninės įrangos, failo trukmės bei filmo duomenys.",
       detailsTitle: "Dalyvio ir filmo byla",
       ctaText: "Atverti Valdymo Skydą"
     },
     accepted: {
-      sub: "Ąžuolynas Film Fest | Sveikiname! Jūsų filmas priimtas",
-      preheader: "Puikios žinios! Jūsų filmas atitiko visus reikalavimus ir priimtas į oficialią konkursinę programą.",
+      sub: "AISFF | Sveikiname! Jūsų filmas priimtas į konkursą",
+      preheader: "Puikios žinios! Jūsų filmas atitiko reikalavimus ir priimtas į 2027 m. tematinę programą „Mano pašaukimas“.",
       heading: "Puikios žinios, {{name}}!",
-      body: "Džiaugiamės galėdami pranešti, kad jūsų filmas atitiko visus festivalio reikalavimus ir yra oficialiai priimtas į konkursinę programą! Jūsų kūrinį vertins tarptautinė žiuri komisija.",
+      body: "Džiaugiamės galėdami pranešti, kad jūsų filmas atitiko visus festivalio reikalavimus ir yra oficialiai priimtas į 2027 m. konkursinę programą tema „Mano pašaukimas“! Jūsų kūrinį vertins tarptautinė žiuri komisija.",
       detailsTitle: "Priėmimo informacija",
       note: "2027 m. balandžio 23 d. festivalio apdovanojimų ceremonija ir laureatų paskelbimas vyks Kauno tarptautinėje gimnazijoje bei tiesioginėje internetinėje transliacijoje (live.html). Sekite @azuolynas.iff.",
       ctaText: "Peržiūrėti Konkurso Programą"
     },
     semiFinalist: {
-      sub: "Ąžuolynas Film Fest | Jūsų darbas pateko į PUSFINALĮ!",
-      preheader: "Sveikiname! Vertinimo komisija jūsų kūrinį atrinko tarp oficialių pusfinalininkų.",
+      sub: "AISFF | Jūsų darbas pateko į PUSFINALĮ!",
+      preheader: "Sveikiname! Vertinimo komisija jūsų filmą atrinko tarp 2027 m. pusfinalininkų.",
       heading: "Sveiki, {{name}}!",
-      body: "Atrankos komisija itin aukštai įvertino jūsų filmo originalumą, kinematografiją bei temos atskleidimą. Jūsų darbas oficialiai patenka tarp festivalio PUSFINALININKŲ!",
+      body: "Atrankos komisija itin aukštai įvertino jūsų filmo originalumą, kinematografiją bei temos „Mano pašaukimas“ atskleidimą. Jūsų darbas oficialiai patenka tarp AISFF 2027 PUSFINALININKŲ!",
       detailsTitle: "Pusfinalio rezultatai",
       note: "Pusfinalio filmai bus pristatomi festivalio peržiūros programoje 2027 m. balandžio 23 d. Kauno tarptautinėje gimnazijoje bei tiesioginiame eteryje per live.html.",
       ctaText: "Sekti Festivalio Naujienas"
     },
     finalist: {
-      sub: "Ąžuolynas Film Fest | Jūs esate FINALE!",
-      preheader: "Ypatingas pasiekimas! Jūsų filmas pateko į oficialų finalą ir varžosi dėl ąžuolo statulėlių.",
+      sub: "AISFF | Jūs esate FINALE!",
+      preheader: "Ypatingas pasiekimas! Jūsų filmas pateko į 2027 m. finalą ir varžosi dėl ąžuolo statulėlių.",
       heading: "Ypatingas pasiekimas, {{name}}!",
-      body: "Nuoširdžiai sveikiname! Jūsų filmas oficialiai pateko į Ąžuolyno kino festivalio FINALĄ ir pretenduoja į prizines vietas, natūralaus ąžuolo statulėles bei Žiūrovų simpatijų prizą.",
+      body: "Nuoširdžiai sveikiname! Jūsų filmas tema „Mano pašaukimas“ oficialiai pateko į AISFF 2027 FINALĄ ir pretenduoja į prizines vietas, natūralaus ąžuolo statulėles bei Žiūrovų simpatijų prizą.",
       detailsTitle: "Finalo informacija",
       note: "Laureatai bus apdovanoti iškilmingoje ceremonijoje Kauno tarptautinėje gimnazijoje 2027 m. balandžio 23 d. Stebėkite tiesiogiai per live.html, naujienos Instagram: @azuolynas.iff.",
       ctaText: "Peržiūrėti Finalininkų Programą"
     },
     winner: {
-      sub: "Ąžuolynas Film Fest | SVEIKINAME FESTIVALIO LAUREATĄ!",
-      preheader: "Puiki pergalė! Jūsų filmas pelnė apdovanojimą Ąžuolyno kino festivalyje.",
+      sub: "AISFF | SVEIKINAME FESTIVALIO LAUREATĄ!",
+      preheader: "Puiki pergalė! Jūsų filmas pelnė apdovanojimą 2027 m. AISFF festivalyje.",
       heading: "Nuoširdžiausi sveikinimai, {{name}}!",
-      body: "Komisijos sprendimu bei žiūrovų balsavimu, džiaugiamės galėdami paskelbti jūsų filmą oficialiu Ąžuolyno tarptautinio mokinių filmų festivalio LAUREATU! Ačiū už jūsų talentą, drąsią režisūrą ir jaunųjų kūrėjų balso stiprinimą.",
+      body: "Komisijos sprendimu bei žiūrovų balsavimu, džiaugiamės galėdami paskelbti jūsų filmą oficialiu AISFF 2027 LAUREATU (tema „Mano pašaukimas“)! Ačiū už jūsų talentą, drąsią režisūrą ir jaunųjų kūrėjų balso stiprinimą.",
       detailsTitle: "Apdovanojimo informacija",
       note: "Dėl autorinės ąžuolo statulėlės ir diplomų įteikimo bei pristatymo su jumis asmeniškai susisieks organizatoriai. Ceremonijos įrašas bus pasiekiamas live.html, sekite @azuolynas.iff.",
       ctaText: "Žiūrėti Laureatų Galeriją"
     },
     rejected: {
-      sub: "Ąžuolynas Film Fest | Informacija apie jūsų filmo paraišką",
-      preheader: "Dėkojame už jūsų filmą ir kūrybinį darbą Ąžuolyno kino festivalyje.",
+      sub: "AISFF | Informacija apie jūsų filmo paraišką",
+      preheader: "Dėkojame už jūsų filmą ir kūrybinį darbą 2027 m. AISFF festivalyje.",
       heading: "Sveiki, {{name}},",
-      body: "Nuoširdžiai dėkojame už jūsų filmą ir dalyvavimą festivalyje. Šiais metais sulaukėme itin daug talentingų moksleivių darbų. Nors jūsų filmas šįkart nepateko į trumpąjį konkursinį sąrašą, komisija džiaugiasi jūsų kūrybine drąsa ir linki nenustoti filmuoti!",
+      body: "Nuoširdžiai dėkojame už jūsų filmą ir dalyvavimą 2027 m. festivalyje tema „Mano pašaukimas“. Šiais metais sulaukėme itin daug talentingų moksleivių darbų. Nors jūsų filmas šįkart nepateko į trumpąjį konkursinį sąrašą, komisija džiaugiasi jūsų kūrybine drąsa ir linki nenustoti filmuoti!",
       detailsTitle: "Atrankos informacija",
       note: "Kiekvienas sukurtas filmas yra svarbi patirtis. Kviečiame stebėti festivalio transliaciją 2027 m. balandžio 23 d. ir sekti mūsų Instagram @azuolynas.iff!",
       ctaText: "Apsilankyti Svetainėje"
     },
     eventReminder: {
-      sub: "Ąžuolynas Film Fest | Festivalio įrašas jau pasiekiamas svetainėje!",
-      preheader: "Oficialus festivalio ceremonijos ir laureatų įrašas paskelbtas festivalio platformoje.",
+      sub: "AISFF | Festivalio įrašas jau pasiekiamas svetainėje!",
+      preheader: "Oficialus 2027 m. festivalio ceremonijos ir laureatų įrašas paskelbtas festivalio platformoje.",
       heading: "Sveiki, {{name}}!",
-      body: "Oficialus Ąžuolyno kino festivalio vaizdo įrašas su moksleivių filmų peržiūra ir iškilminga apdovanojimų ceremonija jau paskelbtas mūsų svetainėje!",
+      body: "Oficialus AISFF 2027 festivalio vaizdo įrašas su moksleivių filmų peržiūra ir iškilminga apdovanojimų ceremonija jau paskelbtas mūsų svetainėje!",
       detailsTitle: "Renginio įrašas",
       note: "Kviečiame patogiai peržiūrėti geriausius mokinių darbus ir ceremonijos akimirkas. Sekite Instagram: @azuolynas.iff.",
       ctaText: "Žiūrėti Festivalio Įrašą"
     },
     remoteLivePass: {
-      sub: "Ąžuolynas Film Fest | Jūsų tiesioginės transliacijos prieiga ir žetonas",
-      preheader: "Jūsų asmeninė festivalio ceremonijos tiesioginės transliacijos nuoroda bei balsavimo žetonas.",
+      sub: "AISFF | Jūsų tiesioginės transliacijos prieiga ir žetonas",
+      preheader: "Jūsų asmeninė 2027 m. festivalio ceremonijos tiesioginės transliacijos nuoroda bei balsavimo žetonas.",
       heading: "Sveiki, {{name}}!",
-      body: "Kadangi pažymėjote, kad negalėsite atvykti į festivalio ceremoniją gyvai Kaune, paruošėme jums tiesioginę transliacijos prieigą. 2027 m. balandžio 23 d. galėsite tiesiogiai stebėti visus konkursinius filmus bei balsuoti už labiausiai patikusį darbą!",
+      body: "Kadangi pažymėjote, kad negalėsite atvykti į festivalio ceremoniją gyvai Kaune, paruošėme jums tiesioginę transliacijos prieigą. 2027 m. balandžio 23 d. galėsite tiesiogiai stebėti visus konkursinius filmus tema „Mano pašaukimas“ bei balsuoti už labiausiai patikusį darbą!",
       detailsTitle: "Nuotolinio dalyvio prieigos duomenys",
       note: "Transliacija bus pasiekiama 2027 m. balandžio 23 d. su šiuo asmeniniu žetonu arba jūsų registruotu el. paštu per https://azuolynasinternationalfilmfestival.github.io/live.html. Sekite @azuolynas.iff.",
       ctaText: "Atverti Tiesioginę Transliaciją"
     },
     userInvite: {
-      sub: "Ąžuolynas Film Fest | Kvietimas prisijungti prie komandos",
-      preheader: "Jums suteikta prieiga prie Ąžuolyno kino festivalio valdymo platformos.",
+      sub: "AISFF | Kvietimas prisijungti prie komandos",
+      preheader: "Jums suteikta prieiga prie AISFF festivalio valdymo platformos.",
       heading: "Sveiki, {{name}}!",
-      body: "Jūs buvote oficialiai pakviestas prisijungti prie Ąžuolyno tarptautinio mokinių filmų festivalio (Kauno Tarptautinė Gimnazija) valdymo sistemos. Žemiau pateikiami jūsų paskyros aktyvavimo duomenys ir saugus patvirtinimo kodas.",
+      body: "Jūs buvote oficialiai pakviestas prisijungti prie AISFF (Kauno tarptautinė gimnazija) valdymo sistemos komandos. Žemiau pateikiami jūsų paskyros aktyvavimo duomenys ir saugus patvirtinimo kodas.",
       detailsTitle: "Paskyros aktyvavimo byla",
       note: "Ši nuoroda skirta tik nurodytam asmeniui. Aktyvuokite savo paskyrą nustatydami saugų slaptažodį.",
       ctaText: "Aktyvuoti Paskyrą Dabar"
@@ -258,7 +262,7 @@ const emailTexts = {
   },
   en: {
     accessRequest: {
-      sub: "Ąžuolynas Film Fest | New Access Request!",
+      sub: "AISFF | New Access Request!",
       preheader: "A new festival dashboard access request has been submitted.",
       heading: "New Access Request Received",
       body: "A user has submitted an access request for the festival management dashboard. Please review the applicant's credentials and determine whether to grant access.",
@@ -267,88 +271,88 @@ const emailTexts = {
       ctaText: "Open Admin Dashboard"
     },
     accessGranted: {
-      sub: "Ąžuolynas Film Fest | Dashboard Access Granted",
+      sub: "AISFF | Dashboard Access Granted",
       preheader: "Your access request has been approved. You can now sign in to the festival dashboard.",
       heading: "Congratulations, {{name}}!",
-      body: "We are pleased to inform you that your request for access to the Ąžuolynas International Film Festival management platform has been approved!",
+      body: "We are pleased to inform you that your request for access to the AISFF (Kaunas International Gymnasium) management platform has been approved!",
       detailsTitle: "Account Access Details",
       note: "Sign in using your authorized email address or your linked Google account.",
       ctaText: "Sign in to Dashboard"
     },
     submissionReceived: {
-      sub: "Ąžuolynas Film Fest | Film Submission Successfully Received!",
-      preheader: "Thank you for submitting! Your film entry has reached the festival selection committee.",
+      sub: "AISFF | Film Submission Successfully Received!",
+      preheader: "Thank you for submitting for the 2027 theme “My Purpose”! Your film entry has reached the committee.",
       heading: "Hello, {{name}}!",
-      body: "Thank you sincerely for participating! Your entry has been safely received by the organizing committee of the Ąžuolynas International Students Film Festival. Our jury will review the film to confirm eligibility (max 180s runtime, smartphone/tablet captured, student-led creation).",
+      body: "Thank you sincerely for participating! Your entry for the 2027 festival theme “My Purpose” has been safely received by the organizing committee of AISFF. Our jury will review the film to confirm eligibility (max 180s runtime, smartphone/tablet captured, student-led creation).",
       detailsTitle: "Submission Summary",
       note: "The gala screening and awards ceremony will take place at Kaunas International Gymnasium on April 23rd, 2027. Watch the global live stream at https://azuolynasinternationalfilmfestival.github.io/live.html and follow us on Instagram: @azuolynas.iff.",
       ctaText: "Visit Festival Platform"
     },
     adminNotification: {
-      sub: "New film submission received!",
-      preheader: "A new student film dossier has been registered in the database.",
+      sub: "AISFF | New film submission received!",
+      preheader: "A new student film dossier has been registered for the 2027 theme “My Purpose”.",
       heading: "New Film Submission Registered",
-      body: "A new film has just been submitted via the official platform. Full details, device specifications, runtime verification, and creator contact are compiled below.",
+      body: "A new film has just been submitted via the official platform for the 2027 theme “My Purpose”. Full details, device specifications, runtime verification, and creator contact are compiled below.",
       detailsTitle: "Applicant Dossier",
       ctaText: "Open Admin Dashboard"
     },
     accepted: {
-      sub: "Ąžuolynas Film Fest | Congratulations! Your Film is Accepted",
-      preheader: "Great news! Your work meets all festival criteria and is officially in competition.",
+      sub: "AISFF | Congratulations! Your Film is Accepted",
+      preheader: "Great news! Your work is officially in competition for the 2027 theme “My Purpose”.",
       heading: "Congratulations, {{name}}!",
-      body: "We are thrilled to inform you that your work has met all submission criteria (max 3 minutes runtime, captured on mobile phone/tablet, student-directed) and is officially accepted into the festival competition program!",
+      body: "We are thrilled to inform you that your work has met all submission criteria (max 3 minutes runtime, captured on mobile phone/tablet, student-directed) and is officially accepted into the AISFF 2027 competition program under the theme “My Purpose”!",
       detailsTitle: "Acceptance Record",
       note: "The full event and ceremony will take place at Kaunas International Gymnasium and stream live on our platform on April 23rd, 2027. Stay tuned via Instagram @azuolynas.iff.",
       ctaText: "Explore Competition Program"
     },
     semiFinalist: {
-      sub: "Ąžuolynas Film Fest | Your Film is a SEMI-FINALIST!",
-      preheader: "Exciting news! The jury has selected your work among the official semi-finalists.",
+      sub: "AISFF | Your Film is a SEMI-FINALIST!",
+      preheader: "Exciting news! The jury has selected your work among the official 2027 semi-finalists.",
       heading: "Exciting news, {{name}}!",
-      body: "Our jury was profoundly moved by your creative voice, camera work, and narrative approach to this year's theme. Your work has officially advanced to the festival SEMI-FINALS!",
+      body: "Our jury was profoundly moved by your creative voice, camera work, and narrative approach to the 2027 theme “My Purpose”. Your work has officially advanced to the AISFF SEMI-FINALS!",
       detailsTitle: "Semi-Final Status",
       note: "Semi-final selections will be highlighted in the official festival broadcast on April 23rd, 2027. Watch live at live.html and follow @azuolynas.iff.",
       ctaText: "Follow Festival Updates"
     },
     finalist: {
-      sub: "Ąžuolynas Film Fest | You have reached the FINALS!",
-      preheader: "Outstanding achievement! Your film has reached the finals and is in contention for awards.",
+      sub: "AISFF | You have reached the FINALS!",
+      preheader: "Outstanding achievement! Your film has reached the 2027 finals and is in contention for awards.",
       heading: "Tremendous achievement, {{name}}!",
-      body: "Warmest congratulations! Your film has officially reached the FINALS of the Ąžuolynas Film Festival and is in direct contention for the Grand Prix, handmade oak statuettes, and the Audience Choice Award.",
+      body: "Warmest congratulations! Your film has officially reached the FINALS of AISFF 2027 (theme “My Purpose”) and is in direct contention for the Grand Prix, handmade oak statuettes, and the Audience Choice Award.",
       detailsTitle: "Finalist Dossier",
       note: "Award winners will be officially unveiled during the ceremony at Kaunas International Gymnasium and live stream on April 23rd, 2027. Follow Instagram: @azuolynas.iff.",
       ctaText: "View Finalist Showcase"
     },
     winner: {
-      sub: "Ąžuolynas Film Fest | CONGRATULATIONS FESTIVAL LAUREATE!",
-      preheader: "Incredible victory! Your film has earned an award at the Ąžuolynas International Film Festival.",
+      sub: "AISFF | CONGRATULATIONS FESTIVAL LAUREATE!",
+      preheader: "Incredible victory! Your film has earned an award at AISFF 2027.",
       heading: "Bravo, {{name}}!",
-      body: "By the decision of our international jury and audience vote, we are deeply honoured to declare your film an official WINNER of the Ąžuolynas International Students Film Festival! Thank you for your inspiring creativity and cinematic boldness.",
+      body: "By the decision of our international jury and audience vote, we are deeply honoured to declare your film an official WINNER of AISFF 2027 (theme “My Purpose”)! Thank you for your inspiring creativity and cinematic boldness.",
       detailsTitle: "Award Record",
       note: "Our organizing team will reach out personally regarding the delivery of your diploma, medal, and festival award. Replay will be available on live.html, follow @azuolynas.iff.",
       ctaText: "View Winners Hall of Fame"
     },
     rejected: {
-      sub: "Ąžuolynas Film Fest | Update regarding your film entry",
-      preheader: "Thank you for submitting your creative work to the Ąžuolynas Film Festival.",
+      sub: "AISFF | Update regarding your film entry",
+      preheader: "Thank you for submitting your creative work to AISFF 2027.",
       heading: "Hello, {{name}},",
-      body: "Thank you sincerely for sharing your story with the Ąžuolynas Film Festival. We received a record number of wonderful submissions this season. While your film was not selected for this season's shortlist, our jury was genuinely inspired by your creative passion.",
+      body: "Thank you sincerely for sharing your story with AISFF for the 2027 theme “My Purpose”. We received a record number of wonderful submissions this season. While your film was not selected for this season's shortlist, our jury was genuinely inspired by your creative passion.",
       detailsTitle: "Selection Record",
       note: "Keep experimenting and filming! Join our live broadcast on April 23rd, 2027, and follow our community on Instagram: @azuolynas.iff.",
       ctaText: "Visit Festival Platform"
     },
     eventReminder: {
-      sub: "Ąžuolynas Film Fest | Festival Recording Now Available On Site!",
+      sub: "AISFF | Festival Recording Now Available On Site!",
       preheader: "The official festival recording and award ceremony is now published directly on our website.",
       heading: "Hello, {{name}}!",
-      body: "The official video recording of the Ąžuolynas Film Festival—including student screenings and the gala award ceremony—is now live on our website!",
+      body: "The official video recording of AISFF 2027—including student screenings and the gala award ceremony—is now live on our website!",
       detailsTitle: "Broadcast Information",
       note: "Sit back and enjoy the remarkable films crafted by youth creators from around the world. Instagram: @azuolynas.iff.",
       ctaText: "Watch Festival Broadcast"
     },
     remoteLivePass: {
-      sub: "Ąžuolynas Film Fest | Your Live Stream Access & Personal Token",
-      preheader: "Your personal festival ceremony live stream access link and remote voting token.",
+      sub: "AISFF | Your Live Stream Access & Personal Token",
+      preheader: "Your personal 2027 festival ceremony live stream access link and remote voting token.",
       heading: "Hello, {{name}}!",
       body: "Since you indicated that you are unable to attend the awards ceremony in person, we have generated your exclusive live broadcast pass. On April 23rd, 2027, you can watch the stream and cast your vote remotely!",
       detailsTitle: "Remote Participant Connection Details",
@@ -356,10 +360,10 @@ const emailTexts = {
       ctaText: "Open Live Stream Platform"
     },
     userInvite: {
-      sub: "Ąžuolynas Film Fest | Staff Team Invitation",
-      preheader: "You have been invited to the Ąžuolynas Film Festival administration portal.",
+      sub: "AISFF | Staff Team Invitation",
+      preheader: "You have been invited to the AISFF administration portal.",
       heading: "Hello, {{name}}!",
-      body: "You have been officially invited to join the staff committee of the Ąžuolynas International Students Film Festival at Kaunas International Gymnasium. Below are your account credentials and secure verification code.",
+      body: "You have been officially invited to join the staff committee of AISFF at Kaunas International Gymnasium. Below are your account credentials and secure verification code.",
       detailsTitle: "Account Activation Record",
       note: "This invitation is personal and confidential. Please activate your account by setting a secure password.",
       ctaText: "Activate My Account Now"
@@ -582,11 +586,15 @@ function buildEmailDocument({ lang, preheader, statusKey, childrenHtml }) {
                 <tr>
                   <td>
                     <div style="font-size: 11px; font-weight: 700; color: #F8FAFC; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px;">
-                      ${isLt ? "🎬 RENGINIO DATA, VIETA IR TIESIOGINĖ TRANSLIACIJĄ" : "🎬 FESTIVAL EVENT, VENUE & LIVE STREAM"}
+                      ${isLt ? "🎬 AISFF 2027: DATA, TEMA IR TIESIOGINĖ TRANSLIACIJĄ" : "🎬 AISFF 2027: EVENT, THEME & LIVE STREAM"}
                     </div>
                     <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="font-size: 12px; line-height: 1.6; color: #BAC9C0;">
                       <tr>
-                        <td style="padding: 2px 0; color: #7A9689; width: 100px;">${isLt ? "Data:" : "Date:"}</td>
+                        <td style="padding: 2px 0; color: #7A9689; width: 110px;">${isLt ? "Tema:" : "Theme:"}</td>
+                        <td style="padding: 2px 0; color: #34D399; font-weight: 700;">${isLt ? "„Mano pašaukimas“" : "“My Purpose”"}</td>
+                      </tr>
+                      <tr>
+                        <td style="padding: 2px 0; color: #7A9689;">${isLt ? "Renginio data:" : "Date:"}</td>
                         <td style="padding: 2px 0; color: #F8FAF7; font-weight: 600;">${isLt ? "2027 m. balandžio 23 d." : "April 23rd, 2027"}</td>
                       </tr>
                       <tr>
@@ -595,7 +603,7 @@ function buildEmailDocument({ lang, preheader, statusKey, childrenHtml }) {
                       </tr>
                       <tr>
                         <td style="padding: 2px 0; color: #7A9689;">${isLt ? "Transliacija:" : "Live Stream:"}</td>
-                        <td style="padding: 2px 0;"><a href="${EMAIL_THEME.liveStreamUrl}" target="_blank" style="color: #4ade80; text-decoration: underline; font-weight: 600;">${isLt ? "Stebėti tiesiogiai internetu (Live Player)" : "Watch official live broadcast"} &rarr;</a></td>
+                        <td style="padding: 2px 0;"><a href="${EMAIL_THEME.liveStreamUrl}" target="_blank" style="color: #34D399; text-decoration: underline; font-weight: 600;">${isLt ? "Stebėti tiesiogiai internetu (Live Player)" : "Watch official live broadcast"} &rarr;</a></td>
                       </tr>
                       <tr>
                         <td style="padding: 2px 0; color: #7A9689;">Instagram:</td>
@@ -607,7 +615,7 @@ function buildEmailDocument({ lang, preheader, statusKey, childrenHtml }) {
               </table>
 
               <p style="margin: 0 0 6px 0; color: #BAC9C0; font-weight: 700; font-size: 12px;">
-                Ąžuolynas International Students Film Festival
+                AISFF &bull; Ąžuolynas International Student Film Festival
               </p>
               <p style="margin: 0 0 10px 0; color: #7A9689;">
                 Kauno „Ąžuolyno“ kino studija &bull; Kauno tarptautinė gimnazija

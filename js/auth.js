@@ -391,7 +391,7 @@ export function initAuth(options = {}) {
   };
 
   // Quick Demo Login Bindings for Smooth Role Testing
-  const bindQuickLogin = (btnId, emailVal, passVal) => {
+  const bindQuickLogin = (btnId, emailVal) => {
     const btn = document.getElementById(btnId);
     if (btn) {
       btn.onclick = (e) => {
@@ -399,16 +399,18 @@ export function initAuth(options = {}) {
         const emInput = loginEmail || document.getElementById("loginEmail");
         const pwInput = loginPassword || document.getElementById("loginPassword");
         if (emInput) emInput.value = emailVal;
-        if (pwInput) pwInput.value = passVal;
-        doLogin();
+        if (pwInput) {
+          pwInput.value = "";
+          pwInput.focus();
+        }
       };
     }
   };
 
-  bindQuickLogin("quickLoginSuper", "azuolynasfilmfestival@gmail.com", "Festivalis2026!");
-  bindQuickLogin("quickLoginKarina", "karina.brdar@gmail.com", "Festivalis2026!");
-  bindQuickLogin("quickLoginEditor", "redaktorius@azuolynasfest.lt", "Festivalis2026!");
-  bindQuickLogin("quickLoginJudge", "teisejas.komisija@gmail.com", "Festivalis2026!");
+  bindQuickLogin("quickLoginSuper", "azuolynasfilmfestival@gmail.com");
+  bindQuickLogin("quickLoginKarina", "karina.brdar@gmail.com");
+  bindQuickLogin("quickLoginEditor", "redaktorius@azuolynasfest.lt");
+  bindQuickLogin("quickLoginJudge", "teisejas.komisija@gmail.com");
 
   // Bind Submit Button & Enter keys
   if (loginSubmitBtn) {

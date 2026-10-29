@@ -10,8 +10,8 @@
 
   /* Restrained Forest/Emerald Accent */
   --accent-color: #1A3E32;
-  --accent-light: #2D6352;
-  --accent-hover: #387864;
+  --accent-light: #34D399;
+  --accent-hover: #6EE7B7;
   --accent-emerald: #34D399;
   --accent-mint: #4ADE80;
 
@@ -402,7 +402,7 @@ body.menu-drawer-open .burger-menu-btn .bar-3 {
 .mobile-menu-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(4, 16, 13, 0.78);
+  background: rgba(0, 0, 0, 0.85);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   z-index: 9998;
@@ -424,9 +424,9 @@ body.menu-drawer-open .mobile-menu-backdrop {
   right: 0;
   bottom: 0;
   width: min(440px, 92vw);
-  background: linear-gradient(180deg, #0d2923 0%, #071c18 100%);
-  border-left: 1px solid rgba(111, 165, 138, 0.28);
-  box-shadow: -15px 0 50px rgba(0, 0, 0, 0.7);
+  background: #070908;
+  border-left: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: -15px 0 50px rgba(0, 0, 0, 0.85);
   z-index: 9999;
   display: flex;
   flex-direction: column;
@@ -452,8 +452,8 @@ body.menu-drawer-open {
   align-items: center;
   justify-content: space-between;
   padding: 18px 24px;
-  border-bottom: 1px solid var(--border-color);
-  background: rgba(7, 28, 24, 0.7);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  background: #070908;
   flex-shrink: 0;
 }
 
@@ -537,7 +537,7 @@ body.menu-drawer-open {
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.12em;
-  color: var(--accent-color);
+  color: var(--accent-light);
   margin-bottom: 8px;
   padding-left: 6px;
 }
@@ -574,8 +574,8 @@ body.menu-drawer-open {
 }
 
 .drawer-nav-link.highlight {
-  background: rgba(111, 165, 138, 0.12);
-  border-color: rgba(111, 165, 138, 0.3);
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.15);
   color: #fff;
 }
 

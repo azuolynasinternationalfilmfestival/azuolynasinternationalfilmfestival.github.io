@@ -302,7 +302,7 @@ function renderStreamControls() {
   if (serverInput) serverInput.value = streamConfig.serverUrl || "rtmps://live.cloudflare.com:443/live/";
 
   const keyInput = document.getElementById("obsStreamKeyInput");
-  if (keyInput) keyInput.value = streamConfig.streamKey || "6561bd7efd0ad61e9040a08676049c4dk937d1a8b2c545a980c9fabc8502d8af4";
+  if (keyInput) keyInput.value = streamConfig.streamKey || "";
 
   // Active viewers metric
   const viewerElem = document.getElementById("statStreamLiveViewers");
@@ -1008,7 +1008,7 @@ function setupCopyButtons() {
   const copyKeyBtn = document.getElementById("btnCopyObsKey");
   if (copyKeyBtn) {
     copyKeyBtn.addEventListener("click", () => {
-      const val = document.getElementById("obsStreamKeyInput")?.value || "6561bd7efd0ad61e9040a08676049c4dk937d1a8b2c545a980c9fabc8502d8af4";
+      const val = document.getElementById("obsStreamKeyInput")?.value || "";
       navigator.clipboard.writeText(val).then(() => showToast("OBS Stream Key nukopijuotas!", "success"));
     });
   }

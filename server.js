@@ -203,7 +203,7 @@ function loadStreamConfig() {
     isLive: true,
     streamState: 'live',
     serverUrl: 'rtmps://live.cloudflare.com:443/live/',
-    streamKey: '6561bd7efd0ad61e9040a08676049c4dk937d1a8b2c545a980c9fabc8502d8af4',
+    streamKey: '',
     iframeUrl: 'https://customer-auu36r7owuzogvfb.cloudflarestream.com/937d1a8b2c545a980c9fabc8502d8af4/iframe',
     viewerCount: 1,
     votingActive: true
@@ -1209,7 +1209,7 @@ app.use((req, res, next) => {
       Tarptautinio mokinių kino festivalio „Ąžuolynas“ platformoje šiuo metu atliekami planiniai techniniai atnaujinimo darbai. Svetainė lankytojams vėl bus pasiekiama netrukus.
     </p>
     <div class="m-footer">
-      <span>Kauno Tarptautinė Gimnazija &bull; 2026 m.</span>
+      <span>Kauno Tarptautinė Gimnazija &bull; AISFF 2027</span>
       <a href="/admin.html" class="m-admin-link">Administratoriaus prisijungimas &rarr;</a>
     </div>
   </div>
@@ -4518,7 +4518,7 @@ app.get(['/api/admin/stream/settings', '/api/admin/stream/config'], (req, res) =
       iframeUrl: config.iframeUrl,
       viewPermission: config.viewPermission || 'token_only',
       serverUrl: config.serverUrl || 'rtmps://live.cloudflare.com:443/live/',
-      streamKey: config.streamKey || '6561bd7efd0ad61e9040a08676049c4dk937d1a8b2c545a980c9fabc8502d8af4',
+      streamKey: config.streamKey || '',
       streamState: config.streamState || 'paused',
       isLive: Boolean(config.isLive)
     });
