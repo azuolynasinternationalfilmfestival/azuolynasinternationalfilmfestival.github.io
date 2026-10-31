@@ -9,3 +9,13 @@ service-account*.json
 credentials*.json
 *.log
 .DS_Store
+
+# Runtime data files containing submissions, live viewer access tokens, and sensitive logs
+data/submissions.json
+data/logs.json
+data/live_viewers.json
+data/access_requests.json
+data/invitations.json
+data/votes.json
+data/stream_config.json
+data/judge_evaluations.json
