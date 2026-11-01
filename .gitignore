@@ -12,6 +12,7 @@ credentials*.json
 
 # Runtime data files containing submissions, live viewer access tokens, and sensitive logs
 data/submissions.json
+data/settings.json
 data/logs.json
 data/live_viewers.json
 data/access_requests.json

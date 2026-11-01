@@ -1,18 +1,11 @@
 /**
- * Ąžuolynas Film Festival - Hero Submission Deadline Countdown
- * Calculates and renders live days, hours, minutes, and seconds until March 26th
+ * AISFF - Hero Submission Deadline Countdown
+ * Calculates and renders live days, hours, minutes, and seconds until April 5, 2027
  */
 (function() {
   function getSubmissionDeadline() {
-    const now = new Date();
-    const currentYear = now.getFullYear();
-    // March 26th, 23:59:59 (Month is 0-indexed: 2 = March)
-    let deadline = new Date(currentYear, 2, 26, 23, 59, 59);
-    // If deadline has already passed this calendar year, count down to next year's March 26th
-    if (now.getTime() > deadline.getTime()) {
-      deadline = new Date(currentYear + 1, 2, 26, 23, 59, 59);
-    }
-    return deadline;
+    // Official 2027 Submission Deadline: April 5, 2027, 23:59:59 (Month is 0-indexed: 3 = April)
+    return new Date(2027, 3, 5, 23, 59, 59);
   }
 
   function formatNumber(num) {

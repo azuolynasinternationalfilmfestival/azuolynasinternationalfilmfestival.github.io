@@ -1,6 +1,6 @@
 {
-  "summary":  "Updated implementation summary to include the mobile submission form optimization: enlarged touch drop zone (min-height 260px, 52px icon, touch browse button) and 3-step progressive stepper with visual progress bar, percentage, and step tabs in Lithuanian and English. All 46 tests passing.",
-  "updatedAt":  "2026-10-31T14:55:13.569102616Z",
+  "summary":  "Implementation plan for updating all 2027 festival dates across the entire application: Submissions Open November 1, 2026; Submission Deadline April 5, 2027; Festival Start Date April 27, 2027. Covers metadata, countdown timer, hero editorial cards, editions, email templates, server defaults, and client scripts with strict separation from previous editions.",
+  "updatedAt":  "2026-11-01T07:30:42.382831610Z",
   "requestFeedback":  true,
   "userFacing":  true
 }

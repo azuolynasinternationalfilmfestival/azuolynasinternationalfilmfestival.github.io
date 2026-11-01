@@ -392,27 +392,27 @@ const DEFAULT_SETTINGS = Object.freeze({
     heroBadge: "7-asis Tarptautinis Mokinių Filmų Festivalis",
     topic: "Mano pašaukimas",
     topicDesc: "Ką norite veikti savo gyvenime ir kaip atrasti tikrąjį pašaukimą? Ieškome istorijų apie savo kelio paieškas, karjeros pasirinkimus ir vidinių abejonių įveikimą. Papasakokite, ko reikia, kad sektumėte savo aistra, kai aplinkiniai tikisi kažko kito – ar tai būtų šeimos spaudimas rinktis „rimtą“ profesiją, pavyzdžiui, mediciną ar teisę, ar jūsų pačių baimė žengti į meną, muziką ar kūrybines sritis. Parodykite šios kelionės tikrovę, kliūtis pakeliui ir tą akimirką, kai jūs ar jūsų herojai suprato, ką iš tiesų lemta daryti.",
-    openingDate: "Lapkričio 1 d.",
-    deadlineDate: "Kovo 26 d.",
-    eventDate: "Balandžio 23 d.",
+    openingDate: "2026 m. lapkričio 1 d.",
+    deadlineDate: "2027 m. balandžio 5 d.",
+    eventDate: "2027 m. balandžio 27 d.",
     aboutText: "„Ąžuolyno“ filmų festivalis pavadintas vieno iš Kauno lankytinų vietų – Ąžuolyno parko – garbei, kurio papėdėje yra įsikūrusi mūsų studija. Kviečiame 10–18 m. moksleivius kurti trumpametražius filmus iki 3 min. išmaniaisiais įrenginiais.",
-    datesSubmissions: "Nuo lapkričio 1 d. iki kovo 26 d.",
-    dateEvent: "2027 m. balandžio 23 d. (Kino festivalis ir tiesioginė transliacija)",
+    datesSubmissions: "Nuo 2026 m. lapkričio 1 d. iki 2027 m. balandžio 5 d.",
+    dateEvent: "2027 m. balandžio 27 d. (Kino festivalis ir tiesioginė transliacija)",
     targetAudience: "Mokiniai (10–18 m.)",
-    recordingPlaceholder: "Festivalio ir tiesioginės transliacijos vaizdo įrašas bus pasiekiamas 2027 m. balandžio 23 d."
+    recordingPlaceholder: "Festivalio ir tiesioginės transliacijos vaizdo įrašas bus pasiekiamas 2027 m. balandžio 27 d."
   },
   en: {
     heroBadge: "The 7th International Students Film Festival",
     topic: "My Purpose",
     topicDesc: "What do you want to do with your life, and how do you find your true calling? We are looking for stories about discovering your path, making career choices, and overcoming self-doubt. Tell us what it takes to follow your passion when the people around you expect something different—whether it is family pressure to pursue a \"serious\" career like medicine or law, or your own fear of stepping into the arts, music, or creative fields. Show the reality of this journey, the obstacles along the way, and the exact moment you or your characters realized what you were meant to do.",
-    openingDate: "November 1st",
-    deadlineDate: "March 26th",
-    eventDate: "April 23rd",
+    openingDate: "November 1, 2026",
+    deadlineDate: "April 5, 2027",
+    eventDate: "April 27, 2027",
     aboutText: "The «Ažuolynas» Film Festival is named after one of the sights of Kaunas, at the foot of which our studio is located. We invite youth directors aged 10–18 to submit smartphone short films up to 3 minutes.",
-    datesSubmissions: "November 1st – March 26th",
-    dateEvent: "April 23rd, 2027 (Film Festival & Live Stream)",
+    datesSubmissions: "November 1, 2026 – April 5, 2027",
+    dateEvent: "April 27th, 2027 (Film Festival & Live Stream)",
     targetAudience: "Students (10–18 yrs)",
-    recordingPlaceholder: "The official festival recording and live stream replay will be published here on April 23rd, 2027."
+    recordingPlaceholder: "The official festival recording and live stream replay will be published here on April 27th, 2027."
   },
   smtp: {
     host: process.env.SMTP_HOST,
@@ -3356,7 +3356,7 @@ app.post('/api/admin/stream/viewers/create', async (req, res) => {
           <div style="background:#070908; border:1px solid rgba(255,255,255,0.1); border-radius:2px; padding:16px; margin:20px 0; font-size:0.86rem;">
             <div style="font-weight:700; color:#F8FAFC; margin-bottom:8px; text-transform:uppercase; font-size:0.78rem; letter-spacing:0.05em;">🎬 Renginio ir transliacijos informacija:</div>
             <table width="100%" cellpadding="0" cellspacing="0" border="0" style="color:#BAC9C0; font-size:0.86rem; line-height:1.6;">
-              <tr><td style="width:110px; color:#7A9689; padding:2px 0;">Transliacijos data:</td><td style="color:#F8FAF7; font-weight:600; padding:2px 0;">2027 m. balandžio 23 d.</td></tr>
+              <tr><td style="width:110px; color:#7A9689; padding:2px 0;">Transliacijos data:</td><td style="color:#F8FAF7; font-weight:600; padding:2px 0;">2027 m. balandžio 27 d.</td></tr>
               <tr><td style="color:#7A9689; padding:2px 0;">Renginio vieta:</td><td style="padding:2px 0;">Kauno tarptautinė gimnazija (Vytauto pr. 44, Kaunas)</td></tr>
               <tr><td style="color:#7A9689; padding:2px 0;">Grotuvas:</td><td style="padding:2px 0;"><a href="${liveLink}" style="color:#34D399; word-break:break-all;">${liveLink}</a></td></tr>
               <tr><td style="color:#7A9689; padding:2px 0;">Instagram:</td><td style="padding:2px 0;"><a href="https://www.instagram.com/azuolynas.iff" target="_blank" style="color:#9BC4AE; font-weight:600;">@azuolynas.iff</a> (naujienos ir užkulisiai)</td></tr>
@@ -3378,7 +3378,7 @@ app.post('/api/admin/stream/viewers/create', async (req, res) => {
         to: cleanEmail,
         subject: `Ąžuolynas Film Fest | Jūsų tiesioginės transliacijos žetonas: ${token}`,
         html: emailHtml,
-        text: `Sveiki, ${cleanName}! Jūsų tiesioginės transliacijos prieiga festivaliui (2027 m. balandžio 23 d.): ${liveLink} (Žetonas: ${token}). Sekite naujienas Instagram: @azuolynas.iff`
+        text: `Sveiki, ${cleanName}! Jūsų tiesioginės transliacijos prieiga festivaliui (2027 m. balandžio 27 d.): ${liveLink} (Žetonas: ${token}). Sekite naujienas Instagram: @azuolynas.iff`
       });
       emailSent = true;
     }
@@ -3537,7 +3537,7 @@ app.post('/api/admin/stream/viewers/resend', async (req, res) => {
           <div style="background:#070908; border:1px solid rgba(255,255,255,0.1); border-radius:2px; padding:16px; margin:20px 0; font-size:0.86rem;">
             <div style="font-weight:700; color:#F8FAFC; margin-bottom:8px; text-transform:uppercase; font-size:0.78rem; letter-spacing:0.05em;">🎬 Renginio ir transliacijos informacija:</div>
             <table width="100%" cellpadding="0" cellspacing="0" border="0" style="color:#BAC9C0; font-size:0.86rem; line-height:1.6;">
-              <tr><td style="width:110px; color:#7A9689; padding:2px 0;">Transliacijos data:</td><td style="color:#F8FAF7; font-weight:600; padding:2px 0;">2027 m. balandžio 23 d.</td></tr>
+              <tr><td style="width:110px; color:#7A9689; padding:2px 0;">Transliacijos data:</td><td style="color:#F8FAF7; font-weight:600; padding:2px 0;">2027 m. balandžio 27 d.</td></tr>
               <tr><td style="color:#7A9689; padding:2px 0;">Renginio vieta:</td><td style="padding:2px 0;">Kauno tarptautinė gimnazija (Vytauto pr. 44, Kaunas)</td></tr>
               <tr><td style="color:#7A9689; padding:2px 0;">Grotuvas:</td><td style="padding:2px 0;"><a href="${liveLink}" style="color:#34D399; word-break:break-all;">${liveLink}</a></td></tr>
               <tr><td style="color:#7A9689; padding:2px 0;">Instagram:</td><td style="padding:2px 0;"><a href="https://www.instagram.com/azuolynas.iff" target="_blank" style="color:#9BC4AE; font-weight:600;">@azuolynas.iff</a></td></tr>
@@ -3559,7 +3559,7 @@ app.post('/api/admin/stream/viewers/resend', async (req, res) => {
       to: viewer.email,
       subject: `Ąžuolynas Film Fest | Jūsų transliacijos žetonas: ${viewer.token}`,
       html: emailHtml,
-      text: `Sveiki! Jūsų transliacijos nuoroda (2027 m. balandžio 23 d.): ${liveLink} (Žetonas: ${viewer.token}). Naujienos Instagram: @azuolynas.iff`
+      text: `Sveiki! Jūsų transliacijos nuoroda (2027 m. balandžio 27 d.): ${liveLink} (Žetonas: ${viewer.token}). Naujienos Instagram: @azuolynas.iff`
     });
 
     recordActivityLog({

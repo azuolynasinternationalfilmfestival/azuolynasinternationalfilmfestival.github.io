@@ -41,10 +41,10 @@ const EMAIL_THEME = {
   instagramHandle: "@azuolynas.iff",
   themeLt: "Mano pašaukimas",
   themeEn: "My Purpose",
-  submissionPeriodLt: "Lapkričio 1 d. – Kovo 26 d.",
-  submissionPeriodEn: "November 1st – March 26th",
-  eventDateLt: "2027 m. balandžio 23 d.",
-  eventDateEn: "April 23rd, 2027",
+  submissionPeriodLt: "2026 m. lapkričio 1 d. – 2027 m. balandžio 5 d.",
+  submissionPeriodEn: "November 1st, 2026 – April 5th, 2027",
+  eventDateLt: "2027 m. balandžio 27 d.",
+  eventDateEn: "April 27th, 2027",
   venueLt: "Kauno tarptautinė gimnazija (Vytauto pr. 44, Kaunas)",
   venueEn: "Kaunas International Gymnasium (Vytauto ave. 44, Kaunas, Lithuania)",
   contactEmail: "azuolynasfilmfestival@gmail.com"
@@ -176,7 +176,7 @@ const emailTexts = {
       heading: "Sveiki, {{name}}!",
       body: "Nuoširdžiai dėkojame už dalyvavimą! Jūsų filmo paraiška 2027 m. festivalio temai „Mano pašaukimas“ sėkmingai pasiekė AISFF organizacinį komitetą. Komisija netrukus peržiūrės filmą ir patikrins atitiktį festivalio taisyklėms (iki 180 s trukmė, filmavimas tik išmaniuoju telefonu/planšete, mokinių autorystė).",
       detailsTitle: "Pateiktos paraiškos suvestinė",
-      note: "Oficiali 2027 m. festivalio filmų peržiūra bei laureatų apdovanojimo ceremonija vyks Kauno tarptautinėje gimnazijoje 2027 m. balandžio 23 d. Tiesioginę transliaciją galėsite stebėti per https://azuolynasinternationalfilmfestival.github.io/live.html, o naujienas sekite Instagram: @azuolynas.iff.",
+      note: "Oficiali 2027 m. festivalio filmų peržiūra bei laureatų apdovanojimo ceremonija vyks Kauno tarptautinėje gimnazijoje 2027 m. balandžio 27 d. Tiesioginę transliaciją galėsite stebėti per https://azuolynasinternationalfilmfestival.github.io/live.html, o naujienas sekite Instagram: @azuolynas.iff.",
       ctaText: "Apsilankyti Festivalio Svetainėje"
     },
     adminNotification: {
@@ -193,7 +193,7 @@ const emailTexts = {
       heading: "Puikios žinios, {{name}}!",
       body: "Džiaugiamės galėdami pranešti, kad jūsų filmas atitiko visus festivalio reikalavimus ir yra oficialiai priimtas į 2027 m. konkursinę programą tema „Mano pašaukimas“! Jūsų kūrinį vertins tarptautinė žiuri komisija.",
       detailsTitle: "Priėmimo informacija",
-      note: "2027 m. balandžio 23 d. festivalio apdovanojimų ceremonija ir laureatų paskelbimas vyks Kauno tarptautinėje gimnazijoje bei tiesioginėje internetinėje transliacijoje (live.html). Sekite @azuolynas.iff.",
+      note: "2027 m. balandžio 27 d. festivalio apdovanojimų ceremonija ir laureatų paskelbimas vyks Kauno tarptautinėje gimnazijoje bei tiesioginėje internetinėje transliacijoje (live.html). Sekite @azuolynas.iff.",
       ctaText: "Peržiūrėti Konkurso Programą"
     },
     semiFinalist: {
@@ -202,7 +202,7 @@ const emailTexts = {
       heading: "Sveiki, {{name}}!",
       body: "Atrankos komisija itin aukštai įvertino jūsų filmo originalumą, kinematografiją bei temos „Mano pašaukimas“ atskleidimą. Jūsų darbas oficialiai patenka tarp AISFF 2027 PUSFINALININKŲ!",
       detailsTitle: "Pusfinalio rezultatai",
-      note: "Pusfinalio filmai bus pristatomi festivalio peržiūros programoje 2027 m. balandžio 23 d. Kauno tarptautinėje gimnazijoje bei tiesioginiame eteryje per live.html.",
+      note: "Pusfinalio filmai bus pristatomi festivalio peržiūros programoje 2027 m. balandžio 27 d. Kauno tarptautinėje gimnazijoje bei tiesioginiame eteryje per live.html.",
       ctaText: "Sekti Festivalio Naujienas"
     },
     finalist: {
@@ -211,7 +211,7 @@ const emailTexts = {
       heading: "Ypatingas pasiekimas, {{name}}!",
       body: "Nuoširdžiai sveikiname! Jūsų filmas tema „Mano pašaukimas“ oficialiai pateko į AISFF 2027 FINALĄ ir pretenduoja į prizines vietas, natūralaus ąžuolo statulėles bei Žiūrovų simpatijų prizą.",
       detailsTitle: "Finalo informacija",
-      note: "Laureatai bus apdovanoti iškilmingoje ceremonijoje Kauno tarptautinėje gimnazijoje 2027 m. balandžio 23 d. Stebėkite tiesiogiai per live.html, naujienos Instagram: @azuolynas.iff.",
+      note: "Laureatai bus apdovanoti iškilmingoje ceremonijoje Kauno tarptautinėje gimnazijoje 2027 m. balandžio 27 d. Stebėkite tiesiogiai per live.html, naujienos Instagram: @azuolynas.iff.",
       ctaText: "Peržiūrėti Finalininkų Programą"
     },
     winner: {
@@ -229,7 +229,7 @@ const emailTexts = {
       heading: "Sveiki, {{name}},",
       body: "Nuoširdžiai dėkojame už jūsų filmą ir dalyvavimą 2027 m. festivalyje tema „Mano pašaukimas“. Šiais metais sulaukėme itin daug talentingų moksleivių darbų. Nors jūsų filmas šįkart nepateko į trumpąjį konkursinį sąrašą, komisija džiaugiasi jūsų kūrybine drąsa ir linki nenustoti filmuoti!",
       detailsTitle: "Atrankos informacija",
-      note: "Kiekvienas sukurtas filmas yra svarbi patirtis. Kviečiame stebėti festivalio transliaciją 2027 m. balandžio 23 d. ir sekti mūsų Instagram @azuolynas.iff!",
+      note: "Kiekvienas sukurtas filmas yra svarbi patirtis. Kviečiame stebėti festivalio transliaciją 2027 m. balandžio 27 d. ir sekti mūsų Instagram @azuolynas.iff!",
       ctaText: "Apsilankyti Svetainėje"
     },
     eventReminder: {
@@ -245,9 +245,9 @@ const emailTexts = {
       sub: "AISFF | Jūsų tiesioginės transliacijos prieiga ir žetonas",
       preheader: "Jūsų asmeninė 2027 m. festivalio ceremonijos tiesioginės transliacijos nuoroda bei balsavimo žetonas.",
       heading: "Sveiki, {{name}}!",
-      body: "Kadangi pažymėjote, kad negalėsite atvykti į festivalio ceremoniją gyvai Kaune, paruošėme jums tiesioginę transliacijos prieigą. 2027 m. balandžio 23 d. galėsite tiesiogiai stebėti visus konkursinius filmus tema „Mano pašaukimas“ bei balsuoti už labiausiai patikusį darbą!",
+      body: "Kadangi pažymėjote, kad negalėsite atvykti į festivalio ceremoniją gyvai Kaune, paruošėme jums tiesioginę transliacijos prieigą. 2027 m. balandžio 27 d. galėsite tiesiogiai stebėti visus konkursinius filmus tema „Mano pašaukimas“ bei balsuoti už labiausiai patikusį darbą!",
       detailsTitle: "Nuotolinio dalyvio prieigos duomenys",
-      note: "Transliacija bus pasiekiama 2027 m. balandžio 23 d. su šiuo asmeniniu žetonu arba jūsų registruotu el. paštu per https://azuolynasinternationalfilmfestival.github.io/live.html. Sekite @azuolynas.iff.",
+      note: "Transliacija bus pasiekiama 2027 m. balandžio 27 d. su šiuo asmeniniu žetonu arba jūsų registruotu el. paštu per https://azuolynasinternationalfilmfestival.github.io/live.html. Sekite @azuolynas.iff.",
       ctaText: "Atverti Tiesioginę Transliaciją"
     },
     userInvite: {
@@ -285,7 +285,7 @@ const emailTexts = {
       heading: "Hello, {{name}}!",
       body: "Thank you sincerely for participating! Your entry for the 2027 festival theme “My Purpose” has been safely received by the organizing committee of AISFF. Our jury will review the film to confirm eligibility (max 180s runtime, smartphone/tablet captured, student-led creation).",
       detailsTitle: "Submission Summary",
-      note: "The gala screening and awards ceremony will take place at Kaunas International Gymnasium on April 23rd, 2027. Watch the global live stream at https://azuolynasinternationalfilmfestival.github.io/live.html and follow us on Instagram: @azuolynas.iff.",
+      note: "The gala screening and awards ceremony will take place at Kaunas International Gymnasium on April 27th, 2027. Watch the global live stream at https://azuolynasinternationalfilmfestival.github.io/live.html and follow us on Instagram: @azuolynas.iff.",
       ctaText: "Visit Festival Platform"
     },
     adminNotification: {
@@ -302,7 +302,7 @@ const emailTexts = {
       heading: "Congratulations, {{name}}!",
       body: "We are thrilled to inform you that your work has met all submission criteria (max 3 minutes runtime, captured on mobile phone/tablet, student-directed) and is officially accepted into the AISFF 2027 competition program under the theme “My Purpose”!",
       detailsTitle: "Acceptance Record",
-      note: "The full event and ceremony will take place at Kaunas International Gymnasium and stream live on our platform on April 23rd, 2027. Stay tuned via Instagram @azuolynas.iff.",
+      note: "The full event and ceremony will take place at Kaunas International Gymnasium and stream live on our platform on April 27th, 2027. Stay tuned via Instagram @azuolynas.iff.",
       ctaText: "Explore Competition Program"
     },
     semiFinalist: {
@@ -311,7 +311,7 @@ const emailTexts = {
       heading: "Exciting news, {{name}}!",
       body: "Our jury was profoundly moved by your creative voice, camera work, and narrative approach to the 2027 theme “My Purpose”. Your work has officially advanced to the AISFF SEMI-FINALS!",
       detailsTitle: "Semi-Final Status",
-      note: "Semi-final selections will be highlighted in the official festival broadcast on April 23rd, 2027. Watch live at live.html and follow @azuolynas.iff.",
+      note: "Semi-final selections will be highlighted in the official festival broadcast on April 27th, 2027. Watch live at live.html and follow @azuolynas.iff.",
       ctaText: "Follow Festival Updates"
     },
     finalist: {
@@ -320,7 +320,7 @@ const emailTexts = {
       heading: "Tremendous achievement, {{name}}!",
       body: "Warmest congratulations! Your film has officially reached the FINALS of AISFF 2027 (theme “My Purpose”) and is in direct contention for the Grand Prix, handmade oak statuettes, and the Audience Choice Award.",
       detailsTitle: "Finalist Dossier",
-      note: "Award winners will be officially unveiled during the ceremony at Kaunas International Gymnasium and live stream on April 23rd, 2027. Follow Instagram: @azuolynas.iff.",
+      note: "Award winners will be officially unveiled during the ceremony at Kaunas International Gymnasium and live stream on April 27th, 2027. Follow Instagram: @azuolynas.iff.",
       ctaText: "View Finalist Showcase"
     },
     winner: {
@@ -338,7 +338,7 @@ const emailTexts = {
       heading: "Hello, {{name}},",
       body: "Thank you sincerely for sharing your story with AISFF for the 2027 theme “My Purpose”. We received a record number of wonderful submissions this season. While your film was not selected for this season's shortlist, our jury was genuinely inspired by your creative passion.",
       detailsTitle: "Selection Record",
-      note: "Keep experimenting and filming! Join our live broadcast on April 23rd, 2027, and follow our community on Instagram: @azuolynas.iff.",
+      note: "Keep experimenting and filming! Join our live broadcast on April 27th, 2027, and follow our community on Instagram: @azuolynas.iff.",
       ctaText: "Visit Festival Platform"
     },
     eventReminder: {
@@ -354,9 +354,9 @@ const emailTexts = {
       sub: "AISFF | Your Live Stream Access & Personal Token",
       preheader: "Your personal 2027 festival ceremony live stream access link and remote voting token.",
       heading: "Hello, {{name}}!",
-      body: "Since you indicated that you are unable to attend the awards ceremony in person, we have generated your exclusive live broadcast pass. On April 23rd, 2027, you can watch the stream and cast your vote remotely!",
+      body: "Since you indicated that you are unable to attend the awards ceremony in person, we have generated your exclusive live broadcast pass. On April 27th, 2027, you can watch the stream and cast your vote remotely!",
       detailsTitle: "Remote Participant Connection Details",
-      note: "The broadcast airs live on April 23rd, 2027. Accessible with this personal token or your registered email at https://azuolynasinternationalfilmfestival.github.io/live.html. Follow @azuolynas.iff.",
+      note: "The broadcast airs live on April 27th, 2027. Accessible with this personal token or your registered email at https://azuolynasinternationalfilmfestival.github.io/live.html. Follow @azuolynas.iff.",
       ctaText: "Open Live Stream Platform"
     },
     userInvite: {
@@ -595,7 +595,7 @@ function buildEmailDocument({ lang, preheader, statusKey, childrenHtml }) {
                       </tr>
                       <tr>
                         <td style="padding: 2px 0; color: #7A9689;">${isLt ? "Renginio data:" : "Date:"}</td>
-                        <td style="padding: 2px 0; color: #F8FAF7; font-weight: 600;">${isLt ? "2027 m. balandžio 23 d." : "April 23rd, 2027"}</td>
+                        <td style="padding: 2px 0; color: #F8FAF7; font-weight: 600;">${isLt ? "2027 m. balandžio 27 d." : "April 27th, 2027"}</td>
                       </tr>
                       <tr>
                         <td style="padding: 2px 0; color: #7A9689;">${isLt ? "Vieta:" : "Venue:"}</td>
