@@ -320,15 +320,15 @@ function initViewerTypeToggles() {
   const roleSelect = document.getElementById("newViewerRole");
 
   function updateState() {
-    const isClassroom = radioClass && radioClass.checked;
+    const isClassroom = radioClass ? radioClass.checked : true;
     if (classroomRow) {
       classroomRow.style.display = isClassroom ? "grid" : "none";
     }
     if (lblName) {
       lblName.textContent = isClassroom ? "Mokytojo Vardas, Pavardė *" : "Žiūrovo Vardas, Pavardė *";
     }
-    if (roleSelect && isClassroom) {
-      roleSelect.value = "classroom_viewer";
+    if (roleSelect && isClassroom && (!roleSelect.value || roleSelect.value === "classroom_viewer" || roleSelect.value === "guest_viewer")) {
+      roleSelect.value = "teacher_classroom";
     }
   }
 
@@ -668,11 +668,11 @@ function initViewerTokenForm() {
       const email = document.getElementById("newViewerEmail")?.value.trim();
       const name = document.getElementById("newViewerName")?.value.trim();
       const customToken = document.getElementById("newViewerCustomToken")?.value.trim();
-      const role = document.getElementById("newViewerRole")?.value || "guest_viewer";
+      const role = document.getElementById("newViewerRole")?.value || "teacher_classroom";
       const expiresInHours = document.getElementById("newViewerExpires")?.value || "48";
       const sendEmail = document.getElementById("newViewerSendEmail")?.checked === true;
 
-      const isClassroom = document.getElementById("viewerTypeClassroom")?.checked === true;
+      const isClassroom = document.getElementById("viewerTypeIndividual")?.checked ? false : true;
       const tokenType = isClassroom ? "classroom" : "individual";
       const classroomLabel = document.getElementById("newViewerClassroomLabel")?.value.trim() || "";
       const maxConcurrentDevices = isClassroom 
@@ -696,8 +696,17 @@ function initViewerTokenForm() {
 
       if (res.ok) {
         const data = await res.json();
-        showToast(`Prieigos žetonas sėkmingai sugeneruotas: ${data.viewer?.token}!`, "success");
+        showToast(`Mokytojo prieigos žetonas sėkmingai sugeneruotas: ${data.viewer?.token}!`, "success");
         form.reset();
+        const rClass = document.getElementById("viewerTypeClassroom");
+        if (rClass) rClass.checked = true;
+        const cRow = document.getElementById("classroomSettingsRow");
+        if (cRow) cRow.style.display = "grid";
+        const rRole = document.getElementById("newViewerRole");
+        if (rRole) rRole.value = "teacher_classroom";
+        const maxDevInput = document.getElementById("newViewerMaxDevices");
+        if (maxDevInput) maxDevInput.value = "35";
+
         await fetchAuthorizedViewers();
         renderAuthorizedViewersTable();
 

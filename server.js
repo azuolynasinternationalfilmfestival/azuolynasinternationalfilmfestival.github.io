@@ -3261,16 +3261,17 @@ app.post('/api/admin/stream/viewers/create', async (req, res) => {
     const cleanName = String(name || cleanEmail.split('@')[0]).trim();
     const callerEmail = String(adminEmail || req.headers['x-admin-email'] || PRIMARY_SUPERADMIN_EMAIL).trim().toLowerCase();
     const duration = parseInt(expiresInHours || '48', 10);
-    const tokenType = rawTokenType === 'classroom' ? 'classroom' : 'individual';
-    const classroomLabel = String(rawClassroomLabel || (tokenType === 'classroom' ? cleanName : '')).trim();
+    // Tokens are created exclusively for Teachers & Classrooms (students watch via the teacher's stream)
+    const tokenType = rawTokenType === 'individual' ? 'individual' : 'classroom';
+    const classroomLabel = String(rawClassroomLabel || cleanName).trim();
     const maxConcurrentDevices = tokenType === 'classroom' ? Math.max(1, Math.min(100, parseInt(rawMaxDevices || '35', 10))) : 1;
 
     // Generate secure Cloudflare Stream signed token
     let token = String(customToken || '').trim();
     if (!token) {
-      // Build cryptographic signed token: cfs_signed_<hex>
+      // Build cryptographic signed token: cfs_teacher_<hex>
       const hashPart = crypto.createHmac('sha256', JWT_SECRET).update(`${cleanEmail}-${Date.now()}`).digest('hex').substring(0, 16);
-      token = tokenType === 'classroom' ? `cfs_class_${hashPart}` : `cfs_live_${hashPart}`;
+      token = tokenType === 'classroom' ? `cfs_teacher_${hashPart}` : `cfs_live_${hashPart}`;
     }
 
     const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
@@ -3294,8 +3295,8 @@ app.post('/api/admin/stream/viewers/create', async (req, res) => {
       activeDevices: 0,
       email: cleanEmail,
       name: cleanName,
-      filmTitle: filmTitle ? String(filmTitle).trim() : (tokenType === 'classroom' ? 'Klasės transliacija' : 'Žiūrovas (Auditorija)'),
-      role: role || (tokenType === 'classroom' ? 'classroom_viewer' : 'guest_viewer'),
+      filmTitle: filmTitle ? String(filmTitle).trim() : 'Mokytojo / Klasės transliacija',
+      role: role || 'teacher_classroom',
       status: 'authorized',
       createdAt: new Date().toISOString(),
       expiresAt: new Date(Date.now() + duration * 3600 * 1000).toISOString(),
@@ -3336,14 +3337,14 @@ app.post('/api/admin/stream/viewers/create', async (req, res) => {
         <tr><td align="center" style="padding-bottom:20px;">
           <img src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media" width="68" height="68" style="border-radius:2px; border:1px solid rgba(255,255,255,0.2); display:block; margin:0 auto;" alt="Logo">
           <h2 style="color:#FFFFFF; margin:14px 0 4px 0; font-size:22px; letter-spacing:0.02em;">AISFF 2027</h2>
-          <p style="color:#BAC9C0; margin:0; font-size:0.88rem; text-transform:uppercase; letter-spacing:0.06em; font-weight:700;">${tokenType === 'classroom' ? 'Mokyklos / Klasės Transliacijos Prieiga' : 'Tiesioginės Transliacijos Žetonas & Prieiga'}</p>
+          <p style="color:#BAC9C0; margin:0; font-size:0.88rem; text-transform:uppercase; letter-spacing:0.06em; font-weight:700;">Mokyklos / Klasės Transliacijos Prieiga (Mokytojui)</p>
         </td></tr>
         <tr><td style="line-height:1.65; font-size:0.95rem; color:#BAC9C0;">
-          <p style="color:#F8FAF7; font-size:1.05rem; margin-top:0;">Sveiki, <strong>${cleanName}</strong>!</p>
-          <p>${tokenType === 'classroom' ? `Jūsų klasei suteikta autorizuota tiesioginės transliacijos prieiga (${maxConcurrentDevices} įrenginiams vienu metu). Mokytojai gali transliuoti per projektorių arba mokiniai gali stebėti per savo įrenginius.` : 'Jums suteikta oficiali autorizuota prieiga tiesiogiai stebėti festivalio filmų peržiūrą ir iškilmingą apdovanojimų ceremoniją per tiesioginę transliaciją.'}</p>
+          <p style="color:#F8FAF7; font-size:1.05rem; margin-top:0;">Gerb. Mokytojau(-a), <strong>${cleanName}</strong>!</p>
+          <p>Jūsų klasei suteikta autorizuota tiesioginės transliacijos prieiga (${maxConcurrentDevices} įrenginiams vienu metu). Galite tiesiogiai transliuoti festivalio peržiūrą klasei per projektorių arba ekraną.</p>
           
           <div style="background:#070908; border:1px solid rgba(255,255,255,0.2); border-radius:2px; padding:18px; margin:20px 0; text-align:center;">
-            <div style="font-size:0.75rem; color:#7A9689; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:6px; font-weight:700;">Jūsų asmeninis prieigos žetonas (Token):</div>
+            <div style="font-size:0.75rem; color:#7A9689; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:6px; font-weight:700;">Jūsų mokytojo prieigos žetonas (Token):</div>
             <code style="font-size:1.25rem; color:#FFFFFF; font-weight:700; letter-spacing:1px; display:inline-block; padding:4px 12px; background:rgba(255,255,255,0.06); border-radius:2px;">${token}</code>
           </div>
 
@@ -3374,13 +3375,17 @@ app.post('/api/admin/stream/viewers/create', async (req, res) => {
 </html>
       `;
 
-      await sendEmail({
-        to: cleanEmail,
-        subject: `Ąžuolynas Film Fest | Jūsų tiesioginės transliacijos žetonas: ${token}`,
-        html: emailHtml,
-        text: `Sveiki, ${cleanName}! Jūsų tiesioginės transliacijos prieiga festivaliui (2027 m. balandžio 27 d.): ${liveLink} (Žetonas: ${token}). Sekite naujienas Instagram: @azuolynas.iff`
-      });
-      emailSent = true;
+      try {
+        await sendEmail({
+          to: cleanEmail,
+          subject: `Ąžuolynas Film Fest | Jūsų tiesioginės transliacijos žetonas: ${token}`,
+          html: emailHtml,
+          text: `Sveiki, ${cleanName}! Jūsų tiesioginės transliacijos prieiga festivaliui (2027 m. balandžio 27 d.): ${liveLink} (Žetonas: ${token}). Sekite naujienas Instagram: @azuolynas.iff`
+        });
+        emailSent = true;
+      } catch (mailErr) {
+        console.warn('[Stream Token] Email sending notice (skipped gracefully):', mailErr.message);
+      }
     }
 
     recordActivityLog({
@@ -3388,7 +3393,7 @@ app.post('/api/admin/stream/viewers/create', async (req, res) => {
       category: "stream",
       adminEmail: callerEmail,
       target: cleanEmail,
-      details: `Sugeneruotas ${tokenType.toUpperCase()} žetonas (${token}) ${cleanName} (${cleanEmail}). Maks. įrenginių: ${maxConcurrentDevices}. Laiškas: ${emailSent ? 'Taip' : 'Ne'}`
+      details: `Sugeneruotas mokytojo žetonas (${token}) ${cleanName} (${cleanEmail}). Maks. įrenginių: ${maxConcurrentDevices}. Laiškas: ${emailSent ? 'Taip' : 'Ne'}`
     });
 
     res.json({
@@ -3399,7 +3404,7 @@ app.post('/api/admin/stream/viewers/create', async (req, res) => {
     });
   } catch (err) {
     console.error('Error creating stream viewer token:', err);
-    res.status(500).json({ error: 'Nepavyko sugeneruoti žiūrovo žetono' });
+    res.status(500).json({ error: 'Nepavyko sugeneruoti žiūrovo žetono: ' + (err.message || String(err)) });
   }
 });
 
@@ -3821,6 +3826,19 @@ app.post('/api/admin/logs', (req, res) => {
     res.json({ success: true, log });
   } catch (err) {
     res.status(500).json({ error: 'Failed to record activity log' });
+  }
+});
+
+// API: Clear All Activity Logs / Messages
+app.delete('/api/admin/logs', (req, res) => {
+  try {
+    saveLogsData({ logs: [] });
+    res.json({
+      success: true,
+      message: 'Visi audito pranešimai ir veiklos žurnalo įrašai sėkmingai ištrinti.'
+    });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to clear activity logs: ' + (err.message || String(err)) });
   }
 });
 

@@ -127,6 +127,10 @@ function initTabNavigation() {
         titleElem.textContent = textSpan ? textSpan.textContent.trim() : "Valdymo Skydas";
       }
 
+      if (tab.btn === "tabDiagnosticsBtn") {
+        try { loadDiagnosticsData(); } catch (e) { console.error("loadDiagnosticsData error:", e); }
+      }
+
       // Close mobile sidebar on selection
       const sidebar = document.getElementById("adminSidebar");
       if (sidebar && window.innerWidth <= 1024) {

@@ -867,35 +867,40 @@
 
             <!-- Add Viewer / Generate Token Form -->
             <form id="formAddStreamViewer" style="background:rgba(12, 38, 31, 0.5); border:1px solid var(--border-color); border-radius:var(--site-radius); padding:16px; margin-bottom:18px;">
+              <div style="background:rgba(52,211,153,0.08); border:1px solid rgba(52,211,153,0.25); border-radius:4px; padding:10px 14px; margin-bottom:14px; font-size:0.82rem; color:#A7F3D0; line-height:1.5; display:flex; align-items:center; gap:10px;">
+                <span style="font-size:1.2rem;">💡</span>
+                <span><strong>Prieiga mokytojams:</strong> Tiesioginės transliacijos žetonai generuojami <strong>TIK mokytojams</strong>. Mokiniams atskirų nuorodų nereikia – mokytojas rodo transliaciją visai klasei per kabineto projektorių ar ekraną.</span>
+              </div>
+
               <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:12px;">
-                <h4 style="font-size:0.9rem; color:#FFFFFF; margin:0;">+ Priskirti Žiūrovą / Klasę & Sugeneruoti Prieigos Žetoną</h4>
+                <h4 style="font-size:0.92rem; color:#FFFFFF; margin:0;">+ Mokytojo / Klasės Prieigos Žetono Kūrimas</h4>
                 <div style="display:flex; gap:12px; align-items:center;">
-                  <label style="cursor:pointer; font-size:0.82rem; color:var(--text-color); display:flex; align-items:center; gap:5px; margin:0;">
-                    <input type="radio" name="viewerTypeRadio" id="viewerTypeIndividual" value="individual" checked style="accent-color:#34D399;">
-                    <span>👤 Individualus žiūrovas</span>
+                  <label style="cursor:pointer; font-size:0.82rem; color:#E2E8F0; display:flex; align-items:center; gap:5px; margin:0; font-weight:700;">
+                    <input type="radio" name="viewerTypeRadio" id="viewerTypeClassroom" value="classroom" checked style="accent-color:#34D399;">
+                    <span>🏫 Mokytojas / Klasė (Projektoriui ir klasei)</span>
                   </label>
-                  <label style="cursor:pointer; font-size:0.82rem; color:#E2E8F0; display:flex; align-items:center; gap:5px; margin:0; font-weight:600;">
-                    <input type="radio" name="viewerTypeRadio" id="viewerTypeClassroom" value="classroom" style="accent-color:#34D399;">
-                    <span>🏫 Mokytojas / Klasė (Multi-device)</span>
+                  <label style="cursor:pointer; font-size:0.82rem; color:var(--text-muted); display:flex; align-items:center; gap:5px; margin:0;">
+                    <input type="radio" name="viewerTypeRadio" id="viewerTypeIndividual" value="individual" style="accent-color:#34D399;">
+                    <span>👤 Individualus organizatorius/teisėjas</span>
                   </label>
                 </div>
               </div>
 
               <div class="two-col-grid" style="margin-bottom:12px;">
                 <div class="input-cell">
-                  <label for="newViewerEmail">El. Paštas / Gmail *</label>
-                  <input type="email" id="newViewerEmail" class="field" placeholder="mokytojas@mokykla.lt arba ziurovas@gmail.com" required>
+                  <label for="newViewerEmail">Mokytojo El. Paštas / Gmail *</label>
+                  <input type="email" id="newViewerEmail" class="field" placeholder="mokytojas@mokykla.lt arba gmail.com" required>
                 </div>
                 <div class="input-cell">
-                  <label for="newViewerName" id="lblViewerName">Žiūrovo arba Mokytojo Vardas, Pavardė *</label>
-                  <input type="text" id="newViewerName" class="field" placeholder="pvz. Jonas Kazlauskas" required>
+                  <label for="newViewerName" id="lblViewerName">Mokytojo Vardas, Pavardė *</label>
+                  <input type="text" id="newViewerName" class="field" placeholder="pvz. Jonas Kazlauskas (Mokytojas)" required>
                 </div>
               </div>
 
-              <!-- Classroom Specific Row (Enabled for classroom) -->
+              <!-- Classroom Specific Row (Enabled by default for classroom/teacher) -->
               <div id="classroomSettingsRow" class="two-col-grid" style="margin-bottom:12px; background:rgba(255,255,255,0.04); padding:12px; border-radius:2px; border:1px solid rgba(255,255,255,0.12);">
                 <div class="input-cell">
-                  <label for="newViewerClassroomLabel" style="color:#CBD5E1;">Klasės / Kabineto Pavadinimas</label>
+                  <label for="newViewerClassroomLabel" style="color:#CBD5E1;">Klasė / Kabinetas (Projektoriaus vieta) *</label>
                   <input type="text" id="newViewerClassroomLabel" class="field" placeholder="pvz. 8B klasė, 204 kab. (Projektorius)">
                 </div>
                 <div class="input-cell">
@@ -907,17 +912,15 @@
               <div class="two-col-grid" style="margin-bottom:12px;">
                 <div class="input-cell">
                   <label for="newViewerCustomToken">Custom Token Pavadinimas (Neprivaloma, tuščias = automatinis signed token)</label>
-                  <input type="text" id="newViewerCustomToken" class="field" placeholder="pvz. fest_vip_2026 (arba palikite tuščią)">
+                  <input type="text" id="newViewerCustomToken" class="field" placeholder="pvz. mokytojas_kazlauskas (arba palikite tuščią)">
                 </div>
                 <div class="input-row">
                   <div class="input-cell">
                     <label for="newViewerRole">Prieigos Rolė</label>
                     <select id="newViewerRole" class="field">
-                      <option value="guest_viewer" selected>Žiūrovas (Auditorija)</option>
-                      <option value="classroom_viewer">Klasės / Mokyklos Prieiga</option>
-                      <option value="remote_participant">Nuotolinis dalyvis</option>
-                      <option value="vip">VIP Svečias</option>
-                      <option value="press">Žiniasklaida (Press)</option>
+                      <option value="teacher_classroom" selected>🏫 Mokytojas (Klasės transliacijai)</option>
+                      <option value="jury_member">⚖️ Vertinimo komisija (Teisėjas)</option>
+                      <option value="vip">🌟 VIP Svečias / Partneris</option>
                     </select>
                   </div>
                   <div class="input-cell">
@@ -934,11 +937,11 @@
               <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
                 <label style="cursor:pointer; display:flex; align-items:center; gap:8px; margin:0; font-size:0.84rem; color:var(--text-color);">
                   <input type="checkbox" id="newViewerSendEmail" checked style="accent-color:var(--accent-color); width:16px; height:16px;">
-                  <span>Automatiškai išsiųsti kvietimo el. laišką su sugeneruotu žetonu ir tiesiogine nuoroda</span>
+                  <span>Automatiškai išsiųsti kvietimo el. laišką mokytojui su žetonu ir tiesiogine nuoroda</span>
                 </label>
                 <button type="submit" id="btnAddStreamViewerSubmit" class="btn-solid btn-sm" style="display:inline-flex; align-items:center; gap:6px;">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
-                  <span>Sugeneruoti Prieigos Žetoną</span>
+                  <span>Sugeneruoti Mokytojo Prieigos Žetoną</span>
                 </button>
               </div>
             </form>
@@ -1418,9 +1421,13 @@ Tomas Vaitkus, Aktų salė (Projektorius), t.vaitkus@mokykla.lt, 100"></textarea
                   Detali visų sistemos veiksmų chronologija: kas, kada ir kokią informaciją pakeitė (nustatymai, leidiniai, paraiškos, užduotys).
                 </p>
               </div>
-              <div style="display:flex; gap:8px;">
+              <div style="display:flex; gap:8px; flex-wrap:wrap;">
                 <button type="button" id="btnExportLogs" class="btn-outline btn-xs">Atsisiųsti JSON ataskaitą</button>
                 <button type="button" id="btnRefreshLogs" class="btn-solid btn-xs">Atnaujinti</button>
+                <button type="button" id="btnClearAllLogs" class="btn-outline btn-xs" style="color:#f87171; border-color:rgba(239,68,68,0.4); display:inline-flex; align-items:center; gap:5px;" title="Ištrinti visus pranešimus ir audito žurnalo įrašus">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                  <span>Išvalyti pranešimus</span>
+                </button>
               </div>
             </div>
           </div>

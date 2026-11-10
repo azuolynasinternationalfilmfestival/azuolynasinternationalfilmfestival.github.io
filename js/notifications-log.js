@@ -36,6 +36,29 @@ export function initNotificationsLog() {
     exportBtn.addEventListener("click", exportLogsJson);
   }
 
+  const clearBtn = document.getElementById("btnClearAllLogs");
+  if (clearBtn) {
+    clearBtn.addEventListener("click", async () => {
+      if (!confirm("Ar tikrai norite išvalyti visus pranešimus ir audito žurnalo įrašus?")) return;
+      clearBtn.disabled = true;
+      try {
+        const res = await fetch("/api/admin/logs", { method: "DELETE" });
+        if (res.ok) {
+          allLogs = [];
+          renderLogsFeed();
+          updateNotificationsBadge();
+          showToast("Visi pranešimai sėkmingai ištrinti!", "success");
+        } else {
+          showToast("Nepavyko ištrinti pranešimų", "error");
+        }
+      } catch (err) {
+        showToast("Klaida trinant pranešimus: " + err.message, "error");
+      } finally {
+        clearBtn.disabled = false;
+      }
+    });
+  }
+
   // Listen to custom refresh event dispatched by other modules
   window.addEventListener("refresh-notifications", () => {
     loadActivityLogs();
