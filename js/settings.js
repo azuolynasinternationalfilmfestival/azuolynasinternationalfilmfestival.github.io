@@ -109,17 +109,17 @@ export function initSettings() {
       const enEvent = document.getElementById("cfgEnEvent");
       const enDates = document.getElementById("cfgEnDates");
 
-      if (ltOpening) ltOpening.value = "Lapkričio 1 d.";
-      if (ltDeadline) ltDeadline.value = "Kovo 26 d.";
-      if (ltEvent) ltEvent.value = "2027 m. balandžio 23 d. (Kino festivalis ir tiesioginė transliacija)";
-      if (ltDates) ltDates.value = "Nuo lapkričio 1 d. iki kovo 26 d.";
+      if (ltOpening) ltOpening.value = "2026 m. lapkričio 1 d.";
+      if (ltDeadline) ltDeadline.value = "2027 m. balandžio 5 d.";
+      if (ltEvent) ltEvent.value = "2027 m. balandžio 27 d. (Kino festivalis ir tiesioginė transliacija)";
+      if (ltDates) ltDates.value = "Nuo 2026 m. lapkričio 1 d. iki 2027 m. balandžio 5 d.";
 
-      if (enOpening) enOpening.value = "November 1st";
-      if (enDeadline) enDeadline.value = "March 26th";
-      if (enEvent) enEvent.value = "April 23rd, 2027 (Film Festival & Live Stream)";
-      if (enDates) enDates.value = "November 1st – March 26th";
+      if (enOpening) enOpening.value = "November 1, 2026";
+      if (enDeadline) enDeadline.value = "April 5, 2027";
+      if (enEvent) enEvent.value = "April 27th, 2027 (Film Festival & Live Stream)";
+      if (enDates) enDates.value = "November 1, 2026 – April 5, 2027";
 
-      showToast("Nustatytos oficialios festivalio datos: Lapkričio 1 d. &bull; Kovo 26 d. &bull; Balandžio 23 d.", "success");
+      showToast("Nustatytos oficialios festivalio datos: 2026 m. lapkričio 1 d. &bull; 2027 m. balandžio 5 d. &bull; 2027 m. balandžio 27 d.", "success");
     });
   }
 }
@@ -286,13 +286,13 @@ function applySettingsToForm(d) {
   const ltTopicDescElem = document.getElementById("cfgLtTopicDesc");
   if (ltTopicDescElem) ltTopicDescElem.value = lt.topicDesc || "Ką norite veikti savo gyvenime ir kaip atrasti tikrąjį pašaukimą? Ieškome istorijų apie savo kelio paieškas, karjeros pasirinkimus ir vidinių abejonių įveikimą. Papasakokite, ko reikia, kad sektumėte savo aistra, kai aplinkiniai tikisi kažko kito – ar tai būtų šeimos spaudimas rinktis „rimtą“ profesiją, pavyzdžiui, mediciną ar teisę, ar jūsų pačių baimė žengti į meną, muziką ar kūrybines sritis. Parodykite šios kelionės tikrovę, kliūtis pakeliui ir tą akimirką, kai jūs ar jūsų herojai suprato, ką iš tiesų lemta daryti.";
   const ltOpeningElem = document.getElementById("cfgLtOpening");
-  if (ltOpeningElem) ltOpeningElem.value = lt.openingDate || "Lapkričio 1 d.";
+  if (ltOpeningElem) ltOpeningElem.value = lt.openingDate || "2026 m. lapkričio 1 d.";
   const ltDeadlineElem = document.getElementById("cfgLtDeadline");
-  if (ltDeadlineElem) ltDeadlineElem.value = lt.deadlineDate || "Kovo 26 d.";
+  if (ltDeadlineElem) ltDeadlineElem.value = lt.deadlineDate || "2027 m. balandžio 5 d.";
   const ltEventElem = document.getElementById("cfgLtEvent");
-  if (ltEventElem) ltEventElem.value = lt.dateEvent || lt.eventDate || "2027 m. balandžio 23 d. (Kino festivalis ir tiesioginė transliacija)";
+  if (ltEventElem) ltEventElem.value = lt.dateEvent || lt.eventDate || "2027 m. balandžio 27 d. (Kino festivalis ir tiesioginė transliacija)";
   const ltDatesElem = document.getElementById("cfgLtDates");
-  if (ltDatesElem) ltDatesElem.value = lt.datesSubmissions || "Nuo lapkričio 1 d. iki kovo 26 d.";
+  if (ltDatesElem) ltDatesElem.value = lt.datesSubmissions || "Nuo 2026 m. lapkričio 1 d. iki 2027 m. balandžio 5 d.";
   const ltAboutElem = document.getElementById("cfgLtAbout");
   if (ltAboutElem) ltAboutElem.value = lt.aboutText || "";
   const ltHeroBadgeElem = document.getElementById("cfgLtHeroBadge");
@@ -300,20 +300,20 @@ function applySettingsToForm(d) {
   const ltTargetElem = document.getElementById("cfgLtTarget");
   if (ltTargetElem) ltTargetElem.value = lt.targetAudience || "Mokiniai (10–18 m.)";
   const ltRecPhElem = document.getElementById("cfgLtRecordingPh");
-  if (ltRecPhElem) ltRecPhElem.value = lt.recordingPlaceholder || "Festivalio ir tiesioginės transliacijos vaizdo įrašas bus pasiekiamas 2027 m. balandžio 23 d.";
+  if (ltRecPhElem) ltRecPhElem.value = lt.recordingPlaceholder || "Festivalio ir tiesioginės transliacijos vaizdo įrašas bus pasiekiamas 2027 m. balandžio 27 d.";
 
   const enTopicElem = document.getElementById("cfgEnTopic");
   if (enTopicElem) enTopicElem.value = en.topic || "My Purpose";
   const enTopicDescElem = document.getElementById("cfgEnTopicDesc");
   if (enTopicDescElem) enTopicDescElem.value = en.topicDesc || "What do you want to do with your life, and how do you find your true calling? We are looking for stories about discovering your path, making career choices, and overcoming self-doubt. Tell us what it takes to follow your passion when the people around you expect something different—whether it is family pressure to pursue a \"serious\" career like medicine or law, or your own fear of stepping into the arts, music, or creative fields. Show the reality of this journey, the obstacles along the way, and the exact moment you or your characters realized what you were meant to do.";
   const enOpeningElem = document.getElementById("cfgEnOpening");
-  if (enOpeningElem) enOpeningElem.value = en.openingDate || "November 1st";
+  if (enOpeningElem) enOpeningElem.value = en.openingDate || "November 1, 2026";
   const enDeadlineElem = document.getElementById("cfgEnDeadline");
-  if (enDeadlineElem) enDeadlineElem.value = en.deadlineDate || "March 26th";
+  if (enDeadlineElem) enDeadlineElem.value = en.deadlineDate || "April 5, 2027";
   const enEventElem = document.getElementById("cfgEnEvent");
-  if (enEventElem) enEventElem.value = en.dateEvent || en.eventDate || "April 23rd, 2027 (Film Festival & Live Stream)";
+  if (enEventElem) enEventElem.value = en.dateEvent || en.eventDate || "April 27th, 2027 (Film Festival & Live Stream)";
   const enDatesElem = document.getElementById("cfgEnDates");
-  if (enDatesElem) enDatesElem.value = en.datesSubmissions || "November 1st – March 26th";
+  if (enDatesElem) enDatesElem.value = en.datesSubmissions || "November 1, 2026 – April 5, 2027";
   const enAboutElem = document.getElementById("cfgEnAbout");
   if (enAboutElem) enAboutElem.value = en.aboutText || "";
   const enHeroBadgeElem = document.getElementById("cfgEnHeroBadge");
@@ -321,7 +321,7 @@ function applySettingsToForm(d) {
   const enTargetElem = document.getElementById("cfgEnTarget");
   if (enTargetElem) enTargetElem.value = en.targetAudience || "Students (10–18 yrs)";
   const enRecPhElem = document.getElementById("cfgEnRecordingPh");
-  if (enRecPhElem) enRecPhElem.value = en.recordingPlaceholder || "The official festival recording and live stream replay will be published here on April 23rd, 2027.";
+  if (enRecPhElem) enRecPhElem.value = en.recordingPlaceholder || "The official festival recording and live stream replay will be published here on April 27th, 2027.";
 
   if (d.smtp && typeof d.smtp === "object") {
     if (document.getElementById("cfgSmtpHost")) document.getElementById("cfgSmtpHost").value = d.smtp.host || "smtp.gmail.com";
@@ -395,16 +395,16 @@ async function saveSettings() {
   const votingChecked = document.getElementById("cfgVotingActive") ? document.getElementById("cfgVotingActive").checked : false;
   const archiveChecked = document.getElementById("cfgArchiveVisibility") ? document.getElementById("cfgArchiveVisibility").checked : true;
 
-  const ltOpening = (document.getElementById("cfgLtOpening")?.value || "").trim() || "Lapkričio 1 d.";
-  const ltDeadline = (document.getElementById("cfgLtDeadline")?.value || "").trim() || "Kovo 26 d.";
-  const ltEvent = (document.getElementById("cfgLtEvent")?.value || "").trim() || "2027 m. balandžio 23 d. (Kino festivalis ir tiesioginė transliacija)";
-  const ltDates = (document.getElementById("cfgLtDates")?.value || "").trim() || "Nuo lapkričio 1 d. iki kovo 26 d.";
+  const ltOpening = (document.getElementById("cfgLtOpening")?.value || "").trim() || "2026 m. lapkričio 1 d.";
+  const ltDeadline = (document.getElementById("cfgLtDeadline")?.value || "").trim() || "2027 m. balandžio 5 d.";
+  const ltEvent = (document.getElementById("cfgLtEvent")?.value || "").trim() || "2027 m. balandžio 27 d. (Kino festivalis ir tiesioginė transliacija)";
+  const ltDates = (document.getElementById("cfgLtDates")?.value || "").trim() || "Nuo 2026 m. lapkričio 1 d. iki 2027 m. balandžio 5 d.";
   const ltTopicDesc = (document.getElementById("cfgLtTopicDesc")?.value || "").trim() || "Ką norite veikti savo gyvenime ir kaip atrasti tikrąjį pašaukimą? Ieškome istorijų apie savo kelio paieškas, karjeros pasirinkimus ir vidinių abejonių įveikimą. Papasakokite, ko reikia, kad sektumėte savo aistra, kai aplinkiniai tikisi kažko kito – ar tai būtų šeimos spaudimas rinktis „rimtą“ profesiją, pavyzdžiui, mediciną ar teisę, ar jūsų pačių baimė žengti į meną, muziką ar kūrybines sritis. Parodykite šios kelionės tikrovę, kliūtis pakeliui ir tą akimirką, kai jūs ar jūsų herojai suprato, ką iš tiesų lemta daryti.";
 
-  const enOpening = (document.getElementById("cfgEnOpening")?.value || "").trim() || "November 1st";
-  const enDeadline = (document.getElementById("cfgEnDeadline")?.value || "").trim() || "March 26th";
-  const enEvent = (document.getElementById("cfgEnEvent")?.value || "").trim() || "April 23rd, 2027 (Film Festival & Live Stream)";
-  const enDates = (document.getElementById("cfgEnDates")?.value || "").trim() || "November 1st – March 26th";
+  const enOpening = (document.getElementById("cfgEnOpening")?.value || "").trim() || "November 1, 2026";
+  const enDeadline = (document.getElementById("cfgEnDeadline")?.value || "").trim() || "April 5, 2027";
+  const enEvent = (document.getElementById("cfgEnEvent")?.value || "").trim() || "April 27th, 2027 (Film Festival & Live Stream)";
+  const enDates = (document.getElementById("cfgEnDates")?.value || "").trim() || "November 1, 2026 – April 5, 2027";
   const enTopicDesc = (document.getElementById("cfgEnTopicDesc")?.value || "").trim() || "What do you want to do with your life, and how do you find your true calling? We are looking for stories about discovering your path, making career choices, and overcoming self-doubt. Tell us what it takes to follow your passion when the people around you expect something different—whether it is family pressure to pursue a \"serious\" career like medicine or law, or your own fear of stepping into the arts, music, or creative fields. Show the reality of this journey, the obstacles along the way, and the exact moment you or your characters realized what you were meant to do.";
 
   const updated = {
@@ -435,7 +435,7 @@ async function saveSettings() {
       aboutText: (document.getElementById("cfgLtAbout")?.value || "").trim(),
       heroBadge: (document.getElementById("cfgLtHeroBadge")?.value || "").trim() || "7-asis Tarptautinis Mokinių Filmų Festivalis",
       targetAudience: (document.getElementById("cfgLtTarget")?.value || "").trim() || "Mokiniai (10–18 m.)",
-      recordingPlaceholder: (document.getElementById("cfgLtRecordingPh")?.value || "").trim() || "Festivalio ir tiesioginės transliacijos vaizdo įrašas bus pasiekiamas 2027 m. balandžio 23 d."
+      recordingPlaceholder: (document.getElementById("cfgLtRecordingPh")?.value || "").trim() || "Festivalio ir tiesioginės transliacijos vaizdo įrašas bus pasiekiamas 2027 m. balandžio 27 d."
     },
     en: {
       topic: (document.getElementById("cfgEnTopic")?.value || "").trim() || "My Purpose",
@@ -448,7 +448,7 @@ async function saveSettings() {
       aboutText: (document.getElementById("cfgEnAbout")?.value || "").trim(),
       heroBadge: (document.getElementById("cfgEnHeroBadge")?.value || "").trim() || "The 7th International Students Film Festival",
       targetAudience: (document.getElementById("cfgEnTarget")?.value || "").trim() || "Students (10–18 yrs)",
-      recordingPlaceholder: (document.getElementById("cfgEnRecordingPh")?.value || "").trim() || "The official festival recording and live stream replay will be published here on April 23rd, 2027."
+      recordingPlaceholder: (document.getElementById("cfgEnRecordingPh")?.value || "").trim() || "The official festival recording and live stream replay will be published here on April 27th, 2027."
     }
   };
 
