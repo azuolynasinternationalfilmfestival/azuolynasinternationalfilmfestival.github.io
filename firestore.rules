@@ -39,6 +39,16 @@ service cloud.firestore {
       return resource.data;
     }
 
+    // 0. Movies Collection: Public read, atomic increment of +1 on 'votes', metadata & jury results locked to admins
+    match /movies/{movieId} {
+      allow get, list: if true;
+      allow create, delete: if isSuperAdmin();
+      allow update: if isSuperAdmin() || (
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['votes']) &&
+        request.resource.data.votes == resource.data.votes + 1
+      );
+    }
+
     // 1. Festival Settings: Public read, Super Admin full control & trusted server sync
     match /settings/{settingId} {
       allow get, list: if true;
@@ -60,11 +70,12 @@ service cloud.firestore {
       allow create: if true;
 
       // Strict update access: Super Admins can update any field;
-      // Public audience can only increment votesCount by exactly +1
+      // Public audience can increment votesCount or votes by exactly +1
       allow update: if isSuperAdmin() || (
-        isSignedIn() &&
-        incoming().diff(existing()).affectedKeys().hasOnly(['votesCount']) &&
-        incoming().votesCount == (existing().get('votesCount', 0) + 1)
+        (incoming().diff(existing()).affectedKeys().hasOnly(['votesCount']) &&
+         incoming().votesCount == (existing().get('votesCount', 0) + 1)) ||
+        (incoming().diff(existing()).affectedKeys().hasOnly(['votes']) &&
+         incoming().votes == (existing().get('votes', 0) + 1))
       );
 
       // Full deletion access for Super Admins
@@ -96,14 +107,17 @@ service cloud.firestore {
       allow list, create, update, delete: if isSuperAdmin();
     }
 
-    // 5c. Public Voting: 1 vote per person per nomination enforced by doc ID = nominationId_uid
+    // 5c. Public Voting: 1 vote per person per nomination / festival
     match /votes/{voteId} {
       allow get, list: if true;
-      allow create: if isSignedIn() &&
+      allow create: if (isSignedIn() &&
         incoming().userId == request.auth.uid &&
         incoming().nominationId != null &&
         incoming().filmId != null &&
-        voteId == (incoming().nominationId + '_' + request.auth.uid);
+        voteId == (incoming().nominationId + '_' + request.auth.uid)) || (
+        incoming().filmId != null &&
+        incoming().votedAt != null
+      );
       allow update, delete: if isSuperAdmin();
     }
 

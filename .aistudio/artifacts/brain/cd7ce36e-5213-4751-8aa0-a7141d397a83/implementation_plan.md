@@ -1,79 +1,131 @@
-# Implementation Plan: 2027 Festival Submission Period & Event Dates Update
+# Voting, Results Publishing & Security Rules Hardening Plan (Revised)
 
-## 1. Overview & Verified Requirements
-Update the official submission period and start date for the upcoming **2027 edition (7th Edition)** of the Ąžuolynas International Student Film Festival (AISFF):
-- **Submissions Officially Open:** November 1, 2026 (*2026 m. lapkričio 1 d.*)
-- **Final Submission Deadline:** April 5, 2027 (*2027 m. balandžio 5 d.*)
-- **Festival Start & Gala Ceremony Date:** April 27, 2027 (*2027 m. balandžio 27 d.*)
-- **Countdown Target:** Synchronized directly to the Submission Deadline (April 5, 2027 at 23:59:59).
-- **Date Cards in Hero Section:** Distinct dedicated cards clearly distinguishing opening date (*2026 m. lapkričio 1 d.* / *November 1, 2026*) from final deadline (*2027 m. balandžio 5 d.* / *April 5, 2027*) and event date (*2027 m. balandžio 27 d.* / *April 27, 2027*).
-- **Scope Guardrail:** Strictly update 2027 edition information. Never touch or alter dates, archives, or awards from previous festival editions (2026, 2025, 2024, etc.).
+Comprehensive technical plan to implement, harden, and verify the voting, security rules, and real-time jury results/audience favorite announcement system for the Ąžuolynas International Student Film Festival (AISFF).
 
 ---
 
-## 2. Proposed Changes & Affected Files
+### User Review & Critical Decisions
 
-### A. Countdown Timer (`js/countdown.js`)
-- Update `getSubmissionDeadline()` calculation to target **April 5, 2027, 23:59:59** (`new Date(2027, 3, 5, 23, 59, 59)`).
-- Update countdown sublabel strings in both Lithuanian and English.
-
-### B. Public Index Pages (`lt/index.html` & `en/index.html`)
-- **HTML Meta & OpenGraph / Twitter Cards:**
-  - Update descriptions to reflect the open window (Nov 1, 2026 – Apr 5, 2027) and gala/stream date (April 27, 2027).
-- **Hero Editorial Meta Grid:**
-  - `dynOpening`: `2026 m. lapkričio 1 d.` (LT) / `November 1, 2026` (EN).
-  - `dynDeadline`: `2027 m. balandžio 5 d.` (LT) / `April 5, 2027` (EN).
-  - `dynEvent`: `2027 m. balandžio 27 d.` (LT) / `April 27, 2027` (EN).
-  - `dynDates`: `Nuo 2026 m. lapkričio 1 d. iki 2027 m. balandžio 5 d.` / `November 1, 2026 – April 5, 2027`.
-- **Countdown Banner:**
-  - Sublabel: `Pateikite savo filmą iki 2027 m. balandžio 5 d. 23:59` / `Submit your entry before April 5, 2027 23:59`.
-- **2027 Edition Card:**
-  - Date label: `2027 m. balandžio 27 d.` / `April 27, 2027`.
-- **Stream Replay Placeholder & FAQ Beside Form:**
-  - Update placeholder text to `2027 m. balandžio 27 d.` / `April 27, 2027`.
-- **Footer Section:**
-  - Update submission period line to `Lapkričio 1 d. – Balandžio 5 d.` / `November 1, 2026 – April 5, 2027` and festival event line to `2027 m. balandžio 27 d.` / `April 27, 2027`.
-- **Client Fallback Defaults (`DEFAULT_CONTENT`):**
-  - Update `openingDate`, `deadlineDate`, `dateEvent`, `datesSubmissions`, and `recordingPlaceholder` for both LT and EN.
-
-### C. 2027 Dedicated Subpages (`azuolynas-fest-2027.html`, `lt/azuolynas-fest-2027.html`, `en/azuolynas-fest-2027.html`)
-- Update meta tags, hero dates, submission deadlines (April 5, 2027), and event dates (April 27, 2027) across all three 2027 pages.
-
-### D. Server Configuration & Email System (`server.js` & `email-templates.js`)
-- **`server.js`:**
-  - Update `DEFAULT_SETTINGS` 2027 dates for `lt` and `en`:
-    - `openingDate`: `"2026 m. lapkričio 1 d."` / `"November 1, 2026"`
-    - `deadlineDate`: `"2027 m. balandžio 5 d."` / `"April 5, 2027"`
-    - `eventDate`: `"2027 m. balandžio 27 d."` / `"April 27, 2027"`
-    - `datesSubmissions`: `"Nuo 2026 m. lapkričio 1 d. iki 2027 m. balandžio 5 d."` / `"November 1, 2026 – April 5, 2027"`
-    - `dateEvent`: `"2027 m. balandžio 27 d. (Kino festivalis ir tiesioginė transliacija)"` / `"April 27th, 2027 (Film Festival & Live Stream)"`
-    - `recordingPlaceholder`: referencing April 27, 2027.
-  - Update live stream pass email notification dates to `2027 m. balandžio 27 d.`
-- **`email-templates.js`:**
-  - Update `EMAIL_THEME`:
-    - `eventDateLt`: `"2027 m. balandžio 27 d."`
-    - `eventDateEn`: `"April 27th, 2027"`
-    - `submissionPeriodLt`: `"2026 m. lapkričio 1 d. – 2027 m. balandžio 5 d."`
-    - `submissionPeriodEn`: `"November 1st, 2026 – April 5th, 2027"`
-  - Update all email template bodies and notes mentioning the ceremony date to April 27, 2027.
-
-### E. Data Files (`data/editions.json` & `data/settings.json`)
-- In `data/editions.json` (2027 entry only):
-  - `date`: `"2027 m. balandžio 27 d."`
-  - `dateEn`: `"April 27, 2027"`
-  - `submissionDeadline`: `"2027-04-05"`
-  - `subtitle` & `story` updated to specify April 5, 2027 deadline and April 27, 2027 gala.
-  - Keep 2026, 2025, and earlier editions untouched.
-- In `data/settings.json`:
-  - Update 2027 opening, deadline, and event dates in both `lt` and `en` blocks.
-- In `.gitignore`:
-  - Ensure `data/settings.json` is added to gitignore to keep SMTP credentials protected from GitGuardian.
+> [!IMPORTANT]
+> The revised plan incorporates all precise technical specifications from your review:
+> - **Security Rules Formula**: Exactly enforces `request.resource.data.diff(resource.data).affectedKeys().hasOnly(['votes']) && request.resource.data.votes == resource.data.votes + 1` on `/movies/{movieId}` for public voting, with all other fields (title, director, category, winners, awards) strictly writable only by authenticated administrators.
+> - **No Mandatory Login for Voting**: Friction-free public voting without requiring viewer login or credentials, secured via `localStorage.getItem('festival_voted')` and atomic increment:
+>   `db.collection('movies').doc(movieId).update({ votes: firebase.firestore.FieldValue.increment(1) })`.
+> - **Categorized Jury Podiums & Dynamic Audience Favorite**:
+>   - **Senior Category (Vyresniųjų / 14–18 m.)**: 1st, 2nd, and 3rd place set by Jury.
+>   - **Junior Category (Jaunesniųjų / 10–13 m.)**: 1st, 2nd, and 3rd place set by Jury.
+>   - **Audience Favorite ("Любимчик / Žiūrovų simpatija")**: Computed in real-time from the highest viewer votes across all movies.
+> - **Locked Results Reveal**: All winner badges, percentages, and podiums remain strictly hidden behind a locked view until the festival organizer flips the `publishResults` / `showResults` flag in Firestore, triggering animated podium reveals on the site and OBS stream overlays.
 
 ---
 
-## 3. Verification & Validation Plan
-1. **Automated Regression Suite:** Run `npm test` to ensure all 46 test suites pass without regression.
-2. **Static & Lint Check:** Run `lint_applet` (`npm run lint`) to confirm clean imports and syntax.
-3. **Applet Compilation:** Run `compile_applet` to confirm successful build.
-4. **Countdown Calculation Check:** Verify in browser/node that `js/countdown.js` correctly computes time remaining until April 5, 2027.
-5. **Historical Integrity Check:** Verify that 2026 and earlier editions remain completely unchanged.
+### 1. Overview & Core Architecture
+
+```
+┌────────────────────────────────────────────────────────────────────────┐
+│                              PUBLIC CLIENTS                            │
+│                                                                        │
+│   voting.html (Web / Mobile / OBS Overlay)                             │
+│   ┌────────────────────────────────────────────────────────────────┐   │
+│   │ 1. Checks localStorage.getItem('festival_voted') on load       │   │
+│   │ 2. If voted: Replaces form with Thank-You screen               │   │
+│   │ 3. If not voted: Displays filtered film cards (Senior/Junior)  │   │
+│   │ 4. On Vote: Updates 'festival_voted' & executes atomic         │   │
+│   │    db.collection('movies').doc(id).update({ votes: +1 })       │   │
+│   │ 5. Real-time Listener on settings/global.showResults:          │   │
+│   │    • Locked: Displays "Results locked until ceremony conclusion"│  │
+│   │    • Unlocked: Animates Senior/Junior podiums + Audience Fav.  │   │
+│   └───────────────────────────────┬────────────────────────────────┘   │
+└───────────────────────────────────┼────────────────────────────────────┘
+                                    │ Atomic +1 vote / Realtime reads
+                                    ▼
+┌────────────────────────────────────────────────────────────────────────┐
+│                        FIREBASE BACKEND / CLOUD                        │
+│                                                                        │
+│   firestore.rules                                                      │
+│   ├── /movies/{movieId}                                                │
+│   │     • allow read: if true;                                         │
+│   │     • allow update: if atomic increment (+1) on 'votes' only      │
+│   │     • allow create, delete, metadata update: if isSuperAdmin()     │
+│   ├── /settings/{settingId}                                            │
+│   │     • allow read: if true;                                         │
+│   │     • allow write: if isSuperAdmin()                               │
+│   └── /submissions/{submissionId} (Seamless backward compatibility)    │
+│                                                                        │
+│   storage.rules                                                        │
+│   ├── /movies/{allPaths=**}  ──> allow read: if true;                  │
+│   │                              allow write, delete: if isTopAdmin(); │
+│   └── /posters/{allPaths=**} ──> allow read: if true;                  │
+│                                  allow write, delete: if isTopAdmin(); │
+└────────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+### 2. Step-by-Step Implementation Details
+
+#### Step 1: Firestore & Storage Security Rules (`firestore.rules` & `storage.rules`)
+1. **Firestore Rules (`firestore.rules`)**:
+   - `match /movies/{movieId}`:
+     - `allow get, list: if true;`
+     - `allow create, delete: if isSuperAdmin();`
+     - `allow update: if isSuperAdmin() || (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['votes']) && request.resource.data.votes == resource.data.votes + 1);`
+   - Preserve existing collections (`/submissions`, `/editions`, `/settings`, `/stream_config`, `/live_viewers`, `/users`, `/invitations`, `/mail`, `/logs`) so that all existing 46 automated backend test suites continue to pass with 100% success.
+2. **Storage Rules (`storage.rules`)**:
+   - `match /movies/{allPaths=**}`: `allow read: if true; allow write, delete: if isTopAdmin();`
+   - `match /posters/{allPaths=**}`: `allow read: if true; allow write, delete: if isTopAdmin();`
+   - `match /submissions/{fileName}`: public upload with size (<500MB) and MIME validation, top admin delete/update.
+
+#### Step 2: Client Logic & Double-Voting Prevention (`voting.html`)
+1. **Load Verification**:
+   - Read `localStorage.getItem('festival_voted')`.
+   - If present (e.g. contains `{ filmId: "...", votedAt: 123456789 }` or `"true"`):
+     - Hide the voting buttons.
+     - Display the responsive "Thank you for your vote! / Ačiū už jūsų balsą! / Спасибо за ваш голос!" card, highlighting the chosen film with a direct link to the live stream (`live.html`).
+2. **Atomic Firestore Execution**:
+   - Wrap in strict `try / catch` with localized user-facing feedback banner.
+   - Disable all buttons immediately upon click to prevent race conditions or double clicks.
+   - Execute:
+     ```javascript
+     const movieRef = db.collection('movies').doc(movieId);
+     await movieRef.update({
+       votes: firebase.firestore.FieldValue.increment(1)
+     });
+     ```
+   - Store `localStorage.setItem('festival_voted', JSON.stringify({ filmId: movieId, timestamp: Date.now() }))`.
+3. **High Traffic Stability (OBS & Cloudflare friendly)**:
+   - Zero synchronous blocking loops.
+   - Graceful fallback: reads from `movies` collection, falling back to `submissions` if needed.
+   - Clean retry handler on transient network disconnections.
+
+#### Step 3: Jury Results & Winner Announcement System
+1. **Database Representation (`settings/global` & `movies`)**:
+   - Firestore flag: `settings/global.showResults === true` (or `resultsPublished: true`).
+   - Movie documents store official jury rankings:
+     - `juryPlace`: `1`, `2`, `3`, or `null`.
+     - `category`: `"senior"` / `"junior"` (or `"II Kategorija (14–18 m.)"` / `"I Kategorija (10–13 m.)"`).
+     - `votes`: numeric counter.
+2. **Category Structuring**:
+   - **Senior Category**:
+     - 🥇 1st Place (Auksinis ąžuolas / Golden Oak)
+     - 🥈 2nd Place (Sidabrinis ąžuolas / Silver Oak)
+     - 🥉 3rd Place (Bronzinis ąžuolas / Bronze Oak)
+   - **Junior Category**:
+     - 🥇 1st Place (Auksinis ąžuolas / Golden Oak)
+     - 🥈 2nd Place (Sidabrinis ąžuolas / Silver Oak)
+     - 🥉 3rd Place (Bronzinis ąžuolas / Bronze Oak)
+   - **Audience Favorite ("Любимчик / Žiūrovų simpatija")**:
+     - Automatically determined by selecting the film with `Math.max(...movies.map(m => m.votes || 0))`.
+     - Displays verified total votes badge, flame/trophy indicator, and laurel wreath styling.
+3. **Admin Real-Time Toggle**:
+   - Flip switch in `admin.html` settings card: "Paskelbti festivalio rezultatus ir laureatus / Publish Festival Results".
+   - Immediately pushes update to `settings/global` via Firestore, updating all connected `voting.html`, `live.html`, and OBS browser overlays in sub-second time.
+
+#### Step 4: Verification & Delivery Checklist
+- Run full codebase tests (`npm test` — all 46 suites must pass).
+- Verify with `lint_applet` and `compile_applet`.
+- Restart development server with `restart_dev_server`.
+- Output complete, clean, copy-paste ready code blocks for:
+  1. `firestore.rules`
+  2. `storage.rules`
+  3. `voting.html` (including all frontend logic, styles, and Firestore interactions).

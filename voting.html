@@ -3,29 +3,49 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title id="vPageTitle">Audience Voting | AISFF</title>
-  <meta name="description" id="vMetaDescription" content="Official Audience Choice Award Voting for AISFF - Ąžuolynas International Student Film Festival. Support independent student filmmakers.">
+  <title id="vPageTitle">Audience Voting & Ceremony Results | AISFF 2027</title>
+  <meta name="description" id="vMetaDescription" content="Official Audience Choice Award Voting & Jury Results for Ąžuolynas International Film Festival. Support independent student filmmakers.">
   <link rel="icon" type="image/webp" href="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media">
   <link rel="stylesheet" href="style.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-  <script src="error-reporting.js"></script>
+  
   <!-- Firebase Compat SDK for Static Browser Execution -->
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
   <script src="config.js"></script>
-  <script src="voting-client.js"></script>
+
   <style>
-    /* Language switcher */
+    /* Custom Styling for Voting & Ceremony Reveal */
+    :root {
+      --gold-c: #ffd700;
+      --silver-c: #e2e8f0;
+      --bronze-c: #cd7f32;
+    }
+
+    body.obs-overlay-mode {
+      background: transparent !important;
+      overflow-x: hidden;
+    }
+    body.obs-overlay-mode .site-header,
+    body.obs-overlay-mode .voting-hero,
+    body.obs-overlay-mode footer {
+      display: none !important;
+    }
+    body.obs-overlay-mode .voting-page-wrapper {
+      padding: 20px !important;
+      background: transparent !important;
+    }
+
     .voting-lang-switch {
       display: inline-flex;
       align-items: center;
-      background: rgba(255, 255, 255, 0.04);
+      background: rgba(255, 255, 255, 0.05);
       border: 1px solid var(--border-color);
-      border-radius: 2px;
-      padding: 2px 4px;
+      border-radius: 4px;
+      padding: 3px;
       gap: 3px;
     }
     .voting-lang-btn {
@@ -36,7 +56,7 @@
       font-family: var(--font-mono);
       font-weight: 600;
       padding: 3px 8px;
-      border-radius: 1px;
+      border-radius: 2px;
       cursor: pointer;
       transition: all 0.2s ease;
     }
@@ -44,39 +64,30 @@
       color: #F8FAF7;
     }
     .voting-lang-btn.active {
-      background: var(--surface-light);
-      color: #FFFFFF;
-      box-shadow: inset 0 0 0 1px var(--border-light);
+      background: #FFFFFF;
+      color: #070908;
+      font-weight: 700;
     }
 
     .voting-hero {
-      padding: 80px 20px 36px 20px;
-      text-align: left;
+      padding: 56px 20px 32px 20px;
       border-bottom: 1px solid var(--border-color);
-      background: var(--surface-color);
+      background: linear-gradient(180deg, #0d1210 0%, #070908 100%);
     }
-    .voting-hero-title {
-      font-family: var(--font-display, sans-serif);
-      font-size: clamp(2.4rem, 5.5vw, 4.2rem);
-      font-weight: 700;
-      letter-spacing: -0.03em;
-      text-transform: uppercase;
-      color: #FFFFFF;
-      margin: 14px 0 10px 0;
-    }
-    .voting-hero-sub {
-      color: #94a3b8;
-      max-width: 720px;
-      margin: 0 0 24px 0;
-      font-size: 1rem;
-      line-height: 1.6;
+    .hero-top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 16px;
     }
     .voting-status-badge {
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      padding: 4px 12px;
-      border-radius: 2px;
+      padding: 5px 12px;
+      border-radius: 4px;
       font-family: var(--font-mono);
       font-size: 0.75rem;
       font-weight: 600;
@@ -93,20 +104,156 @@
       border: 1px solid rgba(239, 68, 68, 0.35);
       color: #f87171;
     }
+    .voting-hero-title {
+      font-family: var(--font-display, sans-serif);
+      font-size: clamp(2.2rem, 5vw, 3.8rem);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: #FFFFFF;
+      margin: 0 0 12px 0;
+      line-height: 1.15;
+    }
+    .voting-hero-sub {
+      color: #94a3b8;
+      max-width: 760px;
+      margin: 0 0 24px 0;
+      font-size: 1.05rem;
+      line-height: 1.6;
+    }
+
+    /* Thank you Banner Card */
+    .thank-you-banner {
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.12) 0%, rgba(6, 78, 59, 0.25) 100%);
+      border: 1px solid rgba(52, 211, 153, 0.4);
+      border-radius: 6px;
+      padding: 32px 28px;
+      margin: 0 0 32px 0;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 16px;
+      position: relative;
+      overflow: hidden;
+      animation: fadeIn 0.4s ease-out;
+    }
+    .thank-you-banner::before {
+      content: "";
+      position: absolute;
+      top: -50%;
+      right: -10%;
+      width: 280px;
+      height: 280px;
+      background: radial-gradient(circle, rgba(52, 211, 153, 0.18) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .thank-you-header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .thank-you-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: #34d399;
+      color: #070908;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+      font-weight: bold;
+      flex-shrink: 0;
+      box-shadow: 0 0 20px rgba(52, 211, 153, 0.4);
+    }
+    .thank-you-title {
+      font-family: var(--font-display, sans-serif);
+      font-size: clamp(1.4rem, 3.2vw, 2rem);
+      font-weight: 700;
+      color: #FFFFFF;
+      margin: 0;
+      letter-spacing: -0.01em;
+    }
+    .thank-you-body {
+      color: #e2e8f0;
+      font-size: 0.98rem;
+      line-height: 1.6;
+      max-width: 680px;
+      margin: 0;
+    }
+    .thank-you-movie-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(52, 211, 153, 0.3);
+      border-radius: 4px;
+      font-family: var(--font-mono);
+      font-size: 0.88rem;
+      color: #34d399;
+    }
+    .thank-you-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 8px;
+    }
+
+    /* Section Tabs: Voting vs Live Results */
+    .view-switcher-bar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border-bottom: 1px solid var(--border-color);
+      background: var(--surface-color);
+      padding: 12px 20px;
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      backdrop-filter: blur(12px);
+    }
+    .view-tab-btn {
+      background: transparent;
+      border: 1px solid transparent;
+      color: #94a3b8;
+      padding: 8px 18px;
+      border-radius: 4px;
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+    }
+    .view-tab-btn:hover {
+      color: #FFFFFF;
+      background: rgba(255, 255, 255, 0.03);
+    }
+    .view-tab-btn.active {
+      background: #FFFFFF;
+      color: #070908;
+      font-weight: 700;
+    }
+
+    /* Filter pills */
     .category-filter-bar {
       display: flex;
       align-items: center;
-      justify-content: flex-start;
       gap: 8px;
       flex-wrap: wrap;
-      margin: 28px 0 20px 0;
+      margin: 20px 0 28px 0;
     }
     .category-tab-btn {
       background: rgba(255, 255, 255, 0.03);
       border: 1px solid var(--border-color);
       color: #cbd5e1;
-      padding: 8px 18px;
-      border-radius: 2px;
+      padding: 6px 14px;
+      border-radius: 3px;
       font-family: var(--font-mono);
       font-size: 0.78rem;
       letter-spacing: 0.04em;
@@ -119,31 +266,39 @@
       color: #FFFFFF;
     }
     .category-tab-btn.active {
-      background: #FFFFFF;
-      border-color: #FFFFFF;
-      color: #070908;
+      background: var(--surface-light);
+      border-color: #34d399;
+      color: #34d399;
       font-weight: 700;
     }
+
+    /* Films Grid */
     .voting-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
-      gap: 20px;
+      gap: 24px;
       max-width: var(--container-max);
       margin: 0 auto;
-      padding: 36px 20px 80px 20px;
+      padding: 24px 20px 80px 20px;
     }
     .film-vote-card {
       background: var(--surface-card);
       border: 1px solid var(--border-color);
-      border-radius: 2px;
+      border-radius: 4px;
       overflow: hidden;
       display: flex;
       flex-direction: column;
-      transition: border-color 0.2s ease;
+      transition: all 0.25s ease;
       position: relative;
     }
     .film-vote-card:hover {
-      border-color: rgba(255, 255, 255, 0.3);
+      border-color: rgba(52, 211, 153, 0.4);
+      transform: translateY(-2px);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+    }
+    .film-vote-card.has-voted-this {
+      border-color: #34d399;
+      box-shadow: 0 0 20px rgba(52, 211, 153, 0.15);
     }
     .film-poster-wrap {
       width: 100%;
@@ -157,10 +312,10 @@
       width: 100%;
       height: 100%;
       object-fit: cover;
-      transition: transform 0.3s ease;
+      transition: transform 0.4s ease;
     }
     .film-vote-card:hover .film-poster-img {
-      transform: scale(1.02);
+      transform: scale(1.03);
     }
     .film-poster-placeholder {
       width: 100%;
@@ -169,7 +324,7 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      background: #0a0f0d;
+      background: #0d1210;
       color: #64748b;
     }
     .film-card-content {
@@ -178,33 +333,55 @@
       flex-direction: column;
       flex: 1;
     }
-    .film-nomination-tag {
+    .category-tag-badge {
+      display: inline-block;
+      align-self: flex-start;
       font-family: var(--font-mono);
       font-size: 0.7rem;
       text-transform: uppercase;
       letter-spacing: 0.08em;
-      color: var(--accent-mint);
-      margin-bottom: 6px;
+      padding: 3px 8px;
+      border-radius: 2px;
+      margin-bottom: 10px;
       font-weight: 600;
     }
+    .tag-senior {
+      background: rgba(147, 51, 234, 0.15);
+      border: 1px solid rgba(168, 85, 247, 0.4);
+      color: #c084fc;
+    }
+    .tag-junior {
+      background: rgba(59, 130, 246, 0.15);
+      border: 1px solid rgba(96, 165, 250, 0.4);
+      color: #93c5fd;
+    }
+    .tag-general {
+      background: rgba(52, 211, 153, 0.12);
+      border: 1px solid rgba(52, 211, 153, 0.3);
+      color: #34d399;
+    }
+
     .film-card-title {
       font-family: var(--font-display, sans-serif);
       font-size: 1.25rem;
       font-weight: 700;
       color: #FFFFFF;
       margin: 0 0 6px 0;
-      line-height: 1.25;
+      line-height: 1.3;
     }
     .film-card-director {
       font-size: 0.85rem;
       color: #94a3b8;
       margin: 0 0 12px 0;
     }
+    .film-card-director strong {
+      color: #cbd5e1;
+    }
     .film-card-synopsis {
       font-size: 0.84rem;
       color: #cbd5e1;
       line-height: 1.6;
-      margin-bottom: 18px;
+      margin-bottom: 20px;
       flex: 1;
       display: -webkit-box;
       -webkit-line-clamp: 3;
@@ -213,20 +390,20 @@
     }
     .film-vote-action {
       margin-top: auto;
-      padding-top: 14px;
+      padding-top: 16px;
       border-top: 1px solid var(--border-color);
     }
     .btn-vote-trigger {
       width: 100%;
-      padding: 10px;
+      padding: 11px;
       background: #FFFFFF;
       color: #070908;
       font-weight: 700;
       letter-spacing: 0.04em;
       text-transform: uppercase;
-      font-size: 0.8rem;
+      font-size: 0.82rem;
       border: 1px solid #FFFFFF;
-      border-radius: 2px;
+      border-radius: 4px;
       cursor: pointer;
       display: flex;
       align-items: center;
@@ -239,57 +416,358 @@
       border-color: #E2E8F0;
       transform: translateY(-1px);
     }
-    .btn-vote-trigger.voted {
+    .btn-vote-trigger.voted-btn {
       background: rgba(52, 211, 153, 0.15);
       border: 1px solid #34d399;
       color: #34d399;
       cursor: default;
       transform: none;
     }
-    .btn-vote-trigger:disabled:not(.voted) {
-      opacity: 0.5;
+    .btn-vote-trigger:disabled:not(.voted-btn) {
+      opacity: 0.45;
       cursor: not-allowed;
       transform: none;
     }
-    /* Animated Live Progress Bar */
-    .film-results-wrap {
+
+    /* Live tallies track */
+    .film-tally-wrap {
       margin-top: 12px;
-      animation: fadeIn 0.4s ease;
-    }
-    .film-results-meta {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+      padding-top: 10px;
+      border-top: 1px dashed rgba(255, 255, 255, 0.08);
       font-size: 0.78rem;
       font-family: var(--font-mono);
-      margin-bottom: 5px;
-      color: #94a3b8;
     }
-    .film-results-meta strong {
+    .film-tally-meta {
+      display: flex;
+      justify-content: space-between;
+      color: #94a3b8;
+      margin-bottom: 6px;
+    }
+    .film-tally-meta strong {
       color: #FFFFFF;
     }
-    .film-results-track {
+    .film-tally-track {
       width: 100%;
       height: 6px;
       background: rgba(255, 255, 255, 0.08);
-      border-radius: 1px;
+      border-radius: 2px;
       overflow: hidden;
     }
-    .film-results-fill {
+    .film-tally-fill {
       height: 100%;
-      background: var(--accent-mint);
-      border-radius: 1px;
-      width: 0%;
-      transition: width 0.8s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-    .voting-empty-state {
-      grid-column: 1 / -1;
-      text-align: center;
-      padding: 60px 20px;
-      color: #94a3b8;
-      background: var(--surface-card);
+      background: #34d399;
       border-radius: 2px;
+      transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    /* ========================================================
+       CEREMONY RESULTS REVEAL SECTION & PODIUM
+       ======================================================== */
+    .ceremony-section {
+      max-width: var(--container-max);
+      margin: 0 auto;
+      padding: 32px 20px 80px 20px;
+    }
+    .results-locked-box {
+      text-align: center;
+      padding: 64px 24px;
+      background: var(--surface-card);
       border: 1px solid var(--border-color);
+      border-radius: 6px;
+      max-width: 720px;
+      margin: 20px auto;
+    }
+    .locked-lock-icon {
+      font-size: 3rem;
+      margin-bottom: 16px;
+      opacity: 0.85;
+    }
+    .locked-title {
+      font-family: var(--font-display, sans-serif);
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: #FFFFFF;
+      margin: 0 0 12px 0;
+    }
+    .locked-desc {
+      color: #94a3b8;
+      font-size: 1rem;
+      line-height: 1.6;
+      max-width: 580px;
+      margin: 0 auto 20px auto;
+    }
+    .locked-tagline {
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      color: #34d399;
+      background: rgba(52, 211, 153, 0.1);
+      display: inline-block;
+      padding: 6px 14px;
+      border-radius: 3px;
+    }
+
+    /* Unlocked Results */
+    .results-unlocked-container {
+      animation: fadeIn 0.6s ease-out;
+    }
+    .results-banner-live {
+      background: linear-gradient(135deg, rgba(255, 215, 0, 0.12) 0%, rgba(205, 127, 50, 0.15) 100%);
+      border: 1px solid rgba(255, 215, 0, 0.35);
+      border-radius: 6px;
+      padding: 24px 28px;
+      margin-bottom: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    .results-banner-title {
+      font-family: var(--font-display, sans-serif);
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: #FFFFFF;
+      margin: 0;
+    }
+    .results-banner-sub {
+      color: #cbd5e1;
+      font-size: 0.92rem;
+      margin: 4px 0 0 0;
+    }
+
+    /* Audience Favorite "Любимчик" Grand Card */
+    .audience-favorite-showcase {
+      background: linear-gradient(180deg, #16201c 0%, #0d1210 100%);
+      border: 2px solid #34d399;
+      border-radius: 8px;
+      padding: 32px 28px;
+      margin-bottom: 48px;
+      position: relative;
+      box-shadow: 0 0 40px rgba(52, 211, 153, 0.2);
+      overflow: hidden;
+    }
+    .audience-favorite-showcase::after {
+      content: "★ ★ ★ ★ ★";
+      position: absolute;
+      top: 14px;
+      right: 20px;
+      color: rgba(52, 211, 153, 0.4);
+      font-size: 1.1rem;
+      letter-spacing: 4px;
+    }
+    .favorite-crown-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 16px;
+      background: #34d399;
+      color: #070908;
+      border-radius: 4px;
+      font-family: var(--font-mono);
+      font-weight: 800;
+      font-size: 0.85rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+    .favorite-grid-layout {
+      display: grid;
+      grid-template-columns: 240px 1fr;
+      gap: 28px;
+      align-items: center;
+    }
+    @media (max-width: 768px) {
+      .favorite-grid-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+    .favorite-poster-box {
+      width: 100%;
+      height: 180px;
+      background: #070908;
+      border-radius: 4px;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .favorite-poster-box img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .favorite-content-box h2 {
+      font-family: var(--font-display, sans-serif);
+      font-size: clamp(1.6rem, 3.5vw, 2.4rem);
+      font-weight: 700;
+      color: #FFFFFF;
+      margin: 0 0 8px 0;
+      line-height: 1.2;
+    }
+    .favorite-director {
+      color: #94a3b8;
+      font-size: 0.95rem;
+      margin: 0 0 14px 0;
+    }
+    .favorite-director strong {
+      color: #FFFFFF;
+    }
+    .favorite-synopsis {
+      color: #cbd5e1;
+      font-size: 0.92rem;
+      line-height: 1.6;
+      margin: 0 0 16px 0;
+      max-width: 650px;
+    }
+    .favorite-tally-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 18px;
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(52, 211, 153, 0.35);
+      border-radius: 4px;
+      font-family: var(--font-mono);
+      font-size: 0.9rem;
+      color: #34d399;
+    }
+
+    /* Category Podium Grid */
+    .category-results-group {
+      margin-bottom: 48px;
+    }
+    .category-results-heading {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-family: var(--font-display, sans-serif);
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: #FFFFFF;
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border-color);
+    }
+    .podium-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+    @media (max-width: 840px) {
+      .podium-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    .podium-card {
+      background: var(--surface-card);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 24px;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.2s ease;
+    }
+    .podium-card:hover {
+      transform: translateY(-2px);
+    }
+    .podium-card.rank-1 {
+      border-color: rgba(255, 215, 0, 0.4);
+      background: linear-gradient(180deg, rgba(255, 215, 0, 0.05) 0%, var(--surface-card) 100%);
+    }
+    .podium-card.rank-2 {
+      border-color: rgba(226, 232, 240, 0.35);
+      background: linear-gradient(180deg, rgba(226, 232, 240, 0.04) 0%, var(--surface-card) 100%);
+    }
+    .podium-card.rank-3 {
+      border-color: rgba(205, 127, 50, 0.35);
+      background: linear-gradient(180deg, rgba(205, 127, 50, 0.04) 0%, var(--surface-card) 100%);
+    }
+    .podium-rank-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 12px;
+      border-radius: 4px;
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      align-self: flex-start;
+      margin-bottom: 14px;
+    }
+    .rank-tag-1 {
+      background: rgba(255, 215, 0, 0.15);
+      color: #ffd700;
+      border: 1px solid rgba(255, 215, 0, 0.4);
+    }
+    .rank-tag-2 {
+      background: rgba(226, 232, 240, 0.15);
+      color: #e2e8f0;
+      border: 1px solid rgba(226, 232, 240, 0.4);
+    }
+    .rank-tag-3 {
+      background: rgba(205, 127, 50, 0.15);
+      color: #cd7f32;
+      border: 1px solid rgba(205, 127, 50, 0.4);
+    }
+
+    .podium-movie-title {
+      font-family: var(--font-display, sans-serif);
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: #FFFFFF;
+      margin: 0 0 6px 0;
+      line-height: 1.3;
+    }
+    .podium-movie-director {
+      color: #94a3b8;
+      font-size: 0.88rem;
+      margin: 0 0 12px 0;
+    }
+    .podium-movie-synopsis {
+      color: #cbd5e1;
+      font-size: 0.84rem;
+      line-height: 1.6;
+      margin-bottom: 14px;
+      flex: 1;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    /* Feedback toast */
+    .vote-toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: #0d1210;
+      border: 1px solid #34d399;
+      color: #FFFFFF;
+      padding: 14px 22px;
+      border-radius: 4px;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+      z-index: 999;
+      transform: translateY(100px);
+      opacity: 0;
+      transition: all 0.3s ease;
+    }
+    .vote-toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+    .vote-toast.error-toast {
+      border-color: #f87171;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
     }
   </style>
 </head>
@@ -305,16 +783,17 @@
 
       <nav class="desktop-nav" aria-label="Main Navigation">
         <a href="en/index.html" class="nav-link" id="navHome">Home</a>
-        <a href="voting.html" class="nav-link active" id="navVoting">Voting</a>
+        <a href="voting.html" class="nav-link active" id="navVoting">Voting & Results</a>
         <a href="live.html" class="nav-link" id="navLive">Live Stream</a>
         <a href="admin.html" class="nav-link" id="navAdmin">Admin</a>
       </nav>
 
       <div class="header-actions" style="display:flex; align-items:center; gap:12px;">
-        <!-- EN/LT Switcher -->
+        <!-- EN/LT/RU Switcher -->
         <div class="voting-lang-switch">
           <button type="button" class="voting-lang-btn active" data-lang="en">EN</button>
           <button type="button" class="voting-lang-btn" data-lang="lt">LT</button>
+          <button type="button" class="voting-lang-btn" data-lang="ru">RU</button>
         </div>
 
         <a href="live.html" class="btn-solid btn-sm" id="btnLiveTop" style="padding:6px 14px; text-decoration:none;">
@@ -324,67 +803,218 @@
     </div>
   </header>
 
-  <!-- Hero Banner -->
+  <!-- Hero Section -->
   <section class="voting-hero">
     <div class="container">
-      <div id="votingStatusBadge" class="voting-status-badge status-open">
-        <span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:currentColor;"></span>
-        <span id="votingStatusText">Voting Active</span>
+      <div class="hero-top-bar">
+        <div id="votingStatusBadge" class="voting-status-badge status-open">
+          <span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:currentColor;"></span>
+          <span id="votingStatusText">Voting Active</span>
+        </div>
+        <div id="juryStatusBadge" class="voting-status-badge" style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); color:#cbd5e1;">
+          <span id="juryStatusText">Festival 2027 Edition</span>
+        </div>
       </div>
+
       <h1 class="voting-hero-title" id="heroTitle">Audience Choice Award Voting</h1>
       <p class="voting-hero-sub" id="heroSubtitle">
-        Support official festival filmmakers! You can cast one vote per nomination category. Real-time voting statistics will be revealed once your vote is recorded.
+        Cast your official vote for the festival's Audience Choice Award ("Любимчик"). All audience votes update atomically in real-time. Official jury rankings and the audience favorite will be revealed live during the closing ceremony.
       </p>
 
-      <!-- Category Filter Tabs -->
-      <div class="category-filter-bar" id="categoryFilterBar">
-        <button type="button" class="category-tab-btn active" data-cat="all">All Categories</button>
+      <!-- Persistent Thank You Banner (Shown if user already voted) -->
+      <div id="thankYouBanner" class="thank-you-banner" style="display:none;">
+        <div class="thank-you-header">
+          <div class="thank-you-icon">✓</div>
+          <div>
+            <h2 class="thank-you-title" id="thankYouTitle">Thank you for your vote!</h2>
+            <p class="thank-you-body" id="thankYouBody">
+              Your vote has been securely recorded in the festival tally. Only one vote per festival attendee is permitted. You can watch the live ceremony and wait for the official winners reveal.
+            </p>
+          </div>
+        </div>
+        <div class="thank-you-actions">
+          <div class="thank-you-movie-badge">
+            <span>🎬</span>
+            <span id="thankYouFilmName">Competing Selection</span>
+          </div>
+          <a href="live.html" class="btn-solid btn-sm" style="text-decoration:none; padding:8px 16px;">
+            <span id="btnWatchCeremony">Watch Live Stream</span>
+          </a>
+        </div>
       </div>
     </div>
   </section>
 
-  <!-- Films Grid -->
-  <main class="voting-grid" id="votingFilmsContainer" aria-live="polite">
-    <div class="voting-empty-state">
-      <p id="loadingNotice">Loading competition films...</p>
+  <!-- View Switcher Tabs: Voting vs Ceremony Results -->
+  <div class="view-switcher-bar">
+    <div class="container" style="display:flex; align-items:center; gap:10px; width:100%;">
+      <button type="button" class="view-tab-btn active" id="tabBtnVoting">
+        <span>🗳️</span> <span id="labelTabVoting">Audience Voting</span>
+      </button>
+      <button type="button" class="view-tab-btn" id="tabBtnResults">
+        <span>🏆</span> <span id="labelTabResults">Ceremony Results</span>
+      </button>
     </div>
-  </main>
+  </div>
+
+  <!-- Main Content Wrapper -->
+  <div class="voting-page-wrapper">
+
+    <!-- VIEW 1: AUDIENCE VOTING SECTION -->
+    <section id="sectionVotingView" class="container">
+      <!-- Category Filter Pills -->
+      <div class="category-filter-bar" id="categoryFilterBar">
+        <button type="button" class="category-tab-btn active" data-cat="all" id="btnFilterAll">All Categories</button>
+        <button type="button" class="category-tab-btn" data-cat="senior" id="btnFilterSenior">Senior (14–18)</button>
+        <button type="button" class="category-tab-btn" data-cat="junior" id="btnFilterJunior">Junior (10–13)</button>
+      </div>
+
+      <!-- Voting Cards Grid -->
+      <main class="voting-grid" id="votingFilmsContainer" aria-live="polite">
+        <div style="grid-column: 1 / -1; text-align: center; padding: 60px 20px; color: #94a3b8;">
+          <p id="loadingNotice">Connecting to festival database...</p>
+        </div>
+      </main>
+    </section>
+
+    <!-- VIEW 2: CEREMONY JURY & AUDIENCE WINNERS SECTION -->
+    <section id="sectionResultsView" class="ceremony-section" style="display:none;">
+      
+      <!-- Locked State (when showResults is false) -->
+      <div id="resultsLockedCard" class="results-locked-box">
+        <div class="locked-lock-icon">🔒</div>
+        <h2 class="locked-title" id="lockedTitle">Official Results are Sealed</h2>
+        <p class="locked-desc" id="lockedDesc">
+          The international festival jury is currently evaluating all competing entries. Official 1st, 2nd, and 3rd place winners for Senior and Junior categories, along with the Audience Favorite ("Любимчик"), will be unlocked live during the grand awards gala!
+        </p>
+        <span class="locked-tagline" id="lockedTagline">Awaiting Organizer Ceremony Toggle</span>
+      </div>
+
+      <!-- Unlocked Ceremony Breakdown (when showResults is true) -->
+      <div id="resultsUnlockedCard" class="results-unlocked-container" style="display:none;">
+        
+        <div class="results-banner-live">
+          <div>
+            <h2 class="results-banner-title" id="unlockedBannerTitle">🏆 Official Festival Winners Announced!</h2>
+            <p class="results-banner-sub" id="unlockedBannerSub">
+              Congratulations to all laureates, directors, and audience favorites of the Ąžuolynas International Film Festival.
+            </p>
+          </div>
+          <button type="button" class="btn-solid btn-sm" id="btnCelebrateAgain" style="padding:8px 16px; cursor:pointer;">
+            🎉 Celebrate
+          </button>
+        </div>
+
+        <!-- Audience Favorite Showcase ("Любимчик") -->
+        <div class="audience-favorite-showcase" id="audienceFavoriteBox">
+          <div class="favorite-crown-badge">
+            <span>👑</span>
+            <span id="labelAudienceFavoriteTitle">Audience Favorite Award • "Любимчик"</span>
+          </div>
+          <div class="favorite-grid-layout">
+            <div class="favorite-poster-box">
+              <img id="favPosterImg" src="" alt="Audience Favorite">
+            </div>
+            <div class="favorite-content-box">
+              <h2 id="favMovieTitle">Loading Winner...</h2>
+              <p class="favorite-director" id="favDirectorLine">Director: <strong>Director Name</strong></p>
+              <p class="favorite-synopsis" id="favSynopsisLine">Compelling storytelling that captured the hearts of festival viewers worldwide.</p>
+              <div class="favorite-tally-pill">
+                <span>❤️</span>
+                <span id="favTotalVotes">0 Total Viewer Votes</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Senior Category Podium (14–18) -->
+        <div class="category-results-group">
+          <div class="category-results-heading">
+            <span>🎬</span>
+            <span id="headingSeniorResults">Senior Category (Ages 14–18) — Official Jury Awards</span>
+          </div>
+          <div class="podium-grid" id="seniorPodiumGrid">
+            <!-- 1st, 2nd, 3rd place injected here -->
+          </div>
+        </div>
+
+        <!-- Junior Category Podium (10–13) -->
+        <div class="category-results-group">
+          <div class="category-results-heading">
+            <span>🌱</span>
+            <span id="headingJuniorResults">Junior Category (Ages 10–13) — Official Jury Awards</span>
+          </div>
+          <div class="podium-grid" id="juniorPodiumGrid">
+            <!-- 1st, 2nd, 3rd place injected here -->
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+  </div>
+
+  <!-- Notification Toast -->
+  <div id="voteToast" class="vote-toast">
+    <span id="toastIcon">✓</span>
+    <span id="toastMsg">Notification message</span>
+  </div>
+
+  <canvas id="confettiCanvas" style="position:fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:9999; display:none;"></canvas>
 
   <script src="js/burger-menu.js"></script>
   <script>
     (function() {
-      // 1. Dual-Language Strings Dictionary (Default: EN)
+      // 1. Multi-Language Dictionary (EN, LT, RU)
       const I18N = {
         en: {
-          pageTitle: "Audience Voting | Ąžuolynas Film Fest",
-          metaDesc: "Official Audience Choice Award Voting for the Ąžuolynas International Students Film Festival. Support independent student filmmakers.",
+          pageTitle: "Audience Voting & Ceremony Results | AISFF 2027",
+          metaDesc: "Official Audience Choice Award Voting & Jury Results for Ąžuolynas International Film Festival. Support independent student filmmakers.",
           navHome: "Home",
-          navVoting: "Voting",
+          navVoting: "Voting & Results",
           navLive: "Live Stream",
           navAdmin: "Admin",
-          btnLiveTop: "Watch Live",
+          btnLiveTop: "Live Stream",
           homeUrl: "en/index.html",
           statusOpen: "Voting Active",
           statusClosed: "Voting Closed",
           heroTitle: "Audience Choice Award Voting",
-          heroSubtitle: "Support official festival filmmakers! You can cast one vote per nomination category. Real-time voting statistics will be revealed once your vote is recorded.",
+          heroSubtitle: "Cast your official vote for the festival's Audience Choice Award (\"Любимчик\"). All audience votes update atomically in real-time. Official jury rankings and the audience favorite will be revealed live during the closing ceremony.",
+          thankYouTitle: "Thank you for your vote!",
+          thankYouBody: "Your vote has been securely recorded in the festival tally. Only one vote per festival attendee is permitted. You can watch the live ceremony and wait for the official winners reveal.",
+          btnWatchCeremony: "Watch Live Stream",
+          labelTabVoting: "Audience Voting",
+          labelTabResults: "Ceremony Results",
           allCategories: "All Categories",
-          loadingNotice: "Loading competition films...",
-          emptyNotice: "No films found in this category yet, or selection is being prepared.",
+          seniorCat: "Senior (14–18)",
+          juniorCat: "Junior (10–13)",
+          loadingNotice: "Connecting to festival database...",
+          emptyNotice: "No films currently in competition or selection is being prepared.",
           directorLabel: "Director:",
           btnVote: "Vote for Film",
-          btnVoting: "Recording vote...",
-          btnVoted: "Your vote recorded ✓",
-          btnAlreadyVoted: "Vote cast in this category",
+          btnVoting: "Submitting vote...",
+          btnVoted: "Your Vote Cast ✓",
+          btnAlreadyVoted: "You have voted",
           votesLabel: "Votes:",
-          anonymousVoter: "Independent Filmmaker",
-          errorVoteFailed: "Failed to cast vote. Please try again."
+          lockedTitle: "Official Results are Sealed",
+          lockedDesc: "The international festival jury is currently evaluating all competing entries. Official 1st, 2nd, and 3rd place winners for Senior and Junior categories, along with the Audience Favorite (\"Любимчик\"), will be unlocked live during the grand awards gala!",
+          lockedTagline: "Awaiting Organizer Ceremony Toggle",
+          unlockedBannerTitle: "🏆 Official Festival Winners Announced!",
+          unlockedBannerSub: "Congratulations to all laureates, directors, and audience favorites of the Ąžuolynas International Film Festival.",
+          labelAudienceFavoriteTitle: "Audience Favorite Award • \"Любимчик\"",
+          headingSeniorResults: "Senior Category (Ages 14–18) — Official Jury Awards",
+          headingJuniorResults: "Junior Category (Ages 10–13) — Official Jury Awards",
+          rank1: "🥇 1st Place (Winner)",
+          rank2: "🥈 2nd Place",
+          rank3: "🥉 3rd Place",
+          noJuryAssigned: "Jury deliberations finalizing",
+          errorVoteFailed: "Vote could not be processed. Please try again."
         },
         lt: {
-          pageTitle: "Žiūrovų Balsavimas | Ąžuolynas Film Fest",
-          metaDesc: "Oficialus Ąžuolynas International Students Film Festival žiūrovų simpatijų balsavimas. Išrinkite geriausius filmus.",
+          pageTitle: "Žiūrovų Balsavimas ir Rezultatai | AISFF 2027",
+          metaDesc: "Oficialus Ąžuolyno tarptautinio mokinių filmų festivalio žiūrovų balsavimas ir ceremonijos laureatai.",
           navHome: "Pradžia",
-          navVoting: "Balsavimas",
+          navVoting: "Balsavimas ir Rezultatai",
           navLive: "Transliacija",
           navAdmin: "Valdymas",
           btnLiveTop: "Žiūrėti Gyvai",
@@ -392,273 +1022,474 @@
           statusOpen: "Balsavimas Aktyvus",
           statusClosed: "Balsavimas Uždarytas",
           heroTitle: "Žiūrovų Simpatijų Balsavimas",
-          heroSubtitle: "Palaikykite oficialios atrankos kūrėjus! Kiekvienoje nominacijoje galite atiduoti po vieną balsą. Realaus laiko rezultatus pamatysite atidavę balsą.",
-          allCategories: "Visos Nominacijos",
-          loadingNotice: "Kraunami konkursiniai filmai...",
-          emptyNotice: "Šioje nominacijoje filmų kol kas nėra arba atranka dar ruošiama.",
+          heroSubtitle: "Atiduokite savo balsą už festivalio Žiūrovų Simpatijos apdovanojimą („Любимчик“). Balsai atnaujinami realiuoju laiku. Oficialūs žiuri rezultatai ir nugalėtojai bus paskelbti iškilmingos ceremonijos metu.",
+          thankYouTitle: "Ačiū už jūsų balsą!",
+          thankYouBody: "Jūsų balsas sėkmingai įskaitytas į bendrą festivalio balsavimo sistemą. Vienam žiūrovui leidžiama balsuoti vieną kartą. Kviečiame stebėti tiesioginę ceremonijos transliaciją!",
+          btnWatchCeremony: "Žiūrėti Transliaciją",
+          labelTabVoting: "Žiūrovų Balsavimas",
+          labelTabResults: "Ceremonijos Rezultatai",
+          allCategories: "Visos Kategorijos",
+          seniorCat: "Vyresnieji (14–18)",
+          juniorCat: "Jaunesnieji (10–13)",
+          loadingNotice: "Jungiamasi prie festivalio duomenų bazės...",
+          emptyNotice: "Šioje programoje filmų kol kas nėra arba atranka dar ruošiama.",
           directorLabel: "Režisierius:",
           btnVote: "Balsuoti už filmą",
-          btnVoting: "Registruojama...",
+          btnVoting: "Registruojamas balsas...",
           btnVoted: "Jūsų balsas įskaitytas ✓",
-          btnAlreadyVoted: "Balsas šioje nominacijoje atiduotas",
+          btnAlreadyVoted: "Balsas jau atiduotas",
           votesLabel: "Balsai:",
-          anonymousVoter: "Nepriklausomas kūrėjas",
-          errorVoteFailed: "Nepavyko atiduoti balso. Bandykite dar kartą."
-        }
-      };
-
-      // Category translation helper
-      const CATEGORY_NAMES = {
-        lt: {
-          "Short Fiction": "Trumpametražis vaidybinis filmas",
-          "Documentary": "Dokumentinis filmas",
-          "Animation": "Animacinis filmas",
-          "Music Video": "Muzikinis klipas",
-          "Experimental": "Eksperimentinis filmas",
-          "Audience Choice": "Žiūrovų simpatija",
-          "Vaidybinis filmas": "Trumpametražis vaidybinis filmas",
-          "Dokumentinis filmas": "Dokumentinis filmas",
-          "Animacija": "Animacinis filmas",
-          "Muzikinis vaizdo klipas": "Muzikinis klipas",
-          "Eksperimentinis": "Eksperimentinis filmas"
+          lockedTitle: "Oficialūs Rezultatai Užrakinti",
+          lockedDesc: "Tarptautinė vertinimo komisija šiuo metu vertina konkursinius darbus. Vyresniųjų ir jaunesniųjų kategorijų 1, 2, 3 vietų nugalėtojai bei Žiūrovų Simpatija („Любимчик“) bus atskleisti iškilmingos apdovanojimų ceremonijos metu!",
+          lockedTagline: "Laukiama organizatorių ceremonijos įjungimo",
+          unlockedBannerTitle: "🏆 Paskelbti Oficialūs Festivalio Nugalėtojai!",
+          unlockedBannerSub: "Sveikiname visus Ąžuolyno tarptautinio kino festivalio laureatus, režisierius ir žiūrovų favoritus.",
+          labelAudienceFavoriteTitle: "Žiūrovų Simpatijos Prizas • „Любимчик“",
+          headingSeniorResults: "Vyresniųjų Grupė (14–18 m.) — Žiuri Apdovanojimai",
+          headingJuniorResults: "Jaunesniųjų Grupė (10–13 m.) — Žiuri Apdovanojimai",
+          rank1: "🥇 1-oji Vieta (Nugalėtojas)",
+          rank2: "🥈 2-oji Vieta",
+          rank3: "🥉 3-ioji Vieta",
+          noJuryAssigned: "Žiuri sprendimas tikslinamas",
+          errorVoteFailed: "Nepavyko įskaityti balso. Bandykite dar kartą."
         },
-        en: {
-          "Trumpametražis vaidybinis filmas": "Short Fiction",
-          "Vaidybinis filmas": "Short Fiction",
-          "Dokumentinis filmas": "Documentary",
-          "Animacinis filmas": "Animation",
-          "Animacija": "Animation",
-          "Muzikinis klipas": "Music Video",
-          "Muzikinis vaizdo klipas": "Music Video",
-          "Eksperimentinis filmas": "Experimental",
-          "Eksperimentinis": "Experimental",
-          "Žiūrovų simpatija": "Audience Choice"
+        ru: {
+          pageTitle: "Голосование зрителей и результаты | AISFF 2027",
+          metaDesc: "Официальное голосование за приз зрительских симпатий кинофестиваля «Ąžuolynas». Поддержите независимых молодых авторов.",
+          navHome: "Главная",
+          navVoting: "Голосование и Результаты",
+          navLive: "Трансляция",
+          navAdmin: "Управление",
+          btnLiveTop: "Смотреть Эфир",
+          homeUrl: "en/index.html",
+          statusOpen: "Голосование Открыто",
+          statusClosed: "Голосование Завершено",
+          heroTitle: "Приз Зрительских Симпатий",
+          heroSubtitle: "Отдайте свой голос за лучший фильм фестиваля («Любимчик»). Все голоса учитываются атомарно в реальном времени. Официальные итоги жюри и победитель зрительского голосования будут объявлены во время церемонии награждения.",
+          thankYouTitle: "Спасибо за ваш голос!",
+          thankYouBody: "Ваш голос успешно учтен в официальном протоколе фестиваля. Каждому зрителю разрешен один голос за все время фестиваля. Присоединяйтесь к прямому эфиру церемонии награждения!",
+          btnWatchCeremony: "Смотреть Церемонию",
+          labelTabVoting: "Голосование",
+          labelTabResults: "Итоги Церемонии",
+          allCategories: "Все Категории",
+          seniorCat: "Старшие (14–18)",
+          juniorCat: "Младшие (10–13)",
+          loadingNotice: "Подключение к базе данных фестиваля...",
+          emptyNotice: "Конкурсные фильмы в данной категории пока готовятся к показу.",
+          directorLabel: "Режиссер:",
+          btnVote: "Голосовать за фильм",
+          btnVoting: "Сохранение голоса...",
+          btnVoted: "Ваш голос учтен ✓",
+          btnAlreadyVoted: "Вы уже проголосовали",
+          votesLabel: "Голосов:",
+          lockedTitle: "Результаты жюри скрыты",
+          lockedDesc: "Международное жюри оценивает конкурсные работы. Обладатели 1-го, 2-го и 3-го мест в старшей и младшей возрастных группах, а также фаворит зрительского голосования («Любимчик») будут торжественно представлены в прямом эфире!",
+          lockedTagline: "Ожидается включение организаторами фестиваля",
+          unlockedBannerTitle: "🏆 Объявлены Победители Фестиваля!",
+          unlockedBannerSub: "Поздравляем всех лауреатов, авторов и победителей Международного кинофестиваля «Ąžuolynas».",
+          labelAudienceFavoriteTitle: "Приз Зрительских Симпатий • «Любимчик»",
+          headingSeniorResults: "Старшая Группа (14–18 лет) — Решение Жюри",
+          headingJuniorResults: "Младшая Группа (10–13 лет) — Решение Жюри",
+          rank1: "🥇 1 Место (Победитель)",
+          rank2: "🥈 2 Место",
+          rank3: "🥉 3 Место",
+          noJuryAssigned: "Подведение итогов жюри",
+          errorVoteFailed: "Не удалось сохранить голос. Пожалуйста, попробуйте еще раз."
         }
       };
 
-      // Detect language (Default: EN)
-      function detectLanguage() {
-        const urlParams = new URLSearchParams(window.location.search);
-        const qLang = urlParams.get("lang");
-        if (qLang === "en" || qLang === "lt") return qLang;
+      // 2. Application State
+      let currentLang = detectLanguage();
+      let activeTab = "voting"; // "voting" or "results"
+      let selectedCategory = "all"; // "all", "senior", "junior"
+      let moviesList = [];
+      let globalSettings = { votingOpen: true, showResults: false };
+      let hasVoted = false;
+      let votedMovieId = null;
+      let votedMovieTitle = "";
 
-        const stored = localStorage.getItem("asiff_preferred_lang");
-        if (stored === "en" || stored === "lt") return stored;
-
-        return "en"; // Default English
+      // Check URL parameters (e.g. ?overlay=true for OBS / vMix)
+      const urlParams = new URLSearchParams(window.location.search);
+      const isObsOverlay = urlParams.get("overlay") === "true" || urlParams.get("obs") === "true";
+      if (isObsOverlay) {
+        document.body.classList.add("obs-overlay-mode");
+        activeTab = "results"; // Default to results overlay in OBS
       }
 
-      let currentLang = detectLanguage();
-      let currentFilms = [];
-      let currentStats = { statsByNomination: {}, filmVoteCounts: {} };
-      let selectedCategory = "all";
+      function detectLanguage() {
+        const qLang = urlParams.get("lang");
+        if (qLang && ["en", "lt", "ru"].includes(qLang.toLowerCase())) return qLang.toLowerCase();
+        const stored = localStorage.getItem("asiff_preferred_lang");
+        if (stored && ["en", "lt", "ru"].includes(stored.toLowerCase())) return stored.toLowerCase();
+        return "en";
+      }
 
-      const container = document.getElementById("votingFilmsContainer");
-      const filterBar = document.getElementById("categoryFilterBar");
+      // Check double-voting storage immediately on load
+      function checkLocalVoteState() {
+        try {
+          const storedVote = localStorage.getItem("festival_voted");
+          if (storedVote) {
+            hasVoted = true;
+            votedMovieId = storedVote;
+            votedMovieTitle = localStorage.getItem("festival_voted_title") || "Selected Film";
+          }
+        } catch (e) {
+          console.warn("Storage access issue:", e);
+        }
+      }
+
+      // DOM Elements
+      const votingGrid = document.getElementById("votingFilmsContainer");
       const statusBadge = document.getElementById("votingStatusBadge");
       const statusText = document.getElementById("votingStatusText");
+      const thankYouBanner = document.getElementById("thankYouBanner");
+      const thankYouFilmName = document.getElementById("thankYouFilmName");
+      const sectionVoting = document.getElementById("sectionVotingView");
+      const sectionResults = document.getElementById("sectionResultsView");
+      const tabBtnVoting = document.getElementById("tabBtnVoting");
+      const tabBtnResults = document.getElementById("tabBtnResults");
+      const resultsLockedCard = document.getElementById("resultsLockedCard");
+      const resultsUnlockedCard = document.getElementById("resultsUnlockedCard");
 
-      function setLanguage(lang) {
-        currentLang = lang;
-        try {
-          localStorage.setItem("asiff_preferred_lang", lang);
-        } catch (e) {}
-
-        document.documentElement.lang = lang;
-        applyTranslations();
-        buildCategoryTabs();
-        renderCards();
-      }
-
-      function getCategoryLabel(catRaw) {
-        if (!catRaw || catRaw === "all") return "";
-        const dict = CATEGORY_NAMES[currentLang];
-        if (dict && dict[catRaw]) return dict[catRaw];
-        return catRaw;
-      }
-
+      // UI Text Localization
       function applyTranslations() {
         const t = I18N[currentLang] || I18N.en;
-
         document.title = t.pageTitle;
         const meta = document.getElementById("vMetaDescription");
         if (meta) meta.content = t.metaDesc;
 
-        const homeLink = document.getElementById("logoLink");
-        if (homeLink) homeLink.href = t.homeUrl;
-
         const navH = document.getElementById("navHome");
         if (navH) { navH.textContent = t.navHome; navH.href = t.homeUrl; }
-
         const navV = document.getElementById("navVoting");
         if (navV) navV.textContent = t.navVoting;
-
         const navL = document.getElementById("navLive");
         if (navL) navL.textContent = t.navLive;
-
         const navA = document.getElementById("navAdmin");
         if (navA) navA.textContent = t.navAdmin;
-
         const btnL = document.getElementById("btnLiveTop");
         if (btnL) btnL.textContent = t.btnLiveTop;
 
         const hTitle = document.getElementById("heroTitle");
         if (hTitle) hTitle.textContent = t.heroTitle;
-
         const hSub = document.getElementById("heroSubtitle");
         if (hSub) hSub.textContent = t.heroSubtitle;
 
-        const loadNotice = document.getElementById("loadingNotice");
-        if (loadNotice) loadNotice.textContent = t.loadingNotice;
+        const tyTitle = document.getElementById("thankYouTitle");
+        if (tyTitle) tyTitle.textContent = t.thankYouTitle;
+        const tyBody = document.getElementById("thankYouBody");
+        if (tyBody) tyBody.textContent = t.thankYouBody;
+        const btnCeremony = document.getElementById("btnWatchCeremony");
+        if (btnCeremony) btnCeremony.textContent = t.btnWatchCeremony;
 
-        // Active button toggle
+        const lTabVote = document.getElementById("labelTabVoting");
+        if (lTabVote) lTabVote.textContent = t.labelTabVoting;
+        const lTabRes = document.getElementById("labelTabResults");
+        if (lTabRes) lTabRes.textContent = t.labelTabResults;
+
+        const fAll = document.getElementById("btnFilterAll");
+        if (fAll) fAll.textContent = t.allCategories;
+        const fSen = document.getElementById("btnFilterSenior");
+        if (fSen) fSen.textContent = t.seniorCat;
+        const fJun = document.getElementById("btnFilterJunior");
+        if (fJun) fJun.textContent = t.juniorCat;
+
+        const lTitle = document.getElementById("lockedTitle");
+        if (lTitle) lTitle.textContent = t.lockedTitle;
+        const lDesc = document.getElementById("lockedDesc");
+        if (lDesc) lDesc.textContent = t.lockedDesc;
+        const lTag = document.getElementById("lockedTagline");
+        if (lTag) lTag.textContent = t.lockedTagline;
+
+        const unBannerT = document.getElementById("unlockedBannerTitle");
+        if (unBannerT) unBannerT.textContent = t.unlockedBannerTitle;
+        const unBannerS = document.getElementById("unlockedBannerSub");
+        if (unBannerS) unBannerS.textContent = t.unlockedBannerSub;
+
+        const favTitle = document.getElementById("labelAudienceFavoriteTitle");
+        if (favTitle) favTitle.textContent = t.labelAudienceFavoriteTitle;
+
+        const headSen = document.getElementById("headingSeniorResults");
+        if (headSen) headSen.textContent = t.headingSeniorResults;
+        const headJun = document.getElementById("headingJuniorResults");
+        if (headJun) headJun.textContent = t.headingJuniorResults;
+
+        // Language Buttons Active Class
         document.querySelectorAll(".voting-lang-btn").forEach(btn => {
-          if (btn.getAttribute("data-lang") === currentLang) {
-            btn.classList.add("active");
-          } else {
-            btn.classList.remove("active");
-          }
+          btn.classList.toggle("active", btn.getAttribute("data-lang") === currentLang);
         });
+
+        updateStatusBadges();
+        updateThankYouBanner();
+        renderVotingCards();
+        renderResultsView();
       }
 
-      // Bind Language Switcher Buttons
+      function updateStatusBadges() {
+        const t = I18N[currentLang] || I18N.en;
+        if (globalSettings.votingOpen !== false) {
+          statusBadge.className = "voting-status-badge status-open";
+          statusText.textContent = t.statusOpen;
+        } else {
+          statusBadge.className = "voting-status-badge status-closed";
+          statusText.textContent = t.statusClosed;
+        }
+      }
+
+      function updateThankYouBanner() {
+        if (hasVoted) {
+          thankYouBanner.style.display = "flex";
+          thankYouFilmName.textContent = votedMovieTitle || "Festival Competitor";
+        } else {
+          thankYouBanner.style.display = "none";
+        }
+      }
+
+      // 3. Tab Navigation
+      tabBtnVoting.addEventListener("click", () => switchTab("voting"));
+      tabBtnResults.addEventListener("click", () => switchTab("results"));
+
+      function switchTab(tab) {
+        activeTab = tab;
+        if (tab === "voting") {
+          tabBtnVoting.classList.add("active");
+          tabBtnResults.classList.remove("active");
+          sectionVoting.style.display = "block";
+          sectionResults.style.display = "none";
+        } else {
+          tabBtnResults.classList.add("active");
+          tabBtnVoting.classList.remove("active");
+          sectionVoting.style.display = "none";
+          sectionResults.style.display = "block";
+          if (globalSettings.showResults) {
+            triggerConfetti();
+          }
+        }
+      }
+
+      // Filter button handlers
+      document.querySelectorAll(".category-tab-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          document.querySelectorAll(".category-tab-btn").forEach(b => b.classList.remove("active"));
+          btn.classList.add("active");
+          selectedCategory = btn.getAttribute("data-cat");
+          renderVotingCards();
+        });
+      });
+
+      // Language Switcher Handlers
       document.querySelectorAll(".voting-lang-btn").forEach(btn => {
         btn.addEventListener("click", () => {
           const l = btn.getAttribute("data-lang");
           if (l && l !== currentLang) {
-            setLanguage(l);
+            currentLang = l;
+            try { localStorage.setItem("asiff_preferred_lang", l); } catch(e) {}
+            applyTranslations();
           }
         });
       });
 
-      applyTranslations();
-
-      // Initialize Voting Engine
-      window.VotingEngine.init({
-        onFilmsUpdate: (films) => {
-          currentFilms = films;
-          buildCategoryTabs();
-          renderCards();
-        },
-        onResultsUpdate: (stats) => {
-          currentStats = stats;
-          renderCards();
-        },
-        onSettingsUpdate: (settings) => {
-          const t = I18N[currentLang] || I18N.en;
-          if (settings.votingOpen) {
-            statusBadge.className = "voting-status-badge status-open";
-            statusText.textContent = t.statusOpen;
-          } else {
-            statusBadge.className = "voting-status-badge status-closed";
-            statusText.textContent = t.statusClosed;
-          }
-          renderCards();
-        },
-        onError: (err) => {
-          if (window.reportAsiffError) {
-            window.reportAsiffError({
-              action: "Balsavimo sistemos sinchronizacija / Voting sync",
-              message: err.message,
-              code: "VOTING_SYNC_ERR",
-              file: "voting.html",
-              functionName: "initVotingEngine"
-            });
-          }
-        }
-      });
-
-      function buildCategoryTabs() {
-        const t = I18N[currentLang] || I18N.en;
-        const categories = new Set();
-        currentFilms.forEach(f => {
-          if (f.category) categories.add(f.category);
-        });
-
-        let html = `<button type="button" class="category-tab-btn ${selectedCategory === 'all' ? 'active' : ''}" data-cat="all">${t.allCategories}</button>`;
-        categories.forEach(cat => {
-          const label = getCategoryLabel(cat);
-          html += `<button type="button" class="category-tab-btn ${selectedCategory === cat ? 'active' : ''}" data-cat="${escapeHtml(cat)}">${escapeHtml(label)}</button>`;
-        });
-
-        filterBar.innerHTML = html;
-
-        filterBar.querySelectorAll(".category-tab-btn").forEach(btn => {
-          btn.addEventListener("click", () => {
-            filterBar.querySelectorAll(".category-tab-btn").forEach(b => b.classList.remove("active"));
-            btn.classList.add("active");
-            selectedCategory = btn.getAttribute("data-cat");
-            renderCards();
-          });
-        });
+      // Confetti celebrate button
+      const btnCelebrate = document.getElementById("btnCelebrateAgain");
+      if (btnCelebrate) {
+        btnCelebrate.addEventListener("click", () => triggerConfetti());
       }
 
-      function renderCards() {
+      // Toast Notification helper
+      function showToast(msg, isError = false) {
+        const toast = document.getElementById("voteToast");
+        const msgEl = document.getElementById("toastMsg");
+        const iconEl = document.getElementById("toastIcon");
+        if (!toast || !msgEl) return;
+
+        msgEl.textContent = msg;
+        iconEl.textContent = isError ? "⚠️" : "✓";
+        toast.className = `vote-toast show ${isError ? 'error-toast' : ''}`;
+        setTimeout(() => {
+          toast.className = "vote-toast";
+        }, 4000);
+      }
+
+      // Confetti Engine
+      function triggerConfetti() {
+        const canvas = document.getElementById("confettiCanvas");
+        if (!canvas) return;
+        canvas.style.display = "block";
+        const ctx = canvas.getContext("2d");
+        const width = (canvas.width = window.innerWidth);
+        const height = (canvas.height = window.innerHeight);
+
+        const colors = ["#ffd700", "#34d399", "#ffffff", "#c084fc", "#60a5fa", "#cd7f32"];
+        const particles = [];
+        for (let i = 0; i < 90; i++) {
+          particles.push({
+            x: width * 0.5 + (Math.random() * 260 - 130),
+            y: height * 0.5 + (Math.random() * 120 - 60),
+            vx: (Math.random() - 0.5) * 14,
+            vy: -Math.random() * 16 - 6,
+            size: Math.random() * 8 + 4,
+            color: colors[Math.floor(Math.random() * colors.length)],
+            rotation: Math.random() * 360,
+            rotSpeed: (Math.random() - 0.5) * 10,
+            gravity: 0.4,
+            drag: 0.96,
+            alpha: 1
+          });
+        }
+
+        let startTime = Date.now();
+        function frame() {
+          ctx.clearRect(0, 0, width, height);
+          let alive = false;
+          for (let p of particles) {
+            p.vx *= p.drag;
+            p.vy *= p.drag;
+            p.vy += p.gravity;
+            p.x += p.vx;
+            p.y += p.vy;
+            p.rotation += p.rotSpeed;
+            if (Date.now() - startTime > 1600) p.alpha -= 0.025;
+
+            if (p.alpha > 0) {
+              alive = true;
+              ctx.save();
+              ctx.globalAlpha = Math.max(0, p.alpha);
+              ctx.translate(p.x, p.y);
+              ctx.rotate((p.rotation * Math.PI) / 180);
+              ctx.fillStyle = p.color;
+              ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size * 0.7);
+              ctx.restore();
+            }
+          }
+          if (alive) {
+            requestAnimationFrame(frame);
+          } else {
+            ctx.clearRect(0, 0, width, height);
+            canvas.style.display = "none";
+          }
+        }
+        frame();
+      }
+
+      // 4. Data Extraction & Fallback Helpers
+      function resolveMovieCategory(film) {
+        const cat = (film.category || film.nomination || "").toLowerCase();
+        if (cat.includes("senior") || cat.includes("vyresn") || cat.includes("14") || cat.includes("ii")) {
+          return "senior";
+        }
+        if (cat.includes("junior") || cat.includes("jaunesn") || cat.includes("10") || cat.includes("i")) {
+          return "junior";
+        }
+        return "senior"; // default high school category
+      }
+
+      function resolveLocalizedField(film, field) {
+        if (currentLang === "lt") {
+          return film[field] || film[`${field}_lt`] || film[`${field}_en`] || "";
+        }
+        if (currentLang === "ru") {
+          return film[`${field}_ru`] || film[`${field}_en`] || film[field] || "";
+        }
+        // English default
+        return film[`${field}_en`] || film[field] || "";
+      }
+
+      function getMovieTitle(film) {
+        return resolveLocalizedField(film, "filmTitle") || 
+               resolveLocalizedField(film, "title") || 
+               film.filmTitle || 
+               film.title || 
+               "Untitled Competition Film";
+      }
+
+      function getMovieDirector(film) {
+        return film.director || film.directorName || film.name || (currentLang === "ru" ? "Независимый автор" : currentLang === "lt" ? "Nepriklausomas kūrėjas" : "Independent Filmmaker");
+      }
+
+      function getMovieSynopsis(film) {
+        return resolveLocalizedField(film, "synopsis") || 
+               resolveLocalizedField(film, "description") || 
+               film.synopsis || 
+               film.description || 
+               (currentLang === "ru" ? "Официальная программа Международного кинофестиваля «Ąžuolynas»." : currentLang === "lt" ? "Oficiali festivalio konkursinė programa." : "Official festival competition selection.");
+      }
+
+      function getMoviePoster(film) {
+        return film.posterUrl || film.poster || film.thumbnailUrl || "";
+      }
+
+      function getMovieVotes(film) {
+        return typeof film.votes === "number" ? film.votes : (typeof film.votesCount === "number" ? film.votesCount : 0);
+      }
+
+      // 5. Render Voting Cards
+      function renderVotingCards() {
         const t = I18N[currentLang] || I18N.en;
-        const filtered = selectedCategory === "all"
-          ? currentFilms
-          : currentFilms.filter(f => f.category === selectedCategory);
+        let filtered = moviesList;
+        if (selectedCategory !== "all") {
+          filtered = moviesList.filter(f => resolveMovieCategory(f) === selectedCategory);
+        }
 
         if (filtered.length === 0) {
-          container.innerHTML = `
-            <div class="voting-empty-state">
+          votingGrid.innerHTML = `
+            <div style="grid-column: 1 / -1; text-align: center; padding: 60px 20px; color: #94a3b8; background: var(--surface-card); border-radius: 4px; border: 1px solid var(--border-color);">
               <p>${t.emptyNotice}</p>
             </div>
           `;
           return;
         }
 
-        const settings = window.VotingEngine.getSettings();
+        const maxVotes = Math.max(...moviesList.map(f => getMovieVotes(f)), 1);
 
-        container.innerHTML = filtered.map(film => {
-          const rawCat = film.category || "General";
-          const localizedCat = getCategoryLabel(rawCat);
-          const hasVotedInCategory = window.VotingEngine.hasUserVotedIn(rawCat);
-          const userVotedThisFilm = window.VotingEngine.getUserVoteFor(rawCat) === film.id;
+        votingGrid.innerHTML = filtered.map(film => {
+          const catKey = resolveMovieCategory(film);
+          const catBadgeClass = catKey === "senior" ? "tag-senior" : "tag-junior";
+          const catLabel = catKey === "senior" ? t.seniorCat : t.juniorCat;
+          const title = getMovieTitle(film);
+          const director = getMovieDirector(film);
+          const synopsis = getMovieSynopsis(film);
+          const poster = getMoviePoster(film);
+          const votes = getMovieVotes(film);
+          const votePercentage = Math.round((votes / maxVotes) * 100);
 
-          // Resolve bilingual fields with automatic fallback
-          const fields = window.VotingEngine.resolveFilmFields(film, currentLang);
-
-          const nomStats = currentStats.statsByNomination[rawCat] || { totalVotes: 0, films: {} };
-          const filmVotes = nomStats.films[film.id] || film.votesCount || 0;
-          const percentage = nomStats.totalVotes > 0 ? Math.round((filmVotes / nomStats.totalVotes) * 100) : 0;
-
-          // Results appear after vote or if festival admin configured always show
-          const shouldShowResults = settings.showResults === "always" || hasVotedInCategory || !settings.votingOpen;
+          const isThisVoted = hasVoted && (votedMovieId === film.id);
+          const canVote = !hasVoted && (globalSettings.votingOpen !== false);
 
           return `
-            <article class="film-vote-card" data-id="${film.id}" data-category="${escapeHtml(rawCat)}">
+            <article class="film-vote-card ${isThisVoted ? 'has-voted-this' : ''}" data-id="${film.id}" data-collection="${film._collection || 'movies'}">
               <div class="film-poster-wrap">
-                ${film.posterUrl 
-                  ? `<img src="${escapeHtml(film.posterUrl)}" alt="${escapeHtml(fields.title)}" class="film-poster-img" loading="lazy">` 
-                  : `<div class="film-poster-placeholder"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect><line x1="7" y1="2" x2="7" y2="22"></line><line x1="17" y1="2" x2="17" y2="22"></line><line x1="2" y1="12" x2="22" y2="12"></line></svg><span style="font-size:0.75rem; margin-top:6px;">ASIFF Selection</span></div>`
+                ${poster 
+                  ? `<img src="${escapeHtml(poster)}" alt="${escapeHtml(title)}" class="film-poster-img" loading="lazy">` 
+                  : `<div class="film-poster-placeholder">
+                      <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect><line x1="7" y1="2" x2="7" y2="22"></line><line x1="17" y1="2" x2="17" y2="22"></line><line x1="2" y1="12" x2="22" y2="12"></line></svg>
+                      <span style="font-size:0.75rem; margin-top:6px; font-family:var(--font-mono);">AISFF 2027</span>
+                    </div>`
                 }
               </div>
               <div class="film-card-content">
-                <span class="film-nomination-tag">${escapeHtml(localizedCat)}</span>
-                <h2 class="film-card-title">${escapeHtml(fields.title)}</h2>
-                <p class="film-card-director">${t.directorLabel} <strong>${escapeHtml(fields.director)}</strong></p>
-                <p class="film-card-synopsis">${escapeHtml(fields.synopsis)}</p>
+                <span class="category-tag-badge ${catBadgeClass}">${catLabel}</span>
+                <h2 class="film-card-title">${escapeHtml(title)}</h2>
+                <p class="film-card-director">${t.directorLabel} <strong>${escapeHtml(director)}</strong></p>
+                <p class="film-card-synopsis">${escapeHtml(synopsis)}</p>
 
                 <div class="film-vote-action">
-                  ${userVotedThisFilm ? `
-                    <button type="button" class="btn-vote-trigger voted" disabled>
+                  ${isThisVoted ? `
+                    <button type="button" class="btn-vote-trigger voted-btn" disabled>
                       <span>${t.btnVoted}</span>
                     </button>
                   ` : `
-                    <button type="button" class="btn-vote-trigger" data-action="vote" data-id="${film.id}" data-nomination="${escapeHtml(rawCat)}" ${(!settings.votingOpen || hasVotedInCategory) ? 'disabled' : ''}>
-                      <span>${hasVotedInCategory ? t.btnAlreadyVoted : t.btnVote}</span>
+                    <button type="button" class="btn-vote-trigger" data-action="vote-btn" data-id="${film.id}" ${canVote ? '' : 'disabled'}>
+                      <span>${hasVoted ? t.btnAlreadyVoted : t.btnVote}</span>
                     </button>
                   `}
 
-                  ${shouldShowResults ? `
-                    <div class="film-results-wrap">
-                      <div class="film-results-meta">
-                        <span>${t.votesLabel} <strong>${filmVotes}</strong></span>
-                        <span><strong>${percentage}%</strong></span>
+                  ${(hasVoted || globalSettings.showResults) ? `
+                    <div class="film-tally-wrap">
+                      <div class="film-tally-meta">
+                        <span>${t.votesLabel} <strong>${votes}</strong></span>
+                        <span><strong>${votePercentage}%</strong></span>
                       </div>
-                      <div class="film-results-track">
-                        <div class="film-results-fill" style="width: ${percentage}%"></div>
+                      <div class="film-tally-track">
+                        <div class="film-tally-fill" style="width: ${votePercentage}%"></div>
                       </div>
                     </div>
                   ` : ''}
@@ -668,24 +1499,191 @@
           `;
         }).join("");
 
-        // Attach vote handlers
-        container.querySelectorAll('[data-action="vote"]').forEach(btn => {
-          btn.addEventListener("click", async () => {
+        // Attach vote button listeners
+        votingGrid.querySelectorAll('[data-action="vote-btn"]').forEach(btn => {
+          btn.addEventListener("click", async (e) => {
             const filmId = btn.getAttribute("data-id");
-            const nom = btn.getAttribute("data-nomination");
-            btn.disabled = true;
-            btn.querySelector("span").textContent = t.btnVoting;
-
-            try {
-              await window.VotingEngine.castVote(nom, filmId);
-              renderCards();
-            } catch (err) {
-              alert(err.message || t.errorVoteFailed);
-              btn.disabled = false;
-              btn.querySelector("span").textContent = t.btnVote;
-            }
+            const film = moviesList.find(m => m.id === filmId);
+            if (!film) return;
+            await handleCastVote(film, btn);
           });
         });
+      }
+
+      // 6. Voting Execution (Double-Voting Check, Atomic Increment, Error Handling)
+      async function handleCastVote(film, btnElement) {
+        const t = I18N[currentLang] || I18N.en;
+
+        // Double check client state
+        if (hasVoted || localStorage.getItem("festival_voted")) {
+          showToast(t.btnAlreadyVoted, true);
+          hasVoted = true;
+          updateThankYouBanner();
+          renderVotingCards();
+          return;
+        }
+
+        if (globalSettings.votingOpen === false) {
+          showToast(t.statusClosed, true);
+          return;
+        }
+
+        // Lock button during async operation
+        btnElement.disabled = true;
+        const originalText = btnElement.querySelector("span").textContent;
+        btnElement.querySelector("span").textContent = t.btnVoting;
+
+        try {
+          if (!window.firebase || !window.firebase.firestore) {
+            throw new Error("Firebase SDK is not initialized.");
+          }
+
+          const db = window.firebase.firestore();
+          const targetCollection = film._collection || "movies";
+
+          // Execute atomic increment of +1 strictly as specified in security rules
+          await db.collection(targetCollection).doc(film.id).update({
+            votes: firebase.firestore.FieldValue.increment(1)
+          });
+
+          // Also attempt to log vote document if collection exists
+          try {
+            await db.collection("votes").add({
+              filmId: film.id,
+              collection: targetCollection,
+              filmTitle: getMovieTitle(film),
+              votedAt: firebase.firestore.FieldValue.serverTimestamp(),
+              userAgent: navigator.userAgent.substring(0, 100)
+            });
+          } catch (logErr) {
+            console.info("Votes audit collection write skipped or optional:", logErr.message);
+          }
+
+          // Persist voting state in localStorage
+          hasVoted = true;
+          votedMovieId = film.id;
+          votedMovieTitle = getMovieTitle(film);
+          localStorage.setItem("festival_voted", film.id);
+          localStorage.setItem("festival_voted_title", votedMovieTitle);
+          localStorage.setItem("festival_voted_timestamp", new Date().toISOString());
+
+          // Show confirmation toast
+          showToast(t.thankYouTitle);
+          triggerConfetti();
+
+          // Update UI
+          updateThankYouBanner();
+          renderVotingCards();
+          renderResultsView();
+
+        } catch (err) {
+          console.error("Voting submission error:", err);
+          showToast(err.message || t.errorVoteFailed, true);
+          btnElement.disabled = false;
+          btnElement.querySelector("span").textContent = originalText;
+        }
+      }
+
+      // 7. Render Ceremony Results Section (Jury Podiums & Audience Favorite)
+      function renderResultsView() {
+        const t = I18N[currentLang] || I18N.en;
+
+        // If results are sealed by festival admins
+        if (!globalSettings.showResults) {
+          resultsLockedCard.style.display = "block";
+          resultsUnlockedCard.style.display = "none";
+          return;
+        }
+
+        resultsLockedCard.style.display = "none";
+        resultsUnlockedCard.style.display = "block";
+
+        // A. Determine Audience Favorite ("Любимчик" - film with highest viewer votes)
+        let topFilm = null;
+        let maxVotes = -1;
+        moviesList.forEach(m => {
+          const v = getMovieVotes(m);
+          if (v > maxVotes) {
+            maxVotes = v;
+            topFilm = m;
+          }
+        });
+
+        if (topFilm) {
+          const favTitle = document.getElementById("favMovieTitle");
+          const favDir = document.getElementById("favDirectorLine");
+          const favSyn = document.getElementById("favSynopsisLine");
+          const favVotes = document.getElementById("favTotalVotes");
+          const favImg = document.getElementById("favPosterImg");
+
+          if (favTitle) favTitle.textContent = getMovieTitle(topFilm);
+          if (favDir) favDir.innerHTML = `${t.directorLabel} <strong>${escapeHtml(getMovieDirector(topFilm))}</strong>`;
+          if (favSyn) favSyn.textContent = getMovieSynopsis(topFilm);
+          if (favVotes) favVotes.textContent = `${maxVotes} ${t.votesLabel}`;
+          if (favImg) {
+            const p = getMoviePoster(topFilm);
+            favImg.src = p || "https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media";
+          }
+        }
+
+        // B. Populate Senior Podium (1st, 2nd, 3rd)
+        const seniorFilms = moviesList.filter(f => resolveMovieCategory(f) === "senior");
+        renderCategoryPodium("seniorPodiumGrid", seniorFilms);
+
+        // C. Populate Junior Podium (1st, 2nd, 3rd)
+        const juniorFilms = moviesList.filter(f => resolveMovieCategory(f) === "junior");
+        renderCategoryPodium("juniorPodiumGrid", juniorFilms);
+      }
+
+      function renderCategoryPodium(containerId, films) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+        const t = I18N[currentLang] || I18N.en;
+
+        // Sort by explicit juryPlace / place if set, else sort by highest votes
+        const sorted = [...films].sort((a, b) => {
+          const rankA = a.juryPlace || a.place || 999;
+          const rankB = b.juryPlace || b.place || 999;
+          if (rankA !== rankB) return rankA - rankB;
+          return getMovieVotes(b) - getMovieVotes(a);
+        });
+
+        const ranks = [
+          { rank: 1, tagClass: "rank-tag-1", cardClass: "rank-1", label: t.rank1 },
+          { rank: 2, tagClass: "rank-tag-2", cardClass: "rank-2", label: t.rank2 },
+          { rank: 3, tagClass: "rank-tag-3", cardClass: "rank-3", label: t.rank3 }
+        ];
+
+        container.innerHTML = ranks.map((r, idx) => {
+          const film = sorted[idx];
+          if (!film) {
+            return `
+              <div class="podium-card ${r.cardClass}">
+                <span class="podium-rank-tag ${r.tagClass}">${r.label}</span>
+                <h3 class="podium-movie-title" style="color:#64748b;">${t.noJuryAssigned}</h3>
+                <p class="podium-movie-director">—</p>
+                <p class="podium-movie-synopsis">—</p>
+              </div>
+            `;
+          }
+
+          const title = getMovieTitle(film);
+          const director = getMovieDirector(film);
+          const synopsis = getMovieSynopsis(film);
+          const votes = getMovieVotes(film);
+
+          return `
+            <div class="podium-card ${r.cardClass}">
+              <span class="podium-rank-tag ${r.tagClass}">${r.label}</span>
+              <h3 class="podium-movie-title">${escapeHtml(title)}</h3>
+              <p class="podium-movie-director">${t.directorLabel} <strong>${escapeHtml(director)}</strong></p>
+              <p class="podium-movie-synopsis">${escapeHtml(synopsis)}</p>
+              <div style="margin-top:auto; padding-top:10px; border-top:1px solid rgba(255,255,255,0.06); font-family:var(--font-mono); font-size:0.78rem; color:#94a3b8;">
+                <span>${t.votesLabel} <strong>${votes}</strong></span>
+              </div>
+            </div>
+          `;
+        }).join("");
       }
 
       function escapeHtml(str) {
@@ -697,6 +1695,82 @@
           .replace(/"/g, "&quot;")
           .replace(/'/g, "&#039;");
       }
+
+      // 8. Real-time Firebase Firestore Sync
+      function initializeFirestoreListeners() {
+        if (!window.firebase || !window.firebase.firestore) {
+          console.warn("Firebase Firestore SDK not ready.");
+          return;
+        }
+
+        try {
+          const db = window.firebase.firestore();
+
+          // A. Settings Listener (showResults toggle & votingOpen)
+          db.collection("settings").doc("global").onSnapshot((doc) => {
+            if (doc.exists) {
+              const data = doc.data();
+              const wasHidden = !globalSettings.showResults;
+              globalSettings.votingOpen = data.votingOpen !== false && data.showVoting !== false;
+              globalSettings.showResults = data.showResults === true || data.resultsPublished === true;
+
+              updateStatusBadges();
+              renderResultsView();
+
+              // If results were just toggled to true, burst confetti!
+              if (wasHidden && globalSettings.showResults) {
+                triggerConfetti();
+              }
+            }
+          }, (err) => {
+            console.warn("Settings snapshot listener notice:", err.message);
+          });
+
+          // B. Submissions & Movies Listeners (Seamless fallback & sync)
+          let moviesMap = new Map();
+
+          // 1. Listen to /movies collection
+          db.collection("movies").onSnapshot((snapshot) => {
+            snapshot.forEach((doc) => {
+              moviesMap.set(doc.id, { id: doc.id, _collection: "movies", ...doc.data() });
+            });
+            moviesList = Array.from(moviesMap.values());
+            renderVotingCards();
+            renderResultsView();
+          }, (err) => {
+            console.info("Movies collection listener info:", err.message);
+          });
+
+          // 2. Also listen to /submissions collection for accepted/competition entries
+          db.collection("submissions").onSnapshot((snapshot) => {
+            snapshot.forEach((doc) => {
+              const d = doc.data();
+              // Check if entry is part of competition or in voting
+              if (d.inVoting === true || (d.votesCount && d.votesCount > 0) || (d.votes && d.votes > 0) || d.status === "accepted" || d.status === "in_competition") {
+                if (!moviesMap.has(doc.id)) {
+                  moviesMap.set(doc.id, { id: doc.id, _collection: "submissions", ...d });
+                }
+              }
+            });
+            moviesList = Array.from(moviesMap.values());
+            renderVotingCards();
+            renderResultsView();
+          }, (err) => {
+            console.info("Submissions listener info:", err.message);
+          });
+
+        } catch (e) {
+          console.error("Firestore sync init error:", e);
+        }
+      }
+
+      // Initialize Everything on DOM Load
+      window.addEventListener("DOMContentLoaded", () => {
+        checkLocalVoteState();
+        applyTranslations();
+        initializeFirestoreListeners();
+      });
+
     })();
   </script>
 </body>

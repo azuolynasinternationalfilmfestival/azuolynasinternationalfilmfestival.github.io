@@ -44,9 +44,16 @@ service firebase.storage {
       allow write, delete: if isTopAdmin() || isSignedIn();
     }
 
+    // Movie Media & Posters: public read, authenticated admin write & delete
+    match /movies/{allPaths=**} {
+      allow read: if true;
+      allow write, delete: if isTopAdmin();
+    }
+
+    // Posters: public read, admin write & delete
     match /posters/{allPaths=**} {
       allow read: if true;
-      allow write, delete: if isTopAdmin() || isSignedIn();
+      allow write, delete: if isTopAdmin();
     }
 
     // Default: public read, top admin write & delete

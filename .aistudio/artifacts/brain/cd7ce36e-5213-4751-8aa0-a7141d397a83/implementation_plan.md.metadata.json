@@ -1,6 +1,6 @@
 {
-  "summary":  "Implementation plan for updating all 2027 festival dates across the entire application: Submissions Open November 1, 2026; Submission Deadline April 5, 2027; Festival Start Date April 27, 2027. Covers metadata, countdown timer, hero editorial cards, editions, email templates, server defaults, and client scripts with strict separation from previous editions.",
-  "updatedAt":  "2026-11-01T07:30:42.382831610Z",
+  "summary":  "Revised implementation plan incorporating the exact rules specifications, client-side localStorage double-voting prevention without mandatory login, atomic updates on /movies, and structured Jury (Senior/Junior) + Audience Favorite reveal mechanics.",
+  "updatedAt":  "2026-11-10T16:20:49.684321401Z",
   "requestFeedback":  true,
   "userFacing":  true
 }
