@@ -70,9 +70,10 @@
     }
 
     .voting-hero {
-      padding: 56px 20px 32px 20px;
+      padding: clamp(48px, 6vw, 72px) 20px 36px 20px;
       border-bottom: 1px solid var(--border-color);
-      background: linear-gradient(180deg, #0d1210 0%, #070908 100%);
+      background: radial-gradient(ellipse 70% 50% at 50% 0%, rgba(26, 62, 50, 0.35), transparent 75%),
+                  linear-gradient(180deg, #0d1210 0%, #070908 100%);
     }
     .hero-top-bar {
       display: flex;
@@ -80,16 +81,16 @@
       justify-content: space-between;
       flex-wrap: wrap;
       gap: 12px;
-      margin-bottom: 16px;
+      margin-bottom: 18px;
     }
     .voting-status-badge {
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      padding: 5px 12px;
+      padding: 6px 14px;
       border-radius: 4px;
       font-family: var(--font-mono);
-      font-size: 0.75rem;
+      font-size: 0.76rem;
       font-weight: 600;
       letter-spacing: 0.05em;
       text-transform: uppercase;
@@ -106,19 +107,19 @@
     }
     .voting-hero-title {
       font-family: var(--font-display, sans-serif);
-      font-size: clamp(2.2rem, 5vw, 3.8rem);
+      font-size: clamp(2rem, 4.5vw, 3.2rem);
       font-weight: 700;
       letter-spacing: -0.02em;
       color: #FFFFFF;
-      margin: 0 0 12px 0;
-      line-height: 1.15;
+      margin: 0 0 14px 0;
+      line-height: 1.2;
     }
     .voting-hero-sub {
       color: #94a3b8;
-      max-width: 760px;
-      margin: 0 0 24px 0;
-      font-size: 1.05rem;
-      line-height: 1.6;
+      max-width: 680px;
+      margin: 0 0 28px 0;
+      font-size: clamp(0.98rem, 1.2vw, 1.1rem);
+      line-height: 1.65;
     }
 
     /* Thank you Banner Card */
@@ -776,32 +777,63 @@
   <!-- Header -->
   <header class="site-header">
     <div class="container nav-bar">
-      <a href="en/index.html" class="logo-wrap" id="logoLink" title="AISFF">
+      <a href="lt/index.html" class="logo-wrap" id="logoLink" title="AISFF">
         <img src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media" alt="AISFF" class="logo-img">
         <span class="logo-text">AISFF</span>
       </a>
 
       <nav class="desktop-nav" aria-label="Main Navigation">
-        <a href="en/index.html" class="nav-link" id="navHome">Home</a>
-        <a href="voting.html" class="nav-link active" id="navVoting">Voting & Results</a>
-        <a href="live.html" class="nav-link" id="navLive">Live Stream</a>
-        <a href="admin.html" class="nav-link" id="navAdmin">Admin</a>
+        <a href="lt/index.html" class="nav-link" id="navHome">Pradinis</a>
+        <a href="voting.html" class="nav-link active" id="navVoting">Balsavimas</a>
+        <a href="live.html" class="nav-link" id="navLive">Transliacija</a>
+        <a href="admin.html" class="nav-link" id="navAdmin">Valdymas</a>
       </nav>
 
       <div class="header-actions" style="display:flex; align-items:center; gap:12px;">
-        <!-- EN/LT/RU Switcher -->
-        <div class="voting-lang-switch">
-          <button type="button" class="voting-lang-btn active" data-lang="en">EN</button>
-          <button type="button" class="voting-lang-btn" data-lang="lt">LT</button>
-          <button type="button" class="voting-lang-btn" data-lang="ru">RU</button>
+        <!-- Clean LT / EN Switcher -->
+        <div class="voting-lang-switch" aria-label="Kalbos pasirinkimas">
+          <button type="button" class="voting-lang-btn active" data-lang="lt">LT</button>
+          <button type="button" class="voting-lang-btn" data-lang="en">EN</button>
         </div>
 
         <a href="live.html" class="btn-solid btn-sm" id="btnLiveTop" style="padding:6px 14px; text-decoration:none;">
-          Live Stream
+          Transliacija
         </a>
+
+        <button type="button" class="burger-menu-btn" id="menuBurgerBtn" aria-label="Atverti navigacijos meniu" aria-expanded="false" aria-controls="mobileMenuDrawer">
+          <span class="burger-icon" aria-hidden="true">
+            <span class="bar bar-1"></span>
+            <span class="bar bar-2"></span>
+            <span class="bar bar-3"></span>
+          </span>
+        </button>
       </div>
     </div>
   </header>
+
+  <!-- Mobile Menu Backdrop & Drawer -->
+  <div class="mobile-menu-backdrop" id="mobileMenuBackdrop" aria-hidden="true"></div>
+  <aside class="mobile-menu-drawer" id="mobileMenuDrawer" aria-label="Navigacijos meniu" aria-hidden="true">
+    <div class="drawer-header">
+      <a href="lt/index.html" class="drawer-logo-wrap" id="drawerLogoLink">
+        <img src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media" alt="AISFF" class="logo-img">
+        <div>
+          <div class="drawer-logo-title">AISFF 2027</div>
+          <div class="drawer-logo-sub" id="drawerSubtitle">Mokinių Kino Festivalis</div>
+        </div>
+      </a>
+      <button type="button" class="drawer-close-btn" id="menuBurgerCloseBtn" aria-label="Uždaryti meniu">&times;</button>
+    </div>
+    <div class="drawer-body">
+      <div class="drawer-section-title" id="drawerNavTitle">Navigacija</div>
+      <ul class="drawer-nav-list">
+        <li><a href="lt/index.html" class="drawer-nav-link" id="drawerNavHome"><span>Pradinis puslapis</span></a></li>
+        <li><a href="voting.html" class="drawer-nav-link highlight" id="drawerNavVoting"><span>Balsavimas už filmus</span></a></li>
+        <li><a href="live.html" class="drawer-nav-link" id="drawerNavLive"><span>Tiesioginė transliacija</span></a></li>
+        <li><a href="admin.html" class="drawer-nav-link" id="drawerNavAdmin"><span>Valdymo skydas</span></a></li>
+      </ul>
+    </div>
+  </aside>
 
   <!-- Hero Section -->
   <section class="voting-hero">
@@ -809,16 +841,16 @@
       <div class="hero-top-bar">
         <div id="votingStatusBadge" class="voting-status-badge status-open">
           <span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:currentColor;"></span>
-          <span id="votingStatusText">Voting Active</span>
+          <span id="votingStatusText">Balsavimas Aktyvus</span>
         </div>
         <div id="juryStatusBadge" class="voting-status-badge" style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); color:#cbd5e1;">
-          <span id="juryStatusText">Festival 2027 Edition</span>
+          <span id="juryStatusText">AISFF 2027</span>
         </div>
       </div>
 
-      <h1 class="voting-hero-title" id="heroTitle">Audience Choice Award Voting</h1>
+      <h1 class="voting-hero-title" id="heroTitle">Balsuokite už jums patikusį filmą</h1>
       <p class="voting-hero-sub" id="heroSubtitle">
-        Cast your official vote for the festival's Audience Choice Award ("Любимчик"). All audience votes update atomically in real-time. Official jury rankings and the audience favorite will be revealed live during the closing ceremony.
+        Pasirinkite filmą ir atiduokite savo balsą. Jūsų balsas padės filmui laimėti Žiūrovų simpatijų apdovanojimą!
       </p>
 
       <!-- Persistent Thank You Banner (Shown if user already voted) -->
@@ -826,19 +858,19 @@
         <div class="thank-you-header">
           <div class="thank-you-icon">✓</div>
           <div>
-            <h2 class="thank-you-title" id="thankYouTitle">Thank you for your vote!</h2>
+            <h2 class="thank-you-title" id="thankYouTitle">Ačiū už jūsų balsą!</h2>
             <p class="thank-you-body" id="thankYouBody">
-              Your vote has been securely recorded in the festival tally. Only one vote per festival attendee is permitted. You can watch the live ceremony and wait for the official winners reveal.
+              Jūsų balsas sėkmingai įskaitytas į festivalio sistemą. Kiekvienas žiūrovas gali atiduoti 1 balsą.
             </p>
           </div>
         </div>
         <div class="thank-you-actions">
           <div class="thank-you-movie-badge">
             <span>🎬</span>
-            <span id="thankYouFilmName">Competing Selection</span>
+            <span id="thankYouFilmName">Konkursinis filmas</span>
           </div>
           <a href="live.html" class="btn-solid btn-sm" style="text-decoration:none; padding:8px 16px;">
-            <span id="btnWatchCeremony">Watch Live Stream</span>
+            <span id="btnWatchCeremony">Žiūrėti Transliaciją</span>
           </a>
         </div>
       </div>
@@ -849,10 +881,10 @@
   <div class="view-switcher-bar">
     <div class="container" style="display:flex; align-items:center; gap:10px; width:100%;">
       <button type="button" class="view-tab-btn active" id="tabBtnVoting">
-        <span>🗳️</span> <span id="labelTabVoting">Audience Voting</span>
+        <span>🗳️</span> <span id="labelTabVoting">Balsavimas</span>
       </button>
       <button type="button" class="view-tab-btn" id="tabBtnResults">
-        <span>🏆</span> <span id="labelTabResults">Ceremony Results</span>
+        <span>🏆</span> <span id="labelTabResults">Rezultatai</span>
       </button>
     </div>
   </div>
@@ -965,43 +997,86 @@
   <script src="js/burger-menu.js"></script>
   <script>
     (function() {
-      // 1. Multi-Language Dictionary (EN, LT, RU)
+      // 1. Multi-Language Dictionary (LT & EN only - strictly no Russian)
       const I18N = {
+        lt: {
+          pageTitle: "Balsuokite už jums patikusį filmą | AISFF 2027",
+          metaDesc: "Oficialus Ąžuolyno tarptautinio mokinių filmų festivalio žiūrovų balsavimas ir apdovanojimai.",
+          navHome: "Pradinis",
+          navVoting: "Balsavimas",
+          navLive: "Transliacija",
+          navAdmin: "Valdymas",
+          btnLiveTop: "Transliacija",
+          homeUrl: "lt/index.html",
+          statusOpen: "Balsavimas Aktyvus",
+          statusClosed: "Balsavimas Uždarytas",
+          heroTitle: "Balsuokite už jums patikusį filmą",
+          heroSubtitle: "Pasirinkite filmą ir atiduokite savo balsą. Jūsų balsas padės filmui laimėti Žiūrovų simpatijų apdovanojimą!",
+          thankYouTitle: "Ačiū už jūsų balsą!",
+          thankYouBody: "Jūsų balsas sėkmingai įskaitytas į festivalio sistemą. Kiekvienas žiūrovas gali atiduoti 1 balsą.",
+          btnWatchCeremony: "Žiūrėti Transliaciją",
+          labelTabVoting: "Balsavimas",
+          labelTabResults: "Rezultatai",
+          allCategories: "Visi filmai",
+          seniorCat: "Vyresnieji (14–18 m.)",
+          juniorCat: "Jaunesnieji (10–13 m.)",
+          loadingNotice: "Jungiamasi prie festivalio duomenų bazės...",
+          emptyNotice: "Šioje kategorijoje filmų kol kas nėra.",
+          directorLabel: "Režisierius:",
+          btnVote: "Balsuoti už filmą",
+          btnVoting: "Registruojamas balsas...",
+          btnVoted: "Jūsų balsas įskaitytas ✓",
+          btnAlreadyVoted: "Balsas jau atiduotas",
+          votesLabel: "Balsai:",
+          lockedTitle: "Rezultatai bus paskelbti ceremonijos metu",
+          lockedDesc: "Žiūrovų simpatijų nugalėtojas ir žiuri laureatai bus atskleisti tiesioginės apdovanojimų ceremonijos transliacijoje.",
+          lockedTagline: "Laukiama ceremonijos pradžios",
+          unlockedBannerTitle: "🏆 Paskelbti Oficialūs Festivalio Nugalėtojai!",
+          unlockedBannerSub: "Sveikiname visus Ąžuolyno tarptautinio kino festivalio laureatus ir žiūrovų favoritus.",
+          labelAudienceFavoriteTitle: "Žiūrovų Simpatijos Prizas (Audience Choice Award)",
+          headingSeniorResults: "Vyresniųjų Grupė (14–18 m.) — Žiuri Apdovanojimai",
+          headingJuniorResults: "Jaunesniųjų Grupė (10–13 m.) — Žiuri Apdovanojimai",
+          rank1: "🥇 1-oji Vieta (Nugalėtojas)",
+          rank2: "🥈 2-oji Vieta",
+          rank3: "🥉 3-ioji Vieta",
+          noJuryAssigned: "Vertinimas baigiamas",
+          errorVoteFailed: "Nepavyko įskaityti balso. Bandykite dar kartą."
+        },
         en: {
-          pageTitle: "Audience Voting & Ceremony Results | AISFF 2027",
-          metaDesc: "Official Audience Choice Award Voting & Jury Results for Ąžuolynas International Film Festival. Support independent student filmmakers.",
+          pageTitle: "Vote for Your Favorite Film | AISFF 2027",
+          metaDesc: "Official Audience Choice Award Voting & Jury Results for Ąžuolynas International Film Festival.",
           navHome: "Home",
-          navVoting: "Voting & Results",
+          navVoting: "Voting",
           navLive: "Live Stream",
           navAdmin: "Admin",
           btnLiveTop: "Live Stream",
           homeUrl: "en/index.html",
           statusOpen: "Voting Active",
           statusClosed: "Voting Closed",
-          heroTitle: "Audience Choice Award Voting",
-          heroSubtitle: "Cast your official vote for the festival's Audience Choice Award (\"Любимчик\"). All audience votes update atomically in real-time. Official jury rankings and the audience favorite will be revealed live during the closing ceremony.",
+          heroTitle: "Vote for Your Favorite Film",
+          heroSubtitle: "Select a film and cast your vote. Your vote helps the film win the Audience Choice Award!",
           thankYouTitle: "Thank you for your vote!",
-          thankYouBody: "Your vote has been securely recorded in the festival tally. Only one vote per festival attendee is permitted. You can watch the live ceremony and wait for the official winners reveal.",
+          thankYouBody: "Your vote has been securely recorded. Each viewer can cast 1 vote.",
           btnWatchCeremony: "Watch Live Stream",
-          labelTabVoting: "Audience Voting",
+          labelTabVoting: "Voting",
           labelTabResults: "Ceremony Results",
-          allCategories: "All Categories",
-          seniorCat: "Senior (14–18)",
-          juniorCat: "Junior (10–13)",
+          allCategories: "All Films",
+          seniorCat: "Senior (14–18 yrs)",
+          juniorCat: "Junior (10–13 yrs)",
           loadingNotice: "Connecting to festival database...",
-          emptyNotice: "No films currently in competition or selection is being prepared.",
+          emptyNotice: "No films currently in competition in this category.",
           directorLabel: "Director:",
           btnVote: "Vote for Film",
           btnVoting: "Submitting vote...",
           btnVoted: "Your Vote Cast ✓",
           btnAlreadyVoted: "You have voted",
           votesLabel: "Votes:",
-          lockedTitle: "Official Results are Sealed",
-          lockedDesc: "The international festival jury is currently evaluating all competing entries. Official 1st, 2nd, and 3rd place winners for Senior and Junior categories, along with the Audience Favorite (\"Любимчик\"), will be unlocked live during the grand awards gala!",
-          lockedTagline: "Awaiting Organizer Ceremony Toggle",
+          lockedTitle: "Results Will Be Announced at the Ceremony",
+          lockedDesc: "The Audience Choice winner and jury laureates will be revealed live during the closing ceremony.",
+          lockedTagline: "Awaiting Ceremony Reveal",
           unlockedBannerTitle: "🏆 Official Festival Winners Announced!",
           unlockedBannerSub: "Congratulations to all laureates, directors, and audience favorites of the Ąžuolynas International Film Festival.",
-          labelAudienceFavoriteTitle: "Audience Favorite Award • \"Любимчик\"",
+          labelAudienceFavoriteTitle: "Audience Choice Award",
           headingSeniorResults: "Senior Category (Ages 14–18) — Official Jury Awards",
           headingJuniorResults: "Junior Category (Ages 10–13) — Official Jury Awards",
           rank1: "🥇 1st Place (Winner)",
@@ -1009,92 +1084,6 @@
           rank3: "🥉 3rd Place",
           noJuryAssigned: "Jury deliberations finalizing",
           errorVoteFailed: "Vote could not be processed. Please try again."
-        },
-        lt: {
-          pageTitle: "Žiūrovų Balsavimas ir Rezultatai | AISFF 2027",
-          metaDesc: "Oficialus Ąžuolyno tarptautinio mokinių filmų festivalio žiūrovų balsavimas ir ceremonijos laureatai.",
-          navHome: "Pradžia",
-          navVoting: "Balsavimas ir Rezultatai",
-          navLive: "Transliacija",
-          navAdmin: "Valdymas",
-          btnLiveTop: "Žiūrėti Gyvai",
-          homeUrl: "lt/index.html",
-          statusOpen: "Balsavimas Aktyvus",
-          statusClosed: "Balsavimas Uždarytas",
-          heroTitle: "Žiūrovų Simpatijų Balsavimas",
-          heroSubtitle: "Atiduokite savo balsą už festivalio Žiūrovų Simpatijos apdovanojimą („Любимчик“). Balsai atnaujinami realiuoju laiku. Oficialūs žiuri rezultatai ir nugalėtojai bus paskelbti iškilmingos ceremonijos metu.",
-          thankYouTitle: "Ačiū už jūsų balsą!",
-          thankYouBody: "Jūsų balsas sėkmingai įskaitytas į bendrą festivalio balsavimo sistemą. Vienam žiūrovui leidžiama balsuoti vieną kartą. Kviečiame stebėti tiesioginę ceremonijos transliaciją!",
-          btnWatchCeremony: "Žiūrėti Transliaciją",
-          labelTabVoting: "Žiūrovų Balsavimas",
-          labelTabResults: "Ceremonijos Rezultatai",
-          allCategories: "Visos Kategorijos",
-          seniorCat: "Vyresnieji (14–18)",
-          juniorCat: "Jaunesnieji (10–13)",
-          loadingNotice: "Jungiamasi prie festivalio duomenų bazės...",
-          emptyNotice: "Šioje programoje filmų kol kas nėra arba atranka dar ruošiama.",
-          directorLabel: "Režisierius:",
-          btnVote: "Balsuoti už filmą",
-          btnVoting: "Registruojamas balsas...",
-          btnVoted: "Jūsų balsas įskaitytas ✓",
-          btnAlreadyVoted: "Balsas jau atiduotas",
-          votesLabel: "Balsai:",
-          lockedTitle: "Oficialūs Rezultatai Užrakinti",
-          lockedDesc: "Tarptautinė vertinimo komisija šiuo metu vertina konkursinius darbus. Vyresniųjų ir jaunesniųjų kategorijų 1, 2, 3 vietų nugalėtojai bei Žiūrovų Simpatija („Любимчик“) bus atskleisti iškilmingos apdovanojimų ceremonijos metu!",
-          lockedTagline: "Laukiama organizatorių ceremonijos įjungimo",
-          unlockedBannerTitle: "🏆 Paskelbti Oficialūs Festivalio Nugalėtojai!",
-          unlockedBannerSub: "Sveikiname visus Ąžuolyno tarptautinio kino festivalio laureatus, režisierius ir žiūrovų favoritus.",
-          labelAudienceFavoriteTitle: "Žiūrovų Simpatijos Prizas • „Любимчик“",
-          headingSeniorResults: "Vyresniųjų Grupė (14–18 m.) — Žiuri Apdovanojimai",
-          headingJuniorResults: "Jaunesniųjų Grupė (10–13 m.) — Žiuri Apdovanojimai",
-          rank1: "🥇 1-oji Vieta (Nugalėtojas)",
-          rank2: "🥈 2-oji Vieta",
-          rank3: "🥉 3-ioji Vieta",
-          noJuryAssigned: "Žiuri sprendimas tikslinamas",
-          errorVoteFailed: "Nepavyko įskaityti balso. Bandykite dar kartą."
-        },
-        ru: {
-          pageTitle: "Голосование зрителей и результаты | AISFF 2027",
-          metaDesc: "Официальное голосование за приз зрительских симпатий кинофестиваля «Ąžuolynas». Поддержите независимых молодых авторов.",
-          navHome: "Главная",
-          navVoting: "Голосование и Результаты",
-          navLive: "Трансляция",
-          navAdmin: "Управление",
-          btnLiveTop: "Смотреть Эфир",
-          homeUrl: "en/index.html",
-          statusOpen: "Голосование Открыто",
-          statusClosed: "Голосование Завершено",
-          heroTitle: "Приз Зрительских Симпатий",
-          heroSubtitle: "Отдайте свой голос за лучший фильм фестиваля («Любимчик»). Все голоса учитываются атомарно в реальном времени. Официальные итоги жюри и победитель зрительского голосования будут объявлены во время церемонии награждения.",
-          thankYouTitle: "Спасибо за ваш голос!",
-          thankYouBody: "Ваш голос успешно учтен в официальном протоколе фестиваля. Каждому зрителю разрешен один голос за все время фестиваля. Присоединяйтесь к прямому эфиру церемонии награждения!",
-          btnWatchCeremony: "Смотреть Церемонию",
-          labelTabVoting: "Голосование",
-          labelTabResults: "Итоги Церемонии",
-          allCategories: "Все Категории",
-          seniorCat: "Старшие (14–18)",
-          juniorCat: "Младшие (10–13)",
-          loadingNotice: "Подключение к базе данных фестиваля...",
-          emptyNotice: "Конкурсные фильмы в данной категории пока готовятся к показу.",
-          directorLabel: "Режиссер:",
-          btnVote: "Голосовать за фильм",
-          btnVoting: "Сохранение голоса...",
-          btnVoted: "Ваш голос учтен ✓",
-          btnAlreadyVoted: "Вы уже проголосовали",
-          votesLabel: "Голосов:",
-          lockedTitle: "Результаты жюри скрыты",
-          lockedDesc: "Международное жюри оценивает конкурсные работы. Обладатели 1-го, 2-го и 3-го мест в старшей и младшей возрастных группах, а также фаворит зрительского голосования («Любимчик») будут торжественно представлены в прямом эфире!",
-          lockedTagline: "Ожидается включение организаторами фестиваля",
-          unlockedBannerTitle: "🏆 Объявлены Победители Фестиваля!",
-          unlockedBannerSub: "Поздравляем всех лауреатов, авторов и победителей Международного кинофестиваля «Ąžuolynas».",
-          labelAudienceFavoriteTitle: "Приз Зрительских Симпатий • «Любимчик»",
-          headingSeniorResults: "Старшая Группа (14–18 лет) — Решение Жюри",
-          headingJuniorResults: "Младшая Группа (10–13 лет) — Решение Жюри",
-          rank1: "🥇 1 Место (Победитель)",
-          rank2: "🥈 2 Место",
-          rank3: "🥉 3 Место",
-          noJuryAssigned: "Подведение итогов жюри",
-          errorVoteFailed: "Не удалось сохранить голос. Пожалуйста, попробуйте еще раз."
         }
       };
 
@@ -1118,10 +1107,12 @@
 
       function detectLanguage() {
         const qLang = urlParams.get("lang");
-        if (qLang && ["en", "lt", "ru"].includes(qLang.toLowerCase())) return qLang.toLowerCase();
+        if (qLang && ["lt", "en"].includes(qLang.toLowerCase())) return qLang.toLowerCase();
         const stored = localStorage.getItem("asiff_preferred_lang");
-        if (stored && ["en", "lt", "ru"].includes(stored.toLowerCase())) return stored.toLowerCase();
-        return "en";
+        if (stored && ["lt", "en"].includes(stored.toLowerCase())) return stored.toLowerCase();
+        const navLang = (navigator.language || navigator.userLanguage || "").toLowerCase();
+        if (navLang.startsWith("en")) return "en";
+        return "lt";
       }
 
       // Check double-voting storage immediately on load
@@ -1168,6 +1159,21 @@
         if (navA) navA.textContent = t.navAdmin;
         const btnL = document.getElementById("btnLiveTop");
         if (btnL) btnL.textContent = t.btnLiveTop;
+
+        const logoL = document.getElementById("logoLink");
+        if (logoL) logoL.href = t.homeUrl;
+        const drawerLogo = document.getElementById("drawerLogoLink");
+        if (drawerLogo) drawerLogo.href = t.homeUrl;
+        const drawerH = document.getElementById("drawerNavHome");
+        if (drawerH) drawerH.href = t.homeUrl;
+        const drawerV = document.getElementById("drawerNavVoting");
+        if (drawerV) { const sp = drawerV.querySelector("span"); if (sp) sp.textContent = t.navVoting; }
+        const drawerL = document.getElementById("drawerNavLive");
+        if (drawerL) { const sp = drawerL.querySelector("span"); if (sp) sp.textContent = t.navLive; }
+        const drawerA = document.getElementById("drawerNavAdmin");
+        if (drawerA) { const sp = drawerA.querySelector("span"); if (sp) sp.textContent = t.navAdmin; }
+        const drawerSub = document.getElementById("drawerSubtitle");
+        if (drawerSub) drawerSub.textContent = currentLang === "lt" ? "Mokinių Kino Festivalis" : "Student Film Festival";
 
         const hTitle = document.getElementById("heroTitle");
         if (hTitle) hTitle.textContent = t.heroTitle;
@@ -1386,9 +1392,6 @@
         if (currentLang === "lt") {
           return film[field] || film[`${field}_lt`] || film[`${field}_en`] || "";
         }
-        if (currentLang === "ru") {
-          return film[`${field}_ru`] || film[`${field}_en`] || film[field] || "";
-        }
         // English default
         return film[`${field}_en`] || film[field] || "";
       }
@@ -1402,7 +1405,7 @@
       }
 
       function getMovieDirector(film) {
-        return film.director || film.directorName || film.name || (currentLang === "ru" ? "Независимый автор" : currentLang === "lt" ? "Nepriklausomas kūrėjas" : "Independent Filmmaker");
+        return film.director || film.directorName || film.name || (currentLang === "lt" ? "Nepriklausomas kūrėjas" : "Independent Filmmaker");
       }
 
       function getMovieSynopsis(film) {
@@ -1410,7 +1413,7 @@
                resolveLocalizedField(film, "description") || 
                film.synopsis || 
                film.description || 
-               (currentLang === "ru" ? "Официальная программа Международного кинофестиваля «Ąžuolynas»." : currentLang === "lt" ? "Oficiali festivalio konkursinė programa." : "Official festival competition selection.");
+               (currentLang === "lt" ? "Oficiali festivalio konkursinė programa." : "Official festival competition selection.");
       }
 
       function getMoviePoster(film) {

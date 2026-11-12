@@ -1,6 +1,0 @@
-{
-  "summary":  "Revised implementation plan incorporating the exact rules specifications, client-side localStorage double-voting prevention without mandatory login, atomic updates on /movies, and structured Jury (Senior/Junior) + Audience Favorite reveal mechanics.",
-  "updatedAt":  "2026-11-10T16:20:49.684321401Z",
-  "requestFeedback":  true,
-  "userFacing":  true
-}

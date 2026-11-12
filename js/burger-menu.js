@@ -43,19 +43,21 @@
       }
     }
 
-    function closeMenu() {
+    function closeMenu(returnFocus = false) {
       drawer.classList.remove("active");
       if (backdrop) backdrop.classList.remove("active");
       document.body.classList.remove("menu-drawer-open");
       burgerBtn.setAttribute("aria-expanded", "false");
       drawer.setAttribute("aria-hidden", "true");
       if (backdrop) backdrop.setAttribute("aria-hidden", "true");
-      burgerBtn.focus();
+      if (returnFocus && burgerBtn) {
+        try { burgerBtn.focus(); } catch (err) {}
+      }
     }
 
     function toggleMenu() {
       if (drawer.classList.contains("active")) {
-        closeMenu();
+        closeMenu(true);
       } else {
         openMenu();
       }
@@ -71,31 +73,39 @@
       closeBtn.addEventListener("click", (e) => {
         e.preventDefault();
         e.stopPropagation();
-        closeMenu();
+        closeMenu(true);
       });
     }
 
     if (backdrop) {
       backdrop.addEventListener("click", () => {
-        closeMenu();
+        closeMenu(true);
       });
     }
 
     // Close on ESC key
     document.addEventListener("keydown", (e) => {
       if (e.key === "Escape" && drawer.classList.contains("active")) {
-        closeMenu();
+        closeMenu(true);
       }
     });
 
-    // Automatically close drawer when an in-page anchor link is clicked
-    const drawerLinks = drawer.querySelectorAll("a");
-    drawerLinks.forEach((link) => {
-      link.addEventListener("click", () => {
-        const href = link.getAttribute("href") || "";
-        // If clicking anchor or page link, close drawer smoothly
-        if (href.startsWith("#") || href.includes(".html")) {
-          closeMenu();
+    // Automatically close drawer when any navigation link or CTA button is clicked
+    const drawerItems = drawer.querySelectorAll("a, button:not(#menuBurgerCloseBtn)");
+    drawerItems.forEach((item) => {
+      item.addEventListener("click", (e) => {
+        const href = item.getAttribute("href") || "";
+        closeMenu(false);
+
+        // If clicking on-page hash anchor (e.g. #about, #rules, #competition, #submit)
+        if (href.startsWith("#") && href.length > 1) {
+          const target = document.querySelector(href);
+          if (target) {
+            e.preventDefault();
+            setTimeout(() => {
+              target.scrollIntoView({ behavior: "smooth" });
+            }, 100);
+          }
         }
       });
     });
