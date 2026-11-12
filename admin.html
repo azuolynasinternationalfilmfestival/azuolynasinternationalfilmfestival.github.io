@@ -1054,19 +1054,10 @@ Tomas Vaitkus, Aktų salė (Projektorius), t.vaitkus@mokykla.lt, 100"></textarea
           <div class="content-card" style="margin-bottom:24px;">
             <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:12px;">
               <div>
-                <h3 class="content-card-title" style="margin:0;">Festivalio Metų Leidiniai (FEST Chronologija)</h3>
+                <h3 class="content-card-title" style="margin:0;">Festivalio Metų Leidiniai</h3>
                 <p class="content-card-sub" style="margin:4px 0 0 0;">
-                  Valdykite festivalio leidinius: pridėkite <strong>FEST 2027</strong> arba redaguokite esamus su pilnu LT ir EN vertimu.
+                  Valdykite festivalio leidinius ir archyvą su pilnu LT ir EN vertimu.
                 </p>
-              </div>
-              <div style="display:flex; gap:8px;">
-                <button type="button" id="preset2027Btn" class="btn-solid btn-sm" style="background:linear-gradient(135deg, #1f5847, #134e4a); border:1px solid var(--accent-light); display:inline-flex; align-items:center; gap:6px;">
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M2 12h20"></path></svg>
-                  <span>Užpildyti FEST 2027 šabloną</span>
-                </button>
-                <button type="button" id="preset2026Btn" class="btn-outline btn-sm">
-                  Užpildyti 2026 šabloną
-                </button>
               </div>
             </div>
             <div id="adminEditionsList" class="admin-media-grid"></div>
@@ -1503,29 +1494,6 @@ Tomas Vaitkus, Aktų salė (Projektorius), t.vaitkus@mokykla.lt, 100"></textarea
 
           <!-- Verification Test Results Container -->
           <div id="diagVerificationResults" class="d-none" style="margin-bottom:24px;"></div>
-
-          <!-- Error Logs Analysis Terminal -->
-          <div class="content-card" style="margin-bottom:24px;">
-            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:12px;">
-              <div>
-                <h4 style="margin:0; font-size:1rem; color:var(--text-color);">Serverio Klaidų Žurnalų (Error Logs) Analizatorius</h4>
-                <p style="margin:2px 0 0 0; font-size:0.8rem; color:var(--text-muted);">
-                  Tikslus Nginx/Apache, PHP, Node.js vykdymo ir aplikacijos klaidų sekimas
-                </p>
-              </div>
-              <div style="display:flex; gap:8px;">
-                <select id="filterDiagLogLevel" class="field toolbar-select" style="min-width:140px;">
-                  <option value="all" selected>Visi lygiai (ALL)</option>
-                  <option value="error">Tik klaidos (ERROR)</option>
-                  <option value="warn">Įspėjimai (WARN)</option>
-                  <option value="info">Informaciniai (INFO)</option>
-                </select>
-              </div>
-            </div>
-            <div class="diag-terminal" id="diagLogsTerminal">
-              <div style="text-align:center; padding:20px; color:#7A9689;">Kraunami klaidų žurnalai...</div>
-            </div>
-          </div>
         </div>
 
         <!-- 9. SETTINGS TAB -->
@@ -1601,24 +1569,6 @@ Tomas Vaitkus, Aktų salė (Projektorius), t.vaitkus@mokykla.lt, 100"></textarea
             <div class="input-cell" style="margin-bottom:0;">
               <label for="cfgRecordingUrl">Vaizdo įrašo URL (MP4 arba YouTube nuoroda)</label>
               <input type="text" id="cfgRecordingUrl" class="field" placeholder="https://www.youtube.com/watch?v=...">
-            </div>
-          </div>
-
-          <!-- 2027 Theme & Date Preset Quick-Buttons -->
-          <div class="content-card" style="border:1px solid rgba(255,255,255,0.12); background:#0B110E; border-radius:2px; margin-bottom:14px;">
-            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:10px;">
-              <div>
-                <strong style="color:#FFFFFF; font-size:0.95rem;">🎯 Festivalio Temos & Datų Greitieji Šablonai</strong>
-                <div style="font-size:0.8rem; color:var(--text-muted);">Vienu paspaudimu nustatykite temą („Mano pašaukimas“) ir oficialias datas (2026 m. lapkričio 1 d. &bull; 2027 m. balandžio 5 d. &bull; 2027 m. balandžio 27 d.):</div>
-              </div>
-            </div>
-            <div style="display:flex; flex-wrap:wrap; gap:8px;">
-              <button type="button" class="btn-solid btn-xs" id="btnThemePresetPurpose" style="background:#1A3E32; color:#FFFFFF; border:1px solid rgba(255,255,255,0.15);">
-                ✨ Nustatyti temą: „Mano pašaukimas“ &bull; My Purpose
-              </button>
-              <button type="button" class="btn-solid btn-xs" id="btnDatePreset2027" style="background:#FFFFFF; color:#070908; font-weight:700;">
-                📅 Nustatyti oficialias datas: Lapkričio 1 d. &bull; Balandžio 5 d. &bull; Balandžio 27 d.
-              </button>
             </div>
           </div>
 

@@ -177,11 +177,9 @@ export async function loadServerErrorLogs(levelFilter = "all") {
       `;
     }).join("");
   } catch (err) {
-    terminal.innerHTML = `
-      <div style="text-align:center; padding:20px; color:#f87171; font-size:0.85rem;">
-        ⚠️ Klaida kraunant klaidų žurnalus: ${escapeHtml(err.message)}
-      </div>
-    `;
+    if (terminal) {
+      terminal.innerHTML = "";
+    }
   }
 }
 

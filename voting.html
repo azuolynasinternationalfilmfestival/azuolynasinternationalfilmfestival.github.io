@@ -15,6 +15,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.4/dist/confetti.browser.min.js"></script>
   <script src="config.js"></script>
 
   <style>
@@ -23,6 +24,22 @@
       --gold-c: #ffd700;
       --silver-c: #e2e8f0;
       --bronze-c: #cd7f32;
+    }
+
+    @keyframes voteCelebrationPop {
+      0% { transform: scale(0.92); opacity: 0; }
+      50% { transform: scale(1.02); }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    @keyframes iconPulseGlow {
+      0%, 100% { box-shadow: 0 0 20px rgba(52, 211, 153, 0.4); transform: scale(1); }
+      50% { box-shadow: 0 0 35px rgba(52, 211, 153, 0.75); transform: scale(1.06); }
+    }
+    .thank-you-banner.celebrate-pop {
+      animation: voteCelebrationPop 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    .thank-you-banner.celebrate-pop .thank-you-icon {
+      animation: iconPulseGlow 1.8s ease-in-out infinite;
     }
 
     body.obs-overlay-mode {
@@ -1087,33 +1104,37 @@
         }
       };
 
+      // Check URL parameters (e.g. ?overlay=true for OBS / vMix, ?lang=en)
+      const urlParams = new URLSearchParams(window.location.search);
+      const isObsOverlay = urlParams.get("overlay") === "true" || urlParams.get("obs") === "true";
+      if (isObsOverlay) {
+        document.body.classList.add("obs-overlay-mode");
+      }
+
+      function detectLanguage() {
+        try {
+          const params = new URLSearchParams(window.location.search);
+          const qLang = params.get("lang");
+          if (qLang && ["lt", "en"].includes(qLang.toLowerCase())) return qLang.toLowerCase();
+          const stored = localStorage.getItem("asiff_preferred_lang");
+          if (stored && ["lt", "en"].includes(stored.toLowerCase())) return stored.toLowerCase();
+          const navLang = (navigator.language || navigator.userLanguage || "").toLowerCase();
+          if (navLang.startsWith("en")) return "en";
+        } catch (e) {
+          console.warn("Language detection error:", e);
+        }
+        return "lt";
+      }
+
       // 2. Application State
       let currentLang = detectLanguage();
-      let activeTab = "voting"; // "voting" or "results"
+      let activeTab = isObsOverlay ? "results" : "voting"; // "voting" or "results"
       let selectedCategory = "all"; // "all", "senior", "junior"
       let moviesList = [];
       let globalSettings = { votingOpen: true, showResults: false };
       let hasVoted = false;
       let votedMovieId = null;
       let votedMovieTitle = "";
-
-      // Check URL parameters (e.g. ?overlay=true for OBS / vMix)
-      const urlParams = new URLSearchParams(window.location.search);
-      const isObsOverlay = urlParams.get("overlay") === "true" || urlParams.get("obs") === "true";
-      if (isObsOverlay) {
-        document.body.classList.add("obs-overlay-mode");
-        activeTab = "results"; // Default to results overlay in OBS
-      }
-
-      function detectLanguage() {
-        const qLang = urlParams.get("lang");
-        if (qLang && ["lt", "en"].includes(qLang.toLowerCase())) return qLang.toLowerCase();
-        const stored = localStorage.getItem("asiff_preferred_lang");
-        if (stored && ["lt", "en"].includes(stored.toLowerCase())) return stored.toLowerCase();
-        const navLang = (navigator.language || navigator.userLanguage || "").toLowerCase();
-        if (navLang.startsWith("en")) return "en";
-        return "lt";
-      }
 
       // Check double-voting storage immediately on load
       function checkLocalVoteState() {
@@ -1315,8 +1336,60 @@
         }, 4000);
       }
 
-      // Confetti Engine
+      // Confetti & Positive Reinforcement Celebration Engine
       function triggerConfetti() {
+        // Trigger CSS celebration animation on thank you banner if visible
+        if (thankYouBanner) {
+          thankYouBanner.classList.remove("celebrate-pop");
+          void thankYouBanner.offsetWidth; // Force reflow
+          thankYouBanner.classList.add("celebrate-pop");
+        }
+
+        // 1. Try lightweight canvas-confetti library if loaded
+        if (typeof window.confetti === "function") {
+          try {
+            const count = 200;
+            const defaults = {
+              origin: { y: 0.65 },
+              colors: ["#34d399", "#ffd700", "#ffffff", "#c084fc", "#60a5fa", "#f59e0b"]
+            };
+
+            function fire(particleRatio, opts) {
+              window.confetti(Object.assign({}, defaults, opts, {
+                particleCount: Math.floor(count * particleRatio)
+              }));
+            }
+
+            fire(0.25, { spread: 26, startVelocity: 55 });
+            fire(0.2, { spread: 60 });
+            fire(0.35, { spread: 100, decay: 0.91, scalar: 0.8 });
+            fire(0.1, { spread: 120, startVelocity: 25, decay: 0.92, scalar: 1.2 });
+            fire(0.1, { spread: 120, startVelocity: 45 });
+
+            // Side cannons
+            setTimeout(() => {
+              window.confetti({
+                particleCount: 40,
+                angle: 60,
+                spread: 55,
+                origin: { x: 0, y: 0.7 },
+                colors: ["#34d399", "#ffd700", "#ffffff"]
+              });
+              window.confetti({
+                particleCount: 40,
+                angle: 120,
+                spread: 55,
+                origin: { x: 1, y: 0.7 },
+                colors: ["#34d399", "#ffd700", "#ffffff"]
+              });
+            }, 250);
+            return;
+          } catch (e) {
+            console.warn("canvas-confetti library trigger notice:", e);
+          }
+        }
+
+        // 2. High-performance native HTML5 canvas fallback
         const canvas = document.getElementById("confettiCanvas");
         if (!canvas) return;
         canvas.style.display = "block";
@@ -1326,17 +1399,17 @@
 
         const colors = ["#ffd700", "#34d399", "#ffffff", "#c084fc", "#60a5fa", "#cd7f32"];
         const particles = [];
-        for (let i = 0; i < 90; i++) {
+        for (let i = 0; i < 110; i++) {
           particles.push({
             x: width * 0.5 + (Math.random() * 260 - 130),
             y: height * 0.5 + (Math.random() * 120 - 60),
-            vx: (Math.random() - 0.5) * 14,
-            vy: -Math.random() * 16 - 6,
+            vx: (Math.random() - 0.5) * 16,
+            vy: -Math.random() * 18 - 8,
             size: Math.random() * 8 + 4,
             color: colors[Math.floor(Math.random() * colors.length)],
             rotation: Math.random() * 360,
-            rotSpeed: (Math.random() - 0.5) * 10,
-            gravity: 0.4,
+            rotSpeed: (Math.random() - 0.5) * 12,
+            gravity: 0.38,
             drag: 0.96,
             alpha: 1
           });
@@ -1353,7 +1426,7 @@
             p.x += p.vx;
             p.y += p.vy;
             p.rotation += p.rotSpeed;
-            if (Date.now() - startTime > 1600) p.alpha -= 0.025;
+            if (Date.now() - startTime > 1800) p.alpha -= 0.025;
 
             if (p.alpha > 0) {
               alive = true;
