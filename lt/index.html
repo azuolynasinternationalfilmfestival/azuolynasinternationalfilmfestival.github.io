@@ -743,6 +743,8 @@
           </div>
         </div>
 
+        <div id="votingLeaderboardWidget" class="voting-leaderboard-widget is-empty" aria-live="polite"></div>
+
         <div id="filmsGalleryContainer" class="films-grid"></div>
       </div>
     </section>
@@ -1036,7 +1038,7 @@
               <div class="form-step-panel" id="stepPanel3" data-panel="3" style="display: none;">
                 <div class="input-cell">
                   <label style="font-weight: 700; color: var(--text-color); margin-bottom: 8px; display: block;">
-                    Vaizdo įrašo pateikimo būdas (MP4 / MOV / WEBM, iki 3 min., iki 300 MB) *
+                    Vaizdo įrašo pateikimo būdas (MP4 / MOV / WEBM, iki 3 min., bet koks failo dydis) *
                   </label>
 
                   <div class="video-source-toggle" role="tablist" aria-label="Vaizdo įrašo pateikimo būdas">
@@ -1063,7 +1065,7 @@
                         <line x1="17" y1="7" x2="22" y2="7"></line>
                       </svg>
                       <div class="drop-title">Pasirinkite arba įtempkite vaizdo įrašą</div>
-                      <div class="drop-sub">Telefonu arba planšete filmuotas darbas • MP4, MOV, WEBM • iki 180 s (3 min.) • iki 300 MB</div>
+                      <div class="drop-sub">Telefonu arba planšete filmuotas darbas • MP4, MOV, WEBM • iki 180 s (3 min.) • bet koks failo dydis</div>
                       <div class="drop-browse-btn">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
                         <span>Pasirinkti failą iš įrenginio</span>
@@ -1091,7 +1093,7 @@
                     <ul id="videoValidationChecklist" class="validation-checklist">
                       <li class="validation-check-item"><span>• Formatas: MP4, MOV arba WEBM</span></li>
                       <li class="validation-check-item"><span>• Maksimali trukmė: iki 180 s (3 min.)</span></li>
-                      <li class="validation-check-item"><span>• Maksimalus failo dydis: iki 300 MB</span></li>
+                      <li class="validation-check-item"><span>• Failo dydis: neribojamas (priimamas bet koks dydis, svarbu formatas)</span></li>
                       <li class="validation-check-item"><span>• Minimali vaizdo raiška: nuo 320×240 px</span></li>
                     </ul>
                   </div>
@@ -1165,7 +1167,7 @@
                 </li>
                 <li class="submit-checklist-item">
                   <span class="submit-check-bullet">4</span>
-                  <div><strong>Formatas ir dydis:</strong> MP4, MOV arba WEBM, rekomenduojamas dydis iki 300 MB.</div>
+                  <div><strong>Formatas ir dydis:</strong> MP4, MOV arba WEBM. Failo dydis neribojamas (priimamas bet koks dydis).</div>
                 </li>
               </ul>
             </div>
@@ -1922,8 +1924,8 @@
 
     const VIDEO_RULES = (typeof VIDEO_VALIDATION_RULES !== "undefined" && VIDEO_VALIDATION_RULES) || {
       maxDurationSeconds: 180,
-      maxSizeBytes: 300 * 1024 * 1024,
-      maxSizeMB: 300,
+      maxSizeBytes: null,
+      maxSizeMB: null,
       allowedExtensions: ["mp4", "mov", "webm"],
       allowedMimeTypes: ["video/mp4", "video/quicktime", "video/webm"],
       minWidth: 320,
@@ -2154,7 +2156,7 @@
           renderVideoValidationSummary("pending", [
             { ok: null, label: "Formatas: MP4, MOV arba WEBM" },
             { ok: null, label: `Maksimali trukmė: iki ${VIDEO_RULES.maxDurationSeconds} s (3 min.)` },
-            { ok: null, label: `Maksimalus failo dydis: iki ${VIDEO_RULES.maxSizeMB} MB` },
+            { ok: null, label: "Failo dydis: neribojamas (turi atitikti formatą)" },
             { ok: null, label: `Minimali vaizdo raiška: nuo ${VIDEO_RULES.minWidth}×${VIDEO_RULES.minHeight} px` }
           ]);
         }
@@ -2177,8 +2179,10 @@
       const sizeMB = sizeBytes / (1024 * 1024);
 
       const extValid = (VIDEO_RULES.allowedExtensions || ["mp4", "mov", "webm"]).includes(ext);
-      const mimeValid = !mime || (VIDEO_RULES.allowedMimeTypes || []).includes(mime) || mime.startsWith("video/");
-      const sizeValid = sizeBytes > 0 && sizeBytes <= VIDEO_RULES.maxSizeBytes;
+      const mimeValid = !mime || (VIDEO_RULES.allowedMimeTypes || ["video/mp4", "video/quicktime", "video/webm"]).includes(mime);
+      const hasMaxSize = Number.isFinite(VIDEO_RULES.maxSizeBytes) && VIDEO_RULES.maxSizeBytes > 0;
+      const sizeValid = sizeBytes > 0 && (!hasMaxSize || sizeBytes <= VIDEO_RULES.maxSizeBytes);
+      const sizeLabelText = hasMaxSize ? `${sizeMB.toFixed(1)} MB / ${VIDEO_RULES.maxSizeMB} MB` : `${sizeMB.toFixed(1)} MB (dydis neribojamas)`;
 
       if (!extValid || !mimeValid) {
         videoValidationError = `Netinkamas failo formatas (.${ext || "?"}). Leidžiami tik MP4, MOV arba WEBM formatai.`;
@@ -2189,7 +2193,7 @@
         }
         renderVideoValidationSummary("fail", [
           { ok: false, label: videoValidationError },
-          { ok: sizeValid, label: `Failo dydis: ${sizeMB.toFixed(1)} MB / ${VIDEO_RULES.maxSizeMB} MB` }
+          { ok: sizeValid, label: `Failo dydis: ${sizeLabelText}` }
         ]);
         return;
       }
@@ -2232,7 +2236,7 @@
 
         const checks = [
           { ok: true, label: `Formatas tinkamas: .${ext.toUpperCase()} (${file.name})` },
-          { ok: true, label: `Failo dydis tinkamas: ${sizeMB.toFixed(1)} MB / ${VIDEO_RULES.maxSizeMB} MB` },
+          { ok: true, label: `Failo dydis tinkamas: ${sizeLabelText}` },
           { ok: durValid, label: durValid ? `Trukmė tinkama: ${videoDurationSeconds} s / ${VIDEO_RULES.maxDurationSeconds} s` : `Trukmė netinkama (${videoDurationSeconds} s): privalo būti nuo 1 iki ${VIDEO_RULES.maxDurationSeconds} s` },
           { ok: resValid, label: resValid ? `Raiška tinkama: ${resLabel}` : `Raiška per maža (${vw}×${vh} px): minimali ${VIDEO_RULES.minWidth}×${VIDEO_RULES.minHeight} px` }
         ];
@@ -2729,7 +2733,7 @@
         }
       } else {
         if (!verifiedVideoFile || videoValidationError) {
-          showToast(videoValidationError || "Prašome pasirinkti vaizdo įrašą, atitinkantį festivalio taisykles (iki 3 min., MP4/MOV/WEBM, iki 300 MB)!", "error");
+          showToast(videoValidationError || "Prašome pasirinkti vaizdo įrašą, atitinkantį festivalio taisykles (MP4/MOV/WEBM, iki 3 min.)!", "error");
           return;
         }
       }
@@ -2845,7 +2849,10 @@
           return;
         }
         const storageRef = activeStorage.ref(storagePath);
-        const uploadTask = storageRef.put(verifiedVideoFile);
+        const uploadExt = String(ext || "mp4").toLowerCase();
+        const uploadContentType = (verifiedVideoFile.type && verifiedVideoFile.type.toLowerCase())
+          || (uploadExt === "mov" ? "video/quicktime" : (uploadExt === "webm" ? "video/webm" : "video/mp4"));
+        const uploadTask = storageRef.put(verifiedVideoFile, { contentType: uploadContentType });
 
         uploadTask.on("state_changed",
           (snap) => {

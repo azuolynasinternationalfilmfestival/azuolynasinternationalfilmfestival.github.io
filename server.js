@@ -3,6 +3,7 @@ import express from 'express';
 import path from 'path';
 import fs from 'fs';
 import crypto from 'crypto';
+import { AsyncLocalStorage } from 'node:async_hooks';
 import { fileURLToPath } from 'url';
 import jwt from 'jsonwebtoken';
 import nodemailer from 'nodemailer';
@@ -11,6 +12,9 @@ import './email-templates.js';
 import { generateSubmissionPdf } from './pdf-generator.js';
 
 const { SUBMISSION_RESPONSE_CONFIG, VIDEO_VALIDATION_RULES } = globalThis;
+const firestoreAuthStorage = typeof AsyncLocalStorage === 'function'
+  ? new AsyncLocalStorage()
+  : { getStore: () => null, run: (_store, fn) => fn() };
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -654,27 +658,54 @@ function toFirestoreValue(val) {
   return { stringValue: String(val) };
 }
 
+function getFirestoreHeaders(extra = {}) {
+  const headers = { ...extra };
+  const idToken = firestoreAuthStorage.getStore();
+  if (idToken && typeof idToken === 'string' && !idToken.startsWith('fixture:')) {
+    headers['Authorization'] = `Bearer ${idToken}`;
+  }
+  return headers;
+}
+
 async function syncToFirestore(collection, docId, rawDataOrFields) {
   try {
     let fields = {};
     if (rawDataOrFields && typeof rawDataOrFields === 'object') {
       for (const [k, v] of Object.entries(rawDataOrFields)) {
-        fields[k] = toFirestoreValue(v);
+        if (v !== undefined) {
+          fields[k] = toFirestoreValue(v);
+        }
       }
     }
-    if (!fields.adminEmail) {
-      fields.adminEmail = { stringValue: PRIMARY_SUPERADMIN_EMAIL };
-    }
     if (collection === 'settings') delete fields.smtp;
-    const patchUrl = `https://firestore.googleapis.com/v1/projects/${FIREBASE_PROJECT_ID}/databases/${FIREBASE_DATABASE_ID}/documents/${collection}/${docId}?key=${FIREBASE_API_KEY}`;
+    if (collection === 'stream_config') delete fields.streamKey;
+
+    const fieldKeys = Object.keys(fields);
+    if (fieldKeys.length === 0) return false;
+
+    const maskQuery = fieldKeys
+      .map(k => {
+        const pathExpr = /^[A-Za-z_][A-Za-z0-9_]*$/.test(k) ? k : `\`${k.replace(/`/g, '')}\``;
+        return `updateMask.fieldPaths=${encodeURIComponent(pathExpr)}`;
+      })
+      .join('&');
+
+    const patchUrl = `https://firestore.googleapis.com/v1/projects/${FIREBASE_PROJECT_ID}/databases/${FIREBASE_DATABASE_ID}/documents/${collection}/${docId}?key=${FIREBASE_API_KEY}&${maskQuery}`;
     const res = await fetch(patchUrl, {
       method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getFirestoreHeaders({ 'Content-Type': 'application/json' }),
       body: JSON.stringify({ fields })
     });
     if (!res.ok) {
       const errText = await res.text().catch(() => '');
-      console.warn(`[Firestore Sync] ${collection}/${docId} returned status ${res.status}:`, errText);
+      let shortErr = '';
+      try {
+        const parsed = JSON.parse(errText);
+        shortErr = parsed?.error?.message || parsed?.error?.status || parsed?.error || '';
+      } catch {
+        shortErr = errText.replace(/\s+/g, ' ').slice(0, 180);
+      }
+      console.warn(`[Firestore Sync] ${collection}/${docId} returned status ${res.status}${shortErr ? ` (${shortErr})` : ''}`);
     } else {
       console.log(`[Firestore Sync] Successfully synchronized ${collection}/${docId}`);
       return true;
@@ -690,7 +721,8 @@ async function deleteFromFirestore(collection, docId) {
   try {
     const delUrl = `https://firestore.googleapis.com/v1/projects/${FIREBASE_PROJECT_ID}/databases/${FIREBASE_DATABASE_ID}/documents/${collection}/${docId}?key=${FIREBASE_API_KEY}`;
     await fetch(delUrl, {
-      method: 'DELETE'
+      method: 'DELETE',
+      headers: getFirestoreHeaders()
     });
   } catch (err) {
     // Non-blocking background sync
@@ -800,6 +832,7 @@ async function requireAdminAuth(req, res, next) {
   if (!token) return res.status(401).json({ error: 'unauthorized' });
   try {
     let identity;
+    let firebaseIdToken = req.headers['x-firebase-id-token'] ? String(req.headers['x-firebase-id-token']).trim() : null;
     const session = verifyToken(token);
     if (session.valid && session.decoded?.type === 'auth') identity = session.decoded;
     else {
@@ -810,6 +843,7 @@ async function requireAdminAuth(req, res, next) {
       const account = (await response.json()).users?.[0];
       if (!account?.email || !account.localId) return res.status(401).json({ error: 'invalid-token' });
       identity = { email: account.email, uid: account.localId };
+      firebaseIdToken = token;
     }
     const email = String(identity.email || '').trim().toLowerCase();
     const users = loadUsersData().users || [];
@@ -822,6 +856,9 @@ async function requireAdminAuth(req, res, next) {
     req.adminUser = { ...profile, uid: identity.uid, email, role: whitelisted ? 'admin' : profile.role };
     if (req.body && typeof req.body === 'object') req.body.adminEmail = email;
     req.headers['x-admin-email'] = email;
+    if (firebaseIdToken) {
+      return firestoreAuthStorage.run(firebaseIdToken, () => next());
+    }
     return next();
   } catch {
     return res.status(401).json({ error: 'Could not verify authentication' });
@@ -1025,7 +1062,7 @@ async function sendEmail({ to, subject, html, text, attachments }) {
 app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Admin-Email, Range');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Admin-Email, X-Firebase-ID-Token, Range');
   res.setHeader('Access-Control-Expose-Headers', 'Content-Length, Content-Range');
   res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
   if (req.method === 'OPTIONS') {
@@ -1060,10 +1097,10 @@ app.use('/api/admin', (req, res, next) => {
     const staffWrites = [
       '/tasks', '/tasks/status', '/tasks/delete', '/tasks/cleanup',
       '/judge-evaluation', '/diagnostics/run-verification', '/diagnostics/fix-permissions',
-      '/stream/iframe-url', '/stream/settings', '/archive'
+      '/stream/iframe-url', '/stream/settings', '/archive', '/submissions/pdf'
     ];
-    const editorWrites = ['/submissions/update', '/submissions/toggle-voting', '/editions', '/archive'];
-    if (req.method === 'GET' && staffReads.includes(req.path)) return next();
+    const editorWrites = ['/submissions/update', '/submissions/toggle-voting', '/editions', '/archive', '/submissions/pdf'];
+    if (req.method === 'GET' && (staffReads.includes(req.path) || /^\/submissions\/[^/]+\/pdf$/.test(req.path))) return next();
     if (req.method === 'POST' && (staffWrites.includes(req.path) || (role === 'editor' && editorWrites.includes(req.path)))) return next();
     return res.status(403).json({ error: 'Administrator access required' });
   });
@@ -4747,6 +4784,99 @@ app.get('/api/admin/submissions', (req, res) => {
   }
 });
 
+function fromFirestoreFields(fields = {}) {
+  const out = {};
+  for (const [key, val] of Object.entries(fields || {})) {
+    if (!val || typeof val !== 'object') continue;
+    if ('stringValue' in val) out[key] = val.stringValue;
+    else if ('integerValue' in val) out[key] = Number(val.integerValue);
+    else if ('doubleValue' in val) out[key] = Number(val.doubleValue);
+    else if ('booleanValue' in val) out[key] = Boolean(val.booleanValue);
+    else if ('timestampValue' in val) out[key] = val.timestampValue;
+    else if ('nullValue' in val) out[key] = null;
+    else if ('mapValue' in val) out[key] = fromFirestoreFields(val.mapValue?.fields || {});
+    else if ('arrayValue' in val) {
+      out[key] = (val.arrayValue?.values || []).map((item) => {
+        if ('stringValue' in item) return item.stringValue;
+        if ('integerValue' in item) return Number(item.integerValue);
+        if ('doubleValue' in item) return Number(item.doubleValue);
+        if ('booleanValue' in item) return Boolean(item.booleanValue);
+        return item;
+      });
+    }
+  }
+  return out;
+}
+
+async function resolveSubmissionForPdf(id, fallbackBody) {
+  const cleanId = String(id || '').trim();
+  const subsData = loadSubmissionsData();
+  const localMatch = (subsData.submissions || []).find((s) => String(s.id).trim() === cleanId);
+  if (localMatch) {
+    return fallbackBody && typeof fallbackBody === 'object'
+      ? { ...fallbackBody, ...localMatch }
+      : localMatch;
+  }
+
+  if (fallbackBody && typeof fallbackBody === 'object' && (fallbackBody.filmTitle || fallbackBody.email || fallbackBody.name)) {
+    return { id: cleanId || fallbackBody.id || 'submission', ...fallbackBody };
+  }
+
+  if (cleanId && FIREBASE_PROJECT_ID && FIREBASE_API_KEY) {
+    try {
+      const fsUrl = `https://firestore.googleapis.com/v1/projects/${FIREBASE_PROJECT_ID}/databases/${FIREBASE_DATABASE_ID}/documents/submissions/${encodeURIComponent(cleanId)}?key=${FIREBASE_API_KEY}`;
+      const resp = await fetch(fsUrl, { headers: getFirestoreHeaders() });
+      if (resp.ok) {
+        const doc = await resp.json();
+        if (doc && doc.fields) {
+          return { id: cleanId, ...fromFirestoreFields(doc.fields) };
+        }
+      }
+    } catch (fsErr) {
+      console.warn('[Submission PDF] Firestore lookup notice:', fsErr.message);
+    }
+  }
+  return null;
+}
+
+// API: Download/generate official submission dossier PDF by ID
+app.get('/api/admin/submissions/:id/pdf', async (req, res) => {
+  try {
+    const sub = await resolveSubmissionForPdf(req.params.id);
+    if (!sub) {
+      return res.status(404).json({ error: 'Submission not found' });
+    }
+    const pdfDoc = await generateSubmissionPdf(sub);
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename="${pdfDoc.filename}"`);
+    res.setHeader('X-Generated-PDF-Filename', pdfDoc.filename);
+    res.send(pdfDoc.buffer);
+  } catch (err) {
+    console.error('[Submission PDF GET Error]:', err);
+    res.status(500).json({ error: 'Failed to generate submission PDF', message: err.message });
+  }
+});
+
+// API: Download/generate official submission dossier PDF (supports Firestore-loaded admin payload)
+app.post('/api/admin/submissions/pdf', async (req, res) => {
+  try {
+    const { id, submission } = req.body || {};
+    const targetId = id || submission?.id;
+    const sub = await resolveSubmissionForPdf(targetId, submission);
+    if (!sub) {
+      return res.status(404).json({ error: 'Submission not found' });
+    }
+    const pdfDoc = await generateSubmissionPdf(sub);
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename="${pdfDoc.filename}"`);
+    res.setHeader('X-Generated-PDF-Filename', pdfDoc.filename);
+    res.send(pdfDoc.buffer);
+  } catch (err) {
+    console.error('[Submission PDF POST Error]:', err);
+    res.status(500).json({ error: 'Failed to generate submission PDF', message: err.message });
+  }
+});
+
 // API: Update submission fields or status
 app.post('/api/admin/submissions/update', async (req, res) => {
   try {
@@ -4888,13 +5018,13 @@ app.post('/api/admin/submissions/delete', async (req, res) => {
     // Clean up votes subcollection docs via REST if present
     try {
       const votesUrl = `https://firestore.googleapis.com/v1/projects/${FIREBASE_PROJECT_ID}/databases/${FIREBASE_DATABASE_ID}/documents/submissions/${cleanId}/votes?key=${FIREBASE_API_KEY}`;
-      const vRes = await fetch(votesUrl).catch(() => null);
+      const vRes = await fetch(votesUrl, { headers: getFirestoreHeaders() }).catch(() => null);
       if (vRes && vRes.ok) {
         const vData = await vRes.json().catch(() => ({}));
         if (Array.isArray(vData.documents)) {
           for (const doc of vData.documents) {
             if (doc.name) {
-              await fetch(`https://firestore.googleapis.com/v1/${doc.name}?key=${FIREBASE_API_KEY}`, { method: 'DELETE' }).catch(() => {});
+              await fetch(`https://firestore.googleapis.com/v1/${doc.name}?key=${FIREBASE_API_KEY}`, { method: 'DELETE', headers: getFirestoreHeaders() }).catch(() => {});
             }
           }
         }
@@ -5019,12 +5149,14 @@ app.post('/api/submissions/record', async (req, res) => {
           });
         }
       }
-      if (cleanMime && !VIDEO_VALIDATION_RULES.allowedMimeTypes.includes(cleanMime) && !cleanMime.startsWith('video/')) {
+      if (cleanMime && !VIDEO_VALIDATION_RULES.allowedMimeTypes.includes(cleanMime)) {
         return res.status(400).json({
-          error: isLt ? `Netinkamas vaizdo tipas (${cleanMime}).` : `Unsupported video MIME type (${cleanMime}).`
+          error: isLt
+            ? `Netinkamas vaizdo formatas (${cleanMime}). Leidžiami formatai: ${VIDEO_VALIDATION_RULES.allowedExtensions.join(', ').toUpperCase()}.`
+            : `Unsupported video format (${cleanMime}). Allowed formats: ${VIDEO_VALIDATION_RULES.allowedExtensions.join(', ').toUpperCase()}.`
         });
       }
-      if (sizeBytesNum > VIDEO_VALIDATION_RULES.maxSizeBytes) {
+      if (VIDEO_VALIDATION_RULES.maxSizeBytes && sizeBytesNum > VIDEO_VALIDATION_RULES.maxSizeBytes) {
         return res.status(400).json({
           error: isLt
             ? `Failas per didelis (${(sizeBytesNum / (1024 * 1024)).toFixed(1)} MB). Maksimalus dydis: ${VIDEO_VALIDATION_RULES.maxSizeMB} MB.`
@@ -5115,6 +5247,7 @@ app.post('/api/submissions/record', async (req, res) => {
     } else {
       subsData.submissions.unshift(record);
     }
+    const storedRecord = existingIndex >= 0 ? subsData.submissions[existingIndex] : record;
     saveSubmissionsData(subsData);
 
     // If remote attendee, add to live_viewers
@@ -5154,6 +5287,8 @@ app.post('/api/submissions/record', async (req, res) => {
       }];
       record.pdfGenerated = true;
       record.pdfFilename = pdfDoc.filename;
+      storedRecord.pdfGenerated = true;
+      storedRecord.pdfFilename = pdfDoc.filename;
     } catch (pdfErr) {
       console.error('[Submission PDF Generation Error]:', pdfErr);
       recordServerErrorLog({

@@ -270,6 +270,22 @@ test('server rejects invalid submissions and creates single shareable teacher an
   });
   assert.equal(overDur.status, 400);
 
+  // Unsupported video format (.avi / wrong MIME) rejected
+  const badFmt = await f.request('/api/submissions/record', null, {
+    directorFirstName: 'A', directorLastName: 'B', email: 'test@example.test',
+    filmTitle: 'Bad Format', videoUrl: 'https://example.test/bad.avi', videoFileName: 'bad.avi',
+    videoMimeType: 'video/x-msvideo', videoSizeBytes: 10 * 1024 * 1024, videoDurationSeconds: 90
+  });
+  assert.equal(badFmt.status, 400);
+
+  // Large file size (> 300 MB) accepted when format (.mp4 / video/mp4) and duration pass
+  const hugeValid = await f.request('/api/submissions/record', null, {
+    directorFirstName: 'A', directorLastName: 'B', email: 'test@example.test',
+    filmTitle: 'Large Feature', videoUrl: 'https://example.test/large.mp4', videoFileName: 'large.mp4',
+    videoMimeType: 'video/mp4', videoSizeBytes: 2 * 1024 * 1024 * 1024, videoDurationSeconds: 90
+  });
+  assert.equal(hugeValid.status, 200);
+
   // Half-filled optional author pair
   const halfPair = await f.request('/api/submissions/record', null, {
     directorFirstName: 'A', directorLastName: 'B', cameraOperatorFirstName: 'OnlyFirst',
@@ -306,4 +322,71 @@ test('server rejects invalid submissions and creates single shareable teacher an
   assert.equal((await v2.json()).valid, true);
 });
 
+test('submission email attaches pupil-and-film named PDF and admin can download PDF via GET/POST', async t => {
+  const f = await serverFixture(t, {smtp: true});
+  const subPayload = {
+    id: 'sub_pdf_dl_1',
+    directorFirstName: 'Austėja',
+    directorLastName: 'Žukauskaitė',
+    email: 'austeja@example.test',
+    filmTitle: 'Šiaurės Vėjas',
+    submissionLang: 'lt',
+    videoUrl: 'https://example.test/wind.mp4',
+    videoFileName: 'wind.mp4',
+    videoDurationSeconds: 112
+  };
+  const createRes = await f.request('/api/submissions/record', null, subPayload);
+  assert.equal(createRes.status, 200);
+  const createJson = await createRes.json();
+  assert.equal(createJson.pdfFilename, 'Austeja_Zukauskaite_-_Siaures_Vejas.pdf');
+  assert.equal(f.messages[0].attachments[0].filename, 'Austeja_Zukauskaite_-_Siaures_Vejas.pdf');
+
+  // GET PDF by ID
+  const getPdf = await f.request('/api/admin/submissions/sub_pdf_dl_1/pdf', admins[0]);
+  assert.equal(getPdf.status, 200);
+  assert.equal(getPdf.headers.get('content-type'), 'application/pdf');
+  assert.equal(getPdf.headers.get('x-generated-pdf-filename'), 'Austeja_Zukauskaite_-_Siaures_Vejas.pdf');
+  const getBuf = Buffer.from(await getPdf.arrayBuffer());
+  assert.equal(getBuf.subarray(0, 5).toString('utf8'), '%PDF-');
+
+  // POST PDF with inline submission payload (e.g. Firestore-only record)
+  const postPdf = await f.request('/api/admin/submissions/pdf', admins[0], {
+    id: 'firestore_only_id',
+    submission: {
+      id: 'firestore_only_id',
+      directorFirstName: 'Lukas',
+      directorLastName: 'Vaitkus',
+      filmTitle: 'Miško Garsai',
+      email: 'lukas@example.test'
+    }
+  });
+  assert.equal(postPdf.status, 200);
+  assert.equal(postPdf.headers.get('x-generated-pdf-filename'), 'Lukas_Vaitkus_-_Misko_Garsai.pdf');
+  const postBuf = Buffer.from(await postPdf.arrayBuffer());
+  assert.equal(postBuf.subarray(0, 5).toString('utf8'), '%PDF-');
+});
+
+test('Firestore REST sync uses updateMask.fieldPaths for partial updates and strips sensitive streamKey', async t => {
+  const f = await serverFixture(t);
+  await f.request('/api/vote', null, {
+    filmId: 'mask_test_film',
+    category: 'cat1',
+    voterUid: 'voter_mask_123456'
+  });
+  const subWrite = f.writes.find(w => w.url.includes('/submissions/mask_test_film'));
+  assert.ok(subWrite, 'Expected submissions Firestore write after vote');
+  assert.match(subWrite.url, /updateMask\.fieldPaths=votesCount/);
+  assert.equal(subWrite.data.fields.adminEmail, undefined);
+
+  const streamRes = await f.request('/api/admin/stream/settings', admins[0], {
+    iframeUrl: 'https://example.test/stream',
+    streamKey: 'super-secret-ingest-key',
+    isLive: true
+  });
+  assert.equal(streamRes.status, 200);
+  const streamWrite = f.writes.find(w => w.url.includes('/stream_config/default'));
+  assert.ok(streamWrite, 'Expected stream_config Firestore write');
+  assert.equal(streamWrite.data.fields.streamKey, undefined);
+  assert.match(streamWrite.url, /updateMask\.fieldPaths=iframeUrl/);
+});
 

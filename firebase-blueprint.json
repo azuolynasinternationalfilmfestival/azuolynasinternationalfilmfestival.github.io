@@ -14,11 +14,15 @@
         "archiveVisibility": { "type": "boolean", "description": "Global archive visibility tumbler" },
         "showCurrentEdition": { "type": "boolean", "description": "Visibility of featured FEST edition link" },
         "showResults": { "type": "boolean", "description": "Visibility of Results & winners tab" },
+        "publicWinners": { "type": "boolean", "description": "Whether public winners are revealed" },
         "showVoting": { "type": "boolean", "description": "Visibility of Voting tab" },
         "votingActive": { "type": "boolean", "description": "Whether voting is active or closed" },
+        "votingOpen": { "type": "boolean", "description": "Legacy voting status flag" },
         "showScreening": { "type": "boolean", "description": "Visibility of Screening tab" },
         "showSubmit": { "type": "boolean", "description": "Visibility of Submission form tab" },
+        "submissionsOpen": { "type": "boolean", "description": "Whether submissions are open" },
         "maintenanceMode": { "type": "boolean", "description": "Whether maintenance mode is active" },
+        "selectedYear": { "type": "string", "description": "Active festival edition year" },
         "recordingVideoUrl": { "type": "string", "description": "URL of the festival recording video" },
         "prizesPhotoUrl": { "type": "string", "description": "URL of the prizes photo" }
       }
@@ -39,12 +43,33 @@
       },
       "required": ["year", "title"]
     },
+    "Movie": {
+      "title": "Movie",
+      "description": "Public showcase film entry for ceremony voting and results",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string", "description": "Film title" },
+        "director": { "type": "string", "description": "Director name" },
+        "category": { "type": "string", "description": "Competition category" },
+        "synopsis": { "type": "string", "description": "Film synopsis" },
+        "posterUrl": { "type": "string", "description": "Poster image URL" },
+        "videoUrl": { "type": "string", "description": "Film video URL" },
+        "votes": { "type": "number", "description": "Audience vote count" },
+        "juryPlace": { "type": "number", "description": "Official jury placement" }
+      },
+      "required": ["title"]
+    },
     "Submission": {
       "title": "Submission",
       "description": "Film festival entry submission",
       "type": "object",
       "properties": {
         "name": { "type": "string", "description": "Student filmmaker full name" },
+        "directorFirstName": { "type": "string", "description": "Director first name" },
+        "directorLastName": { "type": "string", "description": "Director last name" },
+        "cameraOperator": { "type": "string", "description": "Camera operator full name" },
+        "ideaAuthor": { "type": "string", "description": "Idea author full name" },
+        "screenwriter": { "type": "string", "description": "Screenwriter full name" },
         "email": { "type": "string", "description": "Contact email" },
         "age": { "type": "number", "description": "Age 10-18" },
         "category": { "type": "string", "description": "Competition category" },
@@ -53,7 +78,7 @@
         "filmTitle": { "type": "string", "description": "Film title" },
         "deviceModel": { "type": "string", "description": "Phone or tablet model used" },
         "synopsis": { "type": "string", "description": "Film synopsis" },
-        "videoUrl": { "type": "string", "description": "Storage URL of the video" },
+        "videoUrl": { "type": "string", "description": "Storage or HTTPS URL of the video" },
         "videoDurationSeconds": { "type": "number", "description": "Duration in seconds (max 180)" },
         "status": { "type": "string", "description": "Status (submitted, accepted, semifinal, final, winner, rejected)" },
         "inVoting": { "type": "boolean", "description": "Whether film is active in public voting" },
@@ -61,7 +86,47 @@
         "awardTitle": { "type": "string", "description": "Award or nomination title" },
         "votesCount": { "type": "number", "description": "Audience votes counter" }
       },
-      "required": ["name", "email", "category", "filmTitle", "videoUrl"]
+      "required": ["email", "filmTitle", "videoUrl"]
+    },
+    "StreamConfig": {
+      "title": "StreamConfig",
+      "description": "Public live stream playback configuration (sensitive ingest keys excluded)",
+      "type": "object",
+      "properties": {
+        "iframeUrl": { "type": "string", "description": "Public player iframe URL" },
+        "viewPermission": { "type": "string", "description": "token_only, public, or restricted" },
+        "streamState": { "type": "string", "description": "Stream status state" },
+        "isLive": { "type": "boolean", "description": "Whether broadcast is currently live" },
+        "updatedAt": { "type": "string", "description": "Last update timestamp" }
+      }
+    },
+    "LiveViewer": {
+      "title": "LiveViewer",
+      "description": "Authorized remote festival participant pass for live stream access",
+      "type": "object",
+      "properties": {
+        "token": { "type": "string", "description": "Live pass token" },
+        "email": { "type": "string", "description": "Participant email" },
+        "name": { "type": "string", "description": "Participant name" },
+        "filmTitle": { "type": "string", "description": "Submitted film title" },
+        "role": { "type": "string", "description": "Viewer role (remote_participant, teacher, etc.)" },
+        "status": { "type": "string", "description": "Access status" }
+      },
+      "required": ["token", "email", "role", "status"]
+    },
+    "StreamToken": {
+      "title": "StreamToken",
+      "description": "Hashed classroom or individual stream access token",
+      "type": "object",
+      "properties": {
+        "tokenType": { "type": "string", "description": "classroom or individual" },
+        "label": { "type": "string", "description": "Teacher or viewer display label" },
+        "isActive": { "type": "boolean", "description": "Whether token is active" },
+        "maxUses": { "type": "number", "description": "Maximum allowed activations" },
+        "currentUses": { "type": "number", "description": "Current activation count" },
+        "expiresAt": { "type": "string", "description": "Expiration timestamp" }
+      },
+      "required": ["tokenType", "isActive"]
     },
     "UserAccount": {
       "title": "UserAccount",
@@ -98,6 +163,30 @@
       },
       "required": ["token", "email", "role", "code", "status"]
     },
+    "JudgeEvaluation": {
+      "title": "JudgeEvaluation",
+      "description": "Jury scorecard for a film submission",
+      "type": "object",
+      "properties": {
+        "filmId": { "type": "string", "description": "Target submission ID" },
+        "judgeUid": { "type": "string", "description": "Judge UID or email" },
+        "score": { "type": "number", "description": "Assigned total score" },
+        "notes": { "type": "string", "description": "Jury feedback notes" }
+      },
+      "required": ["filmId"]
+    },
+    "VoteRecord": {
+      "title": "VoteRecord",
+      "description": "Public audience vote log record",
+      "type": "object",
+      "properties": {
+        "filmId": { "type": "string", "description": "ID of voted film" },
+        "filmTitle": { "type": "string", "description": "Title of voted film" },
+        "collection": { "type": "string", "description": "Source collection (submissions or movies)" },
+        "votedAt": { "type": "string", "description": "Timestamp of vote" }
+      },
+      "required": ["filmId"]
+    },
     "VoteAudit": {
       "title": "VoteAudit",
       "description": "Audit and rate-limiting document for audience voting per device and category",
@@ -108,7 +197,16 @@
         "deviceHash": { "type": "string", "description": "SHA-256 fingerprint hash of voter device" },
         "votedAt": { "type": "string", "description": "Timestamp when vote was cast" }
       },
-      "required": ["filmId", "category", "deviceHash"]
+      "required": ["filmId", "category"]
+    },
+    "AdminTask": {
+      "title": "AdminTask",
+      "description": "Internal committee workflow task",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string", "description": "Task title" },
+        "status": { "type": "string", "description": "Task status" }
+      }
     },
     "ActivityLog": {
       "title": "ActivityLog",
@@ -124,7 +222,7 @@
         "timestamp": { "type": "string", "description": "ISO timestamp of event" },
         "status": { "type": "string", "description": "Execution status: success, warning, error" }
       },
-      "required": ["action", "adminEmail", "timestamp"]
+      "required": ["action", "timestamp"]
     },
     "MailMessage": {
       "title": "MailMessage",
@@ -141,6 +239,10 @@
     }
   },
   "firestore": {
+    "/movies/{movieId}": {
+      "schema": "Movie",
+      "description": "Showcase films for voting and ceremony podium"
+    },
     "/settings/{settingId}": {
       "schema": "FestivalSettings",
       "description": "Global festival settings and tab controls"
@@ -153,6 +255,30 @@
       "schema": "Submission",
       "description": "Film entries submitted by participants"
     },
+    "/stream_config/{configId}": {
+      "schema": "StreamConfig",
+      "description": "Live broadcast configuration"
+    },
+    "/live_viewers/{viewerId}": {
+      "schema": "LiveViewer",
+      "description": "Remote participant stream access records"
+    },
+    "/stream_tokens/{tokenHash}": {
+      "schema": "StreamToken",
+      "description": "Hashed teacher and viewer live access tokens"
+    },
+    "/votes/{voteId}": {
+      "schema": "VoteRecord",
+      "description": "Audience vote records"
+    },
+    "/votes_audit/{auditId}": {
+      "schema": "VoteAudit",
+      "description": "Device vote locks per category"
+    },
+    "/tasks/{taskId}": {
+      "schema": "AdminTask",
+      "description": "Committee management tasks"
+    },
     "/users/{userId}": {
       "schema": "UserAccount",
       "description": "Admin and staff user accounts"
@@ -161,18 +287,17 @@
       "schema": "Invitation",
       "description": "Pending user invitation tokens"
     },
-    "/votes_audit/{auditId}": {
-      "schema": "VoteAudit",
-      "description": "Device vote locks per category"
-    },
-    "/logs/{logId}": {
-      "schema": "ActivityLog",
-      "description": "Administrative activity and audit logs"
+    "/judge_evaluations/{evaluationId}": {
+      "schema": "JudgeEvaluation",
+      "description": "Jury film evaluations"
     },
     "/mail/{mailId}": {
       "schema": "MailMessage",
       "description": "Trigger Email queue documents"
+    },
+    "/logs/{logId}": {
+      "schema": "ActivityLog",
+      "description": "Administrative activity and audit logs"
     }
   }
 }
-

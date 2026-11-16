@@ -360,9 +360,88 @@
       }
     },
 
+    renderLeaderboard: function () {
+      const widget = document.getElementById("votingLeaderboardWidget");
+      if (!widget) return;
+
+      const isLt = this.currentLang === "lt";
+      const films = Array.isArray(this.cachedFilms) ? this.cachedFilms : [];
+      if (films.length === 0) {
+        widget.classList.add("is-empty");
+        widget.innerHTML = "";
+        return;
+      }
+
+      const safeText = (str) => String(str || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+
+      const ranked = [...films]
+        .sort((a, b) => {
+          const diff = Number(b.votesCount || 0) - Number(a.votesCount || 0);
+          if (diff !== 0) return diff;
+          return String(a.filmTitle || "").localeCompare(String(b.filmTitle || ""));
+        })
+        .slice(0, 5);
+
+      const totalVotes = films.reduce((sum, f) => sum + Number(f.votesCount || 0), 0);
+      const maxVotes = Math.max(...ranked.map((f) => Number(f.votesCount || 0)), 1);
+      const userVotedFilmId = localStorage.getItem("festival_voted_film_id");
+      const voteWord = (n) => {
+        if (!isLt) return n === 1 ? "vote" : "votes";
+        if (n % 10 === 1 && n % 100 !== 11) return "balsas";
+        if (n % 10 >= 2 && n % 10 <= 9 && (n % 100 < 10 || n % 100 >= 20)) return "balsai";
+        return "balsų";
+      };
+
+      widget.classList.remove("is-empty");
+      widget.innerHTML = `
+        <div class="lb-widget-header">
+          <div class="lb-widget-title-group">
+            <span class="lb-widget-kicker">${isLt ? "TIESIOGINĖ RIKIUOTĖ" : "LIVE STANDINGS"}</span>
+            <h3 class="lb-widget-heading">${isLt ? "TOP 5 Lyderių Lentelė" : "Top 5 Films Leaderboard"}</h3>
+          </div>
+          <div class="lb-widget-meta">
+            ${isLt ? `Iš viso balsų: ${totalVotes} • ${films.length} filmai` : `Total votes: ${totalVotes} • ${films.length} films`}
+          </div>
+        </div>
+        <div class="lb-rows-list">
+          ${ranked.map((film, idx) => {
+            const votes = Number(film.votesCount || 0);
+            const barWidth = totalVotes > 0 ? Math.max(4, Math.round((votes / maxVotes) * 100)) : 0;
+            const sharePct = totalVotes > 0 ? Math.round((votes / totalVotes) * 100) : 0;
+            const rankNum = String(idx + 1).padStart(2, "0");
+            const rankClass = idx < 3 ? `rank-${idx + 1}` : "";
+            const isVoted = userVotedFilmId === film.id;
+            const director = film.name || film.directorName || (isLt ? "Autorius" : "Filmmaker");
+            const cat = film.category ? ` • ${film.category}` : "";
+
+            return `
+              <button type="button" class="lb-row-btn ${isVoted ? "is-user-voted" : ""}" onclick="if (typeof openPublicModal === 'function') openPublicModal('${safeText(film.id)}')" title="${isLt ? "Peržiūrėti filmą" : "Watch film"}">
+                <span class="lb-rank-num ${rankClass}">#${rankNum}</span>
+                <span class="lb-film-info">
+                  <span class="lb-film-title">${safeText(film.filmTitle || (isLt ? "Bevardis filmas" : "Untitled Film"))}</span>
+                  <span class="lb-film-sub">${safeText(director)}${safeText(cat)}</span>
+                </span>
+                <span class="lb-bar-wrap" aria-hidden="true">
+                  <span class="lb-bar-fill" style="display:block; width:${barWidth}%;"></span>
+                </span>
+                <span class="lb-votes-tally">${votes} ${voteWord(votes)} · ${sharePct}%</span>
+              </button>
+            `;
+          }).join("")}
+        </div>
+      `;
+    },
+
     render: function (films, lang) {
       if (films) this.cachedFilms = films.filter((f) => f.inVoting === true);
       if (lang) this.currentLang = lang;
+
+      this.renderLeaderboard();
 
       const container = document.getElementById("filmsGalleryContainer");
       if (!container) return;

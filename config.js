@@ -81,8 +81,8 @@ const SUBMISSION_RESPONSE_CONFIG = {
 
 const VIDEO_VALIDATION_RULES = {
   maxDurationSeconds: 180,
-  maxSizeBytes: 300 * 1024 * 1024, // 300 MB
-  maxSizeMB: 300,
+  maxSizeBytes: null, // No file size limit (any size accepted if format matches)
+  maxSizeMB: null,
   allowedExtensions: ["mp4", "mov", "webm"],
   allowedMimeTypes: ["video/mp4", "video/quicktime", "video/webm"],
   minWidth: 320,

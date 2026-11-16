@@ -742,6 +742,8 @@
           </div>
         </div>
 
+        <div id="votingLeaderboardWidget" class="voting-leaderboard-widget is-empty" aria-live="polite"></div>
+
         <div id="filmsGalleryContainer" class="films-grid"></div>
       </div>
     </section>
@@ -1036,7 +1038,7 @@
               <div class="form-step-panel" id="stepPanel3" data-panel="3" style="display: none;">
                 <div class="input-cell">
                   <label style="font-weight: 700; color: var(--text-color); margin-bottom: 8px; display: block;">
-                    Film Video Source (MP4 / MOV / WEBM, strictly up to 3 mins, max 300 MB) *
+                    Film Video Source (MP4 / MOV / WEBM, strictly up to 3 mins, any file size) *
                   </label>
 
                   <div class="video-source-toggle" role="tablist" aria-label="Film video source mode">
@@ -1063,7 +1065,7 @@
                         <line x1="17" y1="7" x2="22" y2="7"></line>
                       </svg>
                       <div class="drop-title">Select or drag video file here</div>
-                      <div class="drop-sub">Phone or tablet filmed video • MP4, MOV, WEBM • max 180s (3 mins) • max 300 MB</div>
+                      <div class="drop-sub">Phone or tablet filmed video • MP4, MOV, WEBM • max 180s (3 mins) • any file size</div>
                       <div class="drop-browse-btn">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
                         <span>Choose file from device</span>
@@ -1091,7 +1093,7 @@
                     <ul id="videoValidationChecklist" class="validation-checklist">
                       <li class="validation-check-item"><span>• Allowed formats: MP4, MOV or WEBM</span></li>
                       <li class="validation-check-item"><span>• Maximum runtime: strictly up to 180s (3 mins)</span></li>
-                      <li class="validation-check-item"><span>• Maximum file size: up to 300 MB</span></li>
+                      <li class="validation-check-item"><span>• File size: unlimited (any size accepted if format matches)</span></li>
                       <li class="validation-check-item"><span>• Minimum resolution: 320×240 px</span></li>
                     </ul>
                   </div>
@@ -1165,7 +1167,7 @@
                 </li>
                 <li class="submit-checklist-item">
                   <span class="submit-check-bullet">4</span>
-                  <div><strong>Format & Size:</strong> MP4, MOV, or WEBM container under 300 MB recommended.</div>
+                  <div><strong>Format & Size:</strong> MP4, MOV, or WEBM container. Any file size is accepted.</div>
                 </li>
               </ul>
             </div>
@@ -1916,8 +1918,8 @@
 
     const VIDEO_RULES = (typeof VIDEO_VALIDATION_RULES !== "undefined" && VIDEO_VALIDATION_RULES) || {
       maxDurationSeconds: 180,
-      maxSizeBytes: 300 * 1024 * 1024,
-      maxSizeMB: 300,
+      maxSizeBytes: null,
+      maxSizeMB: null,
       allowedExtensions: ["mp4", "mov", "webm"],
       allowedMimeTypes: ["video/mp4", "video/quicktime", "video/webm"],
       minWidth: 320,
@@ -2148,7 +2150,7 @@
           renderVideoValidationSummary("pending", [
             { ok: null, label: "Allowed formats: MP4, MOV or WEBM" },
             { ok: null, label: `Maximum runtime: strictly up to ${VIDEO_RULES.maxDurationSeconds}s (3 mins)` },
-            { ok: null, label: `Maximum file size: up to ${VIDEO_RULES.maxSizeMB} MB` },
+            { ok: null, label: "File size: unlimited (format must match)" },
             { ok: null, label: `Minimum resolution: ${VIDEO_RULES.minWidth}×${VIDEO_RULES.minHeight} px` }
           ]);
         }
@@ -2171,8 +2173,10 @@
       const sizeMB = sizeBytes / (1024 * 1024);
 
       const extValid = (VIDEO_RULES.allowedExtensions || ["mp4", "mov", "webm"]).includes(ext);
-      const mimeValid = !mime || (VIDEO_RULES.allowedMimeTypes || []).includes(mime) || mime.startsWith("video/");
-      const sizeValid = sizeBytes > 0 && sizeBytes <= VIDEO_RULES.maxSizeBytes;
+      const mimeValid = !mime || (VIDEO_RULES.allowedMimeTypes || ["video/mp4", "video/quicktime", "video/webm"]).includes(mime);
+      const hasMaxSize = Number.isFinite(VIDEO_RULES.maxSizeBytes) && VIDEO_RULES.maxSizeBytes > 0;
+      const sizeValid = sizeBytes > 0 && (!hasMaxSize || sizeBytes <= VIDEO_RULES.maxSizeBytes);
+      const sizeLabelText = hasMaxSize ? `${sizeMB.toFixed(1)} MB / ${VIDEO_RULES.maxSizeMB} MB` : `${sizeMB.toFixed(1)} MB (no size limit)`;
 
       if (!extValid || !mimeValid) {
         videoValidationError = `Unsupported file format (.${ext || "?"}). Only MP4, MOV, or WEBM formats are accepted.`;
@@ -2183,7 +2187,7 @@
         }
         renderVideoValidationSummary("fail", [
           { ok: false, label: videoValidationError },
-          { ok: sizeValid, label: `File size: ${sizeMB.toFixed(1)} MB / ${VIDEO_RULES.maxSizeMB} MB` }
+          { ok: sizeValid, label: `File size: ${sizeLabelText}` }
         ]);
         return;
       }
@@ -2226,7 +2230,7 @@
 
         const checks = [
           { ok: true, label: `Format valid: .${ext.toUpperCase()} (${file.name})` },
-          { ok: true, label: `File size valid: ${sizeMB.toFixed(1)} MB / ${VIDEO_RULES.maxSizeMB} MB` },
+          { ok: true, label: `File size valid: ${sizeLabelText}` },
           { ok: durValid, label: durValid ? `Duration valid: ${videoDurationSeconds}s / ${VIDEO_RULES.maxDurationSeconds}s` : `Invalid duration (${videoDurationSeconds}s): must be 1 to ${VIDEO_RULES.maxDurationSeconds}s` },
           { ok: resValid, label: resValid ? `Resolution valid: ${resLabel}` : `Resolution too low (${vw}×${vh} px): minimum ${VIDEO_RULES.minWidth}×${VIDEO_RULES.minHeight} px` }
         ];
@@ -2723,7 +2727,7 @@
         }
       } else {
         if (!verifiedVideoFile || videoValidationError) {
-          showToast(videoValidationError || "Please attach a valid video matching festival rules (max 3 mins, MP4/MOV/WEBM, max 300 MB).", "error");
+          showToast(videoValidationError || "Please attach a valid video matching festival rules (MP4/MOV/WEBM, max 3 mins).", "error");
           return;
         }
       }
@@ -2839,7 +2843,10 @@
           return;
         }
         const storageRef = activeStorage.ref(storagePath);
-        const uploadTask = storageRef.put(verifiedVideoFile);
+        const uploadExt = String(ext || "mp4").toLowerCase();
+        const uploadContentType = (verifiedVideoFile.type && verifiedVideoFile.type.toLowerCase())
+          || (uploadExt === "mov" ? "video/quicktime" : (uploadExt === "webm" ? "video/webm" : "video/mp4"));
+        const uploadTask = storageRef.put(verifiedVideoFile, { contentType: uploadContentType });
 
         uploadTask.on("state_changed",
           (snap) => {

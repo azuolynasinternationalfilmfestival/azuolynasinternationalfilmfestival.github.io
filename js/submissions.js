@@ -168,6 +168,30 @@ async function updateMetrics() {
   }
 }
 
+function formatSubmissionDate(rawDate, includeYear = false) {
+  if (!rawDate) return "-";
+  let d = null;
+  if (typeof rawDate === "object" && typeof rawDate.toDate === "function") {
+    try {
+      d = rawDate.toDate();
+    } catch {
+      d = null;
+    }
+  } else {
+    const parsed = new Date(rawDate);
+    if (!isNaN(parsed.getTime())) d = parsed;
+  }
+  if (!d) return "-";
+  const opts = {
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit"
+  };
+  if (includeYear) opts.year = "numeric";
+  return d.toLocaleString("lt-LT", opts);
+}
+
 function renderTable() {
   const searchInput = document.getElementById("filterSearch");
   const yearInput = document.getElementById("filterYear");
@@ -184,15 +208,32 @@ function renderTable() {
   const filtered = submissionsList.filter((item) => {
     const itemYear = getSubmissionYear(item);
     const matchYear = yr === "all" || itemYear === yr;
-    const matchSearch = !q ||
-      (item.name && item.name.toLowerCase().includes(q)) ||
-      (item.filmTitle && item.filmTitle.toLowerCase().includes(q)) ||
-      (item.email && item.email.toLowerCase().includes(q));
+    const searchable = [
+      item.id,
+      item.name,
+      item.directorName,
+      item.directorFirstName,
+      item.directorLastName,
+      item.cameraOperator,
+      item.cameraOperatorFirstName,
+      item.cameraOperatorLastName,
+      item.ideaAuthor,
+      item.ideaAuthorFirstName,
+      item.ideaAuthorLastName,
+      item.screenwriter,
+      item.screenwriterFirstName,
+      item.screenwriterLastName,
+      item.filmTitle,
+      item.email,
+      item.institution,
+      item.location
+    ].filter(Boolean).join(" ").toLowerCase();
+    const matchSearch = !q || searchable.includes(q);
     const matchCat = cat === "all" || item.category === cat;
     const matchStatus = st === "all" || item.status === st;
-    const matchVoting = 
-      vt === "all" || 
-      (vt === "inVoting" && item.inVoting === true) || 
+    const matchVoting =
+      vt === "all" ||
+      (vt === "inVoting" && item.inVoting === true) ||
       (vt === "notInVoting" && item.inVoting !== true);
     return matchYear && matchSearch && matchCat && matchStatus && matchVoting;
   });
@@ -211,15 +252,9 @@ function renderTable() {
   filtered.forEach((sub) => {
     const tr = document.createElement("tr");
 
-    let dateStr = "-";
-    if (sub.submittedAt && sub.submittedAt.toDate) {
-      dateStr = sub.submittedAt.toDate().toLocaleDateString("lt-LT", { 
-        month: "2-digit", 
-        day: "2-digit", 
-        hour: "2-digit", 
-        minute: "2-digit" 
-      });
-    }
+    const dateStr = formatSubmissionDate(sub.submittedAt, false);
+    const authorDisplay = `${sub.directorFirstName || ""} ${sub.directorLastName || ""}`.trim() || sub.name || sub.directorName || "";
+    const metaSubline = [sub.email, sub.institution || sub.location].filter(Boolean).join(" • ");
 
     const rawStatus = sub.status || "submitted";
     const statusMeta = STATUS_DICTIONARY[rawStatus] || { label: rawStatus, className: "status-submitted" };
@@ -227,7 +262,7 @@ function renderTable() {
 
     tr.innerHTML = `
       <td data-label="Data" class="text-date">${dateStr}</td>
-      <td data-label="Kūrėjas"><strong>${sub.name || ''}</strong><br><span class="text-muted-sm">${sub.email || ''}</span></td>
+      <td data-label="Kūrėjas"><strong>${authorDisplay}</strong><br><span class="text-muted-sm">${metaSubline}</span></td>
       <td data-label="Amžius / Kat.">${sub.age || ''} m.<br><span class="text-muted-sm">${sub.category || ''}</span></td>
       <td data-label="Filmas"><strong style="color:var(--text-color);">${sub.filmTitle || ''}</strong></td>
       <td data-label="Balsai">
@@ -475,6 +510,47 @@ function initEntryModal() {
     });
   }
 
+  const mDownloadPdfBtn = document.getElementById("mDownloadPdfBtn");
+  if (mDownloadPdfBtn) {
+    mDownloadPdfBtn.addEventListener("click", async () => {
+      if (!currentEntry) return;
+      const prevText = mDownloadPdfBtn.textContent;
+      mDownloadPdfBtn.disabled = true;
+      mDownloadPdfBtn.textContent = "Ruošiamas PDF...";
+      try {
+        const res = await fetch("/api/admin/submissions/pdf", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id: currentEntry.id, submission: currentEntry })
+        });
+        if (!res.ok) {
+          const errJson = await res.json().catch(() => ({}));
+          throw new Error(errJson.error || `HTTP ${res.status}`);
+        }
+        const blob = await res.blob();
+        const headerFilename = res.headers.get("X-Generated-PDF-Filename");
+        const disp = res.headers.get("Content-Disposition") || "";
+        const dispMatch = disp.match(/filename="?([^"]+)"?/i);
+        const filename = headerFilename || (dispMatch && dispMatch[1]) || currentEntry.pdfFilename || `AISFF_${currentEntry.id}.pdf`;
+
+        const objectUrl = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = objectUrl;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        setTimeout(() => URL.revokeObjectURL(objectUrl), 1500);
+        showToast(`PDF byla atsisiųsta: ${filename}`, "success");
+      } catch (err) {
+        showToast("Nepavyko atsisiųsti PDF: " + err.message, "error");
+      } finally {
+        mDownloadPdfBtn.disabled = false;
+        mDownloadPdfBtn.textContent = prevText;
+      }
+    });
+  }
+
   if (mSaveBtn) {
     mSaveBtn.addEventListener("click", async () => {
       if (!currentEntry) return;
@@ -661,6 +737,29 @@ function initEntryModal() {
   }
 }
 
+function splitRoleNames(first, last, combined) {
+  const f = String(first || "").trim();
+  const l = String(last || "").trim();
+  if (f || l) return { first: f || "—", last: l || "—" };
+  const full = String(combined || "").trim();
+  if (!full) return { first: "—", last: "—" };
+  const parts = full.split(/\s+/);
+  return { first: parts[0] || "—", last: parts.slice(1).join(" ") || "—" };
+}
+
+function buildReadablePdfNameFallback(entry) {
+  const first = String(entry.directorFirstName || "").trim();
+  const last = String(entry.directorLastName || "").trim();
+  const pupil = `${first} ${last}`.trim() || entry.name || "Autorius";
+  const film = entry.filmTitle || "Filmas";
+  const clean = (s) => String(s)
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-zA-Z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "");
+  return `${clean(pupil)}_-_${clean(film)}.pdf`;
+}
+
 function openModal(id) {
   currentEntry = submissionsList.find((x) => x.id === id);
   if (!currentEntry) return;
@@ -670,32 +769,106 @@ function openModal(id) {
     return joined || combined || "—";
   };
 
-  document.getElementById("mTitle").textContent = currentEntry.filmTitle || "Filmas";
-  document.getElementById("mAuthor").textContent = formatAuthor(currentEntry.directorFirstName, currentEntry.directorLastName, currentEntry.name);
-  document.getElementById("mEmail").textContent = currentEntry.email || "";
-  document.getElementById("mAgeInst").textContent = `${currentEntry.age || ''} m. | ${currentEntry.institution || 'Nenurodyta'}`;
-  document.getElementById("mLocation").textContent = currentEntry.location || "";
-  document.getElementById("mDevice").textContent = currentEntry.deviceModel || "";
-  document.getElementById("mDuration").textContent = currentEntry.videoDurationSeconds || "";
-  document.getElementById("mVotes").textContent = currentEntry.votesCount || 0;
-  document.getElementById("mSynopsis").textContent = currentEntry.synopsis || "";
-  document.getElementById("mInVoting").checked = currentEntry.inVoting === true;
-
-  const setOptionalText = (id, value) => {
-    const el = document.getElementById(id);
-    if (el) el.textContent = value || "—";
+  const setOptionalText = (elId, value) => {
+    const el = document.getElementById(elId);
+    if (el) el.textContent = (value === undefined || value === null || value === "") ? "—" : String(value);
   };
+
+  const dirSplit = splitRoleNames(currentEntry.directorFirstName, currentEntry.directorLastName, currentEntry.directorName || currentEntry.name);
+  const camSplit = splitRoleNames(currentEntry.cameraOperatorFirstName, currentEntry.cameraOperatorLastName, currentEntry.cameraOperator);
+  const ideaSplit = splitRoleNames(currentEntry.ideaAuthorFirstName, currentEntry.ideaAuthorLastName, currentEntry.ideaAuthor);
+  const writerSplit = splitRoleNames(currentEntry.screenwriterFirstName, currentEntry.screenwriterLastName, currentEntry.screenwriter);
+
+  setOptionalText("mTitle", currentEntry.filmTitle || "Filmo peržiūra");
+  setOptionalText("mSubId", currentEntry.id || "—");
+  setOptionalText("mSubmittedAt", formatSubmissionDate(currentEntry.submittedAt, true));
+  setOptionalText("mSubmissionLang", currentEntry.submissionLang === "en" ? "English (EN)" : "Lietuvių (LT)");
+  const statusInfo = STATUS_DICTIONARY[currentEntry.status || "submitted"];
+  setOptionalText("mStatusDisplay", statusInfo ? statusInfo.label : (currentEntry.status || "submitted"));
+  setOptionalText("mResponseSla", currentEntry.responseTimeText || "per 5 darbo dienas");
+  setOptionalText("mVotes", currentEntry.votesCount || 0);
+
+  setOptionalText("mDirFirst", dirSplit.first);
+  setOptionalText("mDirLast", dirSplit.last);
+  setOptionalText("mCamFirst", camSplit.first);
+  setOptionalText("mCamLast", camSplit.last);
+  setOptionalText("mIdeaFirst", ideaSplit.first);
+  setOptionalText("mIdeaLast", ideaSplit.last);
+  setOptionalText("mWriterFirst", writerSplit.first);
+  setOptionalText("mWriterLast", writerSplit.last);
+
+  setOptionalText("mAuthor", formatAuthor(currentEntry.directorFirstName, currentEntry.directorLastName, currentEntry.name));
   setOptionalText("mDirectorRole", formatAuthor(currentEntry.directorFirstName, currentEntry.directorLastName, currentEntry.name));
   setOptionalText("mCameraOperatorRole", formatAuthor(currentEntry.cameraOperatorFirstName, currentEntry.cameraOperatorLastName, currentEntry.cameraOperator));
   setOptionalText("mIdeaAuthorRole", formatAuthor(currentEntry.ideaAuthorFirstName, currentEntry.ideaAuthorLastName, currentEntry.ideaAuthor));
   setOptionalText("mScreenwriterRole", formatAuthor(currentEntry.screenwriterFirstName, currentEntry.screenwriterLastName, currentEntry.screenwriter));
+
+  setOptionalText("mEmail", currentEntry.email);
+  setOptionalText("mAge", currentEntry.age ? `${currentEntry.age} m.` : "—");
+  setOptionalText("mCategory", currentEntry.category);
+  setOptionalText("mAgeInst", `${currentEntry.age || ""} m. | ${currentEntry.institution || "Nenurodyta"}`);
+  setOptionalText("mLocation", currentEntry.location || currentEntry.countryCity);
+  setOptionalText("mInstitution", currentEntry.institution);
+  setOptionalText("mAwardDisplay", currentEntry.awardTitle || "—");
+
+  const attendanceLabel = currentEntry.attendanceType === "remote"
+    ? "Nuotoliniu būdu (Remote)"
+    : "Dalyvaus gyvai Kaune (In person)";
+  setOptionalText("mAttendanceType", attendanceLabel);
+  setOptionalText("mLiveToken", currentEntry.liveToken);
+
+  const liveUrlEl = document.getElementById("mLiveStreamUrl");
+  if (liveUrlEl) {
+    if (currentEntry.liveStreamUrl) {
+      liveUrlEl.innerHTML = `<a href="${currentEntry.liveStreamUrl}" target="_blank" rel="noopener noreferrer" style="color:var(--accent-light); text-decoration:underline;">${currentEntry.liveStreamUrl}</a>`;
+    } else {
+      liveUrlEl.textContent = "—";
+    }
+  }
+
+  setOptionalText("mDevice", currentEntry.deviceModel);
+  setOptionalText("mVideoMethod", currentEntry.videoSourceType === "link" ? "Išorinė vaizdo nuoroda (URL)" : "Įkeltas vaizdo failas");
+  setOptionalText("mVideoFileName", currentEntry.videoFileName);
+
+  const bytes = Number(currentEntry.videoSizeBytes || currentEntry.videoFileSizeBytes || 0);
+  const sizeParts = [];
+  if (bytes > 0) sizeParts.push(`${(bytes / (1024 * 1024)).toFixed(2)} MB`);
+  if (currentEntry.videoMimeType) sizeParts.push(currentEntry.videoMimeType);
+  setOptionalText("mVideoSize", sizeParts.length ? sizeParts.join(" • ") : "—");
+  setOptionalText("mDuration", currentEntry.videoDurationSeconds || "—");
+  setOptionalText("mResolution", currentEntry.videoResolution);
+  setOptionalText("mVideoValidation", currentEntry.videoValidationStatus || "PASSED");
+
+  const resolvedPdfName = currentEntry.pdfFilename || buildReadablePdfNameFallback(currentEntry);
+  setOptionalText("mPdfFilename", resolvedPdfName);
+
+  const videoUrlEl = document.getElementById("mVideoUrlLink");
+  const vidUrl = currentEntry.videoUrl || currentEntry.videoLink || "";
+  if (videoUrlEl) {
+    if (vidUrl) {
+      videoUrlEl.innerHTML = `<a href="${vidUrl}" target="_blank" rel="noopener noreferrer" style="color:var(--accent-light); text-decoration:underline;">${vidUrl}</a>`;
+    } else {
+      videoUrlEl.textContent = "—";
+    }
+  }
+
+  const notifParts = [];
+  const receiptRes = currentEntry.notificationResults?.receipt;
+  const orgRes = currentEntry.notificationResults?.organizer;
+  if (receiptRes) notifParts.push(`Autoriui: ${receiptRes.success ? "Išsiųsta" : "Klaida"}`);
+  if (orgRes) notifParts.push(`Administratoriui: ${orgRes.success ? "Išsiųsta" : "Klaida"}`);
+  setOptionalText("mNotifyStatus", notifParts.length ? notifParts.join(" • ") : "Automatinis patvirtinimas");
+
   const specsParts = [];
   if (currentEntry.videoSourceType) specsParts.push(currentEntry.videoSourceType === "link" ? "Nuoroda" : "Failas");
   if (currentEntry.videoFileName) specsParts.push(currentEntry.videoFileName);
-  if (currentEntry.videoSizeBytes) specsParts.push(`${(Number(currentEntry.videoSizeBytes) / (1024 * 1024)).toFixed(2)} MB`);
+  if (bytes > 0) specsParts.push(`${(bytes / (1024 * 1024)).toFixed(2)} MB`);
   if (currentEntry.videoResolution) specsParts.push(currentEntry.videoResolution);
-  if (currentEntry.pdfFilename) specsParts.push(`PDF: ${currentEntry.pdfFilename}`);
-  setOptionalText("mVideoSpecs", specsParts.length ? specsParts.join(" • ") : "—");
+  specsParts.push(`PDF: ${resolvedPdfName}`);
+  setOptionalText("mVideoSpecs", specsParts.join(" • "));
+
+  setOptionalText("mSynopsis", currentEntry.synopsis || "—");
+  document.getElementById("mInVoting").checked = currentEntry.inVoting === true;
 
   const isWinner = currentEntry.status === "winner" || currentEntry.isWinner === true;
   const awardWrap = document.getElementById("mAwardTitleWrap");
@@ -705,11 +878,12 @@ function openModal(id) {
 
   const mVideo = document.getElementById("mVideo");
   if (mVideo) {
-    mVideo.src = currentEntry.videoUrl || "";
+    mVideo.src = vidUrl;
   }
   const downloadLink = document.getElementById("mDownloadLink");
   if (downloadLink) {
-    downloadLink.href = currentEntry.videoUrl || "";
+    downloadLink.href = vidUrl || "#";
+    downloadLink.style.display = vidUrl ? "inline-flex" : "none";
   }
 
   document.getElementById("mNewStatus").value = currentEntry.status || "submitted";

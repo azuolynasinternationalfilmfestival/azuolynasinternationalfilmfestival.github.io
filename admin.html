@@ -1878,25 +1878,92 @@ Tomas Vaitkus, Aktų salė (Projektorius), t.vaitkus@mokykla.lt"></textarea>
 
       <video id="mVideo" class="modal-video-frame" controls playsinline></video>
 
-      <div class="modal-actions-bar">
-        <button id="mDeleteBtn" class="btn-delete">Ištrinti paraišką</button>
-        <a id="mDownloadLink" href="" target="_blank" download class="btn-outline btn-sm">Atsisiųsti video</a>
+      <div class="modal-actions-bar" style="flex-wrap:wrap;">
+        <button id="mDeleteBtn" type="button" class="btn-delete">Ištrinti paraišką</button>
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <button id="mDownloadPdfBtn" type="button" class="btn-solid btn-sm">Atsisiųsti PDF bylą</button>
+          <a id="mDownloadLink" href="" target="_blank" rel="noopener noreferrer" download class="btn-outline btn-sm">Atsisiųsti video</a>
+        </div>
       </div>
 
-      <div class="modal-details">
-        <p><strong>Režisierius / Autorius:</strong> <span id="mAuthor"></span> (<span id="mEmail"></span>)</p>
-        <p><strong>Režisierius (vardas, pavardė):</strong> <span id="mDirectorRole">—</span></p>
-        <p><strong>Operatorius:</strong> <span id="mCameraOperatorRole">—</span></p>
-        <p><strong>Idėjos autorius:</strong> <span id="mIdeaAuthorRole">—</span></p>
-        <p><strong>Scenarijaus autorius:</strong> <span id="mScreenwriterRole">—</span></p>
-        <p><strong>Amžius / Įstaiga:</strong> <span id="mAgeInst"></span></p>
-        <p><strong>Vieta:</strong> <span id="mLocation"></span></p>
-        <p><strong>Kameros modelis:</strong> <span id="mDevice"></span></p>
-        <p><strong>Trukmė:</strong> <span id="mDuration"></span> s</p>
-        <p><strong>Video specifikacijos / PDF:</strong> <span id="mVideoSpecs">—</span></p>
-        <p><strong>Publikos balsai:</strong> <span id="mVotes">0</span></p>
-        <p class="modal-synopsis-label">Sinopsis / Idėja:</p>
-        <p id="mSynopsis" class="modal-synopsis-text"></p>
+      <div class="modal-details modal-dossier-sections">
+        <div class="dossier-section">
+          <div class="dossier-section-title">1. Paraiškos metaduomenys ir statusas</div>
+          <div class="dossier-grid">
+            <div class="dossier-item"><span class="dossier-lbl">Paraiškos ID</span><span class="dossier-val mono-val" id="mSubId">—</span></div>
+            <div class="dossier-item"><span class="dossier-lbl">Pateikimo data</span><span class="dossier-val" id="mSubmittedAt">—</span></div>
+            <div class="dossier-item"><span class="dossier-lbl">Kalba</span><span class="dossier-val" id="mSubmissionLang">—</span></div>
+            <div class="dossier-item"><span class="dossier-lbl">Dabartinis statusas</span><span class="dossier-val" id="mStatusDisplay">—</span></div>
+            <div class="dossier-item"><span class="dossier-lbl">Atsakymo terminas</span><span class="dossier-val" id="mResponseSla">—</span></div>
+            <div class="dossier-item"><span class="dossier-lbl">Publikos balsai</span><span class="dossier-val mono-val" id="mVotes">0</span></div>
+          </div>
+        </div>
+
+        <div class="dossier-section">
+          <div class="dossier-section-title">2. Kūrybinė komanda (Vardas / Pavardė)</div>
+          <div class="dossier-crew-table">
+            <div class="dossier-crew-row dossier-crew-head">
+              <span>Vaidmuo</span><span>Vardas</span><span>Pavardė</span>
+            </div>
+            <div class="dossier-crew-row">
+              <span>Režisierius / Autorius</span><span id="mDirFirst">—</span><span id="mDirLast">—</span>
+            </div>
+            <div class="dossier-crew-row">
+              <span>Operatorius</span><span id="mCamFirst">—</span><span id="mCamLast">—</span>
+            </div>
+            <div class="dossier-crew-row">
+              <span>Idėjos autorius</span><span id="mIdeaFirst">—</span><span id="mIdeaLast">—</span>
+            </div>
+            <div class="dossier-crew-row">
+              <span>Scenarijaus autorius</span><span id="mWriterFirst">—</span><span id="mWriterLast">—</span>
+            </div>
+          </div>
+          <div class="dossier-legacy-summary" style="display:none;">
+            <span id="mAuthor"></span>
+            <span id="mDirectorRole">—</span>
+            <span id="mCameraOperatorRole">—</span>
+            <span id="mIdeaAuthorRole">—</span>
+            <span id="mScreenwriterRole">—</span>
+            <span id="mAgeInst"></span>
+          </div>
+        </div>
+
+        <div class="dossier-section">
+          <div class="dossier-section-title">3. Dalyvio profilis, kontaktai ir ceremonija</div>
+          <div class="dossier-grid">
+            <div class="dossier-item"><span class="dossier-lbl">El. paštas</span><span class="dossier-val" id="mEmail">—</span></div>
+            <div class="dossier-item"><span class="dossier-lbl">Amžius</span><span class="dossier-val" id="mAge">—</span></div>
+            <div class="dossier-item"><span class="dossier-lbl">Kategorija</span><span class="dossier-val" id="mCategory">—</span></div>
+            <div class="dossier-item"><span class="dossier-lbl">Šalis / Miestas</span><span class="dossier-val" id="mLocation">—</span></div>
+            <div class="dossier-item"><span class="dossier-lbl">Mokykla / Studija</span><span class="dossier-val" id="mInstitution">—</span></div>
+            <div class="dossier-item"><span class="dossier-lbl">Apdovanojimas</span><span class="dossier-val" id="mAwardDisplay">—</span></div>
+            <div class="dossier-item"><span class="dossier-lbl">Dalyvavimas (RSVP)</span><span class="dossier-val" id="mAttendanceType">—</span></div>
+            <div class="dossier-item"><span class="dossier-lbl">Transliacijos žetonas</span><span class="dossier-val mono-val" id="mLiveToken">—</span></div>
+            <div class="dossier-item dossier-item-wide"><span class="dossier-lbl">Transliacijos nuoroda</span><span class="dossier-val mono-val" id="mLiveStreamUrl">—</span></div>
+          </div>
+        </div>
+
+        <div class="dossier-section">
+          <div class="dossier-section-title">4. Vaizdo įrašo techninės specifikacijos ir pranešimai</div>
+          <div class="dossier-grid">
+            <div class="dossier-item"><span class="dossier-lbl">Filmavimo įrenginys</span><span class="dossier-val" id="mDevice">—</span></div>
+            <div class="dossier-item"><span class="dossier-lbl">Pateikimo būdas</span><span class="dossier-val" id="mVideoMethod">—</span></div>
+            <div class="dossier-item"><span class="dossier-lbl">Failo pavadinimas</span><span class="dossier-val mono-val" id="mVideoFileName">—</span></div>
+            <div class="dossier-item"><span class="dossier-lbl">Failo dydis ir formatas</span><span class="dossier-val" id="mVideoSize">—</span></div>
+            <div class="dossier-item"><span class="dossier-lbl">Trukmė</span><span class="dossier-val mono-val"><span id="mDuration">—</span> s</span></div>
+            <div class="dossier-item"><span class="dossier-lbl">Raiška</span><span class="dossier-val mono-val" id="mResolution">—</span></div>
+            <div class="dossier-item"><span class="dossier-lbl">Taisyklių patikra</span><span class="dossier-val" id="mVideoValidation">—</span></div>
+            <div class="dossier-item"><span class="dossier-lbl">PDF byla</span><span class="dossier-val mono-val" id="mPdfFilename">—</span></div>
+            <div class="dossier-item dossier-item-wide"><span class="dossier-lbl">Specifikacijų santrauka</span><span class="dossier-val" id="mVideoSpecs">—</span></div>
+            <div class="dossier-item dossier-item-wide"><span class="dossier-lbl">Vaizdo įrašo nuoroda</span><span class="dossier-val mono-val" id="mVideoUrlLink">—</span></div>
+            <div class="dossier-item dossier-item-wide"><span class="dossier-lbl">El. pašto siuntimo būsena</span><span class="dossier-val" id="mNotifyStatus">—</span></div>
+          </div>
+        </div>
+
+        <div class="dossier-section">
+          <div class="dossier-section-title">5. Sinopsis / Filmo idėja</div>
+          <p id="mSynopsis" class="modal-synopsis-text" style="margin:0;"></p>
+        </div>
       </div>
 
       <div class="modal-manage-box">

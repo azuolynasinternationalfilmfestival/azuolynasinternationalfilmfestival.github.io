@@ -258,6 +258,145 @@
       font-weight: 700;
     }
 
+    /* Live Top-5 Leaderboard Widget */
+    .live-leaderboard-card {
+      background: var(--surface-card, #0d1210);
+      border: 1px solid var(--border-color, rgba(255, 255, 255, 0.1));
+      border-radius: 6px;
+      padding: 20px 24px;
+      margin: 22px 0 18px 0;
+    }
+    .lb-top-row {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+      padding-bottom: 12px;
+      margin-bottom: 12px;
+      border-bottom: 1px solid var(--border-color, rgba(255, 255, 255, 0.1));
+    }
+    .lb-kicker {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #34d399;
+      display: block;
+      margin-bottom: 4px;
+    }
+    .lb-heading {
+      font-family: var(--font-display, sans-serif);
+      font-size: 1.18rem;
+      font-weight: 700;
+      color: #FFFFFF;
+      margin: 0;
+    }
+    .lb-total-meta {
+      font-family: var(--font-mono);
+      font-variant-numeric: tabular-nums;
+      font-size: 0.78rem;
+      color: #94a3b8;
+    }
+    .lb-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .lb-row {
+      width: 100%;
+      text-align: left;
+      background: rgba(255, 255, 255, 0.025);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 4px;
+      padding: 11px 14px;
+      display: grid;
+      grid-template-columns: 36px minmax(0, 1.5fr) minmax(100px, 1fr) 96px;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+      color: #F8FAF7;
+      transition: border-color 0.2s ease, background-color 0.2s ease, transform 0.2s ease;
+    }
+    .lb-row:hover,
+    .lb-row:focus-visible {
+      border-color: rgba(52, 211, 153, 0.5);
+      background: rgba(52, 211, 153, 0.06);
+      transform: translateY(-1px);
+      outline: none;
+    }
+    .lb-row.is-voted-film {
+      border-color: rgba(52, 211, 153, 0.55);
+      background: rgba(52, 211, 153, 0.08);
+    }
+    .lb-rank {
+      font-family: var(--font-mono);
+      font-variant-numeric: tabular-nums;
+      font-size: 0.92rem;
+      font-weight: 700;
+      color: #94a3b8;
+    }
+    .lb-rank.r-1 { color: var(--gold-c); }
+    .lb-rank.r-2 { color: var(--silver-c); }
+    .lb-rank.r-3 { color: var(--bronze-c); }
+    .lb-info {
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .lb-title {
+      font-size: 0.92rem;
+      font-weight: 600;
+      color: #FFFFFF;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .lb-sub {
+      font-size: 0.76rem;
+      color: #94a3b8;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .lb-track {
+      width: 100%;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+    .lb-fill {
+      display: block;
+      height: 100%;
+      background: #34d399;
+      border-radius: 2px;
+      transition: width 0.5s cubic-bezier(0.2, 0.7, 0.2, 1);
+    }
+    .lb-count {
+      text-align: right;
+      font-family: var(--font-mono);
+      font-variant-numeric: tabular-nums;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #34d399;
+      white-space: nowrap;
+    }
+    @media (max-width: 680px) {
+      .live-leaderboard-card {
+        padding: 16px;
+      }
+      .lb-row {
+        grid-template-columns: 30px minmax(0, 1fr) auto;
+        gap: 8px 10px;
+      }
+      .lb-track {
+        grid-column: 2 / 4;
+      }
+    }
+
     /* Filter pills */
     .category-filter-bar {
       display: flex;
@@ -909,6 +1048,9 @@
 
     <!-- VIEW 1: AUDIENCE VOTING SECTION -->
     <section id="sectionVotingView" class="container">
+      <!-- Live Top-5 Leaderboard Widget -->
+      <section id="liveLeaderboardWidget" class="live-leaderboard-card" aria-live="polite" style="display:none;"></section>
+
       <!-- Category Filter Pills -->
       <div class="category-filter-bar" id="categoryFilterBar">
         <button type="button" class="category-tab-btn active" data-cat="all" id="btnFilterAll">All Categories</button>
@@ -1055,7 +1197,10 @@
           rank2: "🥈 2-oji Vieta",
           rank3: "🥉 3-ioji Vieta",
           noJuryAssigned: "Vertinimas baigiamas",
-          errorVoteFailed: "Nepavyko įskaityti balso. Bandykite dar kartą."
+          errorVoteFailed: "Nepavyko įskaityti balso. Bandykite dar kartą.",
+          leaderboardKicker: "TIESIOGINĖ RIKIUOTĖ",
+          leaderboardTitle: "TOP 5 Lyderių Lentelė",
+          leaderboardTotalVotes: "Iš viso balsų"
         },
         en: {
           pageTitle: "Vote for Your Favorite Film | AISFF",
@@ -1098,7 +1243,10 @@
           rank2: "🥈 2nd Place",
           rank3: "🥉 3rd Place",
           noJuryAssigned: "Jury deliberations finalizing",
-          errorVoteFailed: "Vote could not be processed. Please try again."
+          errorVoteFailed: "Vote could not be processed. Please try again.",
+          leaderboardKicker: "LIVE STANDINGS",
+          leaderboardTitle: "Top 5 Films Leaderboard",
+          leaderboardTotalVotes: "Total votes"
         }
       };
 
@@ -1245,6 +1393,7 @@
 
         updateStatusBadges();
         updateThankYouBanner();
+        renderLeaderboard();
         renderVotingCards();
         renderResultsView();
       }
@@ -1495,8 +1644,86 @@
         return typeof film.votes === "number" ? film.votes : (typeof film.votesCount === "number" ? film.votesCount : 0);
       }
 
+      function renderLeaderboard() {
+        const widget = document.getElementById("liveLeaderboardWidget");
+        if (!widget) return;
+        const t = I18N[currentLang] || I18N.en;
+
+        if (!moviesList || moviesList.length === 0) {
+          widget.style.display = "none";
+          widget.innerHTML = "";
+          return;
+        }
+
+        const top5 = [...moviesList]
+          .sort((a, b) => {
+            const diff = getMovieVotes(b) - getMovieVotes(a);
+            if (diff !== 0) return diff;
+            return getMovieTitle(a).localeCompare(getMovieTitle(b));
+          })
+          .slice(0, 5);
+
+        const totalVotes = moviesList.reduce((sum, f) => sum + getMovieVotes(f), 0);
+        const maxVotes = Math.max(...top5.map(f => getMovieVotes(f)), 1);
+
+        widget.style.display = "block";
+        widget.innerHTML = `
+          <div class="lb-top-row">
+            <div>
+              <span class="lb-kicker">${t.leaderboardKicker}</span>
+              <h2 class="lb-heading">${t.leaderboardTitle}</h2>
+            </div>
+            <span class="lb-total-meta">${t.leaderboardTotalVotes}: ${totalVotes}</span>
+          </div>
+          <div class="lb-list">
+            ${top5.map((film, idx) => {
+              const votes = getMovieVotes(film);
+              const pct = totalVotes > 0 ? Math.round((votes / totalVotes) * 100) : 0;
+              const widthPct = totalVotes > 0 ? Math.max(4, Math.round((votes / maxVotes) * 100)) : 0;
+              const title = getMovieTitle(film);
+              const director = getMovieDirector(film);
+              const catKey = resolveMovieCategory(film);
+              const catLabel = catKey === "senior" ? t.seniorCat : t.juniorCat;
+              const rankClass = idx < 3 ? `r-${idx + 1}` : "";
+              const isVoted = hasVoted && votedMovieId === film.id;
+              return `
+                <button type="button" class="lb-row ${isVoted ? "is-voted-film" : ""}" data-lb-film-id="${escapeHtml(film.id)}">
+                  <span class="lb-rank ${rankClass}">#${String(idx + 1).padStart(2, "0")}</span>
+                  <span class="lb-info">
+                    <span class="lb-title">${escapeHtml(title)}</span>
+                    <span class="lb-sub">${escapeHtml(director)} • ${escapeHtml(catLabel)}</span>
+                  </span>
+                  <span class="lb-track" aria-hidden="true">
+                    <span class="lb-fill" style="width: ${widthPct}%"></span>
+                  </span>
+                  <span class="lb-count">${votes} · ${pct}%</span>
+                </button>
+              `;
+            }).join("")}
+          </div>
+        `;
+
+        widget.querySelectorAll("[data-lb-film-id]").forEach(rowBtn => {
+          rowBtn.addEventListener("click", () => {
+            const targetId = rowBtn.getAttribute("data-lb-film-id");
+            if (selectedCategory !== "all") {
+              selectedCategory = "all";
+              document.querySelectorAll(".category-tab-btn").forEach(b => {
+                b.classList.toggle("active", b.getAttribute("data-cat") === "all");
+              });
+              renderVotingCards();
+            }
+            const card = votingGrid.querySelector(`.film-vote-card[data-id="${CSS.escape(targetId)}"]`);
+            if (card) {
+              card.scrollIntoView({ behavior: "smooth", block: "center" });
+            }
+          });
+        });
+      }
+
       // 5. Render Voting Cards
       function renderVotingCards() {
+        renderLeaderboard();
         const t = I18N[currentLang] || I18N.en;
         let filtered = moviesList;
         if (selectedCategory !== "all") {
@@ -1584,7 +1811,7 @@
         });
       }
 
-      // 6. Voting Execution (Double-Voting Check, Atomic Increment, Error Handling)
+      // 6. Voting Execution (Double-Voting Check, Server + Atomic Increment, Error Handling)
       async function handleCastVote(film, btnElement) {
         const t = I18N[currentLang] || I18N.en;
 
@@ -1608,30 +1835,79 @@
         btnElement.querySelector("span").textContent = t.btnVoting;
 
         try {
-          if (!window.firebase || !window.firebase.firestore) {
-            throw new Error("Firebase SDK is not initialized.");
-          }
+          let votedViaServer = false;
+          let updatedVoteCount = null;
+          const catSlug = resolveMovieCategory(film) === "senior" ? "cat2" : "cat1";
 
-          const db = window.firebase.firestore();
-          const targetCollection = film._collection || "movies";
-
-          // Execute atomic increment of +1 strictly as specified in security rules
-          await db.collection(targetCollection).doc(film.id).update({
-            votes: firebase.firestore.FieldValue.increment(1)
-          });
-
-          // Also attempt to log vote document if collection exists
           try {
-            await db.collection("votes").add({
-              filmId: film.id,
-              collection: targetCollection,
-              filmTitle: getMovieTitle(film),
-              votedAt: firebase.firestore.FieldValue.serverTimestamp(),
-              userAgent: navigator.userAgent.substring(0, 100)
+            let voterUid = localStorage.getItem("asiff_voter_uid");
+            if (!voterUid) {
+              voterUid = "v_" + Math.random().toString(36).substring(2, 12) + "_" + Date.now().toString(36);
+              localStorage.setItem("asiff_voter_uid", voterUid);
+            }
+            const srvRes = await fetch("/api/vote", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                filmId: film.id,
+                category: catSlug,
+                voterUid
+              })
             });
-          } catch (logErr) {
-            console.info("Votes audit collection write skipped or optional:", logErr.message);
+            const ct = srvRes.headers.get("content-type") || "";
+            if (ct.includes("application/json")) {
+              const srvData = await srvRes.json();
+              if (srvRes.ok && srvData.success) {
+                votedViaServer = true;
+                if (typeof srvData.votesCount === "number") {
+                  updatedVoteCount = srvData.votesCount;
+                }
+              } else if (srvData.error === "already-voted") {
+                hasVoted = true;
+                localStorage.setItem("festival_voted", srvData.filmId || film.id);
+                updateThankYouBanner();
+                renderVotingCards();
+                showToast(t.btnAlreadyVoted, true);
+                return;
+              } else if (srvData.error === "voting-closed") {
+                showToast(t.statusClosed, true);
+                btnElement.disabled = false;
+                btnElement.querySelector("span").textContent = originalText;
+                return;
+              }
+            }
+          } catch (srvErr) {
+            console.info("Server /api/vote fallback to Firestore:", srvErr.message);
           }
+
+          if (!votedViaServer) {
+            if (!window.firebase || !window.firebase.firestore) {
+              throw new Error("Firebase SDK is not initialized.");
+            }
+            const db = window.firebase.firestore();
+            const targetCollection = film._collection || "submissions";
+            const countField = targetCollection === "movies" ? "votes" : "votesCount";
+
+            await db.collection(targetCollection).doc(film.id).update({
+              [countField]: firebase.firestore.FieldValue.increment(1)
+            });
+
+            try {
+              await db.collection("votes").add({
+                filmId: film.id,
+                collection: targetCollection,
+                filmTitle: getMovieTitle(film),
+                votedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                userAgent: navigator.userAgent.substring(0, 100)
+              });
+            } catch (logErr) {
+              console.info("Votes audit write skipped:", logErr.message);
+            }
+          }
+
+          // Update local film vote count immediately for instant leaderboard & card feedback
+          film.votes = updatedVoteCount !== null ? updatedVoteCount : getMovieVotes(film) + 1;
+          film.votesCount = film.votes;
 
           // Persist voting state in localStorage
           hasVoted = true;
@@ -1770,8 +2046,82 @@
           .replace(/'/g, "&#039;");
       }
 
-      // 8. Real-time Firebase Firestore Sync
+      // 8. Real-time Firebase Firestore & Server API Sync
       function initializeFirestoreListeners() {
+        const filmsBySource = {
+          api: [],
+          movies: [],
+          inVoting: [],
+          isWinner: []
+        };
+        let serverVotesByFilm = {};
+
+        function rebuildMoviesList() {
+          const merged = new Map();
+          const applyFilm = (film, sourceCollection) => {
+            if (!film || !film.id) return;
+            const existing = merged.get(film.id) || {};
+            const serverVoteCount = serverVotesByFilm[film.id];
+            const next = { ...existing, ...film, _collection: sourceCollection || existing._collection || "submissions" };
+            if (typeof serverVoteCount === "number") {
+              next.votesCount = Math.max(Number(next.votesCount || 0), serverVoteCount);
+              next.votes = Math.max(Number(next.votes || 0), serverVoteCount);
+            }
+            merged.set(film.id, next);
+          };
+
+          filmsBySource.api.forEach(f => applyFilm(f, f._collection || "submissions"));
+          filmsBySource.movies.forEach(f => applyFilm(f, "movies"));
+          filmsBySource.inVoting.forEach(f => applyFilm(f, "submissions"));
+          filmsBySource.isWinner.forEach(f => applyFilm(f, "submissions"));
+
+          moviesList = Array.from(merged.values());
+          renderVotingCards();
+          renderResultsView();
+        }
+
+        function applySettingsData(data) {
+          if (!data || typeof data !== "object") return;
+          const wasHidden = !globalSettings.showResults;
+          globalSettings.votingOpen = data.votingOpen !== false && data.votingActive !== false && data.showVoting !== false;
+          globalSettings.showResults = data.showResults === true || data.resultsPublished === true || data.publicWinners === true;
+
+          updateStatusBadges();
+          renderResultsView();
+
+          if (wasHidden && globalSettings.showResults) {
+            triggerConfetti();
+          }
+        }
+
+        // Hydrate from Express REST API when backend is available
+        (async () => {
+          try {
+            const [settingsRes, subsRes, votesRes] = await Promise.all([
+              fetch("/api/settings").catch(() => null),
+              fetch("/api/submissions").catch(() => null),
+              fetch("/api/votes").catch(() => null)
+            ]);
+            if (settingsRes && settingsRes.ok) {
+              const sJson = await settingsRes.json().catch(() => null);
+              if (sJson) applySettingsData(sJson.settings || sJson);
+            }
+            if (votesRes && votesRes.ok) {
+              const vJson = await votesRes.json().catch(() => null);
+              if (vJson && vJson.votesByFilm) serverVotesByFilm = vJson.votesByFilm;
+            }
+            if (subsRes && subsRes.ok) {
+              const subJson = await subsRes.json().catch(() => null);
+              if (subJson && Array.isArray(subJson.submissions)) {
+                filmsBySource.api = subJson.submissions.filter(d => d.inVoting === true || d.isWinner === true);
+                rebuildMoviesList();
+              }
+            }
+          } catch (apiErr) {
+            console.info("API hydration fallback:", apiErr.message);
+          }
+        })();
+
         if (!window.firebase || !window.firebase.firestore) {
           console.warn("Firebase Firestore SDK not ready.");
           return;
@@ -1780,58 +2130,42 @@
         try {
           const db = window.firebase.firestore();
 
-          // A. Settings Listener (showResults toggle & votingOpen)
-          db.collection("settings").doc("global").onSnapshot((doc) => {
-            if (doc.exists) {
-              const data = doc.data();
-              const wasHidden = !globalSettings.showResults;
-              globalSettings.votingOpen = data.votingOpen !== false && data.showVoting !== false;
-              globalSettings.showResults = data.showResults === true || data.resultsPublished === true;
-
-              updateStatusBadges();
-              renderResultsView();
-
-              // If results were just toggled to true, burst confetti!
-              if (wasHidden && globalSettings.showResults) {
-                triggerConfetti();
+          // A. Settings Listeners (settings/festival & settings/global)
+          for (const settingsDocId of ["festival", "global"]) {
+            db.collection("settings").doc(settingsDocId).onSnapshot((doc) => {
+              if (doc.exists) {
+                applySettingsData(doc.data());
               }
-            }
-          }, (err) => {
-            console.warn("Settings snapshot listener notice:", err.message);
-          });
-
-          // B. Submissions & Movies Listeners (Seamless fallback & sync)
-          let moviesMap = new Map();
-
-          // 1. Listen to /movies collection
-          db.collection("movies").onSnapshot((snapshot) => {
-            snapshot.forEach((doc) => {
-              moviesMap.set(doc.id, { id: doc.id, _collection: "movies", ...doc.data() });
+            }, (err) => {
+              console.warn(`Settings (${settingsDocId}) snapshot listener notice:`, err.message);
             });
-            moviesList = Array.from(moviesMap.values());
-            renderVotingCards();
-            renderResultsView();
+          }
+
+          // B. Movies Listener
+          db.collection("movies").onSnapshot((snapshot) => {
+            const list = [];
+            snapshot.forEach((doc) => {
+              list.push({ id: doc.id, _collection: "movies", ...doc.data() });
+            });
+            filmsBySource.movies = list;
+            rebuildMoviesList();
           }, (err) => {
             console.info("Movies collection listener info:", err.message);
           });
 
-          // 2. Also listen to /submissions collection for accepted/competition entries
-          db.collection("submissions").onSnapshot((snapshot) => {
-            snapshot.forEach((doc) => {
-              const d = doc.data();
-              // Check if entry is part of competition or in voting
-              if (d.inVoting === true || (d.votesCount && d.votesCount > 0) || (d.votes && d.votes > 0) || d.status === "accepted" || d.status === "in_competition") {
-                if (!moviesMap.has(doc.id)) {
-                  moviesMap.set(doc.id, { id: doc.id, _collection: "submissions", ...d });
-                }
-              }
+          // C. Submissions Public Queries (strictly filtered for security rules)
+          for (const field of ["inVoting", "isWinner"]) {
+            db.collection("submissions").where(field, "==", true).onSnapshot((snapshot) => {
+              const list = [];
+              snapshot.forEach((doc) => {
+                list.push({ id: doc.id, _collection: "submissions", ...doc.data() });
+              });
+              filmsBySource[field] = list;
+              rebuildMoviesList();
+            }, (err) => {
+              console.info(`Submissions (${field}) listener info:`, err.message);
             });
-            moviesList = Array.from(moviesMap.values());
-            renderVotingCards();
-            renderResultsView();
-          }, (err) => {
-            console.info("Submissions listener info:", err.message);
-          });
+          }
 
         } catch (e) {
           console.error("Firestore sync init error:", e);

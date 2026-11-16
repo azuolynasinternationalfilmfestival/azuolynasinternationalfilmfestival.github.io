@@ -400,9 +400,23 @@ for (const lang of ['lt', 'en']) {
     assert.match(f.element('uploadFeedback').textContent, /MP4|MOV|WEBM/i);
     assert.equal(f.element('submitBtn').disabled, false);
 
-    // Oversized file (> 300 MB)
-    f.context.validateSelectedVideoFile({ name: 'huge.mp4', type: 'video/mp4', size: 350 * 1024 * 1024 });
-    assert.match(f.element('uploadFeedback').textContent, /300 MB/i);
+    // Unsupported MIME even with .mp4 extension
+    f.context.validateSelectedVideoFile({ name: 'spoofed.mp4', type: 'video/x-msvideo', size: 1024 * 1024 });
+    assert.match(f.element('uploadFeedback').textContent, /MP4|MOV|WEBM/i);
+    assert.ok(f.element('uploadFeedback').className.includes('error'));
+
+    // Empty file (0 B) fails
+    f.context.validateSelectedVideoFile({ name: 'empty.mp4', type: 'video/mp4', size: 0 });
+    assert.ok(f.element('uploadFeedback').className.includes('error'));
+
+    // Large file (> 300 MB) in valid format is accepted when duration and resolution pass
+    mockVideos.length = 0;
+    f.context.validateSelectedVideoFile({ name: 'huge.mp4', type: 'video/mp4', size: 850 * 1024 * 1024 });
+    mockVideos[0].duration = 120;
+    mockVideos[0].videoWidth = 1920;
+    mockVideos[0].videoHeight = 1080;
+    mockVideos[0].onloadedmetadata();
+    assert.ok(f.element('uploadFeedback').className.includes('success'));
 
     // Duration > 180s
     mockVideos.length = 0;
@@ -488,7 +502,7 @@ test('PDF generator produces valid PDF with all author roles and video metadata,
   assert.ok(Buffer.isBuffer(pdf.buffer));
   assert.ok(pdf.buffer.subarray(0, 5).toString('utf8') === '%PDF-');
   assert.ok(pdf.sizeBytes > 1000);
-  assert.match(pdf.filename, /^AISFF_.*sub_test_pdf_1\.pdf$/);
+  assert.equal(pdf.filename, 'Jonas_Kazlauskas_-_Sviesos_Kelias.pdf');
 
   const plain = vm.runInNewContext(`${templates}\ngenerateSubmissionPlainText('adminNotification', 'lt', ${JSON.stringify(sampleRecord)})`);
   assert.match(plain, /Jonas Kazlauskas/);
@@ -499,6 +513,67 @@ test('PDF generator produces valid PDF with all author roles and video metadata,
   assert.match(plain, /sviesos_kelias\.mp4/);
   assert.match(plain, /1920x1080/);
   assert.match(plain, /per 5 darbo dienas/);
+});
+
+test('live Top-5 leaderboard widget ranks existing films accurately in voting-and-winners.js and voting.html', () => {
+  const leaderboardWidget = { innerHTML: '', classes: new Set(['is-empty']), classList: { add: c => leaderboardWidget.classes.add(c), remove: c => leaderboardWidget.classes.delete(c) } };
+  const galleryContainer = { innerHTML: '' };
+  const statusBanner = { className: '', innerHTML: '' };
+  const docMap = new Map([
+    ['votingLeaderboardWidget', leaderboardWidget],
+    ['filmsGalleryContainer', galleryContainer],
+    ['voterStatusBanner', statusBanner]
+  ]);
+  const ctx = vm.createContext({
+    console,
+    URL,
+    localStorage: { getItem: () => null, setItem: () => {} },
+    fetch: async () => ({ ok: false }),
+    document: { getElementById: (id) => docMap.get(id) || null, querySelectorAll: () => [] },
+    showToast: () => {}
+  });
+  ctx.window = ctx;
+  vm.runInContext(fs.readFileSync(new URL('../js/voting-and-winners.js', import.meta.url), 'utf8'), ctx);
+
+  const sampleFilms = [
+    { id: 'f1', filmTitle: 'Alpha Film', name: 'Dir A', category: 'Category I', inVoting: true, votesCount: 3 },
+    { id: 'f2', filmTitle: 'Beta Film', name: 'Dir B', category: 'Category II', inVoting: true, votesCount: 19 },
+    { id: 'f3', filmTitle: 'Gamma Film', name: 'Dir C', category: 'Category II', inVoting: true, votesCount: 12 },
+    { id: 'f4', filmTitle: 'Delta Film', name: 'Dir D', category: 'Category I', inVoting: true, votesCount: 25 },
+    { id: 'f5', filmTitle: 'Epsilon Film', name: 'Dir E', category: 'Category II', inVoting: true, votesCount: 8 },
+    { id: 'f6', filmTitle: 'Zeta Film', name: 'Dir F', category: 'Category I', inVoting: true, votesCount: 15 },
+    { id: 'f7', filmTitle: 'Hidden Draft', name: 'Dir G', category: 'Category I', inVoting: false, votesCount: 99 }
+  ];
+
+  ctx.FestivalVoting.render(sampleFilms, 'en');
+  assert.equal(leaderboardWidget.classes.has('is-empty'), false);
+  const buttonsCount = (leaderboardWidget.innerHTML.match(/class="lb-row-btn/g) || []).length;
+  assert.equal(buttonsCount, 5);
+  assert.ok(leaderboardWidget.innerHTML.indexOf('Delta Film') < leaderboardWidget.innerHTML.indexOf('Beta Film'));
+  assert.ok(leaderboardWidget.innerHTML.indexOf('Beta Film') < leaderboardWidget.innerHTML.indexOf('Zeta Film'));
+  assert.ok(leaderboardWidget.innerHTML.indexOf('Zeta Film') < leaderboardWidget.innerHTML.indexOf('Gamma Film'));
+  assert.ok(leaderboardWidget.innerHTML.indexOf('Gamma Film') < leaderboardWidget.innerHTML.indexOf('Epsilon Film'));
+  assert.doesNotMatch(leaderboardWidget.innerHTML, /Alpha Film/);
+  assert.doesNotMatch(leaderboardWidget.innerHTML, /Hidden Draft/);
+
+  const votingHtml = fs.readFileSync(new URL('../voting.html', import.meta.url), 'utf8');
+  assert.match(votingHtml, /id="liveLeaderboardWidget"/);
+  assert.match(votingHtml, /function renderLeaderboard\(\)/);
+
+  const ltIndexHtml = fs.readFileSync(new URL('../lt/index.html', import.meta.url), 'utf8');
+  const enIndexHtml = fs.readFileSync(new URL('../en/index.html', import.meta.url), 'utf8');
+  assert.match(ltIndexHtml, /id="votingLeaderboardWidget"/);
+  assert.match(enIndexHtml, /id="votingLeaderboardWidget"/);
+});
+
+test('admin panel displays complete submission dossier fields and PDF download trigger', () => {
+  const adminHtml = fs.readFileSync(new URL('../admin.html', import.meta.url), 'utf8');
+  const subsJs = fs.readFileSync(new URL('../js/submissions.js', import.meta.url), 'utf8');
+  for (const id of ['mSubId', 'mSubmittedAt', 'mDirFirst', 'mDirLast', 'mCamFirst', 'mCamLast', 'mIdeaFirst', 'mIdeaLast', 'mWriterFirst', 'mWriterLast', 'mEmail', 'mAttendanceType', 'mLiveToken', 'mVideoFileName', 'mVideoSize', 'mResolution', 'mPdfFilename', 'mDownloadPdfBtn']) {
+    assert.ok(adminHtml.includes(`id="${id}"`), `Missing #${id} in admin.html`);
+  }
+  assert.match(subsJs, /formatSubmissionDate/);
+  assert.match(subsJs, /\/api\/admin\/submissions\/pdf/);
 });
 
 test('privacy, stream token, and UI visibility invariants hold across HTML, JS, and server', () => {
@@ -525,5 +600,18 @@ test('privacy, stream token, and UI visibility invariants hold across HTML, JS, 
   assert.doesNotMatch(authJs, /azuolynasfilmfestival@gmail\.com/);
   assert.doesNotMatch(streamAdminJs, /newViewerMaxDevices/);
   assert.doesNotMatch(serverJs, /maxConcurrentDevices\s*\|\|\s*35/);
+});
+
+test('voting.html queries only published/winner submissions and firestore.rules protects PII', () => {
+  const votingHtml = fs.readFileSync(new URL('../voting.html', import.meta.url), 'utf8');
+  assert.doesNotMatch(votingHtml, /db\.collection\(["']submissions["']\)\.onSnapshot/);
+  assert.match(votingHtml, /db\.collection\(["']submissions["']\)\.where\(field,\s*["']==["'],\s*true\)/);
+  assert.match(votingHtml, /["']festival["'],\s*["']global["']/);
+
+  const rules = fs.readFileSync(new URL('../firestore.rules', import.meta.url), 'utf8');
+  assert.match(rules, /email_verified == true/);
+  assert.match(rules, /resource\.data\.inVoting == true \|\|\s*resource\.data\.isWinner == true/);
+  const subsBlock = rules.slice(rules.indexOf('match /submissions/{submissionId}'), rules.indexOf('match /stream_config/{configId}'));
+  assert.doesNotMatch(subsBlock, /allow get, list: if true;/);
 });
 
