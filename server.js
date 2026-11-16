@@ -6,7 +6,11 @@ import crypto from 'crypto';
 import { fileURLToPath } from 'url';
 import jwt from 'jsonwebtoken';
 import nodemailer from 'nodemailer';
+import './config.js';
 import './email-templates.js';
+import { generateSubmissionPdf } from './pdf-generator.js';
+
+const { SUBMISSION_RESPONSE_CONFIG, VIDEO_VALIDATION_RULES } = globalThis;
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -133,11 +137,21 @@ const {
   generateAdminNotificationHtml,
   generateInviteEmailHtml,
   generateAccessRequestEmailHtml,
-  generateAccessGrantedEmailHtml
+  generateAccessGrantedEmailHtml,
+  generateSubmissionPlainText
 } = globalThis;
 
 const app = express();
+app.set('trust proxy', 1);
 const PORT = parseInt(process.env.PORT || '3000', 10);
+
+function getRequestBaseUrl(req) {
+  const host = req && typeof req.get === 'function' ? req.get('host') : '';
+  const protoHeader = req?.headers?.['x-forwarded-proto'];
+  const proto = protoHeader ? String(protoHeader).split(',')[0].trim() : (req?.protocol || 'http');
+  if (host) return `${proto}://${host}`;
+  return 'https://azuolynasinternationalfilmfestival.github.io';
+}
 
 // Security & Authentication Configuration
 const JWT_SECRET = process.env.JWT_SECRET || 'azuolynas-film-festival-secure-jwt-key-2026';
@@ -367,6 +381,11 @@ const DEFAULT_SETTINGS = Object.freeze({
   submissionsOpen: true,
   autoRankings: true,
   selectedYear: "2027",
+  submissionResponseTime: {
+    lt: SUBMISSION_RESPONSE_CONFIG.lt,
+    en: SUBMISSION_RESPONSE_CONFIG.en,
+    businessDays: SUBMISSION_RESPONSE_CONFIG.businessDays
+  },
   institutionNameLt: "Kauno Tarptautinė Gimnazija",
   institutionNameEn: "Kaunas International Gymnasium",
   showAbout: true,
@@ -399,7 +418,8 @@ const DEFAULT_SETTINGS = Object.freeze({
     datesSubmissions: "Nuo 2026 m. lapkričio 1 d. iki 2027 m. balandžio 5 d.",
     dateEvent: "2027 m. balandžio 27 d. (Kino festivalis ir tiesioginė transliacija)",
     targetAudience: "Mokiniai (10–18 m.)",
-    recordingPlaceholder: "Festivalio ir tiesioginės transliacijos vaizdo įrašas bus pasiekiamas 2027 m. balandžio 27 d."
+    recordingPlaceholder: "Festivalio ir tiesioginės transliacijos vaizdo įrašas bus pasiekiamas 2027 m. balandžio 27 d.",
+    submissionResponseTime: SUBMISSION_RESPONSE_CONFIG.lt
   },
   en: {
     heroBadge: "The 7th International Students Film Festival",
@@ -412,7 +432,8 @@ const DEFAULT_SETTINGS = Object.freeze({
     datesSubmissions: "November 1, 2026 – April 5, 2027",
     dateEvent: "April 27th, 2027 (Film Festival & Live Stream)",
     targetAudience: "Students (10–18 yrs)",
-    recordingPlaceholder: "The official festival recording and live stream replay will be published here on April 27th, 2027."
+    recordingPlaceholder: "The official festival recording and live stream replay will be published here on April 27th, 2027.",
+    submissionResponseTime: SUBMISSION_RESPONSE_CONFIG.en
   },
   smtp: {
     host: process.env.SMTP_HOST,
@@ -433,6 +454,10 @@ function loadSettingsData() {
     return {
       ...DEFAULT_SETTINGS,
       ...raw,
+      submissionResponseTime: {
+        ...DEFAULT_SETTINGS.submissionResponseTime,
+        ...(raw.submissionResponseTime && typeof raw.submissionResponseTime === 'object' ? raw.submissionResponseTime : {})
+      },
       smtp: {
         ...DEFAULT_SETTINGS.smtp,
         ...(raw.smtp && typeof raw.smtp === 'object' ? raw.smtp : {})
@@ -885,13 +910,14 @@ function getMailTransporter() {
 /**
  * Universal email dispatcher: Attempts SMTP via Nodemailer and syncs to Firestore 'mail' collection
  */
-async function sendEmail({ to, subject, html, text }) {
+async function sendEmail({ to, subject, html, text, attachments }) {
   const result = {
     success: false,
     smtpAttempted: false,
     smtpSent: false,
     firestoreQueued: false,
     messageId: null,
+    attachmentCount: Array.isArray(attachments) ? attachments.length : 0,
     error: null,
     timestamp: new Date().toISOString()
   };
@@ -903,8 +929,18 @@ async function sendEmail({ to, subject, html, text }) {
       typeof subject !== 'string' || !subject.trim() || typeof html !== 'string' || !html.trim() ||
       (text !== undefined && typeof text !== 'string')) {
     result.error = 'Missing required email fields (to, subject, html)';
+    recordServerErrorLog({
+      level: 'ERROR',
+      source: 'Mail/Validation',
+      message: `Email validation failed for ${recipientStr || 'unknown'}`,
+      details: result.error
+    });
     return result;
   }
+
+  const validAttachments = Array.isArray(attachments)
+    ? attachments.filter(att => att && att.filename && att.content)
+    : [];
 
   const cfg = getEffectiveSmtpConfig();
   const transporter = getMailTransporter();
@@ -913,20 +949,30 @@ async function sendEmail({ to, subject, html, text }) {
   if (transporter && cfg.pass) {
     result.smtpAttempted = true;
     try {
-      const info = await transporter.sendMail({
+      const mailOptions = {
         from: cfg.from,
         to: recipientStr,
         subject,
         html,
         text: text || subject
-      });
+      };
+      if (validAttachments.length > 0) {
+        mailOptions.attachments = validAttachments;
+      }
+      const info = await transporter.sendMail(mailOptions);
       result.smtpSent = true;
       result.success = true;
       result.messageId = info.messageId;
       console.log(`[SMTP] Email successfully delivered to: ${recipientStr} (MessageId: ${info.messageId})`);
     } catch (smtpErr) {
       console.error(`[SMTP] Failed to send email via SMTP to ${recipientStr}:`, smtpErr.message);
-      result.error = `SMTP delivery notice: ${smtpErr.message}`;
+      result.error = `SMTP delivery error: ${smtpErr.message}`;
+      recordServerErrorLog({
+        level: 'ERROR',
+        source: 'SMTP/Delivery',
+        message: `Nepavyko išsiųsti el. laiško per SMTP į ${recipientStr}`,
+        details: smtpErr.stack || smtpErr.message
+      });
     }
   } else {
     console.log(`[SMTP] Direct SMTP delivery skipped (SMTP_PASS not provided). Dispatching via Firestore mail queue.`);
@@ -937,15 +983,19 @@ async function sendEmail({ to, subject, html, text }) {
   // 2. Queue in Firestore when direct SMTP is unavailable or failed.
   try {
     const mailId = 'mail_' + Date.now() + '_' + crypto.randomBytes(4).toString('hex');
+    const messagePayload = {
+      subject: subject,
+      html: html,
+      text: text || subject
+    };
+    if (validAttachments.length > 0) {
+      messagePayload.attachmentNames = validAttachments.map(a => String(a.filename));
+    }
     const queued = await syncToFirestore('mail', mailId, {
       from: cfg.from,
       replyTo: cfg.user,
       to: recipients,
-      message: {
-        subject: subject,
-        html: html,
-        text: text || subject
-      },
+      message: messagePayload,
       createdAt: new Date().toISOString(),
       status: result.smtpSent ? 'delivered_smtp' : 'pending_queue',
       smtpAttempted: result.smtpAttempted,
@@ -956,7 +1006,13 @@ async function sendEmail({ to, subject, html, text }) {
     result.success = true; // Queued safely in Firestore
   } catch (fsErr) {
     console.warn('[Firestore] Mail queue sync notice:', fsErr.message);
-    result.error = fsErr.message;
+    result.error = result.error ? `${result.error}; Firestore queue failed: ${fsErr.message}` : fsErr.message;
+    recordServerErrorLog({
+      level: 'ERROR',
+      source: 'Firestore/MailQueue',
+      message: `Nepavyko įrašyti el. laiško į eilę (${recipientStr})`,
+      details: fsErr.stack || fsErr.message
+    });
   }
 
   return result;
@@ -989,9 +1045,16 @@ app.use('/api/admin', (req, res, next) => {
     const role = req.adminUser?.role;
     const isSuper = req.adminUser?.isSuperAdmin || role === 'superadmin' || (req.adminUser?.email && TRUSTED_ADMIN_EMAILS.includes(req.adminUser.email));
     if (role === 'admin' || isSuper || req.path === '/token' || req.path === '/record-login') return next();
+    const canManageStream = Boolean(req.adminUser?.permissions?.manageStream || role === 'moderator' || role === 'viewer_supervisor');
+    const streamRoutes = [
+      '/stream/viewers', '/stream/viewers/create', '/stream/viewers/bulk-create',
+      '/stream/viewers/resend', '/stream/viewers/delete', '/stream/viewers/update',
+      '/stream/viewers/regenerate-token', '/stream/iframe-url', '/stream/settings', '/stream/status'
+    ];
+    if (canManageStream && streamRoutes.includes(req.path)) return next();
     const staffReads = [
       '/submissions', '/tasks', '/judge-evaluations', '/voting-analytics',
-      '/stream/status', '/stream/settings', '/stream/config', '/live/viewers',
+      '/stream/status', '/stream/settings', '/stream/config', '/stream/viewers', '/live/viewers',
       '/diagnostics/system-health', '/diagnostics/logs', '/archive'
     ];
     const staffWrites = [
@@ -1209,7 +1272,7 @@ app.use((req, res, next) => {
       Tarptautinio mokinių kino festivalio „Ąžuolynas“ platformoje šiuo metu atliekami planiniai techniniai atnaujinimo darbai. Svetainė lankytojams vėl bus pasiekiama netrukus.
     </p>
     <div class="m-footer">
-      <span>Kauno Tarptautinė Gimnazija &bull; AISFF 2027</span>
+      <span>Kauno Tarptautinė Gimnazija &bull; AISFF</span>
       <a href="/admin.html" class="m-admin-link">Administratoriaus prisijungimas &rarr;</a>
     </div>
   </div>
@@ -1422,6 +1485,7 @@ app.get('/api/settings', (req, res) => {
         publicWinners: settings?.publicWinners !== false,
         submissionsOpen: settings?.submissionsOpen !== false,
         selectedYear: settings?.selectedYear || "2027",
+        submissionResponseTime: settings?.submissionResponseTime || SUBMISSION_RESPONSE_CONFIG,
         lt: settings?.lt || DEFAULT_SETTINGS.lt,
         en: settings?.en || DEFAULT_SETTINGS.en
       });
@@ -1443,6 +1507,7 @@ app.get('/api/settings', (req, res) => {
         publicWinners: true,
         submissionsOpen: true,
         selectedYear: "2027",
+        submissionResponseTime: SUBMISSION_RESPONSE_CONFIG,
         lt: DEFAULT_SETTINGS.lt,
         en: DEFAULT_SETTINGS.en
       });
@@ -2980,7 +3045,7 @@ app.post('/api/admin/users/send-password-reset', async (req, res) => {
             <td align="center" style="padding-bottom:24px;">
               <img src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media" alt="Logo" width="60" height="60" style="border-radius:2px; border:1px solid rgba(255,255,255,0.2);">
               <h2 style="color:#FFFFFF; margin:14px 0 4px 0; font-size:1.4rem; letter-spacing:0.02em;">AISFF</h2>
-              <p style="color:#BAC9C0; margin:0; font-size:0.85rem;">Valdymo Skydo Slaptažodžio Atstatymas</p>
+              <p style="color:#BAC9C0; margin:0; font-size:0.85rem;">Administravimo Portalo Slaptažodžio Atstatymas</p>
             </td>
           </tr>
           <tr>
@@ -3252,25 +3317,22 @@ app.get('/api/admin/stream/viewers', (req, res) => {
 // API: Add new viewer & generate secure Cloudflare Signed Token
 app.post('/api/admin/stream/viewers/create', async (req, res) => {
   try {
-    const { email, name, filmTitle, customToken, role, expiresInHours, sendEmail: shouldSendEmail, adminEmail, tokenType: rawTokenType, classroomLabel: rawClassroomLabel, maxConcurrentDevices: rawMaxDevices } = req.body || {};
-    if (!email || !String(email).includes('@')) {
+    const { email, name, filmTitle, customToken, role, expiresInHours, sendEmail: shouldSendEmail, adminEmail, tokenType: rawTokenType, classroomLabel: rawClassroomLabel } = req.body || {};
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(email).trim())) {
       return res.status(400).json({ error: 'Reikalingas galiojantis el. pašto adresas / Gmail' });
     }
 
     const cleanEmail = String(email).trim().toLowerCase();
     const cleanName = String(name || cleanEmail.split('@')[0]).trim();
     const callerEmail = String(adminEmail || req.headers['x-admin-email'] || PRIMARY_SUPERADMIN_EMAIL).trim().toLowerCase();
-    const duration = parseInt(expiresInHours || '48', 10);
-    // Tokens are created exclusively for Teachers & Classrooms (students watch via the teacher's stream)
+    const duration = Math.max(1, parseInt(expiresInHours || '48', 10) || 48);
     const tokenType = rawTokenType === 'individual' ? 'individual' : 'classroom';
     const classroomLabel = String(rawClassroomLabel || cleanName).trim();
-    const maxConcurrentDevices = tokenType === 'classroom' ? Math.max(1, Math.min(100, parseInt(rawMaxDevices || '35', 10))) : 1;
 
     // Generate secure Cloudflare Stream signed token
     let token = String(customToken || '').trim();
     if (!token) {
-      // Build cryptographic signed token: cfs_teacher_<hex>
-      const hashPart = crypto.createHmac('sha256', JWT_SECRET).update(`${cleanEmail}-${Date.now()}`).digest('hex').substring(0, 16);
+      const hashPart = crypto.createHmac('sha256', JWT_SECRET).update(`${cleanEmail}-${Date.now()}-${Math.random()}`).digest('hex').substring(0, 16);
       token = tokenType === 'classroom' ? `cfs_teacher_${hashPart}` : `cfs_live_${hashPart}`;
     }
 
@@ -3281,22 +3343,20 @@ app.post('/api/admin/stream/viewers/create', async (req, res) => {
     // Remove existing viewer with same token
     viewersData.viewers = viewersData.viewers.filter(v => v.token !== token);
 
-    const baseUrl = req.protocol + '://' + req.get('host');
+    const baseUrl = getRequestBaseUrl(req);
     const liveLink = `${baseUrl}/live.html?t=${encodeURIComponent(token)}`;
+    const isTeacherToken = tokenType === 'classroom';
 
     const newViewer = {
       token,
       tokenHash,
       tokenType,
       classroomLabel: classroomLabel || cleanName,
-      maxConcurrentDevices,
-      maxUses: maxConcurrentDevices,
       currentUses: 0,
-      activeDevices: 0,
       email: cleanEmail,
       name: cleanName,
-      filmTitle: filmTitle ? String(filmTitle).trim() : 'Mokytojo / Klasės transliacija',
-      role: role || 'teacher_classroom',
+      filmTitle: filmTitle ? String(filmTitle).trim() : (isTeacherToken ? 'Mokytojo / Klasės transliacija (projektoriui)' : 'Asmeninė transliacijos prieiga'),
+      role: role || (isTeacherToken ? 'teacher_classroom' : 'individual_viewer'),
       status: 'authorized',
       createdAt: new Date().toISOString(),
       expiresAt: new Date(Date.now() + duration * 3600 * 1000).toISOString(),
@@ -3312,8 +3372,6 @@ app.post('/api/admin/stream/viewers/create', async (req, res) => {
       tokenHash: { stringValue: tokenHash },
       tokenType: { stringValue: tokenType },
       label: { stringValue: newViewer.classroomLabel || newViewer.name },
-      maxConcurrentDevices: { integerValue: String(maxConcurrentDevices) },
-      maxUses: { integerValue: String(maxConcurrentDevices) },
       currentUses: { integerValue: "0" },
       isActive: { booleanValue: true },
       createdAt: { timestampValue: newViewer.createdAt },
@@ -3336,15 +3394,15 @@ app.post('/api/admin/stream/viewers/create', async (req, res) => {
       <table width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:580px; background:#0B110E; border:1px solid rgba(255,255,255,0.15); border-top:3px solid #34D399; border-radius:4px; padding:32px 24px; text-align:left; box-shadow:0 14px 34px rgba(0,0,0,0.5);">
         <tr><td align="center" style="padding-bottom:20px;">
           <img src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media" width="68" height="68" style="border-radius:2px; border:1px solid rgba(255,255,255,0.2); display:block; margin:0 auto;" alt="Logo">
-          <h2 style="color:#FFFFFF; margin:14px 0 4px 0; font-size:22px; letter-spacing:0.02em;">AISFF 2027</h2>
-          <p style="color:#BAC9C0; margin:0; font-size:0.88rem; text-transform:uppercase; letter-spacing:0.06em; font-weight:700;">Mokyklos / Klasės Transliacijos Prieiga (Mokytojui)</p>
+          <h2 style="color:#FFFFFF; margin:14px 0 4px 0; font-size:22px; letter-spacing:0.02em;">AISFF</h2>
+          <p style="color:#BAC9C0; margin:0; font-size:0.88rem; text-transform:uppercase; letter-spacing:0.06em; font-weight:700;">${isTeacherToken ? 'Mokyklos / Klasės Transliacijos Prieiga (Mokytojui)' : 'Asmeninė Transliacijos Prieiga'}</p>
         </td></tr>
         <tr><td style="line-height:1.65; font-size:0.95rem; color:#BAC9C0;">
-          <p style="color:#F8FAF7; font-size:1.05rem; margin-top:0;">Gerb. Mokytojau(-a), <strong>${cleanName}</strong>!</p>
-          <p>Jūsų klasei suteikta autorizuota tiesioginės transliacijos prieiga (${maxConcurrentDevices} įrenginiams vienu metu). Galite tiesiogiai transliuoti festivalio peržiūrą klasei per projektorių arba ekraną.</p>
+          <p style="color:#F8FAF7; font-size:1.05rem; margin-top:0;">${isTeacherToken ? 'Gerb. Mokytojau(-a),' : 'Sveiki,'} <strong>${cleanName}</strong>!</p>
+          <p>${isTeacherToken ? 'Paruošta viena bendra tiesioginės transliacijos nuoroda Jūsų klasei — atverkite ją kompiuteryje ir rodykite visai klasei per projektorių arba ekraną.' : 'Jums sugeneruota asmeninė tiesioginės transliacijos prieiga.'}</p>
           
           <div style="background:#070908; border:1px solid rgba(255,255,255,0.2); border-radius:2px; padding:18px; margin:20px 0; text-align:center;">
-            <div style="font-size:0.75rem; color:#7A9689; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:6px; font-weight:700;">Jūsų mokytojo prieigos žetonas (Token):</div>
+            <div style="font-size:0.75rem; color:#7A9689; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:6px; font-weight:700;">${isTeacherToken ? 'Mokytojo prieigos žetonas (Token):' : 'Asmeninis prieigos žetonas (Token):'}</div>
             <code style="font-size:1.25rem; color:#FFFFFF; font-weight:700; letter-spacing:1px; display:inline-block; padding:4px 12px; background:rgba(255,255,255,0.06); border-radius:2px;">${token}</code>
           </div>
 
@@ -3393,7 +3451,7 @@ app.post('/api/admin/stream/viewers/create', async (req, res) => {
       category: "stream",
       adminEmail: callerEmail,
       target: cleanEmail,
-      details: `Sugeneruotas mokytojo žetonas (${token}) ${cleanName} (${cleanEmail}). Maks. įrenginių: ${maxConcurrentDevices}. Laiškas: ${emailSent ? 'Taip' : 'Ne'}`
+      details: `Sugeneruotas ${isTeacherToken ? 'mokytojo' : 'asmeninis'} žetonas (${token}) ${cleanName} (${cleanEmail}). Laiškas: ${emailSent ? 'Taip' : 'Ne'}`
     });
 
     res.json({
@@ -3417,21 +3475,20 @@ app.post('/api/admin/stream/viewers/bulk-create', async (req, res) => {
     }
 
     const callerEmail = String(adminEmail || req.headers['x-admin-email'] || PRIMARY_SUPERADMIN_EMAIL).trim().toLowerCase();
-    const duration = parseInt(expiresInHours || '48', 10);
+    const duration = Math.max(1, parseInt(expiresInHours || '48', 10) || 48);
     const viewersData = loadLiveViewersData();
     if (!viewersData.viewers) viewersData.viewers = [];
 
     const createdList = [];
-    const baseUrl = req.protocol + '://' + req.get('host');
+    const baseUrl = getRequestBaseUrl(req);
 
     for (const item of items) {
       const cleanName = String(item.name || item.label || 'Mokytojas / Klasė').trim();
       const cleanEmail = String(item.email || `klase_${Date.now()}_${Math.random().toString(36).substring(2, 6)}@mokykla.lt`).trim().toLowerCase();
       const classroomLabel = String(item.classroomLabel || item.label || cleanName).trim();
-      const maxDevices = Math.max(1, Math.min(100, parseInt(item.maxConcurrentDevices || '35', 10)));
 
       const hashPart = crypto.createHmac('sha256', JWT_SECRET).update(`${cleanEmail}-${Date.now()}-${Math.random()}`).digest('hex').substring(0, 16);
-      const token = `cfs_class_${hashPart}`;
+      const token = `cfs_teacher_${hashPart}`;
       const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
       const liveLink = `${baseUrl}/live.html?t=${encodeURIComponent(token)}`;
 
@@ -3440,14 +3497,11 @@ app.post('/api/admin/stream/viewers/bulk-create', async (req, res) => {
         tokenHash,
         tokenType: 'classroom',
         classroomLabel,
-        maxConcurrentDevices: maxDevices,
-        maxUses: maxDevices,
         currentUses: 0,
-        activeDevices: 0,
         email: cleanEmail,
         name: cleanName,
-        filmTitle: 'Klasės transliacija',
-        role: 'classroom_viewer',
+        filmTitle: 'Mokytojo / Klasės transliacija (projektoriui)',
+        role: 'teacher_classroom',
         status: 'authorized',
         createdAt: new Date().toISOString(),
         expiresAt: new Date(Date.now() + duration * 3600 * 1000).toISOString(),
@@ -3464,8 +3518,6 @@ app.post('/api/admin/stream/viewers/bulk-create', async (req, res) => {
         tokenHash: { stringValue: tokenHash },
         tokenType: { stringValue: 'classroom' },
         label: { stringValue: classroomLabel },
-        maxConcurrentDevices: { integerValue: String(maxDevices) },
-        maxUses: { integerValue: String(maxDevices) },
         currentUses: { integerValue: "0" },
         isActive: { booleanValue: true },
         createdAt: { timestampValue: newViewer.createdAt },
@@ -3480,7 +3532,7 @@ app.post('/api/admin/stream/viewers/bulk-create', async (req, res) => {
       category: "stream",
       adminEmail: callerEmail,
       target: "classroom_tokens",
-      details: `Sugeneruota ${createdList.length} naujų klasės prieigos žetonų.`
+      details: `Sugeneruota ${createdList.length} naujų mokytojo transliacijos žetonų.`
     });
 
     res.json({
@@ -3490,7 +3542,7 @@ app.post('/api/admin/stream/viewers/bulk-create', async (req, res) => {
     });
   } catch (err) {
     console.error('Error bulk creating classroom tokens:', err);
-    res.status(500).json({ error: 'Nepavyko sugeneruoti klasės žetonų' });
+    res.status(500).json({ error: 'Nepavyko sugeneruoti mokytojo žetonų' });
   }
 });
 
@@ -3504,8 +3556,8 @@ app.post('/api/admin/stream/viewers/resend', async (req, res) => {
     const viewer = (viewersData.viewers || []).find(v => v.token === token);
     if (!viewer) return res.status(404).json({ error: 'Žiūrovas nerastas' });
 
-    const baseUrl = req.protocol + '://' + req.get('host');
-    const liveLink = viewer.liveStreamUrl || `${baseUrl}/live.html?token=${encodeURIComponent(viewer.token)}`;
+    const baseUrl = getRequestBaseUrl(req);
+    const liveLink = viewer.liveStreamUrl || `${baseUrl}/live.html?t=${encodeURIComponent(viewer.token)}`;
 
     const emailHtml = `
 <!DOCTYPE html>
@@ -3521,7 +3573,7 @@ app.post('/api/admin/stream/viewers/resend', async (req, res) => {
       <table width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:580px; background:#0B110E; border:1px solid rgba(255,255,255,0.15); border-top:3px solid #34D399; border-radius:4px; padding:32px 24px; text-align:left; box-shadow:0 14px 34px rgba(0,0,0,0.5);">
         <tr><td align="center" style="padding-bottom:20px;">
           <img src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media" width="68" height="68" style="border-radius:2px; border:1px solid rgba(255,255,255,0.2); display:block; margin:0 auto;" alt="Logo">
-          <h2 style="color:#FFFFFF; margin:14px 0 4px 0; font-size:22px; letter-spacing:0.02em;">AISFF 2027</h2>
+          <h2 style="color:#FFFFFF; margin:14px 0 4px 0; font-size:22px; letter-spacing:0.02em;">AISFF</h2>
           <p style="color:#BAC9C0; margin:0; font-size:0.88rem; text-transform:uppercase; letter-spacing:0.06em; font-weight:700;">Primenamas Jūsų Transliacijos Žetonas</p>
         </td></tr>
         <tr><td style="line-height:1.65; font-size:0.95rem; color:#BAC9C0;">
@@ -3529,7 +3581,7 @@ app.post('/api/admin/stream/viewers/resend', async (req, res) => {
           <p>Persiunčiame Jūsų autorizuotą tiesioginės festivalio transliacijos prieigos žetoną:</p>
           
           <div style="background:#070908; border:1px solid rgba(255,255,255,0.2); border-radius:2px; padding:18px; margin:20px 0; text-align:center;">
-            <div style="font-size:0.75rem; color:#7A9689; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:6px; font-weight:700;">Jūsų asmeninis prieigos žetonas:</div>
+            <div style="font-size:0.75rem; color:#7A9689; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:6px; font-weight:700;">Jūsų prieigos žetonas:</div>
             <code style="font-size:1.25rem; color:#FFFFFF; font-weight:700; letter-spacing:1px; display:inline-block; padding:4px 12px; background:rgba(255,255,255,0.06); border-radius:2px;">${viewer.token}</code>
           </div>
 
@@ -4646,11 +4698,12 @@ app.post('/api/admin/stream/viewers/regenerate-token', (req, res) => {
     if (!viewer) return res.status(404).json({ error: 'Žiūrovas nerastas' });
 
     const hashPart = crypto.createHmac('sha256', JWT_SECRET).update(`${viewer.email}-${Date.now()}`).digest('hex').substring(0, 16);
-    const newToken = `cfs_live_${hashPart}`;
+    const isTeacher = viewer.tokenType === 'classroom' || String(viewer.token || '').startsWith('cfs_teacher_') || String(viewer.token || '').startsWith('cfs_class_');
+    const newToken = isTeacher ? `cfs_teacher_${hashPart}` : `cfs_live_${hashPart}`;
 
     viewer.token = newToken;
-    const baseUrl = req.protocol + '://' + req.get('host');
-    viewer.liveStreamUrl = `${baseUrl}/live.html?token=${encodeURIComponent(newToken)}`;
+    const baseUrl = getRequestBaseUrl(req);
+    viewer.liveStreamUrl = `${baseUrl}/live.html?t=${encodeURIComponent(newToken)}`;
     viewer.updatedAt = new Date().toISOString();
     saveLiveViewersData(viewersData);
 
@@ -4883,10 +4936,111 @@ app.post('/api/submissions/record', async (req, res) => {
   let dispatchKey;
   try {
     const data = req.body || {};
-    if (!data.name || !data.email || !data.filmTitle) {
-      return res.status(400).json({ error: 'Missing required submission fields (name, email, filmTitle)' });
+    const emailLang = data.submissionLang === 'en' ? 'en' : 'lt';
+    const isLt = emailLang === 'lt';
+
+    const cleanEmail = String(data.email || '').trim();
+    const emailRegex = /^[^\s@,;<>]+@[^\s@,;<>]+\.[^\s@,;<>]+$/;
+    if (!cleanEmail || !emailRegex.test(cleanEmail)) {
+      return res.status(400).json({ error: isLt ? 'Įveskite galiojantį el. pašto adresą.' : 'Please provide a valid email address.' });
     }
-    dispatchKey = JSON.stringify([String(data.email).toLowerCase(), data.filmTitle]);
+
+    const dirFirst = String(data.directorFirstName || '').trim();
+    const dirLast = String(data.directorLastName || '').trim();
+    const legacyName = String(data.name || '').trim();
+    const effectiveDirectorName = [dirFirst, dirLast].filter(Boolean).join(' ').trim() || legacyName;
+    if (!effectiveDirectorName || (dirFirst && !dirLast) || (!dirFirst && dirLast)) {
+      return res.status(400).json({
+        error: isLt
+          ? 'Privaloma nurodyti režisieriaus / autoriaus vardą ir pavardę.'
+          : 'Director/Author first and last name are required.'
+      });
+    }
+
+    const validateOptionalPair = (firstVal, lastVal, roleLabelLt, roleLabelEn) => {
+      const f = String(firstVal || '').trim();
+      const l = String(lastVal || '').trim();
+      if ((f && !l) || (!f && l)) {
+        return isLt
+          ? `Užpildykite abu ${roleLabelLt} laukus (Vardas ir Pavardė) arba palikite abu tuščius.`
+          : `Please fill both First and Last Name for ${roleLabelEn}, or leave both blank.`;
+      }
+      return null;
+    };
+
+    const rolePairError =
+      validateOptionalPair(data.cameraOperatorFirstName, data.cameraOperatorLastName, 'operatoriaus', 'Camera Operator') ||
+      validateOptionalPair(data.ideaAuthorFirstName, data.ideaAuthorLastName, 'idėjos autoriaus', 'Author of the Idea') ||
+      validateOptionalPair(data.screenwriterFirstName, data.screenwriterLastName, 'scenarijaus autoriaus', 'Screenwriter');
+    if (rolePairError) {
+      return res.status(400).json({ error: rolePairError });
+    }
+
+    const filmTitle = String(data.filmTitle || '').trim();
+    if (!filmTitle) {
+      return res.status(400).json({ error: isLt ? 'Filmo pavadinimas yra privalomas.' : 'Film title is required.' });
+    }
+
+    const videoSourceType = data.videoSourceType === 'link' ? 'link' : 'upload';
+    const cleanVideoUrl = String(data.videoUrl || '').trim();
+    const durationNum = Number(data.videoDurationSeconds || 0);
+    const sizeBytesNum = Number(data.videoSizeBytes || 0);
+    const cleanFileName = String(data.videoFileName || '').trim();
+    const cleanMime = String(data.videoMimeType || '').trim().toLowerCase();
+
+    if (videoSourceType === 'link') {
+      let parsedUrl;
+      try { parsedUrl = new URL(cleanVideoUrl); } catch { parsedUrl = null; }
+      if (!parsedUrl || parsedUrl.protocol !== 'https:') {
+        return res.status(400).json({
+          error: isLt
+            ? 'Pateikite galiojančią HTTPS vaizdo įrašo nuorodą (pvz., YouTube, Vimeo, Google Drive ar tiesioginį MP4/MOV).'
+            : 'Please provide a valid HTTPS video URL (e.g., YouTube, Vimeo, Google Drive, or direct MP4/MOV).'
+        });
+      }
+      if (durationNum > VIDEO_VALIDATION_RULES.maxDurationSeconds) {
+        return res.status(400).json({
+          error: isLt
+            ? `Vaizdo įrašo trukmė (${durationNum} s) viršija leistiną ${VIDEO_VALIDATION_RULES.maxDurationSeconds} s limitą.`
+            : `Video duration (${durationNum}s) exceeds the ${VIDEO_VALIDATION_RULES.maxDurationSeconds}s festival limit.`
+        });
+      }
+    } else {
+      if (!cleanVideoUrl) {
+        return res.status(400).json({ error: isLt ? 'Įkelkite filmo failą arba pateikite nuorodą.' : 'Please upload a video file or provide a link.' });
+      }
+      if (cleanFileName) {
+        const ext = cleanFileName.split('.').pop().toLowerCase();
+        if (!VIDEO_VALIDATION_RULES.allowedExtensions.includes(ext)) {
+          return res.status(400).json({
+            error: isLt
+              ? `Netinkamas failo formatas (.${ext}). Leidžiami formatai: ${VIDEO_VALIDATION_RULES.allowedExtensions.join(', ').toUpperCase()}.`
+              : `Unsupported file format (.${ext}). Allowed formats: ${VIDEO_VALIDATION_RULES.allowedExtensions.join(', ').toUpperCase()}.`
+          });
+        }
+      }
+      if (cleanMime && !VIDEO_VALIDATION_RULES.allowedMimeTypes.includes(cleanMime) && !cleanMime.startsWith('video/')) {
+        return res.status(400).json({
+          error: isLt ? `Netinkamas vaizdo tipas (${cleanMime}).` : `Unsupported video MIME type (${cleanMime}).`
+        });
+      }
+      if (sizeBytesNum > VIDEO_VALIDATION_RULES.maxSizeBytes) {
+        return res.status(400).json({
+          error: isLt
+            ? `Failas per didelis (${(sizeBytesNum / (1024 * 1024)).toFixed(1)} MB). Maksimalus dydis: ${VIDEO_VALIDATION_RULES.maxSizeMB} MB.`
+            : `File exceeds the ${VIDEO_VALIDATION_RULES.maxSizeMB} MB size limit.`
+        });
+      }
+      if (!durationNum || durationNum <= 0 || durationNum > VIDEO_VALIDATION_RULES.maxDurationSeconds) {
+        return res.status(400).json({
+          error: isLt
+            ? `Filmo trukmė turi būti nuo 1 iki ${VIDEO_VALIDATION_RULES.maxDurationSeconds} sekundžių (gauta: ${durationNum} s).`
+            : `Film duration must be between 1 and ${VIDEO_VALIDATION_RULES.maxDurationSeconds} seconds (received: ${durationNum}s).`
+        });
+      }
+    }
+
+    dispatchKey = JSON.stringify([cleanEmail.toLowerCase(), filmTitle]);
     if (pendingSubmissionDispatches.has(dispatchKey)) {
       dispatchKey = undefined;
       return res.status(409).json({ success: false, error: 'Submission is already being processed. Please retry shortly.' });
@@ -4897,32 +5051,60 @@ app.post('/api/submissions/record', async (req, res) => {
     if (!subsData.submissions) subsData.submissions = [];
 
     const subId = data.id || ('sub_' + Date.now() + '_' + crypto.randomBytes(3).toString('hex'));
-    const existingIndex = subsData.submissions.findIndex(s => s.id === subId || (s.email === data.email && s.filmTitle === data.filmTitle));
+    const existingIndex = subsData.submissions.findIndex(s => s.id === subId || (String(s.email || '').toLowerCase() === cleanEmail.toLowerCase() && s.filmTitle === filmTitle));
 
+    const settings = loadSettingsData();
+    const responseTimeText = (settings?.submissionResponseTime && settings.submissionResponseTime[emailLang])
+      || SUBMISSION_RESPONSE_CONFIG[emailLang]
+      || (isLt ? 'per 5 darbo dienas' : 'within 5 business days');
+
+    const baseUrl = getRequestBaseUrl(req);
     const generatedLiveToken = data.liveToken || ('live_' + crypto.randomBytes(4).toString('hex'));
-    const generatedLiveStreamUrl = data.liveStreamUrl || `https://azuolynasinternationalfilmfestival.github.io/live.html?token=${generatedLiveToken}`;
+    const generatedLiveStreamUrl = data.liveStreamUrl || `${baseUrl}/live.html?t=${encodeURIComponent(generatedLiveToken)}`;
+
+    const cameraFull = [String(data.cameraOperatorFirstName || '').trim(), String(data.cameraOperatorLastName || '').trim()].filter(Boolean).join(' ') || String(data.cameraOperator || '').trim();
+    const ideaFull = [String(data.ideaAuthorFirstName || '').trim(), String(data.ideaAuthorLastName || '').trim()].filter(Boolean).join(' ') || String(data.ideaAuthor || '').trim();
+    const writerFull = [String(data.screenwriterFirstName || '').trim(), String(data.screenwriterLastName || '').trim()].filter(Boolean).join(' ') || String(data.screenwriter || '').trim();
 
     const record = {
       id: subId,
-      name: data.name,
-      email: data.email,
+      name: effectiveDirectorName,
+      directorName: effectiveDirectorName,
+      directorFirstName: dirFirst || effectiveDirectorName.split(' ')[0] || '',
+      directorLastName: dirLast || effectiveDirectorName.split(' ').slice(1).join(' ') || '',
+      cameraOperatorFirstName: String(data.cameraOperatorFirstName || '').trim(),
+      cameraOperatorLastName: String(data.cameraOperatorLastName || '').trim(),
+      cameraOperator: cameraFull,
+      ideaAuthorFirstName: String(data.ideaAuthorFirstName || '').trim(),
+      ideaAuthorLastName: String(data.ideaAuthorLastName || '').trim(),
+      ideaAuthor: ideaFull,
+      screenwriterFirstName: String(data.screenwriterFirstName || '').trim(),
+      screenwriterLastName: String(data.screenwriterLastName || '').trim(),
+      screenwriter: writerFull,
+      email: cleanEmail,
       age: data.age,
       category: data.category,
-      location: data.location || data.countryCity || '',
-      institution: data.institution || '',
-      filmTitle: data.filmTitle,
-      deviceModel: data.deviceModel || '',
-      synopsis: data.synopsis || '',
-      videoUrl: data.videoUrl || '',
-      videoDurationSeconds: data.videoDurationSeconds || 0,
-      storagePath: data.storagePath || '',
+      location: String(data.location || data.countryCity || '').trim(),
+      institution: String(data.institution || '').trim(),
+      filmTitle,
+      deviceModel: String(data.deviceModel || '').trim(),
+      synopsis: String(data.synopsis || '').trim(),
+      videoSourceType,
+      videoFileName: cleanFileName,
+      videoMimeType: cleanMime,
+      videoSizeBytes: sizeBytesNum || 0,
+      videoResolution: String(data.videoResolution || '').trim(),
+      videoUrl: cleanVideoUrl,
+      videoDurationSeconds: durationNum || 0,
+      storagePath: String(data.storagePath || '').trim(),
       attendanceType: data.attendanceType || 'in_person',
       liveToken: generatedLiveToken,
       liveStreamUrl: generatedLiveStreamUrl,
+      responseTimeText,
       votesCount: data.votesCount || 0,
       inVoting: data.inVoting || false,
       status: data.status || 'submitted',
-      submissionLang: data.submissionLang || 'lt',
+      submissionLang: emailLang,
       submittedAt: data.submittedAt || new Date().toISOString()
     };
     // Preserve completed dispatches when retrying after a partial failure.
@@ -4961,22 +5143,72 @@ app.post('/api/submissions/record', async (req, res) => {
       }
     }
 
-    const emailLang = record.submissionLang === 'en' ? 'en' : 'lt';
+    // Generate complete PDF dossier for both applicant and admin emails
+    let pdfAttachments = [];
+    try {
+      const pdfDoc = await generateSubmissionPdf(record);
+      pdfAttachments = [{
+        filename: pdfDoc.filename,
+        content: pdfDoc.buffer,
+        contentType: 'application/pdf'
+      }];
+      record.pdfGenerated = true;
+      record.pdfFilename = pdfDoc.filename;
+    } catch (pdfErr) {
+      console.error('[Submission PDF Generation Error]:', pdfErr);
+      recordServerErrorLog({
+        level: 'ERROR',
+        source: 'PDF/Submission',
+        message: `Nepavyko sugeneruoti paraiškos PDF (${record.id})`,
+        details: pdfErr.stack || pdfErr.message
+      });
+    }
+
     const emailTemplate = record.attendanceType === 'remote' ? 'remoteLivePass' : 'submissionReceived';
     const emailData = { ...record, ctaUrl: record.attendanceType === 'remote' ? record.liveStreamUrl : undefined };
-    const receipt = record.notificationResults.receipt?.success ? record.notificationResults.receipt : await sendEmail({ to: record.email,
-      subject: getEmailSubject(emailTemplate, emailLang, emailData),
-      html: generateEmailHtml(emailTemplate, emailLang, emailData) });
+    const receiptText = typeof generateSubmissionPlainText === 'function'
+      ? generateSubmissionPlainText(emailTemplate, emailLang, emailData)
+      : '';
+    const adminText = typeof generateSubmissionPlainText === 'function'
+      ? generateSubmissionPlainText('adminNotification', emailLang, record)
+      : '';
+
+    const receipt = record.notificationResults.receipt?.success
+      ? record.notificationResults.receipt
+      : await sendEmail({
+          to: record.email,
+          subject: getEmailSubject(emailTemplate, emailLang, emailData),
+          html: generateEmailHtml(emailTemplate, emailLang, emailData),
+          text: receiptText,
+          attachments: pdfAttachments
+        });
     record.notificationResults.receipt = receipt;
     saveSubmissionsData(subsData);
-    const organizer = record.notificationResults.organizer?.success ? record.notificationResults.organizer : await sendEmail({ to: PRIMARY_SUPERADMIN_EMAIL,
-      subject: emailLang === 'en' ? `New Submission: ${record.filmTitle}` : `Nauja paraiška: ${record.filmTitle}`,
-      html: generateAdminNotificationHtml(emailLang, record) });
+
+    const organizer = record.notificationResults.organizer?.success
+      ? record.notificationResults.organizer
+      : await sendEmail({
+          to: PRIMARY_SUPERADMIN_EMAIL,
+          subject: emailLang === 'en' ? `New Submission: ${record.filmTitle}` : `Nauja paraiška: ${record.filmTitle}`,
+          html: generateAdminNotificationHtml(emailLang, record),
+          text: adminText,
+          attachments: pdfAttachments
+        });
     record.notificationResults.organizer = organizer;
     saveSubmissionsData(subsData);
+
     if (!receipt.success || !organizer.success) {
-      return res.status(502).json({ success: false, submission: record,
-        error: 'The film was recorded but its notifications could not be sent or queued.' });
+      recordServerErrorLog({
+        level: 'ERROR',
+        source: 'Mail/SubmissionRecord',
+        message: `Nepavyko išsiųsti pranešimų paraiškai ${record.id}`,
+        details: JSON.stringify({ receipt: receipt.error, organizer: organizer.error })
+      });
+      return res.status(502).json({
+        success: false,
+        submission: record,
+        error: 'The film was recorded but its notifications could not be sent or queued.'
+      });
     }
 
     // Non-blocking sync to Firestore
@@ -4991,7 +5223,7 @@ app.post('/api/submissions/record', async (req, res) => {
         adminEmail: record.email,
         adminName: record.name,
         target: record.filmTitle,
-        details: `Gauta nauja paraiška: „${record.filmTitle}“ (Autorius: ${record.name}, RSVP: ${record.attendanceType === 'remote' ? 'Nuotolinis stebėtojas' : 'Dalyvaus gyvai'})`
+        details: `Gauta nauja paraiška: „${record.filmTitle}“ (Režisierius: ${record.name}, PDF: ${record.pdfGenerated ? 'Taip' : 'Ne'}, RSVP: ${record.attendanceType === 'remote' ? 'Nuotolinis stebėtojas' : 'Dalyvaus gyvai'})`
       });
     } catch (logErr) {
       // Activity log notice
@@ -5008,7 +5240,7 @@ app.post('/api/submissions/record', async (req, res) => {
     }
 
     if (!res.headersSent) {
-      res.json({ success: true, submission: record });
+      res.json({ success: true, submission: record, pdfFilename: record.pdfFilename || null });
     }
   } catch (err) {
     console.error('[Submissions Record Error]:', err);
@@ -5037,8 +5269,8 @@ app.post('/api/admin/resend-live-link', async (req, res) => {
     if (!sub) return res.status(404).json({ error: 'Submission not found' });
 
     const token = sub.liveToken || ('live_' + Math.random().toString(36).substring(2, 9));
-    const baseUrl = `http://${req.headers.host || 'localhost:3000'}`;
-    const liveStreamUrl = `${baseUrl}/live.html?token=${token}`;
+    const baseUrl = getRequestBaseUrl(req);
+    const liveStreamUrl = `${baseUrl}/live.html?t=${encodeURIComponent(token)}`;
 
     sub.liveToken = token;
     sub.liveStreamUrl = liveStreamUrl;
@@ -5243,23 +5475,22 @@ app.post('/api/stream/validate-token', (req, res) => {
     }
 
     const isClassroom = viewer.tokenType === 'classroom';
-    const maxAllowed = isClassroom ? (viewer.maxConcurrentDevices || 35) : (viewer.maxUses || 5);
+    const maxAllowed = isClassroom ? null : (viewer.maxUses || 5);
     const currentUses = (viewer.currentUses || 0) + 1;
-    if (!isClassroom && currentUses > maxAllowed) {
+    if (!isClassroom && maxAllowed && currentUses > maxAllowed) {
       return res.status(403).json({ valid: false, error: 'max_uses_reached', message: 'Viršytas leistinų prisijungimų limitas.' });
     }
 
     viewer.currentUses = currentUses;
-    viewer.activeDevices = Math.min(maxAllowed, (viewer.activeDevices || 0) + 1);
+    viewer.activeDevices = isClassroom ? (viewer.activeDevices || 0) + 1 : Math.min(maxAllowed, (viewer.activeDevices || 0) + 1);
     viewer.lastAccessAt = new Date().toISOString();
     saveLiveViewersData(viewersData);
 
     res.json({
       valid: true,
       tokenType: viewer.tokenType || (isClassroom ? 'classroom' : 'individual'),
-      maxDevices: maxAllowed,
       activeDevices: viewer.activeDevices,
-      label: viewer.classroomLabel || viewer.name || viewer.email || (isClassroom ? 'Klasės transliacija' : 'Žiūrovas'),
+      label: viewer.classroomLabel || viewer.name || viewer.email || (isClassroom ? 'Mokytojo / Klasės transliacija' : 'Žiūrovas'),
       playbackUrl: 'https://customer-auu36r7owuzogvfb.cloudflarestream.com/937d1a8b2c545a980c9fabc8502d8af4/iframe',
       expiresAt: viewer.expiresAt || null
     });

@@ -154,98 +154,98 @@ const emailTexts = {
   lt: {
     accessRequest: {
       sub: "AISFF | Nauja prieigos užklausa!",
-      preheader: "Pateikta nauja užklausa prieigai prie festivalio valdymo skydo.",
+      preheader: "Pateikta nauja užklausa prieigai prie festivalio administravimo portalo.",
       heading: "Gauta nauja prieigos užklausa",
-      body: "Festivalio platformoje pateikta nauja užklausa dėl prieigos prie valdymo skydo teisių. Prašome peržiūrėti kandidato duomenis ir nuspręsti dėl prieigos suteikimo.",
+      body: "Festivalio platformoje pateikta nauja užklausa dėl prieigos prie administravimo portalo teisių. Prašome peržiūrėti kandidato duomenis ir nuspręsti dėl prieigos suteikimo.",
       detailsTitle: "Užklausos duomenys",
-      note: "Patvirtinti arba atmesti prieigą galite prisijungę prie valdymo skydo skilties „Vartotojai & Prieiga“.",
-      ctaText: "Peržiūrėti Valdymo Skyde"
+      note: "Patvirtinti arba atmesti prieigą galite prisijungę prie administravimo portalo skilties „Vartotojai & Prieiga“.",
+      ctaText: "Peržiūrėti Administravimo Portale"
     },
     accessGranted: {
-      sub: "AISFF | Jums suteikta valdymo skydo prieiga",
-      preheader: "Jūsų prieigos užklausa patvirtinta. Dabar galite prisijungti prie festivalio valdymo skydo.",
+      sub: "AISFF | Jums suteikta administravimo prieiga",
+      preheader: "Jūsų prieigos užklausa patvirtinta. Dabar galite prisijungti prie festivalio administravimo portalo.",
       heading: "Sveikiname, {{name}}!",
-      body: "Pranešame, kad jūsų prieigos užklausa prie AISFF (Kauno tarptautinė gimnazija) valdymo sistemos buvo sėkmingai patvirtinta!",
+      body: "Pranešame, kad jūsų prieigos užklausa prie AISFF (Kauno tarptautinė gimnazija) administravimo sistemos buvo sėkmingai patvirtinta!",
       detailsTitle: "Paskyros prieigos informacija",
       note: "Prisijunkite naudodami savo registruotą el. pašto adresą arba susietą Google paskyrą.",
-      ctaText: "Prisijungti prie Valdymo Skydo"
+      ctaText: "Prisijungti prie Administravimo Portalo"
     },
     submissionReceived: {
       sub: "AISFF | Filmo paraiška sėkmingai gauta!",
-      preheader: "Dėkojame už paraišką 2027 m. temai „Mano pašaukimas“! Jūsų filmas pasiekė atrankos komisiją.",
+      preheader: "Dėkojame už paraišką festivalio temai „Mano pašaukimas“! Jūsų filmas pasiekė atrankos komisiją.",
       heading: "Sveiki, {{name}}!",
-      body: "Nuoširdžiai dėkojame už dalyvavimą! Jūsų filmo paraiška 2027 m. festivalio temai „Mano pašaukimas“ sėkmingai pasiekė AISFF organizacinį komitetą. Komisija netrukus peržiūrės filmą ir patikrins atitiktį festivalio taisyklėms (iki 180 s trukmė, filmavimas tik išmaniuoju telefonu/planšete, mokinių autorystė).",
+      body: "Nuoširdžiai dėkojame už dalyvavimą! Jūsų filmo paraiška festivalio temai „Mano pašaukimas“ sėkmingai pasiekė AISFF organizacinį komitetą. Prie šio laiško pridėtas PDF dokumentas su visais jūsų pateiktais duomenimis. Komisija peržiūrės filmą ir atsakymą atsiųs {{responseTime}}.",
       detailsTitle: "Pateiktos paraiškos suvestinė",
-      note: "Oficiali 2027 m. festivalio filmų peržiūra bei laureatų apdovanojimo ceremonija vyks Kauno tarptautinėje gimnazijoje 2027 m. balandžio 27 d. Tiesioginę transliaciją galėsite stebėti per https://azuolynasinternationalfilmfestival.github.io/live.html, o naujienas sekite Instagram: @azuolynas.iff.",
+      note: "Oficiali festivalio filmų peržiūra bei laureatų apdovanojimo ceremonija vyks Kauno tarptautinėje gimnazijoje 2027 m. balandžio 27 d. Tiesioginę transliaciją galėsite stebėti per https://azuolynasinternationalfilmfestival.github.io/live.html, o naujienas sekite Instagram: @azuolynas.iff.",
       ctaText: "Apsilankyti Festivalio Svetainėje"
     },
     adminNotification: {
       sub: "AISFF | Nauja dalyvio paraiška festivaliui!",
-      preheader: "Užregistruota nauja dalyvio paraiška 2027 m. temai „Mano pašaukimas“.",
+      preheader: "Užregistruota nauja dalyvio paraiška temai „Mano pašaukimas“.",
       heading: "Gauta nauja filmo paraiška",
-      body: "Festivalio sistemoje ką tik sėkmingai užregistruota nauja mokinio paraiška 2027 m. temai „Mano pašaukimas“. Žemiau pateikiami visi autoriaus, techninės įrangos, failo trukmės bei filmo duomenys.",
+      body: "Festivalio sistemoje ką tik sėkmingai užregistruota nauja mokinio paraiška temai „Mano pašaukimas“. Pridėtas pilnas PDF dokumentas bei žemiau pateikiami visi kūrybinės grupės, įrangos ir vaizdo įrašo duomenys.",
       detailsTitle: "Dalyvio ir filmo byla",
-      ctaText: "Atverti Valdymo Skydą"
+      ctaText: "Atverti Administravimo Portalą"
     },
     accepted: {
       sub: "AISFF | Sveikiname! Jūsų filmas priimtas į konkursą",
-      preheader: "Puikios žinios! Jūsų filmas atitiko reikalavimus ir priimtas į 2027 m. tematinę programą „Mano pašaukimas“.",
+      preheader: "Puikios žinios! Jūsų filmas atitiko reikalavimus ir priimtas į tematinę programą „Mano pašaukimas“.",
       heading: "Puikios žinios, {{name}}!",
-      body: "Džiaugiamės galėdami pranešti, kad jūsų filmas atitiko visus festivalio reikalavimus ir yra oficialiai priimtas į 2027 m. konkursinę programą tema „Mano pašaukimas“! Jūsų kūrinį vertins tarptautinė žiuri komisija.",
+      body: "Džiaugiamės galėdami pranešti, kad jūsų filmas atitiko visus festivalio reikalavimus ir yra oficialiai priimtas į konkursinę programą tema „Mano pašaukimas“! Jūsų kūrinį vertins tarptautinė žiuri komisija.",
       detailsTitle: "Priėmimo informacija",
       note: "2027 m. balandžio 27 d. festivalio apdovanojimų ceremonija ir laureatų paskelbimas vyks Kauno tarptautinėje gimnazijoje bei tiesioginėje internetinėje transliacijoje (live.html). Sekite @azuolynas.iff.",
       ctaText: "Peržiūrėti Konkurso Programą"
     },
     semiFinalist: {
       sub: "AISFF | Jūsų darbas pateko į PUSFINALĮ!",
-      preheader: "Sveikiname! Vertinimo komisija jūsų filmą atrinko tarp 2027 m. pusfinalininkų.",
+      preheader: "Sveikiname! Vertinimo komisija jūsų filmą atrinko tarp pusfinalininkų.",
       heading: "Sveiki, {{name}}!",
-      body: "Atrankos komisija itin aukštai įvertino jūsų filmo originalumą, kinematografiją bei temos „Mano pašaukimas“ atskleidimą. Jūsų darbas oficialiai patenka tarp AISFF 2027 PUSFINALININKŲ!",
+      body: "Atrankos komisija itin aukštai įvertino jūsų filmo originalumą, kinematografiją bei temos „Mano pašaukimas“ atskleidimą. Jūsų darbas oficialiai patenka tarp AISFF PUSFINALININKŲ!",
       detailsTitle: "Pusfinalio rezultatai",
       note: "Pusfinalio filmai bus pristatomi festivalio peržiūros programoje 2027 m. balandžio 27 d. Kauno tarptautinėje gimnazijoje bei tiesioginiame eteryje per live.html.",
       ctaText: "Sekti Festivalio Naujienas"
     },
     finalist: {
       sub: "AISFF | Jūs esate FINALE!",
-      preheader: "Ypatingas pasiekimas! Jūsų filmas pateko į 2027 m. finalą ir varžosi dėl ąžuolo statulėlių.",
+      preheader: "Ypatingas pasiekimas! Jūsų filmas pateko į finalą ir varžosi dėl ąžuolo statulėlių.",
       heading: "Ypatingas pasiekimas, {{name}}!",
-      body: "Nuoširdžiai sveikiname! Jūsų filmas tema „Mano pašaukimas“ oficialiai pateko į AISFF 2027 FINALĄ ir pretenduoja į prizines vietas, natūralaus ąžuolo statulėles bei Žiūrovų simpatijų prizą.",
+      body: "Nuoširdžiai sveikiname! Jūsų filmas tema „Mano pašaukimas“ oficialiai pateko į AISFF FINALĄ ir pretenduoja į prizines vietas, natūralaus ąžuolo statulėles bei Žiūrovų simpatijų prizą.",
       detailsTitle: "Finalo informacija",
       note: "Laureatai bus apdovanoti iškilmingoje ceremonijoje Kauno tarptautinėje gimnazijoje 2027 m. balandžio 27 d. Stebėkite tiesiogiai per live.html, naujienos Instagram: @azuolynas.iff.",
       ctaText: "Peržiūrėti Finalininkų Programą"
     },
     winner: {
       sub: "AISFF | SVEIKINAME FESTIVALIO LAUREATĄ!",
-      preheader: "Puiki pergalė! Jūsų filmas pelnė apdovanojimą 2027 m. AISFF festivalyje.",
+      preheader: "Puiki pergalė! Jūsų filmas pelnė apdovanojimą AISFF festivalyje.",
       heading: "Nuoširdžiausi sveikinimai, {{name}}!",
-      body: "Komisijos sprendimu bei žiūrovų balsavimu, džiaugiamės galėdami paskelbti jūsų filmą oficialiu AISFF 2027 LAUREATU (tema „Mano pašaukimas“)! Ačiū už jūsų talentą, drąsią režisūrą ir jaunųjų kūrėjų balso stiprinimą.",
+      body: "Komisijos sprendimu bei žiūrovų balsavimu, džiaugiamės galėdami paskelbti jūsų filmą oficialiu AISFF LAUREATU (tema „Mano pašaukimas“)! Ačiū už jūsų talentą, drąsią režisūrą ir jaunųjų kūrėjų balso stiprinimą.",
       detailsTitle: "Apdovanojimo informacija",
       note: "Dėl autorinės ąžuolo statulėlės ir diplomų įteikimo bei pristatymo su jumis asmeniškai susisieks organizatoriai. Ceremonijos įrašas bus pasiekiamas live.html, sekite @azuolynas.iff.",
       ctaText: "Žiūrėti Laureatų Galeriją"
     },
     rejected: {
       sub: "AISFF | Informacija apie jūsų filmo paraišką",
-      preheader: "Dėkojame už jūsų filmą ir kūrybinį darbą 2027 m. AISFF festivalyje.",
+      preheader: "Dėkojame už jūsų filmą ir kūrybinį darbą AISFF festivalyje.",
       heading: "Sveiki, {{name}},",
-      body: "Nuoširdžiai dėkojame už jūsų filmą ir dalyvavimą 2027 m. festivalyje tema „Mano pašaukimas“. Šiais metais sulaukėme itin daug talentingų moksleivių darbų. Nors jūsų filmas šįkart nepateko į trumpąjį konkursinį sąrašą, komisija džiaugiasi jūsų kūrybine drąsa ir linki nenustoti filmuoti!",
+      body: "Nuoširdžiai dėkojame už jūsų filmą ir dalyvavimą festivalyje tema „Mano pašaukimas“. Šiais metais sulaukėme itin daug talentingų moksleivių darbų. Nors jūsų filmas šįkart nepateko į trumpąjį konkursinį sąrašą, komisija džiaugiasi jūsų kūrybine drąsa ir linki nenustoti filmuoti!",
       detailsTitle: "Atrankos informacija",
       note: "Kiekvienas sukurtas filmas yra svarbi patirtis. Kviečiame stebėti festivalio transliaciją 2027 m. balandžio 27 d. ir sekti mūsų Instagram @azuolynas.iff!",
       ctaText: "Apsilankyti Svetainėje"
     },
     eventReminder: {
       sub: "AISFF | Festivalio įrašas jau pasiekiamas svetainėje!",
-      preheader: "Oficialus 2027 m. festivalio ceremonijos ir laureatų įrašas paskelbtas festivalio platformoje.",
+      preheader: "Oficialus festivalio ceremonijos ir laureatų įrašas paskelbtas festivalio platformoje.",
       heading: "Sveiki, {{name}}!",
-      body: "Oficialus AISFF 2027 festivalio vaizdo įrašas su moksleivių filmų peržiūra ir iškilminga apdovanojimų ceremonija jau paskelbtas mūsų svetainėje!",
+      body: "Oficialus AISFF festivalio vaizdo įrašas su moksleivių filmų peržiūra ir iškilminga apdovanojimų ceremonija jau paskelbtas mūsų svetainėje!",
       detailsTitle: "Renginio įrašas",
       note: "Kviečiame patogiai peržiūrėti geriausius mokinių darbus ir ceremonijos akimirkas. Sekite Instagram: @azuolynas.iff.",
       ctaText: "Žiūrėti Festivalio Įrašą"
     },
     remoteLivePass: {
       sub: "AISFF | Jūsų tiesioginės transliacijos prieiga ir žetonas",
-      preheader: "Jūsų asmeninė 2027 m. festivalio ceremonijos tiesioginės transliacijos nuoroda bei balsavimo žetonas.",
+      preheader: "Jūsų asmeninė festivalio ceremonijos tiesioginės transliacijos nuoroda bei balsavimo žetonas.",
       heading: "Sveiki, {{name}}!",
-      body: "Kadangi pažymėjote, kad negalėsite atvykti į festivalio ceremoniją gyvai Kaune, paruošėme jums tiesioginę transliacijos prieigą. 2027 m. balandžio 27 d. galėsite tiesiogiai stebėti visus konkursinius filmus tema „Mano pašaukimas“ bei balsuoti už labiausiai patikusį darbą!",
+      body: "Kadangi pažymėjote, kad negalėsite atvykti į festivalio ceremoniją gyvai Kaune, paruošėme jums tiesioginę transliacijos prieigą. Prie šio laiško pridėtas PDF su visa jūsų paraiškos informacija. Atsakymo dėl atrankos sulauksite {{responseTime}}, o 2027 m. balandžio 27 d. galėsite stebėti transliaciją bei balsuoti!",
       detailsTitle: "Nuotolinio dalyvio prieigos duomenys",
       note: "Transliacija bus pasiekiama 2027 m. balandžio 27 d. su šiuo asmeniniu žetonu arba jūsų registruotu el. paštu per https://azuolynasinternationalfilmfestival.github.io/live.html. Sekite @azuolynas.iff.",
       ctaText: "Atverti Tiesioginę Transliaciją"
@@ -281,62 +281,62 @@ const emailTexts = {
     },
     submissionReceived: {
       sub: "AISFF | Film Submission Successfully Received!",
-      preheader: "Thank you for submitting for the 2027 theme “My Purpose”! Your film entry has reached the committee.",
+      preheader: "Thank you for submitting for the theme “My Purpose”! Your film entry has reached the committee.",
       heading: "Hello, {{name}}!",
-      body: "Thank you sincerely for participating! Your entry for the 2027 festival theme “My Purpose” has been safely received by the organizing committee of AISFF. Our jury will review the film to confirm eligibility (max 180s runtime, smartphone/tablet captured, student-led creation).",
+      body: "Thank you sincerely for participating! Your entry for the festival theme “My Purpose” has been safely received by the organizing committee of AISFF. A full PDF copy of your submission is attached to this email. Our jury will review your entry and get back to you {{responseTime}}.",
       detailsTitle: "Submission Summary",
       note: "The gala screening and awards ceremony will take place at Kaunas International Gymnasium on April 27th, 2027. Watch the global live stream at https://azuolynasinternationalfilmfestival.github.io/live.html and follow us on Instagram: @azuolynas.iff.",
       ctaText: "Visit Festival Platform"
     },
     adminNotification: {
       sub: "AISFF | New film submission received!",
-      preheader: "A new student film dossier has been registered for the 2027 theme “My Purpose”.",
+      preheader: "A new student film dossier has been registered for the theme “My Purpose”.",
       heading: "New Film Submission Registered",
-      body: "A new film has just been submitted via the official platform for the 2027 theme “My Purpose”. Full details, device specifications, runtime verification, and creator contact are compiled below.",
+      body: "A new film has just been submitted via the official platform for the theme “My Purpose”. A PDF summary is attached and all author roles, device specifications, and video verification details are listed below.",
       detailsTitle: "Applicant Dossier",
       ctaText: "Open Admin Dashboard"
     },
     accepted: {
       sub: "AISFF | Congratulations! Your Film is Accepted",
-      preheader: "Great news! Your work is officially in competition for the 2027 theme “My Purpose”.",
+      preheader: "Great news! Your work is officially in competition for the theme “My Purpose”.",
       heading: "Congratulations, {{name}}!",
-      body: "We are thrilled to inform you that your work has met all submission criteria (max 3 minutes runtime, captured on mobile phone/tablet, student-directed) and is officially accepted into the AISFF 2027 competition program under the theme “My Purpose”!",
+      body: "We are thrilled to inform you that your work has met all submission criteria (max 3 minutes runtime, captured on mobile phone/tablet, student-directed) and is officially accepted into the AISFF competition program under the theme “My Purpose”!",
       detailsTitle: "Acceptance Record",
       note: "The full event and ceremony will take place at Kaunas International Gymnasium and stream live on our platform on April 27th, 2027. Stay tuned via Instagram @azuolynas.iff.",
       ctaText: "Explore Competition Program"
     },
     semiFinalist: {
       sub: "AISFF | Your Film is a SEMI-FINALIST!",
-      preheader: "Exciting news! The jury has selected your work among the official 2027 semi-finalists.",
+      preheader: "Exciting news! The jury has selected your work among the official semi-finalists.",
       heading: "Exciting news, {{name}}!",
-      body: "Our jury was profoundly moved by your creative voice, camera work, and narrative approach to the 2027 theme “My Purpose”. Your work has officially advanced to the AISFF SEMI-FINALS!",
+      body: "Our jury was profoundly moved by your creative voice, camera work, and narrative approach to the theme “My Purpose”. Your work has officially advanced to the AISFF SEMI-FINALS!",
       detailsTitle: "Semi-Final Status",
       note: "Semi-final selections will be highlighted in the official festival broadcast on April 27th, 2027. Watch live at live.html and follow @azuolynas.iff.",
       ctaText: "Follow Festival Updates"
     },
     finalist: {
       sub: "AISFF | You have reached the FINALS!",
-      preheader: "Outstanding achievement! Your film has reached the 2027 finals and is in contention for awards.",
+      preheader: "Outstanding achievement! Your film has reached the finals and is in contention for awards.",
       heading: "Tremendous achievement, {{name}}!",
-      body: "Warmest congratulations! Your film has officially reached the FINALS of AISFF 2027 (theme “My Purpose”) and is in direct contention for the Grand Prix, handmade oak statuettes, and the Audience Choice Award.",
+      body: "Warmest congratulations! Your film has officially reached the FINALS of AISFF (theme “My Purpose”) and is in direct contention for the Grand Prix, handmade oak statuettes, and the Audience Choice Award.",
       detailsTitle: "Finalist Dossier",
       note: "Award winners will be officially unveiled during the ceremony at Kaunas International Gymnasium and live stream on April 27th, 2027. Follow Instagram: @azuolynas.iff.",
       ctaText: "View Finalist Showcase"
     },
     winner: {
       sub: "AISFF | CONGRATULATIONS FESTIVAL LAUREATE!",
-      preheader: "Incredible victory! Your film has earned an award at AISFF 2027.",
+      preheader: "Incredible victory! Your film has earned an award at AISFF.",
       heading: "Bravo, {{name}}!",
-      body: "By the decision of our international jury and audience vote, we are deeply honoured to declare your film an official WINNER of AISFF 2027 (theme “My Purpose”)! Thank you for your inspiring creativity and cinematic boldness.",
+      body: "By the decision of our international jury and audience vote, we are deeply honoured to declare your film an official WINNER of AISFF (theme “My Purpose”)! Thank you for your inspiring creativity and cinematic boldness.",
       detailsTitle: "Award Record",
       note: "Our organizing team will reach out personally regarding the delivery of your diploma, medal, and festival award. Replay will be available on live.html, follow @azuolynas.iff.",
       ctaText: "View Winners Hall of Fame"
     },
     rejected: {
       sub: "AISFF | Update regarding your film entry",
-      preheader: "Thank you for submitting your creative work to AISFF 2027.",
+      preheader: "Thank you for submitting your creative work to AISFF.",
       heading: "Hello, {{name}},",
-      body: "Thank you sincerely for sharing your story with AISFF for the 2027 theme “My Purpose”. We received a record number of wonderful submissions this season. While your film was not selected for this season's shortlist, our jury was genuinely inspired by your creative passion.",
+      body: "Thank you sincerely for sharing your story with AISFF for the theme “My Purpose”. We received a record number of wonderful submissions this season. While your film was not selected for this season's shortlist, our jury was genuinely inspired by your creative passion.",
       detailsTitle: "Selection Record",
       note: "Keep experimenting and filming! Join our live broadcast on April 27th, 2027, and follow our community on Instagram: @azuolynas.iff.",
       ctaText: "Visit Festival Platform"
@@ -345,16 +345,16 @@ const emailTexts = {
       sub: "AISFF | Festival Recording Now Available On Site!",
       preheader: "The official festival recording and award ceremony is now published directly on our website.",
       heading: "Hello, {{name}}!",
-      body: "The official video recording of AISFF 2027—including student screenings and the gala award ceremony—is now live on our website!",
+      body: "The official video recording of AISFF—including student screenings and the gala award ceremony—is now live on our website!",
       detailsTitle: "Broadcast Information",
       note: "Sit back and enjoy the remarkable films crafted by youth creators from around the world. Instagram: @azuolynas.iff.",
       ctaText: "Watch Festival Broadcast"
     },
     remoteLivePass: {
       sub: "AISFF | Your Live Stream Access & Personal Token",
-      preheader: "Your personal 2027 festival ceremony live stream access link and remote voting token.",
+      preheader: "Your personal festival ceremony live stream access link and remote voting token.",
       heading: "Hello, {{name}}!",
-      body: "Since you indicated that you are unable to attend the awards ceremony in person, we have generated your exclusive live broadcast pass. On April 27th, 2027, you can watch the stream and cast your vote remotely!",
+      body: "Since you indicated that you are unable to attend the awards ceremony in person, we have generated your exclusive live broadcast pass. A full PDF copy of your submission is attached, and our team will respond {{responseTime}}. On April 27th, 2027, you can watch the stream and cast your vote remotely!",
       detailsTitle: "Remote Participant Connection Details",
       note: "The broadcast airs live on April 27th, 2027. Accessible with this personal token or your registered email at https://azuolynasinternationalfilmfestival.github.io/live.html. Follow @azuolynas.iff.",
       ctaText: "Open Live Stream Platform"
@@ -444,10 +444,22 @@ function normalizeParams(p1, p2, p3, defaultKey = "submissionReceived") {
 
   // Guarantee cross-field aliases so no template variable is ever lost
   if (data && typeof data === "object") {
+    const directorFull = [data.directorFirstName, data.directorLastName].filter(Boolean).join(" ").trim();
+    if (!data.directorName && directorFull) data.directorName = directorFull;
+    if (!data.name && directorFull) data.name = directorFull;
     if (!data.filmTitle && data.title) data.filmTitle = data.title;
     if (!data.name && data.authorName) data.name = data.authorName;
     if (!data.name && data.author) data.name = data.author;
     if (!data.name && data.userName) data.name = data.userName;
+    if (!data.cameraOperatorName) {
+      data.cameraOperatorName = [data.cameraOperatorFirstName, data.cameraOperatorLastName].filter(Boolean).join(" ").trim() || data.cameraOperator || "";
+    }
+    if (!data.ideaAuthorName) {
+      data.ideaAuthorName = [data.ideaAuthorFirstName, data.ideaAuthorLastName].filter(Boolean).join(" ").trim() || data.ideaAuthor || "";
+    }
+    if (!data.screenwriterName) {
+      data.screenwriterName = [data.screenwriterFirstName, data.screenwriterLastName].filter(Boolean).join(" ").trim() || data.screenwriter || "";
+    }
     if (!data.videoDurationSeconds && data.duration) data.videoDurationSeconds = data.duration;
     if (!data.location && data.countryCity) data.location = data.countryCity;
     if (!data.attendanceType && data.rsvp) data.attendanceType = data.rsvp;
@@ -586,7 +598,7 @@ function buildEmailDocument({ lang, preheader, statusKey, childrenHtml }) {
                 <tr>
                   <td>
                     <div style="font-size: 11px; font-weight: 700; color: #F8FAFC; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px;">
-                      ${isLt ? "🎬 AISFF 2027: DATA, TEMA IR TIESIOGINĖ TRANSLIACIJĄ" : "🎬 AISFF 2027: EVENT, THEME & LIVE STREAM"}
+                      ${isLt ? "🎬 AISFF: DATA, TEMA IR TIESIOGINĖ TRANSLIACIJA" : "🎬 AISFF: EVENT, THEME & LIVE STREAM"}
                     </div>
                     <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="font-size: 12px; line-height: 1.6; color: #BAC9C0;">
                       <tr>
@@ -675,17 +687,34 @@ function generateEmailHtml(p1, p2, p3) {
   const t = texts[templateKey] || texts.submissionReceived;
   const isLt = lang === "lt";
 
-  const applicantName = data.name || (isLt ? "Dalyvi" : "Filmmaker");
+  const applicantName = data.directorName || data.name || (isLt ? "Dalyvi" : "Filmmaker");
   const filmTitle = data.filmTitle || "-";
   const category = data.category || "-";
   const deviceModel = data.deviceModel || "-";
   const duration = data.videoDurationSeconds ? `${data.videoDurationSeconds} s` : null;
+  const responseTimeDisplay = data.responseTimeText || (isLt ? "per 5 darbo dienas" : "within 5 business days");
 
   const headingText = t.heading.replace("{{name}}", escapeHtml(applicantName));
+  const bodyText = t.body.replace("{{responseTime}}", escapeHtml(responseTimeDisplay));
 
   let metaRows = "";
   metaRows += buildMetaRow(isLt ? "Filmo pavadinimas:" : "Film Title:", `<span style="color:#9BC4AE; font-weight:700;">„${escapeHtml(filmTitle)}“</span>`);
-  metaRows += buildMetaRow(isLt ? "Autorius:" : "Director / Author:", escapeHtml(applicantName));
+  metaRows += buildMetaRow(
+    isLt ? "Režisierius / Autorius:" : "Director / Author:",
+    escapeHtml(applicantName) + (data.directorFirstName && data.directorLastName ? ` <span style="color:#7A9689;font-size:11px;">(${escapeHtml(isLt ? 'Vardas' : 'First')}: ${escapeHtml(data.directorFirstName)}, ${escapeHtml(isLt ? 'Pavardė' : 'Last')}: ${escapeHtml(data.directorLastName)})</span>` : '')
+  );
+  if (data.cameraOperatorName) {
+    metaRows += buildMetaRow(isLt ? "Operatorius:" : "Camera Operator:", escapeHtml(data.cameraOperatorName));
+  }
+  if (data.ideaAuthorName) {
+    metaRows += buildMetaRow(isLt ? "Idėjos autorius:" : "Author of the Idea:", escapeHtml(data.ideaAuthorName));
+  }
+  if (data.screenwriterName) {
+    metaRows += buildMetaRow(isLt ? "Scenarijaus autorius:" : "Screenwriter:", escapeHtml(data.screenwriterName));
+  }
+  if (data.email) {
+    metaRows += buildMetaRow(isLt ? "El. paštas:" : "Email:", escapeHtml(data.email));
+  }
   metaRows += buildMetaRow(isLt ? "Kategorija:" : "Category:", escapeHtml(category));
   if (data.age) {
     metaRows += buildMetaRow(isLt ? "Amžius:" : "Age:", `${escapeHtml(data.age)} ${isLt ? 'm.' : 'y/o'}`);
@@ -693,10 +722,29 @@ function generateEmailHtml(p1, p2, p3) {
   if (data.location || data.countryCity) {
     metaRows += buildMetaRow(isLt ? "Miestas, Šalis:" : "Location:", escapeHtml(data.location || data.countryCity));
   }
+  if (data.institution) {
+    metaRows += buildMetaRow(isLt ? "Mokykla / Studija:" : "Institution:", escapeHtml(data.institution));
+  }
   metaRows += buildMetaRow(isLt ? "Filmavimo įranga:" : "Filming Device:", `📱 ${escapeHtml(deviceModel)}`);
   if (duration) {
-    metaRows += buildMetaRow(isLt ? "Trukmė:" : "Runtime:", `⏱️ ${escapeHtml(duration)} (griežtai &le; 180 s)`);
+    metaRows += buildMetaRow(isLt ? "Trukmė:" : "Runtime:", `⏱️ ${escapeHtml(duration)} (&le; 180 s)`);
   }
+  if (data.videoFileName) {
+    metaRows += buildMetaRow(isLt ? "Vaizdo failas:" : "Video File:", escapeHtml(data.videoFileName));
+  }
+  if (data.videoResolution) {
+    metaRows += buildMetaRow(isLt ? "Raiška:" : "Resolution:", escapeHtml(data.videoResolution));
+  }
+  if (data.videoSizeBytes) {
+    metaRows += buildMetaRow(isLt ? "Failo dydis:" : "File Size:", `${(Number(data.videoSizeBytes) / (1024 * 1024)).toFixed(2)} MB`);
+  }
+  if (data.videoUrl) {
+    metaRows += buildMetaRow(isLt ? "Vaizdo nuoroda:" : "Video Link:", `<a href="${escapeHtml(data.videoUrl)}" style="color:#9BC4AE;word-break:break-all;" target="_blank">${escapeHtml(data.videoUrl)}</a>`);
+  }
+  if (data.submittedAt) {
+    metaRows += buildMetaRow(isLt ? "Pateikimo laikas:" : "Submitted At:", escapeHtml(new Date(data.submittedAt).toLocaleString(isLt ? "lt-LT" : "en-US")));
+  }
+  metaRows += buildMetaRow(isLt ? "Atsakymo terminas:" : "Response Time:", `<strong style="color:#9BC4AE;">${escapeHtml(responseTimeDisplay)}</strong>`);
   if (data.attendanceType) {
     const isRemote = data.attendanceType === 'remote';
     const rsvpLabel = isRemote
@@ -758,7 +806,7 @@ function generateEmailHtml(p1, p2, p3) {
       ${headingText}
     </h2>
     <p style="font-size: 14px; color: #BAC9C0; line-height: 1.65; margin: 0 0 20px 0;">
-      ${t.body}
+      ${bodyText}
     </p>
 
     <div style="background-color: #081B17; border: 1px solid rgba(111,165,138,0.22); border-radius: 6px; padding: 18px 20px; margin: 18px 0;">
@@ -800,18 +848,51 @@ function generateAdminNotificationHtml(p1, p2, p3) {
 
   const adminUrl = EMAIL_THEME.adminUrl;
   const filmTitle = data.filmTitle || "-";
-  const authorName = data.name || "-";
+  const authorName = data.directorName || data.name || "-";
   const applicantEmail = data.email || "-";
   const duration = data.videoDurationSeconds ? `${data.videoDurationSeconds} s` : "-";
 
   let dossierRows = "";
-  dossierRows += buildMetaRow(isLt ? "Autorius:" : "Applicant:", `<b>${escapeHtml(authorName)}</b> (<a href="mailto:${escapeHtml(applicantEmail)}" style="color:#9BC4AE; text-decoration:none;">${escapeHtml(applicantEmail)}</a>)`);
+  if (data.id) {
+    dossierRows += buildMetaRow(isLt ? "Paraiškos ID:" : "Submission ID:", `<code>${escapeHtml(data.id)}</code>`);
+  }
+  dossierRows += buildMetaRow(
+    isLt ? "Režisierius / Autorius:" : "Director / Author:",
+    `<b>${escapeHtml(authorName)}</b>` +
+    (data.directorFirstName && data.directorLastName ? ` (${escapeHtml(data.directorFirstName)} | ${escapeHtml(data.directorLastName)})` : '')
+  );
+  dossierRows += buildMetaRow(isLt ? "El. paštas:" : "Email:", `<a href="mailto:${escapeHtml(applicantEmail)}" style="color:#9BC4AE; text-decoration:none;">${escapeHtml(applicantEmail)}</a>`);
+  if (data.cameraOperatorName) {
+    dossierRows += buildMetaRow(isLt ? "Operatorius:" : "Camera Operator:", escapeHtml(data.cameraOperatorName));
+  }
+  if (data.ideaAuthorName) {
+    dossierRows += buildMetaRow(isLt ? "Idėjos autorius:" : "Author of the Idea:", escapeHtml(data.ideaAuthorName));
+  }
+  if (data.screenwriterName) {
+    dossierRows += buildMetaRow(isLt ? "Scenarijaus autorius:" : "Screenwriter:", escapeHtml(data.screenwriterName));
+  }
   dossierRows += buildMetaRow(isLt ? "Filmo pavadinimas:" : "Film Title:", `<span style="color:#9BC4AE; font-weight:700;">„${escapeHtml(filmTitle)}“</span>`);
-  dossierRows += buildMetaRow(isLt ? "Kategorija ir amžius:" : "Category & Age:", `${escapeHtml(data.category || '-')} (${escapeHtml(data.age || '-')} m.)`);
+  dossierRows += buildMetaRow(isLt ? "Kategorija ir amžius:" : "Category & Age:", `${escapeHtml(data.category || '-')} (${escapeHtml(data.age || '-')} ${isLt ? 'm.' : 'y/o'})`);
   dossierRows += buildMetaRow(isLt ? "Šalis ir miestas:" : "Location:", escapeHtml(data.location || data.countryCity || '-'));
   dossierRows += buildMetaRow(isLt ? "Mokykla / Studija:" : "Institution:", escapeHtml(data.institution || '-'));
   dossierRows += buildMetaRow(isLt ? "Įrenginio modelis:" : "Device Model:", `📱 ${escapeHtml(data.deviceModel || '-')}`);
-  dossierRows += buildMetaRow(isLt ? "Vaizdo įrašo trukmė:" : "Video Runtime:", `⏱️ ${escapeHtml(duration)} ${data.videoDurationSeconds && Number(data.videoDurationSeconds) <= 180 ? '✅ (Tinka &le; 180s)' : '⚠️ (>180s)'}`);
+  dossierRows += buildMetaRow(
+    isLt ? "Vaizdo šaltinis:" : "Video Source:",
+    data.videoSourceType === 'link' ? (isLt ? "🔗 Nuoroda" : "🔗 External Link") : (isLt ? "📁 Įkeltas failas" : "📁 File Upload")
+  );
+  if (data.videoFileName) {
+    dossierRows += buildMetaRow(isLt ? "Vaizdo failas:" : "File Name:", escapeHtml(data.videoFileName));
+  }
+  if (data.videoSizeBytes) {
+    dossierRows += buildMetaRow(isLt ? "Failo dydis:" : "File Size:", `${(Number(data.videoSizeBytes) / (1024 * 1024)).toFixed(2)} MB`);
+  }
+  if (data.videoResolution) {
+    dossierRows += buildMetaRow(isLt ? "Raiška:" : "Resolution:", escapeHtml(data.videoResolution));
+  }
+  dossierRows += buildMetaRow(isLt ? "Vaizdo įrašo trukmė:" : "Video Runtime:", `⏱️ ${escapeHtml(duration)} ${data.videoDurationSeconds && Number(data.videoDurationSeconds) <= 180 ? '✅ (&le; 180s)' : 'ℹ️'}`);
+  if (data.submittedAt) {
+    dossierRows += buildMetaRow(isLt ? "Pateikta:" : "Submitted:", escapeHtml(new Date(data.submittedAt).toLocaleString(isLt ? "lt-LT" : "en-US")));
+  }
   
   if (data.attendanceType) {
     const isRemote = data.attendanceType === 'remote';
@@ -1131,6 +1212,66 @@ function getEmailSubject(p1, p2, p3) {
   return lang === "en" ? "Ąžuolynas Film Fest Notification" : "Ąžuolynas Film Fest Pranešimas";
 }
 
+/**
+ * Builds a complete plain-text representation of all submitted film & author details.
+ */
+function generateSubmissionPlainText(p1, p2, p3) {
+  const { templateKey, lang, data } = normalizeParams(p1, p2, p3, "submissionReceived");
+  const isLt = lang === "lt";
+  const directorName = data.directorName || [data.directorFirstName, data.directorLastName].filter(Boolean).join(" ") || data.name || "-";
+  const cameraName = data.cameraOperatorName || [data.cameraOperatorFirstName, data.cameraOperatorLastName].filter(Boolean).join(" ") || "-";
+  const ideaName = data.ideaAuthorName || [data.ideaAuthorFirstName, data.ideaAuthorLastName].filter(Boolean).join(" ") || "-";
+  const writerName = data.screenwriterName || [data.screenwriterFirstName, data.screenwriterLastName].filter(Boolean).join(" ") || "-";
+  const sizeMb = data.videoSizeBytes ? `${(Number(data.videoSizeBytes) / (1024 * 1024)).toFixed(2)} MB` : "-";
+  const responseTime = data.responseTimeText || (isLt ? "per 5 darbo dienas" : "within 5 business days");
+  const isAdmin = templateKey === "adminNotification";
+
+  const lines = [
+    isLt
+      ? (isAdmin ? "AISFF | Nauja dalyvio paraiška festivaliui" : "AISFF | Jūsų filmo paraiška sėkmingai gauta")
+      : (isAdmin ? "AISFF | New Film Submission Dossier" : "AISFF | Film Submission Successfully Received"),
+    "================================================================",
+    `${isLt ? "Paraiškos ID" : "Submission ID"}: ${data.id || "-"}`,
+    `${isLt ? "Pateikimo data" : "Submitted At"}: ${data.submittedAt || new Date().toISOString()}`,
+    `${isLt ? "Kalba" : "Language"}: ${lang.toUpperCase()}`,
+    `${isLt ? "Atsakymo terminas" : "Expected Response Time"}: ${responseTime}`,
+    "",
+    isLt ? "--- FILMO DUOMENYS ---" : "--- FILM DETAILS ---",
+    `${isLt ? "Filmo pavadinimas" : "Film Title"}: ${data.filmTitle || "-"}`,
+    `${isLt ? "Kategorija" : "Category"}: ${data.category || "-"}`,
+    `${isLt ? "Amžius" : "Age"}: ${data.age || "-"}`,
+    `${isLt ? "Šalis ir miestas" : "Location"}: ${data.location || data.countryCity || "-"}`,
+    `${isLt ? "Mokykla / Studija" : "Institution"}: ${data.institution || "-"}`,
+    `${isLt ? "Filmavimo įranga" : "Filming Device"}: ${data.deviceModel || "-"}`,
+    `${isLt ? "Sinopsis" : "Synopsis"}: ${data.synopsis || "-"}`,
+    "",
+    isLt ? "--- AUTORIAI IR KŪRYBINĖ KOMANDA ---" : "--- AUTHORS & CREATIVE TEAM ---",
+    `${isLt ? "Režisierius / Autorius" : "Director / Author"}: ${directorName}${data.directorFirstName ? ` (Vardas: ${data.directorFirstName}, Pavardė: ${data.directorLastName || ""})` : ""}`,
+    `${isLt ? "Operatorius" : "Camera Operator"}: ${cameraName}`,
+    `${isLt ? "Idėjos autorius" : "Author of the Idea"}: ${ideaName}`,
+    `${isLt ? "Scenarijaus autorius" : "Screenwriter"}: ${writerName}`,
+    `${isLt ? "El. paštas" : "Email"}: ${data.email || "-"}`,
+    "",
+    isLt ? "--- VAIZDO ĮRAŠO DUOMENYS ---" : "--- VIDEO DETAILS ---",
+    `${isLt ? "Šaltinis" : "Source Type"}: ${data.videoSourceType === "link" ? (isLt ? "Vaizdo nuoroda" : "Video Link") : (isLt ? "Įkeltas failas" : "Uploaded File")}`,
+    `${isLt ? "Failo pavadinimas" : "File Name"}: ${data.videoFileName || "-"}`,
+    `${isLt ? "Trukmė" : "Duration"}: ${data.videoDurationSeconds ? `${data.videoDurationSeconds} s` : "-"}`,
+    `${isLt ? "Dydis" : "File Size"}: ${sizeMb}`,
+    `${isLt ? "Raiška" : "Resolution"}: ${data.videoResolution || "-"}`,
+    `${isLt ? "Nuoroda / URL" : "Video URL"}: ${data.videoUrl || "-"}`,
+    data.storagePath ? `${isLt ? "Saugyklos kelias" : "Storage Path"}: ${data.storagePath}` : null,
+    "",
+    isLt ? "--- DALYVAVIMAS CEREMONIJOJE ---" : "--- CEREMONY ATTENDANCE ---",
+    `${isLt ? "Dalyvavimas (RSVP)" : "Attendance"}: ${data.attendanceType === "remote" ? (isLt ? "Nuotolinis stebėtojas" : "Remote participant") : (isLt ? "Dalyvaus gyvai" : "Attending in person")}`,
+    data.liveToken ? `${isLt ? "Transliacijos žetonas" : "Live Stream Token"}: ${data.liveToken}` : null,
+    data.liveStreamUrl ? `${isLt ? "Transliacijos nuoroda" : "Live Stream URL"}: ${data.liveStreamUrl}` : null,
+    "",
+    isLt ? "Pastaba: Prie šio laiško pridėtas PDF dokumentas su visa pateikta informacija." : "Note: A complete PDF copy of your submission is attached to this email."
+  ].filter(Boolean);
+
+  return lines.join("\n");
+}
+
 // Global browser and runtime scope compatibility
 if (typeof window !== "undefined") {
   window.emailTexts = emailTexts;
@@ -1140,6 +1281,7 @@ if (typeof window !== "undefined") {
   window.generateInviteEmailHtml = generateInviteEmailHtml;
   window.generateAccessRequestEmailHtml = generateAccessRequestEmailHtml;
   window.generateAccessGrantedEmailHtml = generateAccessGrantedEmailHtml;
+  window.generateSubmissionPlainText = generateSubmissionPlainText;
 }
 if (typeof globalThis !== "undefined") {
   globalThis.emailTexts = emailTexts;
@@ -1149,6 +1291,7 @@ if (typeof globalThis !== "undefined") {
   globalThis.generateInviteEmailHtml = generateInviteEmailHtml;
   globalThis.generateAccessRequestEmailHtml = generateAccessRequestEmailHtml;
   globalThis.generateAccessGrantedEmailHtml = generateAccessGrantedEmailHtml;
+  globalThis.generateSubmissionPlainText = generateSubmissionPlainText;
 }
 
 // Node / CommonJS module export compatibility (for backend/tests)
@@ -1160,7 +1303,8 @@ if (typeof module !== "undefined" && module.exports) {
     generateAdminNotificationHtml,
     generateInviteEmailHtml,
     generateAccessRequestEmailHtml,
-    generateAccessGrantedEmailHtml
+    generateAccessGrantedEmailHtml,
+    generateSubmissionPlainText
   };
 }
 

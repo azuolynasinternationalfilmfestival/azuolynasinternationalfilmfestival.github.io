@@ -34,11 +34,18 @@
     const headers = new Headers(input instanceof Request ? input.headers : undefined);
     new Headers(options.headers).forEach((value, key) => headers.set(key, value));
     const user = typeof firebase !== 'undefined' && firebase.auth ? firebase.auth().currentUser : null;
-    if (user) headers.set('Authorization', `Bearer ${await user.getIdToken()}`);
-    else {
-      const sessionToken = sessionStorage.getItem('admin_jwt_token');
-      if (sessionToken) headers.set('Authorization', `Bearer ${sessionToken}`);
+    let bearerToken = '';
+    if (user && typeof user.getIdToken === 'function') {
+      try {
+        bearerToken = await user.getIdToken();
+      } catch (tokenErr) {
+        console.warn('getIdToken fallback notice:', tokenErr?.message || tokenErr);
+      }
     }
+    if (!bearerToken) {
+      bearerToken = sessionStorage.getItem('admin_jwt_token') || '';
+    }
+    if (bearerToken) headers.set('Authorization', `Bearer ${bearerToken}`);
     if (apiBase()) {
       const target = `${apiBase()}${url.pathname}${url.search}`;
       // Preserve Request bodies and methods when forwarding to a separate backend.

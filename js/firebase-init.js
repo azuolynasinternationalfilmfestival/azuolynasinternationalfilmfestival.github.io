@@ -124,6 +124,12 @@ export const AUTHORIZED_ADMIN_EMAILS = [
   "karina.brdar@gmail.com"
 ];
 
+export const SUBMISSION_RESPONSE_CONFIG = {
+  lt: "per 5 darbo dienas",
+  en: "within 5 business days",
+  businessDays: 5
+};
+
 export const DEFAULT_CONTENT = {
   lt: {
     heroBadge: "7-asis Tarptautinis Mokinių Filmų Festivalis",
@@ -136,7 +142,8 @@ export const DEFAULT_CONTENT = {
     datesSubmissions: "Nuo 2026 m. lapkričio 1 d. iki 2027 m. balandžio 5 d.",
     dateEvent: "2027 m. balandžio 27 d. (Kino festivalis ir tiesioginė transliacija)",
     targetAudience: "Mokiniai (10–18 m.)",
-    recordingPlaceholder: "Festivalio ir tiesioginės transliacijos vaizdo įrašas bus pasiekiamas 2027 m. balandžio 27 d."
+    recordingPlaceholder: "Festivalio ir tiesioginės transliacijos vaizdo įrašas bus pasiekiamas 2027 m. balandžio 27 d.",
+    submissionResponseTime: SUBMISSION_RESPONSE_CONFIG.lt
   },
   en: {
     heroBadge: "The 7th International Students Film Festival",
@@ -149,9 +156,11 @@ export const DEFAULT_CONTENT = {
     datesSubmissions: "November 1, 2026 – April 5, 2027",
     dateEvent: "April 27th, 2027 (Film Festival & Live Stream)",
     targetAudience: "Students (10–18 yrs)",
-    recordingPlaceholder: "The official festival recording and live stream replay will be published here on April 27th, 2027."
+    recordingPlaceholder: "The official festival recording and live stream replay will be published here on April 27th, 2027.",
+    submissionResponseTime: SUBMISSION_RESPONSE_CONFIG.en
   },
   selectedYear: "2027",
+  submissionResponseTime: { ...SUBMISSION_RESPONSE_CONFIG },
   showAbout: true,
   showTerms: true,
   showFaq: true,

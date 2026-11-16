@@ -11,6 +11,26 @@ let allSubmissions = [];
 let authorizedViewers = [];
 let activeViewerCount = 0;
 
+async function parseApiError(res, fallbackMsg) {
+  try {
+    const contentType = res.headers.get("content-type") || "";
+    if (contentType.includes("application/json")) {
+      const data = await res.json();
+      if (data && (data.error || data.message)) {
+        return `${data.error || data.message} (HTTP ${res.status})`;
+      }
+    } else {
+      const txt = (await res.text() || "").trim();
+      if (txt && txt.length < 200) {
+        return `${txt} (HTTP ${res.status})`;
+      }
+    }
+  } catch {
+    // Ignore parse error
+  }
+  return `${fallbackMsg} (HTTP ${res.status})`;
+}
+
 export function initStreamAdmin() {
   // 1. Stream State Buttons
   const btnSetLive = document.getElementById("btnSetStreamLive");
@@ -411,7 +431,7 @@ function initTokenQrModalHandlers() {
           </head>
           <body>
             <div class="card">
-              <h1>ĄŽUOLYNAS FILM FESTIVAL 2027</h1>
+              <h1>ĄŽUOLYNAS FILM FESTIVAL</h1>
               <p>Mokyklos / Klasės Transliacijos QR Prieiga<br><strong>${name}</strong></p>
               ${printArea.innerHTML}
               <div class="link">Tiesioginė nuoroda: ${link}</div>
@@ -437,19 +457,18 @@ export function openTokenQrModal(viewer) {
   const qrContainer = document.getElementById("tokenQrCanvasContainer");
 
   const isClassroom = viewer.tokenType === "classroom";
-  const nameLabel = isClassroom ? (viewer.classroomLabel || viewer.name || "Klasės peržiūra") : (viewer.name || viewer.email || "Žiūrovas");
-  const maxDevices = viewer.maxConcurrentDevices || (isClassroom ? 35 : 1);
+  const nameLabel = isClassroom ? (viewer.classroomLabel || viewer.name || "Mokytojo / Klasės transliacija") : (viewer.name || viewer.email || "Žiūrovas");
   const liveLink = `${window.location.origin}/live.html?t=${encodeURIComponent(viewer.token)}`;
 
   if (targetName) targetName.textContent = nameLabel;
   if (typeBadge) {
     if (isClassroom) {
-      typeBadge.textContent = `🏫 Klasė (${maxDevices} įrenginiai)`;
+      typeBadge.textContent = "🏫 Mokytojo / Klasės Transliacija (Projektoriui)";
       typeBadge.style.background = "rgba(255,255,255,0.08)";
       typeBadge.style.color = "#FFFFFF";
       typeBadge.style.borderColor = "rgba(255,255,255,0.2)";
     } else {
-      typeBadge.textContent = "👤 Individualus žiūrovas (1 įr.)";
+      typeBadge.textContent = "👤 Individualus žiūrovas";
       typeBadge.style.background = "rgba(111,165,138,0.2)";
       typeBadge.style.color = "#9BC4AE";
       typeBadge.style.borderColor = "rgba(111,165,138,0.4)";
@@ -512,8 +531,6 @@ export function renderAuthorizedViewersTable() {
     const liveLink = `${window.location.origin}/live.html?t=${encodeURIComponent(viewer.token)}`;
     const isClassroom = viewer.tokenType === "classroom";
     const dateFormatted = viewer.createdAt ? new Date(viewer.createdAt).toLocaleDateString("lt-LT") : "—";
-    const maxDevices = viewer.maxConcurrentDevices || (isClassroom ? 35 : 1);
-    const activeDevices = viewer.activeDevices || 0;
 
     return `
       <tr>
@@ -529,11 +546,11 @@ export function renderAuthorizedViewersTable() {
         <td>
           ${isClassroom ? `
             <span class="badge" style="background:rgba(255,255,255,0.08); color:#FFFFFF; border:1px solid rgba(255,255,255,0.2); font-size:0.75rem; border-radius:2px;">
-              🏫 Klasė (${activeDevices}/${maxDevices} įr.)
+              🏫 Mokytojas / Klasė
             </span>
           ` : `
             <span class="badge" style="background:rgba(111,165,138,0.18); color:#9BC4AE; border:1px solid rgba(111,165,138,0.35); font-size:0.75rem; border-radius:2px;">
-              👤 1 įrenginys
+              👤 Asmeninis žiūrovas
             </span>
           `}
         </td>
@@ -619,10 +636,11 @@ export function renderAuthorizedViewersTable() {
         if (res.ok) {
           showToast("Laiškas įrašytas į siuntimo eilę.", "success");
         } else {
-          showToast("Klaida siunčiant laišką", "error");
+          const msg = await parseApiError(res, "Klaida siunčiant laišką");
+          showToast(msg, "error");
         }
       } catch (err) {
-        showToast("Ryšio klaida", "error");
+        showToast(`Nepavyko siųsti laiško: ${err?.message || "Serveris nepasiekiamas"}`, "error");
       } finally {
         btn.disabled = false;
       }
@@ -643,10 +661,11 @@ export function renderAuthorizedViewersTable() {
           renderAuthorizedViewersTable();
           showToast("Žiūrovo prieiga sėkmingai pašalinta.", "success");
         } else {
-          showToast("Nepavyko pašalinti prieigos", "error");
+          const msg = await parseApiError(res, "Nepavyko pašalinti prieigos");
+          showToast(msg, "error");
         }
       } catch (err) {
-        showToast("Ryšio klaida", "error");
+        showToast(`Nepavyko pašalinti prieigos: ${err?.message || "Serveris nepasiekiamas"}`, "error");
       }
     };
   });
@@ -675,9 +694,15 @@ function initViewerTokenForm() {
       const isClassroom = document.getElementById("viewerTypeIndividual")?.checked ? false : true;
       const tokenType = isClassroom ? "classroom" : "individual";
       const classroomLabel = document.getElementById("newViewerClassroomLabel")?.value.trim() || "";
-      const maxConcurrentDevices = isClassroom 
-        ? Math.max(1, Math.min(100, parseInt(document.getElementById("newViewerMaxDevices")?.value || "35", 10)))
-        : 1;
+
+      if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        showToast("Įveskite galiojantį el. pašto adresą.", "error");
+        return;
+      }
+      if (!name) {
+        showToast(isClassroom ? "Įveskite mokytojo vardą ir pavardę." : "Įveskite žiūrovo vardą ir pavardę.", "error");
+        return;
+      }
 
       const res = await FirebaseClient.request("stream.viewers.create", {
         method: "POST",
@@ -689,14 +714,14 @@ function initViewerTokenForm() {
           expiresInHours,
           sendEmail,
           tokenType,
-          classroomLabel,
-          maxConcurrentDevices
+          classroomLabel
         }
       });
 
       if (res.ok) {
         const data = await res.json();
-        showToast(`Mokytojo prieigos žetonas sėkmingai sugeneruotas: ${data.viewer?.token}!`, "success");
+        const kindLabel = isClassroom ? "Mokytojo prieigos žetonas" : "Asmeninis prieigos žetonas";
+        showToast(`${kindLabel} sėkmingai sugeneruotas: ${data.viewer?.token}!`, "success");
         form.reset();
         const rClass = document.getElementById("viewerTypeClassroom");
         if (rClass) rClass.checked = true;
@@ -704,8 +729,6 @@ function initViewerTokenForm() {
         if (cRow) cRow.style.display = "grid";
         const rRole = document.getElementById("newViewerRole");
         if (rRole) rRole.value = "teacher_classroom";
-        const maxDevInput = document.getElementById("newViewerMaxDevices");
-        if (maxDevInput) maxDevInput.value = "35";
 
         await fetchAuthorizedViewers();
         renderAuthorizedViewersTable();
@@ -715,11 +738,11 @@ function initViewerTokenForm() {
           openTokenQrModal(data.viewer);
         }
       } else {
-        const err = await res.json();
-        showToast(err.error || "Nepavyko sugeneruoti žetono", "error");
+        const msg = await parseApiError(res, "Nepavyko sugeneruoti žetono");
+        showToast(msg, "error");
       }
     } catch (err) {
-      showToast("Ryšio klaida", "error");
+      showToast(`Nepavyko sukurti prieigos žetono: ${err?.message || "Serveris nepasiekiamas"}`, "error");
     } finally {
       if (btn) {
         btn.disabled = false;
@@ -747,13 +770,11 @@ async function runBulkClassroomGenerate() {
       const name = parts[0] || "Mokytojas";
       const classroomLabel = parts[1] || name;
       const email = (parts[2] && parts[2].includes("@")) ? parts[2] : `mokytojas_${Date.now()}_${Math.random().toString(36).substring(2, 6)}@mokykla.lt`;
-      const maxConcurrentDevices = parts[3] ? parseInt(parts[3], 10) : 35;
 
       items.push({
         name,
         classroomLabel,
         email,
-        maxConcurrentDevices: isNaN(maxConcurrentDevices) ? 35 : maxConcurrentDevices,
         tokenType: "classroom"
       });
     }
@@ -768,7 +789,7 @@ async function runBulkClassroomGenerate() {
   if (btn) btn.disabled = true;
 
   try {
-    showToast(`Generuojami ${items.length} klasių prieigos žetonai...`, "info");
+    showToast(`Generuojami ${items.length} mokytojų prieigos žetonai...`, "info");
     const res = await FirebaseClient.request("stream.viewers.bulk-create", {
       method: "POST",
       body: { items }
@@ -776,16 +797,16 @@ async function runBulkClassroomGenerate() {
 
     if (res.ok) {
       const data = await res.json();
-      showToast(`Sėkmingai sugeneruoti ${data.count} klasės žetonai!`, "success");
+      showToast(`Sėkmingai sugeneruoti ${data.count} mokytojų žetonai!`, "success");
       if (textarea) textarea.value = "";
       await fetchAuthorizedViewers();
       renderAuthorizedViewersTable();
     } else {
-      const err = await res.json();
-      showToast(err.error || "Klaida generuojant žetonus", "error");
+      const msg = await parseApiError(res, "Klaida generuojant žetonus");
+      showToast(msg, "error");
     }
   } catch (err) {
-    showToast("Ryšio klaida", "error");
+    showToast(`Nepavyko sugeneruoti žetonų: ${err?.message || "Serveris nepasiekiamas"}`, "error");
   } finally {
     if (btn) btn.disabled = false;
   }
@@ -801,18 +822,16 @@ function exportClassroomTokensCsv() {
     return;
   }
 
-  const headers = ["Mokytojas / Klasė", "El. Paštas", "Cloudflare Signed Token", "Tiesioginė Nuoroda", "Maks. Įrenginiai", "Galioja Iki"];
+  const headers = ["Mokytojas / Klasė", "El. Paštas", "Prieigos Žetonas", "Tiesioginė Nuoroda", "Galioja Iki"];
   const rows = listToExport.map(v => {
     const liveLink = `${window.location.origin}/live.html?t=${encodeURIComponent(v.token)}`;
     const label = v.classroomLabel || v.name || "";
-    const devices = v.maxConcurrentDevices || 35;
     const expires = v.expiresAt || "";
     return [
       `"${label.replace(/"/g, '""')}"`,
       `"${(v.email || '').replace(/"/g, '""')}"`,
       `"${(v.token || '').replace(/"/g, '""')}"`,
       `"${liveLink}"`,
-      devices,
       `"${expires}"`
     ].join(",");
   });
@@ -896,7 +915,7 @@ export function renderRsvpTable() {
       : `<span class="badge" style="background:rgba(34,197,94,0.18); color:#4ade80; border:1px solid rgba(34,197,94,0.35); display:inline-flex; align-items:center; gap:5px;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg><span>Gyvai vietoje</span></span>`;
 
     const token = sub.liveToken || "—";
-    const liveLink = sub.liveStreamUrl || `${window.location.origin}/live.html?token=${encodeURIComponent(token)}`;
+    const liveLink = sub.liveStreamUrl || `${window.location.origin}/live.html?t=${encodeURIComponent(token)}`;
 
     return `
       <tr>
@@ -977,11 +996,11 @@ async function updateStreamState(newState) {
       showToast(`Transliacijos būsena sėkmingai atnaujinta į ${newState.toUpperCase()}`, "success");
       window.dispatchEvent(new CustomEvent("refresh-notifications"));
     } else {
-      const err = await res.json();
-      showToast(err.error || "Nepavyko atnaujinti transliacijos būsenos", "error");
+      const msg = await parseApiError(res, "Nepavyko atnaujinti transliacijos būsenos");
+      showToast(msg, "error");
     }
   } catch (err) {
-    showToast("Firebase ryšio klaida", "error");
+    showToast(`Nepavyko atnaujinti transliacijos būsenos: ${err?.message || "Serveris nepasiekiamas"}`, "error");
   }
 }
 
@@ -997,11 +1016,11 @@ async function resendLiveTokenEmail(submissionId) {
       showToast("Laiškas su prieigos nuoroda įrašytas į siuntimo eilę.", "success");
       window.dispatchEvent(new CustomEvent("refresh-notifications"));
     } else {
-      const err = await res.json();
-      showToast(err.error || "Klaida siunčiant laišką", "error");
+      const msg = await parseApiError(res, "Klaida siunčiant laišką");
+      showToast(msg, "error");
     }
   } catch (err) {
-    showToast("Firebase ryšio klaida", "error");
+    showToast(`Nepavyko išsiųsti nuorodos: ${err?.message || "Serveris nepasiekiamas"}`, "error");
   }
 }
 

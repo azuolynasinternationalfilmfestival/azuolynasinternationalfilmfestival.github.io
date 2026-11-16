@@ -381,7 +381,7 @@ export function initAuth(options = {}) {
       showToast("Sėkmingai prisijungta!");
     } catch (err) {
       console.error("Firebase authentication failed:", err.code, err.message);
-      displayAuthError(authErrMsg, err, "Nepavyko prisijungti prie valdymo skydo");
+      displayAuthError(authErrMsg, err, "Nepavyko prisijungti prie sistemos");
     } finally {
       if (submitBtn) {
         submitBtn.disabled = false;
@@ -390,27 +390,6 @@ export function initAuth(options = {}) {
     }
   };
 
-  // Quick Demo Login Bindings for Smooth Role Testing
-  const bindQuickLogin = (btnId, emailVal) => {
-    const btn = document.getElementById(btnId);
-    if (btn) {
-      btn.onclick = (e) => {
-        if (e) e.preventDefault();
-        const emInput = loginEmail || document.getElementById("loginEmail");
-        const pwInput = loginPassword || document.getElementById("loginPassword");
-        if (emInput) emInput.value = emailVal;
-        if (pwInput) {
-          pwInput.value = "";
-          pwInput.focus();
-        }
-      };
-    }
-  };
-
-  bindQuickLogin("quickLoginSuper", "azuolynasfilmfestival@gmail.com");
-  bindQuickLogin("quickLoginKarina", "karina.brdar@gmail.com");
-  bindQuickLogin("quickLoginEditor", "redaktorius@azuolynasfest.lt");
-  bindQuickLogin("quickLoginJudge", "teisejas.komisija@gmail.com");
 
   // Bind Submit Button & Enter keys
   if (loginSubmitBtn) {
@@ -624,8 +603,6 @@ export function initAuth(options = {}) {
             if (currentUserName) {
               if (isSuperAdmin) {
                 currentUserName.textContent = "Pagrindinis Administratorius";
-              } else if (emailLower === "karina.brdar@gmail.com") {
-                currentUserName.textContent = "Karina Brdar";
               } else if (userDoc && (userDoc.name || userDoc.surname)) {
                 currentUserName.textContent = `${userDoc.name || ""} ${userDoc.surname || ""}`.trim();
               } else {

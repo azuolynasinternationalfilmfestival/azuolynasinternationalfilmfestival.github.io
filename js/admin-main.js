@@ -124,7 +124,7 @@ function initTabNavigation() {
       const titleElem = document.getElementById("adminCurrentSectionTitle");
       if (titleElem) {
         const textSpan = btnElem.querySelector("span:not(.badge)");
-        titleElem.textContent = textSpan ? textSpan.textContent.trim() : "Valdymo Skydas";
+        titleElem.textContent = textSpan ? textSpan.textContent.trim() : "Administravimo Portalas";
       }
 
       if (tab.btn === "tabDiagnosticsBtn") {

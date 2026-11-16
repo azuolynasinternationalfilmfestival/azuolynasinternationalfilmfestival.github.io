@@ -97,8 +97,8 @@ function renderVotingMetrics() {
   // Determine top film from submissions or votes
   const submissions = getSubmissionsList();
   if (submissions.length > 0 && statTopFilm) {
-    const sorted = [...submissions].sort((a, b) => (b.votes || 0) - (a.votes || 0));
-    statTopFilm.textContent = sorted[0].title || "—";
+    const sorted = [...submissions].sort((a, b) => (Number(b.votesCount ?? b.votes ?? 0)) - (Number(a.votesCount ?? a.votes ?? 0)));
+    statTopFilm.textContent = sorted[0].filmTitle || sorted[0].title || "—";
   }
 }
 
@@ -119,8 +119,8 @@ export function renderVotingLeaderboard() {
 
   // Sort by combined score or public votes
   list.sort((a, b) => {
-    const aVotes = Number(a.votes || 0);
-    const bVotes = Number(b.votes || 0);
+    const aVotes = Number(a.votesCount ?? a.votes ?? 0);
+    const bVotes = Number(b.votesCount ?? b.votes ?? 0);
     const aJudge = judgeSummaries[a.id]?.averageJudgeScore || 0;
     const bJudge = judgeSummaries[b.id]?.averageJudgeScore || 0;
     return (bVotes + bJudge * 10) - (aVotes + aJudge * 10);
@@ -150,9 +150,9 @@ export function renderVotingLeaderboard() {
         </td>
         <td>
           <div style="font-weight:600; color:var(--text-color); font-family:var(--font-cinema); font-size:0.96rem;">
-            ${escapeHtml(film.title)}
+            ${escapeHtml(film.filmTitle || film.title || 'Be pavadinimo')}
           </div>
-          <div style="font-size:0.75rem; color:var(--text-muted);">${escapeHtml(film.author || '')} &bull; ${escapeHtml(film.school || '')}</div>
+          <div style="font-size:0.75rem; color:var(--text-muted);">${escapeHtml(film.name || film.directorName || film.author || '')} &bull; ${escapeHtml(film.institution || film.school || '')}</div>
         </td>
         <td>
           <span class="badge" style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); color:var(--accent-light); font-size:0.72rem; border-radius:2px;">
@@ -160,7 +160,7 @@ export function renderVotingLeaderboard() {
           </span>
         </td>
         <td style="text-align:center; font-weight:700; color:var(--accent-light);">
-          <span style="font-size:1.05rem;">${film.votes || 0}</span>
+          <span style="font-size:1.05rem;">${Number(film.votesCount ?? film.votes ?? 0)}</span>
           <span style="font-size:0.72rem; color:var(--text-muted); display:block;">balsai</span>
         </td>
         <td style="text-align:center;">
@@ -223,10 +223,10 @@ function openJudgeEvalModal(film) {
   const modal = document.getElementById("judgeEvalModal");
   if (!modal) return;
 
-  document.getElementById("judgeEvalFilmTitle").textContent = film.title || "Filmo vertinimas";
-  document.getElementById("judgeEvalAuthorMeta").textContent = `${film.author || ''} (${film.category || ''})`;
+  document.getElementById("judgeEvalFilmTitle").textContent = film.filmTitle || film.title || "Filmo vertinimas";
+  document.getElementById("judgeEvalAuthorMeta").textContent = `${film.name || film.author || ''} (${film.category || ''})`;
 
-  const currentUserEmail = sessionStorage.getItem("admin_user_email") || "teisejas.komisija@gmail.com";
+  const currentUserEmail = sessionStorage.getItem("admin_user_email") || "";
   const currentUserName = sessionStorage.getItem("admin_user_name") || "Komisijos narys";
 
   document.getElementById("judgeEvalNameInput").value = currentUserName;
@@ -277,7 +277,7 @@ async function handleSaveJudgeEvaluation() {
   if (!currentJudgeFilm) return;
 
   const judgeName = (document.getElementById("judgeEvalNameInput")?.value || "Komisijos narys").trim();
-  const judgeEmail = sessionStorage.getItem("admin_user_email") || "teisejas.komisija@gmail.com";
+  const judgeEmail = sessionStorage.getItem("admin_user_email") || "";
 
   const scores = {
     creativity: Number(document.getElementById("scoreCreativity").value),
@@ -290,12 +290,13 @@ async function handleSaveJudgeEvaluation() {
   const notes = (document.getElementById("judgeEvalNotes")?.value || "").trim();
 
   try {
+    const filmTitleVal = currentJudgeFilm.filmTitle || currentJudgeFilm.title || "Filmas";
     const res = await fetch("/api/admin/judge-evaluation", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         filmId: currentJudgeFilm.id,
-        filmTitle: currentJudgeFilm.title,
+        filmTitle: filmTitleVal,
         judgeEmail,
         judgeName,
         scores,
@@ -305,7 +306,7 @@ async function handleSaveJudgeEvaluation() {
 
     const data = await res.json();
     if (res.ok && data.success) {
-      showToast(`Įvertinimas filmui „${currentJudgeFilm.title}“ išsaugotas!`, "success");
+      showToast(`Įvertinimas filmui „${filmTitleVal}“ išsaugotas!`, "success");
       document.getElementById("judgeEvalModal").classList.add("d-none");
       await loadVotingAnalytics();
       window.dispatchEvent(new CustomEvent("refresh-notifications"));
@@ -326,7 +327,7 @@ async function declareWinnerAction(filmId, awardTitle) {
       body: JSON.stringify({
         filmId,
         awardTitle,
-        year: "2026",
+        year: "2027",
         adminEmail: currentUserEmail
       })
     });

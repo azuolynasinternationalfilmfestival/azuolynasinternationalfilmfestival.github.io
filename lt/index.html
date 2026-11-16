@@ -788,7 +788,7 @@
               <button type="button" class="btn-outline btn-sm" onclick="resetFormView()">Pateikti kitą paraišką</button>
             </div>
 
-            <div style="background: rgba(18, 55, 47, 0.35); border: 1px solid rgba(111,165,138,0.25); border-radius: var(--radius-sm); padding: 12px 18px; margin-bottom: 24px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+            <div style="background: rgba(18, 55, 47, 0.35); border: 1px solid rgba(111,165,138,0.25); border-radius: var(--radius-sm); padding: 12px 18px; margin-bottom: 14px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
               <span style="font-size: 0.88rem; color: var(--text-color); display: flex; align-items: center; gap: 8px;">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--accent-light); flex-shrink:0;"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>
                 <span><strong>Svarbiausia taisyklė:</strong> Filmas turi būti nufilmuotas telefonu/planšete ir griežtai iki 3 min. (180 s).</span>
@@ -798,7 +798,14 @@
               </a>
             </div>
 
-            <form id="submissionForm">
+            <div id="submissionResponseNotice" class="submission-response-notice" role="status">
+              <svg class="submission-response-notice-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+              <div>
+                <strong>Automatinis pateikimas ir atsakymo laikas:</strong> Jūsų paraiška ir PDF patvirtinimas išsiunčiami automatiškai iškart po pateikimo. Oficialų atsakymą dėl paraiškos gausite <strong id="submissionResponseTimeValue">per 5 darbo dienas</strong>.
+              </div>
+            </div>
+
+            <form id="submissionForm" novalidate>
               <!-- Multi-step Form Progress Bar -->
               <div class="form-stepper" id="formStepper" role="progressbar" aria-valuenow="1" aria-valuemin="1" aria-valuemax="3" aria-label="Registracijos žingsniai">
                 <div class="form-stepper-header">
@@ -817,7 +824,7 @@
                 <div class="form-stepper-nav" role="tablist">
                   <button type="button" class="stepper-tab is-active" data-step="1" id="stepTab1" role="tab" aria-selected="true">
                     <span class="stepper-tab-num">1</span>
-                    <span class="stepper-tab-text">Autorius</span>
+                    <span class="stepper-tab-text">Autoriai</span>
                   </button>
                   <button type="button" class="stepper-tab" data-step="2" id="stepTab2" role="tab" aria-selected="false">
                     <span class="stepper-tab-num">2</span>
@@ -830,23 +837,108 @@
                 </div>
               </div>
 
-              <!-- Step 1: Autoriaus duomenys -->
+              <!-- Step 1: Autoriaus ir kūrybinės grupės duomenys -->
               <div class="form-step-panel is-active" id="stepPanel1" data-panel="1">
-                <div class="input-row">
-                  <div class="input-cell">
-                    <label for="participantName">Vardas ir Pavardė *</label>
-                    <input type="text" id="participantName" maxlength="150" class="field" placeholder="Vardenis Pavardenis" required>
+                <input type="hidden" id="participantName" value="">
+
+                <!-- Režisierius / Autorius (Privaloma) -->
+                <div class="author-role-group is-primary-role">
+                  <div class="author-role-header">
+                    <div class="author-role-title-wrap">
+                      <span class="author-role-title">Režisierius / Autorius *</span>
+                      <span class="role-badge-required">Privaloma</span>
+                    </div>
                   </div>
-                  <div class="input-cell">
-                    <label for="participantEmail">El. pašto adresas *</label>
-                    <input type="email" id="participantEmail" maxlength="150" class="field" placeholder="vardas@pavyzdys.lt" required>
+                  <div class="input-row">
+                    <div class="input-cell">
+                      <label for="directorFirstName">Vardas *</label>
+                      <input type="text" id="directorFirstName" maxlength="75" class="field" placeholder="pvz. Lukas" required autocomplete="given-name">
+                      <div class="field-error" id="err_directorFirstName"></div>
+                    </div>
+                    <div class="input-cell">
+                      <label for="directorLastName">Pavardė *</label>
+                      <input type="text" id="directorLastName" maxlength="75" class="field" placeholder="pvz. Kazlauskas" required autocomplete="family-name">
+                      <div class="field-error" id="err_directorLastName"></div>
+                    </div>
                   </div>
+                  <div class="input-cell" style="margin-top: 14px; margin-bottom: 0;">
+                    <label for="participantEmail">El. pašto adresas (patvirtinimui ir PDF paraiškai) *</label>
+                    <input type="email" id="participantEmail" maxlength="150" class="field" placeholder="vardas@domenas.lt" required autocomplete="email">
+                    <div class="field-error" id="err_participantEmail"></div>
+                  </div>
+                </div>
+
+                <!-- Operatorius (Neprivaloma) -->
+                <div class="author-role-group">
+                  <div class="author-role-header">
+                    <div class="author-role-title-wrap">
+                      <span class="author-role-title">Operatorius</span>
+                      <span class="role-badge-optional">Neprivaloma</span>
+                    </div>
+                    <button type="button" class="btn-copy-director" id="copyDirectorToCamera">Tas pats kaip režisierius</button>
+                  </div>
+                  <div class="input-row">
+                    <div class="input-cell">
+                      <label for="cameraOperatorFirstName">Vardas</label>
+                      <input type="text" id="cameraOperatorFirstName" maxlength="75" class="field" placeholder="Operatoriaus vardas">
+                    </div>
+                    <div class="input-cell">
+                      <label for="cameraOperatorLastName">Pavardė</label>
+                      <input type="text" id="cameraOperatorLastName" maxlength="75" class="field" placeholder="Operatoriaus pavardė">
+                    </div>
+                  </div>
+                  <div class="field-error" id="err_cameraOperator"></div>
+                </div>
+
+                <!-- Idėjos autorius (Neprivaloma) -->
+                <div class="author-role-group">
+                  <div class="author-role-header">
+                    <div class="author-role-title-wrap">
+                      <span class="author-role-title">Idėjos autorius</span>
+                      <span class="role-badge-optional">Neprivaloma</span>
+                    </div>
+                    <button type="button" class="btn-copy-director" id="copyDirectorToIdea">Tas pats kaip režisierius</button>
+                  </div>
+                  <div class="input-row">
+                    <div class="input-cell">
+                      <label for="ideaAuthorFirstName">Vardas</label>
+                      <input type="text" id="ideaAuthorFirstName" maxlength="75" class="field" placeholder="Idėjos autoriaus vardas">
+                    </div>
+                    <div class="input-cell">
+                      <label for="ideaAuthorLastName">Pavardė</label>
+                      <input type="text" id="ideaAuthorLastName" maxlength="75" class="field" placeholder="Idėjos autoriaus pavardė">
+                    </div>
+                  </div>
+                  <div class="field-error" id="err_ideaAuthor"></div>
+                </div>
+
+                <!-- Scenarijaus autorius (Neprivaloma) -->
+                <div class="author-role-group">
+                  <div class="author-role-header">
+                    <div class="author-role-title-wrap">
+                      <span class="author-role-title">Scenarijaus autorius</span>
+                      <span class="role-badge-optional">Neprivaloma</span>
+                    </div>
+                    <button type="button" class="btn-copy-director" id="copyDirectorToWriter">Tas pats kaip režisierius</button>
+                  </div>
+                  <div class="input-row">
+                    <div class="input-cell">
+                      <label for="screenwriterFirstName">Vardas</label>
+                      <input type="text" id="screenwriterFirstName" maxlength="75" class="field" placeholder="Scenaristo vardas">
+                    </div>
+                    <div class="input-cell">
+                      <label for="screenwriterLastName">Pavardė</label>
+                      <input type="text" id="screenwriterLastName" maxlength="75" class="field" placeholder="Scenaristo pavardė">
+                    </div>
+                  </div>
+                  <div class="field-error" id="err_screenwriter"></div>
                 </div>
 
                 <div class="input-row">
                   <div class="input-cell">
                     <label for="participantAge">Amžius (10–18 m.) *</label>
                     <input type="number" id="participantAge" min="10" max="18" class="field" required>
+                    <div class="field-error" id="err_participantAge"></div>
                   </div>
                   <div class="input-cell">
                     <label for="participantCategory">Kategorija *</label>
@@ -855,6 +947,7 @@
                       <option value="Category I (10-13)">I Kategorija (10-13 m.)</option>
                       <option value="Category II (14-18)">II Kategorija (14-18 m.)</option>
                     </select>
+                    <div class="field-error" id="err_participantCategory"></div>
                   </div>
                 </div>
 
@@ -862,9 +955,10 @@
                   <div class="input-cell">
                     <label for="countryCity">Šalis ir Miestas *</label>
                     <input type="text" id="countryCity" class="field" placeholder="Lietuva, Kaunas" required>
+                    <div class="field-error" id="err_countryCity"></div>
                   </div>
                   <div class="input-cell">
-                    <label for="institution">Mokykla arba studija</label>
+                    <label for="institution">Mokykla arba studija <span style="font-weight:400; color:var(--text-subtle);">(neprivaloma)</span></label>
                     <input type="text" id="institution" class="field" placeholder="Gimnazijos pavadinimas">
                   </div>
                 </div>
@@ -882,16 +976,19 @@
                 <div class="input-cell">
                   <label for="filmTitle">Filmo pavadinimas *</label>
                   <input type="text" id="filmTitle" maxlength="200" class="field" placeholder="Originalus filmo pavadinimas" required>
+                  <div class="field-error" id="err_filmTitle"></div>
                 </div>
 
                 <div class="input-cell">
                   <label for="deviceModel">Kameros / Įrenginio modelis *</label>
                   <input type="text" id="deviceModel" class="field" placeholder="pvz. iPhone 14 Pro, Samsung Galaxy Tab" required>
+                  <div class="field-error" id="err_deviceModel"></div>
                 </div>
 
                 <div class="input-cell">
                   <label for="synopsis">Trumpas aprašymas / Idėja *</label>
                   <textarea id="synopsis" class="field" placeholder="Kaip filmas atskleidžia temą?" required></textarea>
+                  <div class="field-error" id="err_synopsis"></div>
                 </div>
 
                 <!-- Ceremony Attendance (RSVP) -->
@@ -935,33 +1032,70 @@
                 </div>
               </div>
 
-              <!-- Step 3: Vaizdo įrašo įkėlimas ir patvirtinimai -->
+              <!-- Step 3: Vaizdo įrašo įkėlimas / nuoroda ir patvirtinimai -->
               <div class="form-step-panel" id="stepPanel3" data-panel="3" style="display: none;">
                 <div class="input-cell">
                   <label style="font-weight: 700; color: var(--text-color); margin-bottom: 8px; display: block;">
-                    Vaizdo įrašo failas (MP4 / MOV / WEBM, iki 3 minučių) *
+                    Vaizdo įrašo pateikimo būdas (MP4 / MOV / WEBM, iki 3 min., iki 300 MB) *
                   </label>
-                  <div class="drop-area" id="uploadZone">
-                    <svg class="drop-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                      <rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect>
-                      <line x1="7" y1="2" x2="7" y2="22"></line>
-                      <line x1="17" y1="2" x2="17" y2="22"></line>
-                      <line x1="2" y1="12" x2="22" y2="12"></line>
-                      <line x1="2" y1="7" x2="7" y2="7"></line>
-                      <line x1="2" y1="17" x2="7" y2="17"></line>
-                      <line x1="17" y1="17" x2="22" y2="17"></line>
-                      <line x1="17" y1="7" x2="22" y2="7"></line>
-                    </svg>
-                    <div class="drop-title">Pasirinkite arba įtempkite vaizdo įrašą</div>
-                    <div class="drop-sub">Telefonu arba planšete filmuotas darbas • Maksimali trukmė 180 s (3 min.)</div>
-                    <div class="drop-browse-btn">
+
+                  <div class="video-source-toggle" role="tablist" aria-label="Vaizdo įrašo pateikimo būdas">
+                    <button type="button" class="video-source-btn is-active" id="videoSourceFileBtn" data-source="upload" role="tab" aria-selected="true">
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
-                      <span>Pasirinkti failą iš įrenginio</span>
-                    </div>
-                    <input type="file" id="videoFileInput" accept="video/mp4,video/quicktime,video/webm" required>
+                      <span>Įkelti failą</span>
+                    </button>
+                    <button type="button" class="video-source-btn" id="videoSourceLinkBtn" data-source="link" role="tab" aria-selected="false">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+                      <span>Pateikti vaizdo nuorodą</span>
+                    </button>
                   </div>
+
+                  <div id="videoUploadPanel">
+                    <div class="drop-area" id="uploadZone">
+                      <svg class="drop-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect>
+                        <line x1="7" y1="2" x2="7" y2="22"></line>
+                        <line x1="17" y1="2" x2="17" y2="22"></line>
+                        <line x1="2" y1="12" x2="22" y2="12"></line>
+                        <line x1="2" y1="7" x2="7" y2="7"></line>
+                        <line x1="2" y1="17" x2="7" y2="17"></line>
+                        <line x1="17" y1="17" x2="22" y2="17"></line>
+                        <line x1="17" y1="7" x2="22" y2="7"></line>
+                      </svg>
+                      <div class="drop-title">Pasirinkite arba įtempkite vaizdo įrašą</div>
+                      <div class="drop-sub">Telefonu arba planšete filmuotas darbas • MP4, MOV, WEBM • iki 180 s (3 min.) • iki 300 MB</div>
+                      <div class="drop-browse-btn">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                        <span>Pasirinkti failą iš įrenginio</span>
+                      </div>
+                      <input type="file" id="videoFileInput" accept="video/mp4,video/quicktime,video/webm,.mp4,.mov,.webm">
+                    </div>
+                  </div>
+
+                  <div id="videoLinkPanel" class="video-link-box" style="display: none;">
+                    <label for="videoLinkInput">Vaizdo įrašo HTTPS nuoroda (YouTube, Vimeo, Google Drive arba tiesioginis MP4/MOV/WEBM) *</label>
+                    <input type="url" id="videoLinkInput" class="field" placeholder="https://youtu.be/... arba https://drive.google.com/...">
+                    <div class="video-link-hint">
+                      Jei dalijatės „Google Drive“ nuoroda, įsitikinkite, kad nustatyta prieiga „Bet kas turintis nuorodą gali peržiūrėti“. Tiesioginėms MP4/MOV/WEBM nuorodoms automatiškai patikrinama trukmė (&le; 180 s) ir raiška.
+                    </div>
+                    <div class="field-error" id="err_videoLinkInput"></div>
+                  </div>
+
                   <div id="uploadFeedback" class="drop-alert"></div>
-                  
+
+                  <div id="videoValidationSummary" class="video-validation-card" aria-live="polite">
+                    <div class="video-validation-header">
+                      <span class="video-validation-title">Automatinė taisyklių patikra</span>
+                      <span id="videoValidationStatusBadge" class="video-validation-badge is-pending">Laukiama įrašo</span>
+                    </div>
+                    <ul id="videoValidationChecklist" class="validation-checklist">
+                      <li class="validation-check-item"><span>• Formatas: MP4, MOV arba WEBM</span></li>
+                      <li class="validation-check-item"><span>• Maksimali trukmė: iki 180 s (3 min.)</span></li>
+                      <li class="validation-check-item"><span>• Maksimalus failo dydis: iki 300 MB</span></li>
+                      <li class="validation-check-item"><span>• Minimali vaizdo raiška: nuo 320×240 px</span></li>
+                    </ul>
+                  </div>
+
                   <div class="bar-box" id="progressContainer">
                     <div class="bar-line">
                       <div class="bar-fill" id="progressFill"></div>
@@ -1477,6 +1611,15 @@
         const phElem = document.getElementById("dynRecordingPlaceholder");
         if (phElem) phElem.textContent = ph;
       }
+
+      const respValEl = document.getElementById("submissionResponseTimeValue");
+      if (respValEl) {
+        const cfgResp = (d.submissionResponseTime && d.submissionResponseTime.lt)
+          || data.submissionResponseTime
+          || (typeof SUBMISSION_RESPONSE_CONFIG !== "undefined" && SUBMISSION_RESPONSE_CONFIG.lt)
+          || "per 5 darbo dienas";
+        respValEl.textContent = cfgResp;
+      }
     }
 
     window.FestivalApi.hasServer()
@@ -1772,6 +1915,123 @@
     let pendingSubmission = null;
     let verifiedVideoFile = null;
     let videoDurationSeconds = 0;
+    let videoSourceType = "upload";
+    let verifiedVideoLink = "";
+    let videoValidationError = "";
+    let videoFileMeta = { fileName: "", mimeType: "", sizeBytes: 0, width: 0, height: 0, resolution: "" };
+
+    const VIDEO_RULES = (typeof VIDEO_VALIDATION_RULES !== "undefined" && VIDEO_VALIDATION_RULES) || {
+      maxDurationSeconds: 180,
+      maxSizeBytes: 300 * 1024 * 1024,
+      maxSizeMB: 300,
+      allowedExtensions: ["mp4", "mov", "webm"],
+      allowedMimeTypes: ["video/mp4", "video/quicktime", "video/webm"],
+      minWidth: 320,
+      minHeight: 240,
+      allowedLinkHosts: ["youtube.com", "www.youtube.com", "m.youtube.com", "youtu.be", "vimeo.com", "player.vimeo.com", "drive.google.com", "docs.google.com", "cloudflarestream.com"]
+    };
+
+    const EMAIL_REGEX_STRICT = /^[^\s@,;<>]+@[^\s@,;<>]+\.[^\s@,;<>]+$/;
+
+    function setFieldError(fieldId, errorId, message) {
+      const inputEl = fieldId ? document.getElementById(fieldId) : null;
+      const errEl = errorId ? document.getElementById(errorId) : null;
+      if (inputEl && inputEl.classList) {
+        if (message) inputEl.classList.add("is-invalid");
+        else inputEl.classList.remove("is-invalid");
+      }
+      if (errEl) {
+        errEl.textContent = message || "";
+        if (errEl.classList) {
+          if (message) errEl.classList.add("visible");
+          else errEl.classList.remove("visible");
+        }
+      }
+    }
+
+    function clearRolePairErrors() {
+      setFieldError("cameraOperatorFirstName", "err_cameraOperator", "");
+      setFieldError("cameraOperatorLastName", null, "");
+      setFieldError("ideaAuthorFirstName", "err_ideaAuthor", "");
+      setFieldError("ideaAuthorLastName", null, "");
+      setFieldError("screenwriterFirstName", "err_screenwriter", "");
+      setFieldError("screenwriterLastName", null, "");
+    }
+
+    function syncParticipantFullName() {
+      const df = (document.getElementById("directorFirstName")?.value || "").trim();
+      const dl = (document.getElementById("directorLastName")?.value || "").trim();
+      const fullEl = document.getElementById("participantName");
+      const combined = [df, dl].filter(Boolean).join(" ").trim();
+      if (fullEl && combined) fullEl.value = combined;
+      return combined || (fullEl?.value || "").trim();
+    }
+
+    ["directorFirstName", "directorLastName"].forEach((id) => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.addEventListener("input", () => {
+          syncParticipantFullName();
+          setFieldError(id, `err_${id}`, "");
+        });
+      }
+    });
+
+    function bindCopyDirectorButton(btnId, firstTargetId, lastTargetId, errTargetId) {
+      const btn = document.getElementById(btnId);
+      if (!btn) return;
+      btn.addEventListener("click", () => {
+        const df = (document.getElementById("directorFirstName")?.value || "").trim();
+        const dl = (document.getElementById("directorLastName")?.value || "").trim();
+        if (!df && !dl) {
+          showToast("Pirmiausia įveskite režisieriaus vardą ir pavardę.", "error");
+          return;
+        }
+        const tFirst = document.getElementById(firstTargetId);
+        const tLast = document.getElementById(lastTargetId);
+        if (tFirst) tFirst.value = df;
+        if (tLast) tLast.value = dl;
+        setFieldError(firstTargetId, errTargetId, "");
+        setFieldError(lastTargetId, null, "");
+      });
+    }
+
+    bindCopyDirectorButton("copyDirectorToCamera", "cameraOperatorFirstName", "cameraOperatorLastName", "err_cameraOperator");
+    bindCopyDirectorButton("copyDirectorToIdea", "ideaAuthorFirstName", "ideaAuthorLastName", "err_ideaAuthor");
+    bindCopyDirectorButton("copyDirectorToWriter", "screenwriterFirstName", "screenwriterLastName", "err_screenwriter");
+
+    [
+      ["participantEmail", "err_participantEmail"],
+      ["participantAge", "err_participantAge"],
+      ["participantCategory", "err_participantCategory"],
+      ["countryCity", "err_countryCity"],
+      ["filmTitle", "err_filmTitle"],
+      ["deviceModel", "err_deviceModel"],
+      ["synopsis", "err_synopsis"]
+    ].forEach(([fid, eid]) => {
+      const el = document.getElementById(fid);
+      if (el) {
+        el.addEventListener("input", () => setFieldError(fid, eid, ""));
+        el.addEventListener("change", () => setFieldError(fid, eid, ""));
+      }
+    });
+
+    [
+      ["cameraOperatorFirstName", "cameraOperatorLastName", "err_cameraOperator"],
+      ["ideaAuthorFirstName", "ideaAuthorLastName", "err_ideaAuthor"],
+      ["screenwriterFirstName", "screenwriterLastName", "err_screenwriter"]
+    ].forEach(([fid, lid, eid]) => {
+      const fEl = document.getElementById(fid);
+      const lEl = document.getElementById(lid);
+      [fEl, lEl].forEach((el) => {
+        if (el) {
+          el.addEventListener("input", () => {
+            setFieldError(fid, eid, "");
+            setFieldError(lid, null, "");
+          });
+        }
+      });
+    });
 
     const ageInput = document.getElementById("participantAge");
     const catSelect = document.getElementById("participantCategory");
@@ -1780,12 +2040,317 @@
         const val = parseInt(e.target.value, 10);
         if (val >= 10 && val <= 13) catSelect.value = "Category I (10-13)";
         else if (val >= 14 && val <= 18) catSelect.value = "Category II (14-18)";
+        setFieldError("participantCategory", "err_participantCategory", "");
       });
+    }
+
+    function renderVideoValidationSummary(state, checks) {
+      const card = document.getElementById("videoValidationSummary");
+      const badge = document.getElementById("videoValidationStatusBadge");
+      const list = document.getElementById("videoValidationChecklist");
+      if (card && card.classList) {
+        card.classList.remove("is-pass", "is-fail");
+        if (state === "pass") card.classList.add("is-pass");
+        else if (state === "fail") card.classList.add("is-fail");
+      }
+      if (badge) {
+        if (badge.classList) {
+          badge.classList.remove("is-pass", "is-fail", "is-pending");
+          badge.classList.add(state === "pass" ? "is-pass" : (state === "fail" ? "is-fail" : "is-pending"));
+        }
+        badge.textContent = state === "pass" ? "ATITINKA TAISYKLES" : (state === "fail" ? "NEATITINKA TAISYKLIŲ" : "Laukiama įrašo");
+      }
+      if (list && Array.isArray(checks)) {
+        list.innerHTML = checks.map((c) => {
+          const icon = c.ok === true ? "✓" : (c.ok === false ? "✕" : "•");
+          const cls = c.ok === true ? "is-pass" : (c.ok === false ? "is-fail" : "");
+          return `<li class="validation-check-item ${cls}"><span>${icon}</span><span>${c.label}</span></li>`;
+        }).join("");
+      }
+    }
+
+    function validateVideoLinkValue(rawUrl) {
+      const cleaned = String(rawUrl || "").trim();
+      if (!cleaned) {
+        return { valid: false, reason: "Įveskite vaizdo įrašo HTTPS nuorodą.", checks: [] };
+      }
+      let parsed = null;
+      try {
+        parsed = new URL(cleaned);
+      } catch (e) {
+        parsed = null;
+      }
+      if (!parsed || parsed.protocol !== "https:") {
+        return {
+          valid: false,
+          reason: "Nuoroda privalo prasidėti https:// ir būti galiojantis internetinis adresas.",
+          checks: [
+            { ok: false, label: "Protokolas: būtina saugi HTTPS nuoroda (https://...)" },
+            { ok: false, label: "Formatas / Platforma: negalima patvirtinti netinkamos nuorodos" }
+          ]
+        };
+      }
+      const host = parsed.hostname.toLowerCase();
+      const pathname = parsed.pathname.toLowerCase();
+      const isAllowedHost = (VIDEO_RULES.allowedLinkHosts || []).some((h) => host === h || host.endsWith("." + h));
+      const isDirectVideo = /\.(mp4|mov|webm)$/i.test(pathname);
+      if (!isAllowedHost && !isDirectVideo) {
+        return {
+          valid: false,
+          reason: "Nuoroda turi vesti į YouTube, Vimeo, Google Drive, Cloudflare Stream arba tiesioginį MP4/MOV/WEBM failą.",
+          checks: [
+            { ok: true, label: `HTTPS protokolas galiojantis (${host})` },
+            { ok: false, label: "Šaltinis: leistinos tik YouTube, Vimeo, Google Drive, Cloudflare Stream ar tiesioginės .mp4/.mov/.webm nuorodos" }
+          ]
+        };
+      }
+      return {
+        valid: true,
+        url: cleaned,
+        isDirectVideo,
+        host,
+        checks: [
+          { ok: true, label: `HTTPS nuoroda galiojanti (${host})` },
+          { ok: true, label: isDirectVideo ? "Tiesioginis vaizdo failo formatas patvirtintas" : "Palaikoma vaizdo platforma patvirtinta" },
+          { ok: true, label: `Festivalio limitas: trukmė iki ${VIDEO_RULES.maxDurationSeconds} s (3 min.)` }
+        ]
+      };
     }
 
     const fileInput = document.getElementById("videoFileInput");
     const feedback = document.getElementById("uploadFeedback");
     const uploadZone = document.getElementById("uploadZone");
+    const videoLinkInput = document.getElementById("videoLinkInput");
+    const videoSourceFileBtn = document.getElementById("videoSourceFileBtn");
+    const videoSourceLinkBtn = document.getElementById("videoSourceLinkBtn");
+    const videoUploadPanel = document.getElementById("videoUploadPanel");
+    const videoLinkPanel = document.getElementById("videoLinkPanel");
+
+    function setVideoSourceMode(mode) {
+      videoSourceType = mode === "link" ? "link" : "upload";
+      if (videoSourceFileBtn && videoSourceFileBtn.classList) {
+        videoSourceFileBtn.classList.toggle("is-active", videoSourceType === "upload");
+        if (typeof videoSourceFileBtn.setAttribute === "function") videoSourceFileBtn.setAttribute("aria-selected", String(videoSourceType === "upload"));
+      }
+      if (videoSourceLinkBtn && videoSourceLinkBtn.classList) {
+        videoSourceLinkBtn.classList.toggle("is-active", videoSourceType === "link");
+        if (typeof videoSourceLinkBtn.setAttribute === "function") videoSourceLinkBtn.setAttribute("aria-selected", String(videoSourceType === "link"));
+      }
+      if (videoUploadPanel && videoUploadPanel.style) {
+        videoUploadPanel.style.display = videoSourceType === "upload" ? "block" : "none";
+      }
+      if (videoLinkPanel && videoLinkPanel.style) {
+        videoLinkPanel.style.display = videoSourceType === "link" ? "block" : "none";
+      }
+      if (feedback) {
+        feedback.className = "drop-alert";
+        feedback.textContent = "";
+      }
+      setFieldError("videoLinkInput", "err_videoLinkInput", "");
+      if (videoSourceType === "upload") {
+        if (verifiedVideoFile && !videoValidationError) {
+          // keep current valid file summary
+        } else {
+          renderVideoValidationSummary("pending", [
+            { ok: null, label: "Formatas: MP4, MOV arba WEBM" },
+            { ok: null, label: `Maksimali trukmė: iki ${VIDEO_RULES.maxDurationSeconds} s (3 min.)` },
+            { ok: null, label: `Maksimalus failo dydis: iki ${VIDEO_RULES.maxSizeMB} MB` },
+            { ok: null, label: `Minimali vaizdo raiška: nuo ${VIDEO_RULES.minWidth}×${VIDEO_RULES.minHeight} px` }
+          ]);
+        }
+      } else {
+        handleVideoLinkChange();
+      }
+    }
+
+    if (videoSourceFileBtn) videoSourceFileBtn.addEventListener("click", () => setVideoSourceMode("upload"));
+    if (videoSourceLinkBtn) videoSourceLinkBtn.addEventListener("click", () => setVideoSourceMode("link"));
+
+    function validateSelectedVideoFile(file) {
+      if (!file) return;
+      verifiedVideoFile = null;
+      videoValidationError = "";
+      videoDurationSeconds = 0;
+      const ext = (file.name || "").split(".").pop().toLowerCase();
+      const mime = (file.type || "").toLowerCase();
+      const sizeBytes = Number(file.size || 0);
+      const sizeMB = sizeBytes / (1024 * 1024);
+
+      const extValid = (VIDEO_RULES.allowedExtensions || ["mp4", "mov", "webm"]).includes(ext);
+      const mimeValid = !mime || (VIDEO_RULES.allowedMimeTypes || []).includes(mime) || mime.startsWith("video/");
+      const sizeValid = sizeBytes > 0 && sizeBytes <= VIDEO_RULES.maxSizeBytes;
+
+      if (!extValid || !mimeValid) {
+        videoValidationError = `Netinkamas failo formatas (.${ext || "?"}). Leidžiami tik MP4, MOV arba WEBM formatai.`;
+        if (fileInput) fileInput.value = "";
+        if (feedback) {
+          feedback.className = "drop-alert error";
+          feedback.textContent = videoValidationError;
+        }
+        renderVideoValidationSummary("fail", [
+          { ok: false, label: videoValidationError },
+          { ok: sizeValid, label: `Failo dydis: ${sizeMB.toFixed(1)} MB / ${VIDEO_RULES.maxSizeMB} MB` }
+        ]);
+        return;
+      }
+
+      if (!sizeValid) {
+        videoValidationError = sizeBytes <= 0
+          ? "Pasirinktas vaizdo įrašo failas yra tuščias (0 B)."
+          : `Failas per didelis (${sizeMB.toFixed(1)} MB). Maksimalus leistinas dydis yra ${VIDEO_RULES.maxSizeMB} MB.`;
+        if (fileInput) fileInput.value = "";
+        if (feedback) {
+          feedback.className = "drop-alert error";
+          feedback.textContent = videoValidationError;
+        }
+        renderVideoValidationSummary("fail", [
+          { ok: true, label: `Formatas tinkamas: .${ext.toUpperCase()}` },
+          { ok: false, label: videoValidationError }
+        ]);
+        return;
+      }
+
+      const videoElement = document.createElement("video");
+      videoElement.preload = "metadata";
+      const blobUrl = (typeof window !== "undefined" && window.URL && typeof window.URL.createObjectURL === "function")
+        ? window.URL.createObjectURL(file)
+        : "";
+      if (blobUrl) videoElement.src = blobUrl;
+
+      const handleLoadedMetadata = () => {
+        if (blobUrl && window.URL && typeof window.URL.revokeObjectURL === "function") {
+          window.URL.revokeObjectURL(blobUrl);
+        }
+        const dur = Number(videoElement.duration || 0);
+        videoDurationSeconds = Number.isFinite(dur) ? Math.round(dur) : 0;
+        const vw = Number(videoElement.videoWidth || 0);
+        const vh = Number(videoElement.videoHeight || 0);
+        const resLabel = (vw > 0 && vh > 0) ? `${vw}×${vh}` : "Nenustatyta (naršyklės srautas)";
+
+        const durValid = videoDurationSeconds > 0 && videoDurationSeconds <= VIDEO_RULES.maxDurationSeconds;
+        const resValid = (vw === 0 && vh === 0) || (vw >= VIDEO_RULES.minWidth && vh >= VIDEO_RULES.minHeight);
+
+        const checks = [
+          { ok: true, label: `Formatas tinkamas: .${ext.toUpperCase()} (${file.name})` },
+          { ok: true, label: `Failo dydis tinkamas: ${sizeMB.toFixed(1)} MB / ${VIDEO_RULES.maxSizeMB} MB` },
+          { ok: durValid, label: durValid ? `Trukmė tinkama: ${videoDurationSeconds} s / ${VIDEO_RULES.maxDurationSeconds} s` : `Trukmė netinkama (${videoDurationSeconds} s): privalo būti nuo 1 iki ${VIDEO_RULES.maxDurationSeconds} s` },
+          { ok: resValid, label: resValid ? `Raiška tinkama: ${resLabel}` : `Raiška per maža (${vw}×${vh} px): minimali ${VIDEO_RULES.minWidth}×${VIDEO_RULES.minHeight} px` }
+        ];
+
+        if (!durValid || !resValid) {
+          verifiedVideoFile = null;
+          videoValidationError = !durValid
+            ? `Klaida: filmo trukmė yra ${videoDurationSeconds} s. Leidžiama griežtai nuo 1 iki ${VIDEO_RULES.maxDurationSeconds} s (3 min.)!`
+            : `Klaida: vaizdo raiška per maža (${vw}×${vh} px). Minimali leistina raiška yra ${VIDEO_RULES.minWidth}×${VIDEO_RULES.minHeight} px.`;
+          if (fileInput) fileInput.value = "";
+          if (feedback) {
+            feedback.className = "drop-alert error";
+            feedback.textContent = videoValidationError;
+          }
+          renderVideoValidationSummary("fail", checks);
+        } else {
+          verifiedVideoFile = file;
+          videoValidationError = "";
+          videoFileMeta = {
+            fileName: file.name,
+            mimeType: mime || `video/${ext}`,
+            sizeBytes,
+            width: vw,
+            height: vh,
+            resolution: vw > 0 && vh > 0 ? `${vw}x${vh}` : ""
+          };
+          if (feedback) {
+            feedback.className = "drop-alert success";
+            feedback.textContent = `✓ Vaizdo įrašas atitinka visas festivalio taisykles: ${videoDurationSeconds} s, ${sizeMB.toFixed(1)} MB (${file.name})`;
+          }
+          renderVideoValidationSummary("pass", checks);
+        }
+      };
+
+      videoElement.onloadedmetadata = handleLoadedMetadata;
+      videoElement.onerror = () => {
+        if (blobUrl && window.URL && typeof window.URL.revokeObjectURL === "function") {
+          window.URL.revokeObjectURL(blobUrl);
+        }
+        verifiedVideoFile = null;
+        videoValidationError = "Nepavyko nuskaityti vaizdo įrašo metaduomenų. Patikrinkite, ar failas nėra pažeistas (naudokite H.264 MP4/MOV/WEBM).";
+        if (fileInput) fileInput.value = "";
+        if (feedback) {
+          feedback.className = "drop-alert error";
+          feedback.textContent = videoValidationError;
+        }
+        renderVideoValidationSummary("fail", [
+          { ok: false, label: videoValidationError }
+        ]);
+      };
+    }
+
+    function handleVideoLinkChange() {
+      if (videoSourceType !== "link") return;
+      const rawUrl = videoLinkInput ? videoLinkInput.value.trim() : "";
+      verifiedVideoLink = "";
+      videoValidationError = "";
+      if (!rawUrl) {
+        setFieldError("videoLinkInput", "err_videoLinkInput", "");
+        renderVideoValidationSummary("pending", [
+          { ok: null, label: "Įveskite YouTube, Vimeo, Google Drive arba tiesioginę MP4/MOV/WEBM HTTPS nuorodą" },
+          { ok: null, label: `Trukmės limitas: iki ${VIDEO_RULES.maxDurationSeconds} s (3 min.)` }
+        ]);
+        return;
+      }
+      const check = validateVideoLinkValue(rawUrl);
+      if (!check.valid) {
+        videoValidationError = check.reason;
+        setFieldError("videoLinkInput", "err_videoLinkInput", check.reason);
+        renderVideoValidationSummary("fail", check.checks);
+        return;
+      }
+      setFieldError("videoLinkInput", "err_videoLinkInput", "");
+      if (check.isDirectVideo) {
+        const probe = document.createElement("video");
+        probe.preload = "metadata";
+        probe.src = check.url;
+        verifiedVideoLink = check.url;
+        videoDurationSeconds = 0;
+        videoFileMeta = { fileName: check.url.split("/").pop() || "video-link", mimeType: "text/uri-list", sizeBytes: 0, width: 0, height: 0, resolution: "" };
+        renderVideoValidationSummary("pass", check.checks);
+        probe.onloadedmetadata = () => {
+          if (videoLinkInput && videoLinkInput.value.trim() !== check.url) return;
+          const dur = Math.round(Number(probe.duration || 0));
+          const vw = Number(probe.videoWidth || 0);
+          const vh = Number(probe.videoHeight || 0);
+          videoDurationSeconds = dur;
+          if (dur > VIDEO_RULES.maxDurationSeconds) {
+            verifiedVideoLink = "";
+            videoValidationError = `Nuorodos vaizdo įrašas per ilgas (${dur} s). Maksimali trukmė yra ${VIDEO_RULES.maxDurationSeconds} s.`;
+            setFieldError("videoLinkInput", "err_videoLinkInput", videoValidationError);
+            renderVideoValidationSummary("fail", [
+              ...check.checks.slice(0, 2),
+              { ok: false, label: videoValidationError }
+            ]);
+          } else {
+            videoFileMeta.width = vw;
+            videoFileMeta.height = vh;
+            videoFileMeta.resolution = vw > 0 && vh > 0 ? `${vw}x${vh}` : "";
+            renderVideoValidationSummary("pass", [
+              ...check.checks.slice(0, 2),
+              { ok: true, label: `Patikrinta trukmė: ${dur} s / ${VIDEO_RULES.maxDurationSeconds} s` },
+              ...(vw > 0 && vh > 0 ? [{ ok: vw >= VIDEO_RULES.minWidth && vh >= VIDEO_RULES.minHeight, label: `Raiška: ${vw}×${vh} px` }] : [])
+            ]);
+          }
+        };
+      } else {
+        verifiedVideoLink = check.url;
+        videoDurationSeconds = 0;
+        videoFileMeta = { fileName: check.host, mimeType: "text/uri-list", sizeBytes: 0, width: 0, height: 0, resolution: "" };
+        renderVideoValidationSummary("pass", check.checks);
+      }
+    }
+
+    if (videoLinkInput) {
+      videoLinkInput.addEventListener("input", handleVideoLinkChange);
+      videoLinkInput.addEventListener("blur", handleVideoLinkChange);
+    }
 
     if (uploadZone) {
       ["dragenter", "dragover"].forEach(evt => {
@@ -1794,11 +2359,17 @@
           if (uploadZone.classList && uploadZone.classList.add) uploadZone.classList.add("dragover");
         });
       });
-      ["dragleave", "drop"].forEach(evt => {
-        uploadZone.addEventListener(evt, (e) => {
-          if (e && e.preventDefault) e.preventDefault();
-          if (uploadZone.classList && uploadZone.classList.remove) uploadZone.classList.remove("dragover");
-        });
+      uploadZone.addEventListener("dragleave", (e) => {
+        if (e && e.preventDefault) e.preventDefault();
+        if (uploadZone.classList && uploadZone.classList.remove) uploadZone.classList.remove("dragover");
+      });
+      uploadZone.addEventListener("drop", (e) => {
+        if (e && e.preventDefault) e.preventDefault();
+        if (uploadZone.classList && uploadZone.classList.remove) uploadZone.classList.remove("dragover");
+        const droppedFile = e && e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+        if (droppedFile) {
+          validateSelectedVideoFile(droppedFile);
+        }
       });
     }
 
@@ -1806,34 +2377,7 @@
       fileInput.addEventListener("change", (e) => {
         const file = e.target.files && e.target.files[0];
         if (!file) return;
-
-        const videoElement = document.createElement("video");
-        videoElement.preload = "metadata";
-        if (window.URL && typeof window.URL.createObjectURL === "function") {
-          videoElement.src = URL.createObjectURL(file);
-        }
-
-        videoElement.onloadedmetadata = () => {
-          if (window.URL && typeof window.URL.revokeObjectURL === "function") {
-            window.URL.revokeObjectURL(videoElement.src);
-          }
-          videoDurationSeconds = Math.round(videoElement.duration);
-
-          if (videoDurationSeconds > 180) {
-            verifiedVideoFile = null;
-            fileInput.value = "";
-            if (feedback) {
-              feedback.className = "drop-alert error";
-              feedback.textContent = `Klaida: filmo trukmė yra ${videoDurationSeconds} s. Leidžiama griežtai iki 180 s (3 min.)!`;
-            }
-          } else {
-            verifiedVideoFile = file;
-            if (feedback) {
-              feedback.className = "drop-alert success";
-              feedback.textContent = `✓ Trukmė tinkama: ${videoDurationSeconds} s (${file.name})`;
-            }
-          }
-        };
+        validateSelectedVideoFile(file);
       });
     }
 
@@ -1855,7 +2399,7 @@
     const stepPercentText = document.getElementById("stepPercentText");
 
     const stepTitlesLt = [
-      "Autoriaus duomenys",
+      "Autorių ir kūrybinės grupės duomenys",
       "Filmas ir ceremonija",
       "Vaizdo įrašas ir pateikimas"
     ];
@@ -1918,54 +2462,140 @@
       });
     }
 
-    function validateStep1() {
-      const name = document.getElementById("participantName");
-      const email = document.getElementById("participantEmail");
-      const age = document.getElementById("participantAge");
-      const category = document.getElementById("participantCategory");
-      const location = document.getElementById("countryCity");
+    function readAuthorData() {
+      const dfEl = document.getElementById("directorFirstName");
+      const dlEl = document.getElementById("directorLastName");
+      const legacyEl = document.getElementById("participantName");
 
-      if (name && typeof name.checkValidity === "function" && !name.checkValidity()) {
-        if (typeof name.reportValidity === "function") name.reportValidity();
-        return false;
+      let directorFirstName = (dfEl?.value || "").trim();
+      let directorLastName = (dlEl?.value || "").trim();
+      const legacyName = (legacyEl?.value || "").trim();
+
+      if (!directorFirstName && !directorLastName && legacyName) {
+        const parts = legacyName.split(/\s+/);
+        directorFirstName = parts[0] || "";
+        directorLastName = parts.slice(1).join(" ") || "";
       }
-      if (email && typeof email.checkValidity === "function" && !email.checkValidity()) {
-        if (typeof email.reportValidity === "function") email.reportValidity();
-        return false;
+
+      const directorName = [directorFirstName, directorLastName].filter(Boolean).join(" ").trim() || legacyName;
+      if (legacyEl && directorName) legacyEl.value = directorName;
+
+      const cameraOperatorFirstName = (document.getElementById("cameraOperatorFirstName")?.value || "").trim();
+      const cameraOperatorLastName = (document.getElementById("cameraOperatorLastName")?.value || "").trim();
+      const ideaAuthorFirstName = (document.getElementById("ideaAuthorFirstName")?.value || "").trim();
+      const ideaAuthorLastName = (document.getElementById("ideaAuthorLastName")?.value || "").trim();
+      const screenwriterFirstName = (document.getElementById("screenwriterFirstName")?.value || "").trim();
+      const screenwriterLastName = (document.getElementById("screenwriterLastName")?.value || "").trim();
+
+      return {
+        name: directorName,
+        directorFirstName,
+        directorLastName,
+        cameraOperatorFirstName,
+        cameraOperatorLastName,
+        cameraOperator: [cameraOperatorFirstName, cameraOperatorLastName].filter(Boolean).join(" ").trim(),
+        ideaAuthorFirstName,
+        ideaAuthorLastName,
+        ideaAuthor: [ideaAuthorFirstName, ideaAuthorLastName].filter(Boolean).join(" ").trim(),
+        screenwriterFirstName,
+        screenwriterLastName,
+        screenwriter: [screenwriterFirstName, screenwriterLastName].filter(Boolean).join(" ").trim()
+      };
+    }
+
+    function validateStep1() {
+      const authors = readAuthorData();
+      const email = (document.getElementById("participantEmail")?.value || "").trim();
+      const ageRaw = (document.getElementById("participantAge")?.value || "").trim();
+      const age = Number(ageRaw);
+      const category = (document.getElementById("participantCategory")?.value || "").trim();
+      const location = (document.getElementById("countryCity")?.value || "").trim();
+
+      let valid = true;
+
+      setFieldError("directorFirstName", "err_directorFirstName", "");
+      setFieldError("directorLastName", "err_directorLastName", "");
+      setFieldError("participantEmail", "err_participantEmail", "");
+      clearRolePairErrors();
+      setFieldError("participantAge", "err_participantAge", "");
+      setFieldError("participantCategory", "err_participantCategory", "");
+      setFieldError("countryCity", "err_countryCity", "");
+
+      if (!authors.directorFirstName) {
+        setFieldError("directorFirstName", "err_directorFirstName", "Įveskite režisieriaus / autoriaus vardą.");
+        valid = false;
       }
-      if (age && typeof age.checkValidity === "function" && !age.checkValidity()) {
-        if (typeof age.reportValidity === "function") age.reportValidity();
-        return false;
+      if (!authors.directorLastName) {
+        setFieldError("directorLastName", "err_directorLastName", "Įveskite režisieriaus / autoriaus pavardę.");
+        valid = false;
       }
-      if (category && typeof category.checkValidity === "function" && (!category.value || !category.checkValidity())) {
-        if (typeof category.reportValidity === "function") category.reportValidity();
-        return false;
+      if (!email || !EMAIL_REGEX_STRICT.test(email) || email.length > 150) {
+        setFieldError("participantEmail", "err_participantEmail", "Įveskite galiojantį el. pašto adresą (pvz., vardas@domenas.lt).");
+        valid = false;
       }
-      if (location && typeof location.checkValidity === "function" && !location.checkValidity()) {
-        if (typeof location.reportValidity === "function") location.reportValidity();
-        return false;
+
+      if ((authors.cameraOperatorFirstName && !authors.cameraOperatorLastName) || (!authors.cameraOperatorFirstName && authors.cameraOperatorLastName)) {
+        setFieldError("cameraOperatorFirstName", "err_cameraOperator", "Įveskite abu operatoriaus laukus (Vardas ir Pavardė) arba abu palikite tuščius.");
+        setFieldError("cameraOperatorLastName", null, "err");
+        valid = false;
       }
-      return true;
+      if ((authors.ideaAuthorFirstName && !authors.ideaAuthorLastName) || (!authors.ideaAuthorFirstName && authors.ideaAuthorLastName)) {
+        setFieldError("ideaAuthorFirstName", "err_ideaAuthor", "Įveskite abu idėjos autoriaus laukus (Vardas ir Pavardė) arba abu palikite tuščius.");
+        setFieldError("ideaAuthorLastName", null, "err");
+        valid = false;
+      }
+      if ((authors.screenwriterFirstName && !authors.screenwriterLastName) || (!authors.screenwriterFirstName && authors.screenwriterLastName)) {
+        setFieldError("screenwriterFirstName", "err_screenwriter", "Įveskite abu scenarijaus autoriaus laukus (Vardas ir Pavardė) arba abu palikite tuščius.");
+        setFieldError("screenwriterLastName", null, "err");
+        valid = false;
+      }
+
+      if (!ageRaw || !Number.isFinite(age) || age < 10 || age > 18) {
+        setFieldError("participantAge", "err_participantAge", "Nurodykite dalyvio amžių nuo 10 iki 18 metų.");
+        valid = false;
+      }
+      if (!category) {
+        setFieldError("participantCategory", "err_participantCategory", "Pasirinkite amžiaus kategoriją.");
+        valid = false;
+      }
+      if (!location) {
+        setFieldError("countryCity", "err_countryCity", "Įveskite šalį ir miestą.");
+        valid = false;
+      }
+
+      if (!valid) {
+        showToast("Patikrinkite pažymėtus privalomus autoriaus laukus.", "error");
+      }
+      return valid;
     }
 
     function validateStep2() {
-      const filmTitle = document.getElementById("filmTitle");
-      const deviceModel = document.getElementById("deviceModel");
-      const synopsis = document.getElementById("synopsis");
+      const filmTitle = (document.getElementById("filmTitle")?.value || "").trim();
+      const deviceModel = (document.getElementById("deviceModel")?.value || "").trim();
+      const synopsis = (document.getElementById("synopsis")?.value || "").trim();
 
-      if (filmTitle && typeof filmTitle.checkValidity === "function" && !filmTitle.checkValidity()) {
-        if (typeof filmTitle.reportValidity === "function") filmTitle.reportValidity();
-        return false;
+      let valid = true;
+      setFieldError("filmTitle", "err_filmTitle", "");
+      setFieldError("deviceModel", "err_deviceModel", "");
+      setFieldError("synopsis", "err_synopsis", "");
+
+      if (!filmTitle || filmTitle.length > 200) {
+        setFieldError("filmTitle", "err_filmTitle", "Įveskite filmo pavadinimą (iki 200 simbolių).");
+        valid = false;
       }
-      if (deviceModel && typeof deviceModel.checkValidity === "function" && !deviceModel.checkValidity()) {
-        if (typeof deviceModel.reportValidity === "function") deviceModel.reportValidity();
-        return false;
+      if (!deviceModel) {
+        setFieldError("deviceModel", "err_deviceModel", "Nurodykite telefono arba planšetės modelį.");
+        valid = false;
       }
-      if (synopsis && typeof synopsis.checkValidity === "function" && !synopsis.checkValidity()) {
-        if (typeof synopsis.reportValidity === "function") synopsis.reportValidity();
-        return false;
+      if (!synopsis) {
+        setFieldError("synopsis", "err_synopsis", "Įveskite trumpą filmo aprašymą / idėją.");
+        valid = false;
       }
-      return true;
+
+      if (!valid) {
+        showToast("Užpildykite visus privalomus filmo duomenis.", "error");
+      }
+      return valid;
     }
 
     function scrollToFormHeader() {
@@ -2046,61 +2676,106 @@
       if (formSuccessDisplay) formSuccessDisplay.classList.add("d-none");
       if (form) {
         form.classList.remove("d-none");
-        form.reset();
+        if (typeof form.reset === "function") form.reset();
         pendingSubmission = null;
       }
       verifiedVideoFile = null;
-      if (feedback) feedback.textContent = "";
+      verifiedVideoLink = "";
+      videoValidationError = "";
+      videoDurationSeconds = 0;
+      videoFileMeta = { fileName: "", mimeType: "", sizeBytes: 0, width: 0, height: 0, resolution: "" };
+      setVideoSourceMode("upload");
+      if (feedback) {
+        feedback.className = "drop-alert";
+        feedback.textContent = "";
+      }
       if (progressContainer) progressContainer.classList.remove("active");
-      if (progressFill) progressFill.style.width = "0%";
+      if (progressFill && progressFill.style) progressFill.style.width = "0%";
       if (submitBtn) submitBtn.disabled = false;
+      clearRolePairErrors();
       if (typeof updateStepView === "function") updateStepView(1);
     }
 
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
       if (submitBtn.disabled) return;
-      if (!verifiedVideoFile) {
-        showToast("Prašome pasirinkti vaizdo įrašą, kurio trukmė neviršija 3 minučių!", "error");
+
+      if (!validateStep1()) {
+        updateStepView(1);
+        scrollToFormHeader();
+        return;
+      }
+      if (!validateStep2()) {
+        updateStepView(2);
+        scrollToFormHeader();
         return;
       }
 
-      const name = document.getElementById("participantName").value.trim();
-      const email = document.getElementById("participantEmail").value.trim();
-      const age = Number(document.getElementById("participantAge").value);
-      const category = document.getElementById("participantCategory").value;
-      const location = document.getElementById("countryCity").value.trim();
-      const institution = document.getElementById("institution").value.trim();
-      const filmTitle = document.getElementById("filmTitle").value.trim();
-      const deviceModel = document.getElementById("deviceModel").value.trim();
-      const synopsis = document.getElementById("synopsis").value.trim();
-
-      if (!name || name.length > 150 || !email || email.length > 150 || !filmTitle || filmTitle.length > 200) {
-        showToast("Įveskite vardą, el. paštą ir filmo pavadinimą neviršydami leidžiamo ilgio.", "error");
-        return;
+      if (typeof document.querySelectorAll === "function") {
+        const consentBoxes = document.querySelectorAll('.consent-list input[type="checkbox"]');
+        for (const box of consentBoxes) {
+          if (!box.checked) {
+            showToast("Pažymėkite visus privalomus sutikimo laukelius prieš pateikdami paraišką.", "error");
+            return;
+          }
+        }
       }
-      const attendanceInput = document.querySelector('input[name="attendanceType"]:checked');
-      const attendanceType = attendanceInput ? attendanceInput.value : 'in_person';
-      const fingerprint = JSON.stringify([name, email, age, category, location, institution, filmTitle, deviceModel, synopsis, attendanceType]);
+
+      if (videoSourceType === "link") {
+        handleVideoLinkChange();
+        if (!verifiedVideoLink || videoValidationError) {
+          showToast(videoValidationError || "Pateikite galiojančią vaizdo įrašo HTTPS nuorodą.", "error");
+          return;
+        }
+      } else {
+        if (!verifiedVideoFile || videoValidationError) {
+          showToast(videoValidationError || "Prašome pasirinkti vaizdo įrašą, atitinkantį festivalio taisykles (iki 3 min., MP4/MOV/WEBM, iki 300 MB)!", "error");
+          return;
+        }
+      }
+
+      const authors = readAuthorData();
+      const name = authors.name;
+      const email = (document.getElementById("participantEmail")?.value || "").trim();
+      const age = Number(document.getElementById("participantAge")?.value);
+      const category = document.getElementById("participantCategory")?.value || "";
+      const location = (document.getElementById("countryCity")?.value || "").trim();
+      const institution = (document.getElementById("institution")?.value || "").trim();
+      const filmTitle = (document.getElementById("filmTitle")?.value || "").trim();
+      const deviceModel = (document.getElementById("deviceModel")?.value || "").trim();
+      const synopsis = (document.getElementById("synopsis")?.value || "").trim();
+
+      const attendanceInput = typeof document.querySelector === "function" ? document.querySelector('input[name="attendanceType"]:checked') : null;
+      const attendanceType = attendanceInput ? attendanceInput.value : "in_person";
+      const fingerprint = JSON.stringify([
+        name, authors.directorFirstName, authors.directorLastName,
+        authors.cameraOperator, authors.ideaAuthor, authors.screenwriter,
+        email, age, category, location, institution, filmTitle, deviceModel, synopsis, attendanceType, videoSourceType, verifiedVideoLink
+      ]);
+
       submitBtn.disabled = true;
       progressContainer.classList.add("active");
 
       try {
-        const ext = verifiedVideoFile.name.split(".").pop();
-        const safeName = name.replace(/[^a-zA-Z0-9]/g, "_");
-        const storagePath = `submissions/${Date.now()}_${safeName}.${ext}`;
-        const activeStorage = storage || (typeof firebase !== "undefined" && typeof firebase.storage === "function" ? firebase.storage() : null);
-        if (!activeStorage) {
-          throw new Error("Saugyklos tarnyba šiuo metu nepasiekiama.");
-        }
-        const finishSubmission = async (videoUrl) => {
+        const finishSubmission = async (videoUrl, storagePath) => {
           try {
-            const liveToken = 'live_' + Math.random().toString(36).substring(2, 10) + '_' + Date.now().toString(36);
+            const liveToken = "live_" + Math.random().toString(36).substring(2, 10) + "_" + Date.now().toString(36);
             const baseUrl = window.location.origin;
-            const liveStreamUrl = `${baseUrl}/live.html?token=${liveToken}`;
+            const liveStreamUrl = `${baseUrl}/live.html?t=${liveToken}`;
 
             const submissionData = {
               name,
+              directorFirstName: authors.directorFirstName,
+              directorLastName: authors.directorLastName,
+              cameraOperatorFirstName: authors.cameraOperatorFirstName,
+              cameraOperatorLastName: authors.cameraOperatorLastName,
+              cameraOperator: authors.cameraOperator,
+              ideaAuthorFirstName: authors.ideaAuthorFirstName,
+              ideaAuthorLastName: authors.ideaAuthorLastName,
+              ideaAuthor: authors.ideaAuthor,
+              screenwriterFirstName: authors.screenwriterFirstName,
+              screenwriterLastName: authors.screenwriterLastName,
+              screenwriter: authors.screenwriter,
               email,
               age,
               category,
@@ -2109,6 +2784,11 @@
               filmTitle,
               deviceModel,
               synopsis,
+              videoSourceType,
+              videoFileName: videoFileMeta.fileName || (verifiedVideoFile ? verifiedVideoFile.name : ""),
+              videoMimeType: videoFileMeta.mimeType || (verifiedVideoFile && verifiedVideoFile.type ? verifiedVideoFile.type : ""),
+              videoSizeBytes: videoFileMeta.sizeBytes || (verifiedVideoFile && verifiedVideoFile.size ? verifiedVideoFile.size : 0),
+              videoResolution: videoFileMeta.resolution || "",
               videoUrl,
               videoDurationSeconds,
               storagePath,
@@ -2120,17 +2800,22 @@
               status: "submitted",
               submissionLang: "lt",
               submittedAt: firebase.firestore.FieldValue.serverTimestamp()
-        };
+            };
 
             const targetDb = firestoreDb || (typeof window !== "undefined" && window.db) || (typeof db !== "undefined" ? db : null) || firebase.firestore();
-            if (!pendingSubmission || pendingSubmission.fingerprint !== fingerprint || pendingSubmission.file !== verifiedVideoFile) {
-              pendingSubmission = { ...window.MailClient.createSubmission(targetDb, submissionData), fingerprint, file: verifiedVideoFile, videoUrl, storagePath };
+            const fileKey = videoSourceType === "link" ? verifiedVideoLink : verifiedVideoFile;
+            if (!pendingSubmission || pendingSubmission.fingerprint !== fingerprint || pendingSubmission.file !== fileKey) {
+              pendingSubmission = { ...window.MailClient.createSubmission(targetDb, submissionData), fingerprint, file: fileKey, videoUrl, storagePath };
             }
-            await window.MailClient.submit(targetDb, pendingSubmission);
+            const submitResp = await window.MailClient.submit(targetDb, pendingSubmission);
 
             form.classList.add("d-none");
             formSuccessDisplay.classList.remove("d-none");
-            showToast("Dėkojame! Jūsų filmo paraiška sėkmingai gauta.");
+            if (submitResp && submitResp.emailErrors && submitResp.emailErrors.length > 0) {
+              showToast("Paraiška išsaugota, tačiau vienas iš el. laiškų užstrigo: " + submitResp.emailErrors.join("; "), "error");
+            } else {
+              showToast("Dėkojame! Jūsų filmo paraiška ir PDF patvirtinimas sėkmingai išsiųsti.");
+            }
           } catch (error) {
             console.error(error);
             showToast("Nepavyko išsaugoti paraiškos ir laiškų. Bandykite dar kartą: " + error.message, "error");
@@ -2140,8 +2825,23 @@
           }
         };
 
+        if (videoSourceType === "link") {
+          if (progressFill && progressFill.style) progressFill.style.width = "100%";
+          if (progressStatus) progressStatus.textContent = "Siunčiama paraiška...";
+          await finishSubmission(verifiedVideoLink, "");
+          return;
+        }
+
+        const ext = (verifiedVideoFile.name || "mp4").split(".").pop();
+        const safeName = name.replace(/[^a-zA-Z0-9]/g, "_");
+        const storagePath = `submissions/${Date.now()}_${safeName}.${ext}`;
+        const activeStorage = (typeof storage !== "undefined" ? storage : null) || (typeof firebase !== "undefined" && typeof firebase.storage === "function" ? firebase.storage() : null);
+        if (!activeStorage) {
+          throw new Error("Saugyklos tarnyba šiuo metu nepasiekiama.");
+        }
+
         if (pendingSubmission && pendingSubmission.fingerprint === fingerprint && pendingSubmission.file === verifiedVideoFile) {
-          await finishSubmission(pendingSubmission.videoUrl);
+          await finishSubmission(pendingSubmission.videoUrl, pendingSubmission.storagePath || storagePath);
           return;
         }
         const storageRef = activeStorage.ref(storagePath);
@@ -2150,8 +2850,8 @@
         uploadTask.on("state_changed",
           (snap) => {
             const pct = Math.round((snap.bytesTransferred / snap.totalBytes) * 100);
-            progressFill.style.width = pct + "%";
-            progressStatus.textContent = `Įkeliama... ${pct}%`;
+            if (progressFill && progressFill.style) progressFill.style.width = pct + "%";
+            if (progressStatus) progressStatus.textContent = `Įkeliama... ${pct}%`;
           },
           (err) => {
             console.error(err);
@@ -2161,7 +2861,7 @@
           },
           async () => {
             try {
-              await finishSubmission(await uploadTask.snapshot.ref.getDownloadURL());
+              await finishSubmission(await uploadTask.snapshot.ref.getDownloadURL(), storagePath);
             } catch (error) {
               showToast(error.message, "error");
               submitBtn.disabled = false;

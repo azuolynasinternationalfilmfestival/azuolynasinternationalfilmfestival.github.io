@@ -10,7 +10,7 @@ export function getSubmissionsList() {
 }
 
 export function getSubmissionYear(sub) {
-  if (!sub) return "2026";
+  if (!sub) return "2027";
   if (sub.year) return String(sub.year).trim();
   if (sub.edition) return String(sub.edition).replace(/[^0-9]/g, "");
   if (sub.awardYear) return String(sub.awardYear).trim();
@@ -21,7 +21,7 @@ export function getSubmissionYear(sub) {
     const d = new Date(sub.submittedAt);
     if (!isNaN(d.getFullYear())) return String(d.getFullYear());
   }
-  return "2026";
+  return "2027";
 }
 
 const STATUS_DICTIONARY = {
@@ -65,7 +65,7 @@ function updateYearBadges() {
   const status = document.getElementById("dashboardSystemStatus");
 
   if (badge) {
-    badge.textContent = selYear === "all" ? "Visi metai" : `FEST ${selYear}`;
+    badge.textContent = selYear === "all" ? "Visi metai" : `${selYear} m.`;
   }
   if (status) {
     status.innerHTML = selYear === "all"
@@ -132,7 +132,7 @@ export function unsubscribeSubmissionsListener() {
 
 async function updateMetrics() {
   const filterYear = document.getElementById("filterYear");
-  const selYear = filterYear ? filterYear.value : "2026";
+  const selYear = filterYear ? filterYear.value : "2027";
 
   const list = (selYear === "all")
     ? submissionsList
@@ -665,8 +665,13 @@ function openModal(id) {
   currentEntry = submissionsList.find((x) => x.id === id);
   if (!currentEntry) return;
 
+  const formatAuthor = (first, last, combined) => {
+    const joined = `${first || ""} ${last || ""}`.trim();
+    return joined || combined || "—";
+  };
+
   document.getElementById("mTitle").textContent = currentEntry.filmTitle || "Filmas";
-  document.getElementById("mAuthor").textContent = currentEntry.name || "";
+  document.getElementById("mAuthor").textContent = formatAuthor(currentEntry.directorFirstName, currentEntry.directorLastName, currentEntry.name);
   document.getElementById("mEmail").textContent = currentEntry.email || "";
   document.getElementById("mAgeInst").textContent = `${currentEntry.age || ''} m. | ${currentEntry.institution || 'Nenurodyta'}`;
   document.getElementById("mLocation").textContent = currentEntry.location || "";
@@ -675,6 +680,22 @@ function openModal(id) {
   document.getElementById("mVotes").textContent = currentEntry.votesCount || 0;
   document.getElementById("mSynopsis").textContent = currentEntry.synopsis || "";
   document.getElementById("mInVoting").checked = currentEntry.inVoting === true;
+
+  const setOptionalText = (id, value) => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = value || "—";
+  };
+  setOptionalText("mDirectorRole", formatAuthor(currentEntry.directorFirstName, currentEntry.directorLastName, currentEntry.name));
+  setOptionalText("mCameraOperatorRole", formatAuthor(currentEntry.cameraOperatorFirstName, currentEntry.cameraOperatorLastName, currentEntry.cameraOperator));
+  setOptionalText("mIdeaAuthorRole", formatAuthor(currentEntry.ideaAuthorFirstName, currentEntry.ideaAuthorLastName, currentEntry.ideaAuthor));
+  setOptionalText("mScreenwriterRole", formatAuthor(currentEntry.screenwriterFirstName, currentEntry.screenwriterLastName, currentEntry.screenwriter));
+  const specsParts = [];
+  if (currentEntry.videoSourceType) specsParts.push(currentEntry.videoSourceType === "link" ? "Nuoroda" : "Failas");
+  if (currentEntry.videoFileName) specsParts.push(currentEntry.videoFileName);
+  if (currentEntry.videoSizeBytes) specsParts.push(`${(Number(currentEntry.videoSizeBytes) / (1024 * 1024)).toFixed(2)} MB`);
+  if (currentEntry.videoResolution) specsParts.push(currentEntry.videoResolution);
+  if (currentEntry.pdfFilename) specsParts.push(`PDF: ${currentEntry.pdfFilename}`);
+  setOptionalText("mVideoSpecs", specsParts.length ? specsParts.join(" • ") : "—");
 
   const isWinner = currentEntry.status === "winner" || currentEntry.isWinner === true;
   const awardWrap = document.getElementById("mAwardTitleWrap");
@@ -722,7 +743,7 @@ function initWinnersManager() {
 
       const filmId = filmSelect ? filmSelect.value : "";
       const awardTitle = titleInput ? titleInput.value.trim() : "";
-      const selYear = (yearInput && yearInput.value !== "all") ? yearInput.value : "2026";
+      const selYear = (yearInput && yearInput.value !== "all") ? yearInput.value : "2027";
 
       if (!filmId || !awardTitle) {
         showToast("Pasirinkite filmą ir įveskite nominaciją!", "error");
@@ -822,7 +843,7 @@ function updateWinnersSelector() {
   const yearInput = document.getElementById("filterYear");
   if (!select || !list) return;
 
-  const yr = yearInput ? yearInput.value : "2026";
+  const yr = yearInput ? yearInput.value : "2027";
   const currentYearList = (yr === "all")
     ? submissionsList
     : submissionsList.filter(s => getSubmissionYear(s) === yr);

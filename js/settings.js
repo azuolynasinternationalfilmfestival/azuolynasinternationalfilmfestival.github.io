@@ -119,7 +119,7 @@ export function initSettings() {
       if (enEvent) enEvent.value = "April 27th, 2027 (Film Festival & Live Stream)";
       if (enDates) enDates.value = "November 1, 2026 – April 5, 2027";
 
-      showToast("Nustatytos oficialios festivalio datos: 2026 m. lapkričio 1 d. &bull; 2027 m. balandžio 5 d. &bull; 2027 m. balandžio 27 d.", "success");
+      showToast("Nustatytos oficialios festivalio datos: 2026 m. lapkričio 1 d. • 2027 m. balandžio 5 d. • 2027 m. balandžio 27 d.", "success");
     });
   }
 }
@@ -132,11 +132,10 @@ async function updateGlobalTumbler(patchData, successMsg, toggleInput) {
       ? auth.currentUser.email.toLowerCase()
       : (sessionStorage.getItem("admin_user_email") || "azuolynasfilmfestival@gmail.com").toLowerCase();
 
-    // Verify Firebase Auth state for superadmin allow-list
     if (auth && !auth.currentUser) {
       throw {
         code: "auth/unauthenticated",
-        message: "Privalote būti prisijungęs su Firebase Auth administratoriaus paskyra (azuolynasfilmfestival@gmail.com)."
+        message: "Privalote būti prisijungęs su Firebase Auth administratoriaus paskyra."
       };
     }
 
@@ -460,7 +459,7 @@ async function saveSettings() {
     if (auth && !auth.currentUser) {
       throw {
         code: "auth/unauthenticated",
-        message: "Privalote būti prisijungęs su Firebase Auth administratoriaus paskyra (azuolynasfilmfestival@gmail.com)."
+        message: "Privalote būti prisijungęs su Firebase Auth administratoriaus paskyra."
       };
     }
 

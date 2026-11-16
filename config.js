@@ -72,6 +72,34 @@ var AUTHORIZED_ADMIN_EMAILS = [
   "karina.brdar@gmail.com"
 ];
 
+const SUBMISSION_RESPONSE_CONFIG = {
+  // Single central place to edit how long it takes to receive a response after automatic submission
+  lt: "per 5 darbo dienas",
+  en: "within 5 business days",
+  businessDays: 5
+};
+
+const VIDEO_VALIDATION_RULES = {
+  maxDurationSeconds: 180,
+  maxSizeBytes: 300 * 1024 * 1024, // 300 MB
+  maxSizeMB: 300,
+  allowedExtensions: ["mp4", "mov", "webm"],
+  allowedMimeTypes: ["video/mp4", "video/quicktime", "video/webm"],
+  minWidth: 320,
+  minHeight: 240,
+  allowedLinkHosts: [
+    "youtube.com",
+    "www.youtube.com",
+    "m.youtube.com",
+    "youtu.be",
+    "vimeo.com",
+    "player.vimeo.com",
+    "drive.google.com",
+    "docs.google.com",
+    "cloudflarestream.com"
+  ]
+};
+
 const DEFAULT_CONTENT = {
   lt: {
     heroBadge: "7-asis Tarptautinis Mokinių Filmų Festivalis",
@@ -92,7 +120,8 @@ const DEFAULT_CONTENT = {
     cat1Desc: "Pradedančiųjų kino kūrėjų vizualiniai ieškojimai ir autorinis pasakojimas.",
     cat2Age: "Nuo 14 iki 18 metų amžiaus",
     cat2Desc: "Vyresniųjų moksleivių kinematografinė kalba, gilesnė dramaturgija ir savitas braižas.",
-    recordingPlaceholder: "Festivalio ir tiesioginės transliacijos vaizdo įrašas bus pasiekiamas 2027 m. balandžio 27 d."
+    recordingPlaceholder: "Festivalio ir tiesioginės transliacijos vaizdo įrašas bus pasiekiamas 2027 m. balandžio 27 d.",
+    submissionResponseTime: SUBMISSION_RESPONSE_CONFIG.lt
   },
   en: {
     heroBadge: "The 7th International Students Film Festival",
@@ -113,9 +142,15 @@ const DEFAULT_CONTENT = {
     cat1Desc: "For budding visual artists beginning their cinematic storytelling journey.",
     cat2Age: "From 14 to 18 years old",
     cat2Desc: "For youth directors exploring bold perspectives and nuanced compositions.",
-    recordingPlaceholder: "The official festival recording and live stream replay will be published here on April 27th, 2027."
+    recordingPlaceholder: "The official festival recording and live stream replay will be published here on April 27th, 2027.",
+    submissionResponseTime: SUBMISSION_RESPONSE_CONFIG.en
   },
   selectedYear: "2027",
+  submissionResponseTime: {
+    lt: SUBMISSION_RESPONSE_CONFIG.lt,
+    en: SUBMISSION_RESPONSE_CONFIG.en,
+    businessDays: SUBMISSION_RESPONSE_CONFIG.businessDays
+  },
   showAbout: true,
   showTerms: true,
   showFaq: true,
@@ -140,5 +175,24 @@ if (typeof window !== "undefined") {
   window.storage = storage;
   window.PRIMARY_SUPERADMIN_EMAIL = PRIMARY_SUPERADMIN_EMAIL;
   window.AUTHORIZED_ADMIN_EMAILS = AUTHORIZED_ADMIN_EMAILS;
+  window.SUBMISSION_RESPONSE_CONFIG = SUBMISSION_RESPONSE_CONFIG;
+  window.VIDEO_VALIDATION_RULES = VIDEO_VALIDATION_RULES;
   window.DEFAULT_CONTENT = DEFAULT_CONTENT;
+}
+
+if (typeof globalThis !== "undefined") {
+  globalThis.SUBMISSION_RESPONSE_CONFIG = SUBMISSION_RESPONSE_CONFIG;
+  globalThis.VIDEO_VALIDATION_RULES = VIDEO_VALIDATION_RULES;
+  globalThis.DEFAULT_CONTENT = DEFAULT_CONTENT;
+}
+
+if (typeof module !== "undefined" && module.exports) {
+  module.exports = {
+    firebaseConfig,
+    PRIMARY_SUPERADMIN_EMAIL,
+    AUTHORIZED_ADMIN_EMAILS,
+    SUBMISSION_RESPONSE_CONFIG,
+    VIDEO_VALIDATION_RULES,
+    DEFAULT_CONTENT
+  };
 }

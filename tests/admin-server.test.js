@@ -8,7 +8,9 @@ import { once } from 'node:events';
 import { fileURLToPath } from 'node:url';
 import express from 'express';
 import jwt from 'jsonwebtoken';
+import '../config.js';
 import '../email-templates.js';
+import { generateSubmissionPdf } from '../pdf-generator.js';
 
 const root = path.resolve(import.meta.dirname, '..');
 const admins = ['azuolynasfilmfestival@gmail.com', 'karina.brdar@gmail.com'];
@@ -46,10 +48,10 @@ async function serverFixture(t, {smtp = false, rejectQueue = false, rejectSmtp =
   const code = source.replace(/^import .*;\n/gm, '').replace(/^export /gm, '')
     .replace('fileURLToPath(import.meta.url)', JSON.stringify(path.join(directory, 'server.js')));
   const body = code.slice(0, code.lastIndexOf('app.listen('));
-  const create = new Function('dotenv', 'express', 'path', 'fs', 'crypto', 'fileURLToPath', 'jwt', 'nodemailer', 'process', 'fetch', 'console',
+  const create = new Function('dotenv', 'express', 'path', 'fs', 'crypto', 'fileURLToPath', 'jwt', 'nodemailer', 'generateSubmissionPdf', 'process', 'fetch', 'console',
     body + '\nreturn {app, sendEmail, loadUsersData};');
   const server = create({config() {}}, express, path, fs, crypto, fileURLToPath, jwt,
-    {createTransport: () => transporter}, processFixture, externalFetch, {log() {}, warn() {}, error() {}});
+    {createTransport: () => transporter}, generateSubmissionPdf, processFixture, externalFetch, {log() {}, warn() {}, error() {}});
   const listener = server.app.listen(0, '127.0.0.1');
   await once(listener, 'listening');
   const base = `http://127.0.0.1:${listener.address().port}`;
@@ -138,24 +140,51 @@ test('a rejected Firestore queue write is not reported as sent or queued', async
 
 for (const lang of ['lt', 'en']) {
   for (const attendanceType of ['in_person', 'remote']) {
-    test(`${lang}/${attendanceType} server submission sends exactly two notifications`, async t => {
-      const f = await serverFixture(t);
-      const response = await f.request('/api/submissions/record', null, {id: 'test', name: 'Test Participant',
-        email: 'applicant@example.test', filmTitle: 'Test Film', submissionLang: lang, attendanceType,
-        videoUrl: 'https://example.test/test.mp4', liveToken: 'synthetic-live-token'});
+    test(`${lang}/${attendanceType} server submission sends exactly two notifications with PDF & crew info`, async t => {
+      const f = await serverFixture(t, {smtp: true});
+      const response = await f.request('/api/submissions/record', null, {
+        id: 'test',
+        directorFirstName: 'Test',
+        directorLastName: 'Participant',
+        cameraOperatorFirstName: 'Cam',
+        cameraOperatorLastName: 'Operator',
+        ideaAuthorFirstName: 'Idea',
+        ideaAuthorLastName: 'Creator',
+        screenwriterFirstName: 'Script',
+        screenwriterLastName: 'Writer',
+        email: 'applicant@example.test',
+        filmTitle: 'Test Film',
+        submissionLang: lang,
+        attendanceType,
+        videoSourceType: 'upload',
+        videoFileName: 'test.mp4',
+        videoDurationSeconds: 120,
+        videoSizeBytes: 5 * 1024 * 1024,
+        videoResolution: '1920x1080',
+        videoUrl: 'https://example.test/test.mp4',
+        liveToken: 'synthetic-live-token'
+      });
       assert.equal(response.status, 200);
-      const mails = f.writes.filter(write => write.url.includes('/mail/'));
-      assert.equal(mails.length, 2);
-      assert.equal(mails[0].data.fields.to.arrayValue.values[0].stringValue, 'applicant@example.test');
-      assert.equal(mails[1].data.fields.to.arrayValue.values[0].stringValue, admins[0]);
-      if (attendanceType === 'remote') assert.match(mails[0].data.fields.message.mapValue.fields.html.stringValue, /synthetic-live-token/);
+      assert.equal(f.messages.length, 2);
+      assert.equal(f.messages[0].to, 'applicant@example.test');
+      assert.equal(f.messages[1].to, admins[0]);
+      assert.equal(f.messages[0].attachments.length, 1);
+      assert.equal(f.messages[1].attachments.length, 1);
+      assert.equal(f.messages[0].attachments[0].content.subarray(0, 5).toString('utf8'), '%PDF-');
+      assert.match(f.messages[0].text, /Cam Operator/);
+      assert.match(f.messages[1].text, /Script Writer/);
+      if (attendanceType === 'remote') assert.match(f.messages[0].html, /synthetic-live-token/);
     });
   }
 }
 
 test('failed submission notifications return an error after the film has been recorded', async t => {
   const f = await serverFixture(t, {rejectQueue: true});
-  const response = await f.request('/api/submissions/record', null, {id: 'test', name: 'Test Participant', email: 'applicant@example.test', filmTitle: 'Test Film'});
+  const response = await f.request('/api/submissions/record', null, {
+    id: 'test', directorFirstName: 'Test', directorLastName: 'Participant',
+    email: 'applicant@example.test', filmTitle: 'Test Film',
+    videoUrl: 'https://example.test/test.mp4', videoFileName: 'test.mp4', videoDurationSeconds: 90
+  });
   assert.equal(response.status, 502);
   assert.equal((await response.json()).success, false);
   assert.equal(JSON.parse(fs.readFileSync(path.join(f.directory, 'data/submissions.json'))).submissions.length, 1);
@@ -172,7 +201,8 @@ test('environment SMTP credentials work before any SMTP settings are saved', asy
 
 test('submission retry does not resend either successful notification', async t => {
   const f = await serverFixture(t);
-  const data = {id: 'retry_film', name: 'Test Participant', email: 'applicant@example.test', filmTitle: 'Retry film'};
+  const data = {id: 'retry_film', directorFirstName: 'Test', directorLastName: 'Participant', email: 'applicant@example.test', filmTitle: 'Retry film',
+    videoUrl: 'https://example.test/retry.mp4', videoFileName: 'retry.mp4', videoDurationSeconds: 100};
   for (let index = 0; index < 2; index++) assert.equal((await f.request('/api/submissions/record', null, data)).status, 200);
   assert.equal(f.writes.filter(write => write.url.includes('/mail/')).length, 2);
   assert.equal(JSON.parse(fs.readFileSync(f.directory + '/data/submissions.json')).submissions.length, 1);
@@ -184,7 +214,8 @@ test('partial submission retry only retries the failed recipient', async t => {
     const to = JSON.parse(options.body || '{}').fields?.to?.arrayValue?.values?.[0]?.stringValue;
     return denyOrganizer && to === admins[0];
   }});
-  const data = {id: 'partial_retry', name: 'Test Participant', email: 'applicant@example.test', filmTitle: 'Partial film'};
+  const data = {id: 'partial_retry', directorFirstName: 'Test', directorLastName: 'Participant', email: 'applicant@example.test', filmTitle: 'Partial film',
+    videoUrl: 'https://example.test/partial.mp4', videoFileName: 'partial.mp4', videoDurationSeconds: 110};
   assert.equal((await f.request('/api/submissions/record', null, data)).status, 502);
   denyOrganizer = false;
   assert.equal((await f.request('/api/submissions/record', null, data)).status, 200);
@@ -204,15 +235,20 @@ test('server normalizes recipient lists and rejects malformed mail fields', asyn
 
 test('admin can delete film festival submission and associated hierarchy without errors', async t => {
   const f = await serverFixture(t);
-  await f.request('/api/submissions/record', null, {
+  const createRes = await f.request('/api/submissions/record', null, {
     id: 'sub_to_delete',
-    name: 'Delete Participant',
+    directorFirstName: 'Delete',
+    directorLastName: 'Participant',
     email: 'del@example.test',
     filmTitle: 'Film To Delete',
     attendanceType: 'remote',
+    videoUrl: 'https://example.test/delete_test.mp4',
+    videoFileName: 'delete_test.mp4',
+    videoDurationSeconds: 95,
     liveToken: 'live_token_123',
     storagePath: 'submissions/test_video.mp4'
   });
+  assert.equal(createRes.status, 200);
   const subFile = path.join(f.directory, 'data/submissions.json');
   assert.equal(JSON.parse(fs.readFileSync(subFile, 'utf8')).submissions.some(s => s.id === 'sub_to_delete'), true);
 
@@ -223,4 +259,51 @@ test('admin can delete film festival submission and associated hierarchy without
   assert.equal(result.id, 'sub_to_delete');
   assert.equal(JSON.parse(fs.readFileSync(subFile, 'utf8')).submissions.some(s => s.id === 'sub_to_delete'), false);
 });
+
+test('server rejects invalid submissions and creates single shareable teacher and personal stream tokens', async t => {
+  const f = await serverFixture(t, {smtp: true});
+
+  // Invalid video duration (> 180s)
+  const overDur = await f.request('/api/submissions/record', null, {
+    directorFirstName: 'A', directorLastName: 'B', email: 'test@example.test',
+    filmTitle: 'Too Long', videoUrl: 'https://example.test/long.mp4', videoFileName: 'long.mp4', videoDurationSeconds: 220
+  });
+  assert.equal(overDur.status, 400);
+
+  // Half-filled optional author pair
+  const halfPair = await f.request('/api/submissions/record', null, {
+    directorFirstName: 'A', directorLastName: 'B', cameraOperatorFirstName: 'OnlyFirst',
+    email: 'test@example.test', filmTitle: 'Half Role', videoUrl: 'https://example.test/ok.mp4', videoFileName: 'ok.mp4', videoDurationSeconds: 80
+  });
+  assert.equal(halfPair.status, 400);
+
+  // Teacher classroom token (no device count cap, single ?t= link)
+  const teacherRes = await f.request('/api/admin/stream/viewers/create', admins[0], {
+    email: 'teacher@school.example.test', name: '8B Mokytoja', tokenType: 'classroom', expiresInHours: 48
+  });
+  assert.equal(teacherRes.status, 200);
+  const teacherData = await teacherRes.json();
+  assert.equal(teacherData.success, true);
+  assert.match(teacherData.viewer.token, /^cfs_teacher_/);
+  assert.match(teacherData.liveLink, /\?t=cfs_teacher_/);
+  assert.equal(teacherData.viewer.maxConcurrentDevices, undefined);
+
+  // Personal individual token
+  const personalRes = await f.request('/api/admin/stream/viewers/create', admins[0], {
+    email: 'pupil@school.example.test', name: 'Mokinys', tokenType: 'individual', expiresInHours: 24
+  });
+  assert.equal(personalRes.status, 200);
+  const personalData = await personalRes.json();
+  assert.equal(personalData.success, true);
+  assert.match(personalData.viewer.token, /^cfs_live_/);
+
+  // Validate teacher token works multiple times without device cap rejection
+  const v1 = await f.request('/api/stream/validate-token', null, { token: teacherData.viewer.token, sessionId: 'proj-1' });
+  const v2 = await f.request('/api/stream/validate-token', null, { token: teacherData.viewer.token, sessionId: 'proj-2' });
+  assert.equal(v1.status, 200);
+  assert.equal(v2.status, 200);
+  assert.equal((await v1.json()).valid, true);
+  assert.equal((await v2.json()).valid, true);
+});
+
 

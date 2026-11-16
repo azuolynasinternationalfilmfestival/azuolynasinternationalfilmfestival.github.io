@@ -67,23 +67,49 @@ function formFixture(lang, attendanceType = 'in_person', reject, storageFailure 
     if (!elements.has(id)) {
       const classes = new Set(id === 'formSuccessDisplay' ? ['d-none'] : []);
       elements.set(id, { value: '', style: {}, disabled: false, textContent: '', handlers: {},
-        classList: { add: value => classes.add(value), remove: value => classes.delete(value), contains: value => classes.has(value) },
+        classList: {
+          add: value => classes.add(value),
+          remove: value => classes.delete(value),
+          contains: value => classes.has(value),
+          toggle: (value, force) => {
+            const on = force !== undefined ? Boolean(force) : !classes.has(value);
+            if (on) classes.add(value); else classes.delete(value);
+            return on;
+          }
+        },
         addEventListener(event, handler) { this.handlers[event] = handler; }, reset() { this.wasReset = true; }
       });
     }
     return elements.get(id);
   }
-  const fields = { participantName: film.name, participantEmail: film.email, participantAge: '15',
-    participantCategory: film.category, countryCity: 'Test City', institution: 'Test School',
-    filmTitle: film.filmTitle, deviceModel: film.deviceModel, synopsis: 'Test Synopsis' };
+  const fields = {
+    participantName: film.name,
+    directorFirstName: 'Test',
+    directorLastName: 'Participant',
+    cameraOperatorFirstName: 'Cam',
+    cameraOperatorLastName: 'Op',
+    participantEmail: film.email,
+    participantAge: '15',
+    participantCategory: film.category,
+    countryCity: 'Test City',
+    institution: 'Test School',
+    filmTitle: film.filmTitle,
+    deviceModel: film.deviceModel,
+    synopsis: 'Test Synopsis'
+  };
   Object.entries(fields).forEach(([id, value]) => { element(id).value = value; });
   const uploads = [], toasts = [], errors = [], apiCalls = [];
   const document = { getElementById: element, querySelector: () => ({ value: attendanceType }),
+    querySelectorAll: () => [],
     createElement: () => ({ duration: 120 }) };
+  class TestURL extends URL {
+    static createObjectURL() { return 'blob:test'; }
+    static revokeObjectURL() {}
+  }
   Object.assign(f.context, { document, firestoreDb: f.database, showToast: (message, type) => toasts.push({message, type}),
     console: { ...console, error: error => errors.push(error) },
     fetch: async (route, options) => { apiCalls.push({route, body: JSON.parse(options.body)}); return {ok: true, json: async () => ({success: true})}; },
-    URL: { createObjectURL: () => 'blob:test', revokeObjectURL() {} },
+    URL: TestURL,
     storage: { ref: path => ({ put: () => {
       if (storageFailure) throw new Error('Storage unavailable');
       const task = { snapshot: { ref: { getDownloadURL: async () => film.videoUrl } },
@@ -325,3 +351,179 @@ for (const lang of ['lt', 'en']) {
     assert.equal(context.filmsCache[0].id, 'winner');
   });
 }
+
+for (const lang of ['lt', 'en']) {
+  test(`${lang} author validation rejects missing/half-filled roles & bad email, accepts valid crew`, () => {
+    const f = formFixture(lang);
+    assert.equal(f.context.validateStep1(), true);
+
+    // Missing director last name (spaces only)
+    f.element('directorLastName').value = '   ';
+    assert.equal(f.context.validateStep1(), false);
+    assert.ok(f.element('err_directorLastName').textContent.length > 0);
+    f.element('directorLastName').value = 'Participant';
+
+    // Half-filled optional role (Idea Author first name without last name)
+    f.element('ideaAuthorFirstName').value = 'Jonas';
+    f.element('ideaAuthorLastName').value = '';
+    assert.equal(f.context.validateStep1(), false);
+    assert.ok(f.element('err_ideaAuthor').textContent.length > 0);
+    f.element('ideaAuthorLastName').value = 'Jonaitis';
+
+    // Half-filled screenwriter role
+    f.element('screenwriterFirstName').value = '';
+    f.element('screenwriterLastName').value = 'Petraitis';
+    assert.equal(f.context.validateStep1(), false);
+    assert.ok(f.element('err_screenwriter').textContent.length > 0);
+    f.element('screenwriterFirstName').value = 'Petras';
+
+    // Bad email format
+    f.element('participantEmail').value = 'not-an-email';
+    assert.equal(f.context.validateStep1(), false);
+    assert.ok(f.element('err_participantEmail').textContent.length > 0);
+    f.element('participantEmail').value = 'valid.creator@example.test';
+
+    assert.equal(f.context.validateStep1(), true);
+  });
+
+  test(`${lang} video & link validator enforces format, size, duration, resolution, and HTTPS rules`, () => {
+    const mockVideos = [];
+    const f = formFixture(lang);
+    f.context.document.createElement = () => {
+      const el = { preload: '', src: '', duration: 90, videoWidth: 1280, videoHeight: 720, onloadedmetadata: null, onerror: null };
+      mockVideos.push(el);
+      return el;
+    };
+
+    // Invalid format (.avi)
+    f.context.validateSelectedVideoFile({ name: 'bad.avi', type: 'video/x-msvideo', size: 1024 * 1024 });
+    assert.match(f.element('uploadFeedback').textContent, /MP4|MOV|WEBM/i);
+    assert.equal(f.element('submitBtn').disabled, false);
+
+    // Oversized file (> 300 MB)
+    f.context.validateSelectedVideoFile({ name: 'huge.mp4', type: 'video/mp4', size: 350 * 1024 * 1024 });
+    assert.match(f.element('uploadFeedback').textContent, /300 MB/i);
+
+    // Duration > 180s
+    mockVideos.length = 0;
+    f.context.validateSelectedVideoFile({ name: 'toolong.mp4', type: 'video/mp4', size: 5 * 1024 * 1024 });
+    mockVideos[0].duration = 210;
+    mockVideos[0].onloadedmetadata();
+    assert.match(f.element('uploadFeedback').textContent, /180/);
+
+    // Resolution too low (160x120)
+    mockVideos.length = 0;
+    f.context.validateSelectedVideoFile({ name: 'tiny.mp4', type: 'video/mp4', size: 2 * 1024 * 1024 });
+    mockVideos[0].duration = 60;
+    mockVideos[0].videoWidth = 160;
+    mockVideos[0].videoHeight = 120;
+    mockVideos[0].onloadedmetadata();
+    assert.match(f.element('uploadFeedback').textContent, /320/);
+
+    // Corrupt metadata error
+    mockVideos.length = 0;
+    f.context.validateSelectedVideoFile({ name: 'corrupt.mp4', type: 'video/mp4', size: 2 * 1024 * 1024 });
+    mockVideos[0].onerror();
+    assert.ok(f.element('uploadFeedback').className.includes('error'));
+
+    // Valid video passes
+    mockVideos.length = 0;
+    f.context.validateSelectedVideoFile({ name: 'valid_film.mov', type: 'video/quicktime', size: 12 * 1024 * 1024 });
+    mockVideos[0].duration = 145;
+    mockVideos[0].videoWidth = 1920;
+    mockVideos[0].videoHeight = 1080;
+    mockVideos[0].onloadedmetadata();
+    assert.ok(f.element('uploadFeedback').className.includes('success'));
+
+    // Video link checks
+    assert.equal(f.context.validateVideoLinkValue('http://youtube.com/watch?v=123').valid, false);
+    assert.equal(f.context.validateVideoLinkValue('https://unknown-site.example/video').valid, false);
+    assert.equal(f.context.validateVideoLinkValue('https://youtu.be/dQw4w9WgXcQ').valid, true);
+    assert.equal(f.context.validateVideoLinkValue('https://cdn.example.test/movie.mp4').valid, true);
+  });
+
+  test(`${lang} submission page displays central response-time notice`, () => {
+    const html = fs.readFileSync(new URL(`../${lang}/index.html`, import.meta.url), 'utf8');
+    assert.match(html, /id="submissionResponseNotice"/);
+    assert.match(html, /id="submissionResponseTimeValue"/);
+    assert.match(html, /SUBMISSION_RESPONSE_CONFIG/);
+  });
+}
+
+test('PDF generator produces valid PDF with all author roles and video metadata, and plain-text summary matches', async () => {
+  const { generateSubmissionPdf } = await import('../pdf-generator.js');
+  const sampleRecord = {
+    id: 'sub_test_pdf_1',
+    submissionLang: 'lt',
+    submittedAt: '2027-01-15T12:00:00.000Z',
+    directorFirstName: 'Jonas',
+    directorLastName: 'Kazlauskas',
+    cameraOperatorFirstName: 'Mantas',
+    cameraOperatorLastName: 'Petrauskas',
+    ideaAuthorFirstName: 'Greta',
+    ideaAuthorLastName: 'Vaitkutė',
+    screenwriterFirstName: 'Lukasz',
+    screenwriterLastName: 'Nowak',
+    email: 'jonas@example.test',
+    age: 16,
+    category: 'II Kategorija (14-18 m.)',
+    location: 'Kaunas, Lietuva',
+    institution: 'Kauno Gimnazija',
+    filmTitle: 'Šviesos Kelias',
+    deviceModel: 'iPhone 15',
+    synopsis: 'Trumpas pasakojimas apie pašaukimą.',
+    videoSourceType: 'upload',
+    videoFileName: 'sviesos_kelias.mp4',
+    videoSizeBytes: 25 * 1024 * 1024,
+    videoDurationSeconds: 142,
+    videoResolution: '1920x1080',
+    videoUrl: 'https://storage.example.test/sviesos_kelias.mp4',
+    attendanceType: 'remote',
+    liveToken: 'live_abcd1234',
+    liveStreamUrl: 'https://festival.example.test/live.html?t=live_abcd1234',
+    responseTimeText: 'per 5 darbo dienas'
+  };
+
+  const pdf = await generateSubmissionPdf(sampleRecord);
+  assert.ok(Buffer.isBuffer(pdf.buffer));
+  assert.ok(pdf.buffer.subarray(0, 5).toString('utf8') === '%PDF-');
+  assert.ok(pdf.sizeBytes > 1000);
+  assert.match(pdf.filename, /^AISFF_.*sub_test_pdf_1\.pdf$/);
+
+  const plain = vm.runInNewContext(`${templates}\ngenerateSubmissionPlainText('adminNotification', 'lt', ${JSON.stringify(sampleRecord)})`);
+  assert.match(plain, /Jonas Kazlauskas/);
+  assert.match(plain, /Mantas Petrauskas/);
+  assert.match(plain, /Greta Vaitkutė/);
+  assert.match(plain, /Lukasz Nowak/);
+  assert.match(plain, /jonas@example\.test/);
+  assert.match(plain, /sviesos_kelias\.mp4/);
+  assert.match(plain, /1920x1080/);
+  assert.match(plain, /per 5 darbo dienas/);
+});
+
+test('privacy, stream token, and UI visibility invariants hold across HTML, JS, and server', () => {
+  const votingHtml = fs.readFileSync(new URL('../voting.html', import.meta.url), 'utf8');
+  const liveHtml = fs.readFileSync(new URL('../live.html', import.meta.url), 'utf8');
+  const adminHtml = fs.readFileSync(new URL('../admin.html', import.meta.url), 'utf8');
+  const ltFaqHtml = fs.readFileSync(new URL('../lt/faq.html', import.meta.url), 'utf8');
+  const enFaqHtml = fs.readFileSync(new URL('../en/faq.html', import.meta.url), 'utf8');
+  const streamAdminJs = fs.readFileSync(new URL('../js/stream-admin.js', import.meta.url), 'utf8');
+  const authJs = fs.readFileSync(new URL('../js/auth.js', import.meta.url), 'utf8');
+  const serverJs = fs.readFileSync(new URL('../server.js', import.meta.url), 'utf8');
+
+  assert.doesNotMatch(votingHtml, /admin\.html/i);
+  assert.doesNotMatch(votingHtml, /AISFF 2027/);
+  assert.doesNotMatch(ltFaqHtml, /admin\.html/i);
+  assert.doesNotMatch(enFaqHtml, /admin\.html/i);
+  assert.doesNotMatch(liveHtml, /\|\|\s*35/);
+  assert.doesNotMatch(adminHtml, /newViewerMaxDevices/);
+  assert.doesNotMatch(adminHtml, /user@example\.com/);
+  const loginOverlaySection = adminHtml.slice(adminHtml.indexOf('id="loginOverlay"'), adminHtml.indexOf('id="adminApp"'));
+  assert.doesNotMatch(loginOverlaySection, /azuolynasfilmfestival@gmail\.com/);
+  assert.doesNotMatch(loginOverlaySection, /karina\.brdar@gmail\.com/);
+  assert.doesNotMatch(authJs, /karina\.brdar@gmail\.com/);
+  assert.doesNotMatch(authJs, /azuolynasfilmfestival@gmail\.com/);
+  assert.doesNotMatch(streamAdminJs, /newViewerMaxDevices/);
+  assert.doesNotMatch(serverJs, /maxConcurrentDevices\s*\|\|\s*35/);
+});
+

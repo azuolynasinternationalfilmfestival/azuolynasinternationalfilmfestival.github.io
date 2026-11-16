@@ -768,10 +768,10 @@
               const doc = await fsRes.json();
               const f = doc.fields || {};
               const isActive = f.isActive ? f.isActive.booleanValue !== false : true;
-              const maxUses = f.maxUses ? parseInt(f.maxUses.integerValue || "1", 10) : (f.maxConcurrentDevices ? parseInt(f.maxConcurrentDevices.integerValue || "35", 10) : 35);
+              const tokenType = f.tokenType?.stringValue || "classroom";
+              const maxUses = f.maxUses ? parseInt(f.maxUses.integerValue || "5", 10) : 5;
               const currentUses = f.currentUses ? parseInt(f.currentUses.integerValue || "0", 10) : 0;
               const expiresAt = f.expiresAt?.timestampValue ? new Date(f.expiresAt.timestampValue) : null;
-              const tokenType = f.tokenType?.stringValue || (maxUses > 1 ? "classroom" : "individual");
 
               if (!isActive) throw new Error(t.errRevoked);
               if (expiresAt && expiresAt.getTime() < Date.now()) throw new Error(t.errExpired);
@@ -780,7 +780,6 @@
               validation = {
                 valid: true,
                 tokenType: tokenType,
-                maxDevices: maxUses,
                 label: f.label?.stringValue || (tokenType === "classroom" ? t.classroomLabel : t.defaultViewer),
                 playbackUrl: "https://customer-auu36r7owuzogvfb.cloudflarestream.com/937d1a8b2c545a980c9fabc8502d8af4/iframe",
                 expiresAt: expiresAt ? expiresAt.toISOString() : null
@@ -863,7 +862,7 @@
 
         const isClassroom = auth.tokenType === "classroom";
         const badgeLabel = isClassroom 
-          ? `🏫 ${escapeHtml(auth.label || t.classroomLabel)} (${auth.maxDevices || 35})`
+          ? `🏫 ${escapeHtml(auth.label || t.classroomLabel)}`
           : `👤 ${escapeHtml(auth.label || t.defaultViewer)}`;
 
         stage.innerHTML = `

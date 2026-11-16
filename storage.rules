@@ -18,10 +18,10 @@ service firebase.storage {
       );
     }
 
-    // Submissions directory: public upload with strict size and type validation
+    // Submissions directory: public upload with strict size (<= 300 MB) and type validation
     match /submissions/{fileName} {
       allow read: if true;
-      allow create: if request.resource.size < 500 * 1024 * 1024
+      allow create: if request.resource.size <= 300 * 1024 * 1024
                     && (request.resource.contentType.matches('video/.*')
                         || request.resource.contentType.matches('image/.*')
                         || request.resource.contentType == 'application/pdf');

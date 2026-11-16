@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title id="vPageTitle">Audience Voting & Ceremony Results | AISFF 2027</title>
+  <title id="vPageTitle">Audience Voting & Ceremony Results | AISFF</title>
   <meta name="description" id="vMetaDescription" content="Official Audience Choice Award Voting & Jury Results for Ąžuolynas International Film Festival. Support independent student filmmakers.">
   <link rel="icon" type="image/webp" href="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media">
   <link rel="stylesheet" href="style.css">
@@ -803,7 +803,6 @@
         <a href="lt/index.html" class="nav-link" id="navHome">Pradinis</a>
         <a href="voting.html" class="nav-link active" id="navVoting">Balsavimas</a>
         <a href="live.html" class="nav-link" id="navLive">Transliacija</a>
-        <a href="admin.html" class="nav-link" id="navAdmin">Valdymas</a>
       </nav>
 
       <div class="header-actions" style="display:flex; align-items:center; gap:12px;">
@@ -835,7 +834,7 @@
       <a href="lt/index.html" class="drawer-logo-wrap" id="drawerLogoLink">
         <img src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media" alt="AISFF" class="logo-img">
         <div>
-          <div class="drawer-logo-title">AISFF 2027</div>
+          <div class="drawer-logo-title">AISFF</div>
           <div class="drawer-logo-sub" id="drawerSubtitle">Mokinių Kino Festivalis</div>
         </div>
       </a>
@@ -847,7 +846,6 @@
         <li><a href="lt/index.html" class="drawer-nav-link" id="drawerNavHome"><span>Pradinis puslapis</span></a></li>
         <li><a href="voting.html" class="drawer-nav-link highlight" id="drawerNavVoting"><span>Balsavimas už filmus</span></a></li>
         <li><a href="live.html" class="drawer-nav-link" id="drawerNavLive"><span>Tiesioginė transliacija</span></a></li>
-        <li><a href="admin.html" class="drawer-nav-link" id="drawerNavAdmin"><span>Valdymo skydas</span></a></li>
       </ul>
     </div>
   </aside>
@@ -861,7 +859,7 @@
           <span id="votingStatusText">Balsavimas Aktyvus</span>
         </div>
         <div id="juryStatusBadge" class="voting-status-badge" style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); color:#cbd5e1;">
-          <span id="juryStatusText">AISFF 2027</span>
+          <span id="juryStatusText">AISFF</span>
         </div>
       </div>
 
@@ -1017,12 +1015,12 @@
       // 1. Multi-Language Dictionary (LT & EN only - strictly no Russian)
       const I18N = {
         lt: {
-          pageTitle: "Balsuokite už jums patikusį filmą | AISFF 2027",
+          pageTitle: "Balsuokite už jums patikusį filmą | AISFF",
           metaDesc: "Oficialus Ąžuolyno tarptautinio mokinių filmų festivalio žiūrovų balsavimas ir apdovanojimai.",
           navHome: "Pradinis",
           navVoting: "Balsavimas",
           navLive: "Transliacija",
-          navAdmin: "Valdymas",
+          navAdmin: "Administravimas",
           btnLiveTop: "Transliacija",
           homeUrl: "lt/index.html",
           statusOpen: "Balsavimas Aktyvus",
@@ -1060,7 +1058,7 @@
           errorVoteFailed: "Nepavyko įskaityti balso. Bandykite dar kartą."
         },
         en: {
-          pageTitle: "Vote for Your Favorite Film | AISFF 2027",
+          pageTitle: "Vote for Your Favorite Film | AISFF",
           metaDesc: "Official Audience Choice Award Voting & Jury Results for Ąžuolynas International Film Festival.",
           navHome: "Home",
           navVoting: "Voting",
@@ -1537,7 +1535,7 @@
                   ? `<img src="${escapeHtml(poster)}" alt="${escapeHtml(title)}" class="film-poster-img" loading="lazy">` 
                   : `<div class="film-poster-placeholder">
                       <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect><line x1="7" y1="2" x2="7" y2="22"></line><line x1="17" y1="2" x2="17" y2="22"></line><line x1="2" y1="12" x2="22" y2="12"></line></svg>
-                      <span style="font-size:0.75rem; margin-top:6px; font-family:var(--font-mono);">AISFF 2027</span>
+                      <span style="font-size:0.75rem; margin-top:6px; font-family:var(--font-mono);">AISFF</span>
                     </div>`
                 }
               </div>

@@ -8,7 +8,7 @@
  * 2. Firestore Settings (settings/festival & settings/global)
  * 3. Firestore Movies & Submissions Collections (/movies & /submissions)
  * 4. Voting Rules & Atomic Increments Protection (prevent tampering, 1 vote per viewer)
- * 5. Stream Tokens & Teacher Classroom Passes (multi-device 35 stream allowance)
+ * 5. Stream Tokens & Teacher Classroom Passes (single shareable projector link)
  * 6. Cloudflare Stream Worker & Signed Token Validator (/api/stream/validate-token)
  * 7. Mail Queue & Notification Triggers (/mail & SMTP)
  */
@@ -336,14 +336,14 @@ export async function runFullSystemCheck() {
         const classrooms = viewers.filter(v => v.tokenType === "classroom");
         return {
           status: "PASS",
-          details: `Transliacijos žetonų sistema sukonfigūruota mokytojams (${classrooms.length} klasių su 35 įrenginių limitu, iš viso ${viewers.length} žetonų). Mokiniai žiūri per mokytoją.`
+          details: `Transliacijos žetonų sistema sukonfigūruota mokytojams (${classrooms.length} klasės nuorodos, iš viso ${viewers.length} žetonų). Mokiniai žiūri per mokytojo projektorių.`
         };
       }
     } catch (e) {}
 
     return {
       status: "PASS",
-      details: "Transliacijos žetonai generuojami mokytojams klasių transliacijoms su multi-device palaikymu (35 įrenginiai)."
+      details: "Transliacijos žetonai generuojami mokytojams kaip viena bendrinama klasės / projektoriaus nuoroda."
     };
   });
 

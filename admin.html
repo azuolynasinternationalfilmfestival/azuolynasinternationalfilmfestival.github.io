@@ -9,7 +9,7 @@
   <script src="js/firebase-client.js"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Valdymo Skydas | AISFF</title>
+  <title>Administravimo Portalas | AISFF</title>
   <link rel="icon" type="image/webp" href="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -29,14 +29,14 @@
   <div id="loginSection" class="admin-auth-container">
     <div class="admin-auth-card">
       <img src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media" alt="Logo" class="admin-auth-logo">
-      <h2 class="admin-auth-title">Valdymo Skydas</h2>
+      <h2 class="admin-auth-title">Administravimo Portalas</h2>
       <p class="admin-auth-sub">Autorizuota prieiga &bull; Kauno Tarptautinė Gimnazija</p>
 
       <div id="loginFormWrapper">
         <form id="adminAuthForm" action="javascript:void(0);" onsubmit="event.preventDefault(); return false;">
           <div class="input-cell">
             <label for="loginEmail">Identifikatorius (El. paštas)</label>
-            <input type="email" id="loginEmail" class="field" autocomplete="username" placeholder="azuolynasfilmfestival@gmail.com" required>
+            <input type="email" id="loginEmail" class="field" autocomplete="username" placeholder="el.pastas@domenas.lt" required>
           </div>
           <div class="input-cell">
             <div style="display:flex; justify-content:space-between; align-items:center;">
@@ -176,7 +176,7 @@
         <img src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media" alt="Logo" class="admin-brand-logo">
         <div style="display:flex; flex-direction:column; line-height:1.2;">
           <span class="admin-brand-title" style="font-size:1.05rem;">AISFF</span>
-          <span style="font-size:0.72rem; color:var(--accent-light);">Valdymo Skydas</span>
+          <span style="font-size:0.72rem; color:var(--accent-light);">Administravimas</span>
         </div>
       </div>
 
@@ -266,7 +266,7 @@
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
           </button>
           <div>
-            <span style="font-size:0.75rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.04em;">Valdymo Skydas /</span>
+            <span style="font-size:0.75rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.04em;">Administravimo Portalas /</span>
             <h2 id="adminCurrentSectionTitle" style="font-size:1.15rem; font-weight:700; margin:0; color:var(--text-color); font-family:var(--font-cinema);">
               Paraiškos
             </h2>
@@ -296,7 +296,7 @@
       <div class="admin-workspace-body container">
         <div id="maintenanceActiveAlert" class="drop-alert d-none" style="margin-bottom:18px; background:rgba(255,255,255,0.06); border-color:rgba(255,255,255,0.2); color:#FFFFFF; display:flex; align-items:flex-start; gap:8px;">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0; margin-top:2px;"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
-          <div><strong>Profilaktikos režimas yra ĮJUNGTAS:</strong> Vieša svetainės prieiga lankytojams apribota. Lankytojai mato informacinį profilaktikos pranešimą. Tik autorizuoti administratoriai gali pasiekti valdymo skydą.</div>
+          <div><strong>Profilaktikos režimas yra ĮJUNGTAS:</strong> Vieša svetainės prieiga lankytojams apribota. Lankytojai mato informacinį profilaktikos pranešimą. Tik autorizuoti administratoriai gali pasiekti administravimo portalą.</div>
         </div>
 
         <!-- 0. STATISTIKA & SUVESTINĖ (DASHBOARD TAB) -->
@@ -898,14 +898,10 @@
               </div>
 
               <!-- Classroom Specific Row (Enabled by default for classroom/teacher) -->
-              <div id="classroomSettingsRow" class="two-col-grid" style="margin-bottom:12px; background:rgba(255,255,255,0.04); padding:12px; border-radius:2px; border:1px solid rgba(255,255,255,0.12);">
-                <div class="input-cell">
-                  <label for="newViewerClassroomLabel" style="color:#CBD5E1;">Klasė / Kabinetas (Projektoriaus vieta) *</label>
+              <div id="classroomSettingsRow" style="display:grid; grid-template-columns:1fr; margin-bottom:12px; background:rgba(255,255,255,0.04); padding:12px; border-radius:2px; border:1px solid rgba(255,255,255,0.12);">
+                <div class="input-cell" style="margin-bottom:0;">
+                  <label for="newViewerClassroomLabel" style="color:#CBD5E1;">Klasė / Kabinetas (Projektoriaus vieta klasei)</label>
                   <input type="text" id="newViewerClassroomLabel" class="field" placeholder="pvz. 8B klasė, 204 kab. (Projektorius)">
-                </div>
-                <div class="input-cell">
-                  <label for="newViewerMaxDevices" style="color:#CBD5E1;">Maks. Įrenginių Skaičius Vienu Metu (Standartas: 35)</label>
-                  <input type="number" id="newViewerMaxDevices" class="field" min="1" max="100" value="35">
                 </div>
               </div>
 
@@ -952,7 +948,7 @@
                 <div>
                   <h4 style="font-size:0.88rem; color:#FFFFFF; margin:0;">🏫 Masinis Mokytojų ir Klasių Žetonų Generavimas & CSV Eksportas</h4>
                   <p style="margin:2px 0 0 0; font-size:0.78rem; color:var(--text-muted);">
-                    Įklijuokite mokytojų sąrašą (po vieną eilutę: Vardas Pavardė, Klasė / Kabinetas, El. paštas, Įrenginių skaičius).
+                    Įklijuokite mokytojų sąrašą (po vieną eilutę: Vardas Pavardė, Klasė / Kabinetas, El. paštas). Kiekvienam mokytojui sugeneruojama viena bendrinama nuoroda projektoriui.
                   </p>
                 </div>
                 <div style="display:flex; gap:8px;">
@@ -968,11 +964,11 @@
 
               <div id="bulkClassroomDrawer" class="d-none" style="margin-top:10px; padding-top:10px; border-top:1px solid rgba(111,165,138,0.2);">
                 <label for="bulkClassroomInput" style="font-size:0.75rem; color:#BAC9C0; display:block; margin-bottom:6px;">
-                  Formatas: <code>Mokytojo Vardas, Klasė, mokytojas@mokykla.lt, 35</code> (vienas įrašas eilutėje):
+                  Formatas: <code>Mokytojo Vardas, Klasė, mokytojas@mokykla.lt</code> (vienas įrašas eilutėje):
                 </label>
-                <textarea id="bulkClassroomInput" class="field" rows="4" style="font-family:monospace; font-size:0.8rem; margin-bottom:10px;" placeholder="Jonas Kazlauskas, 8B klasė (204 kab.), j.kazlauskas@mokykla.lt, 35
-Rasa Petrauskienė, 10A klasė (301 kab.), r.petrauskiene@mokykla.lt, 35
-Tomas Vaitkus, Aktų salė (Projektorius), t.vaitkus@mokykla.lt, 100"></textarea>
+                <textarea id="bulkClassroomInput" class="field" rows="4" style="font-family:monospace; font-size:0.8rem; margin-bottom:10px;" placeholder="Jonas Kazlauskas, 8B klasė (204 kab.), j.kazlauskas@mokykla.lt
+Rasa Petrauskienė, 10A klasė (301 kab.), r.petrauskiene@mokykla.lt
+Tomas Vaitkus, Aktų salė (Projektorius), t.vaitkus@mokykla.lt"></textarea>
                 <div style="display:flex; justify-content:flex-end; gap:8px;">
                   <button type="button" id="btnRunBulkClassroomGenerate" class="btn-solid btn-sm" style="background:#4ade80; color:#041310; font-weight:700;">
                     Vykdyti Masinį Generavimą
@@ -998,8 +994,8 @@ Tomas Vaitkus, Aktų salė (Projektorius), t.vaitkus@mokykla.lt, 100"></textarea
                 <thead>
                   <tr>
                     <th>Žiūrovas / Klasė</th>
-                    <th>Tipas & Įrenginiai</th>
-                    <th>Cloudflare Signed Token</th>
+                    <th>Prieigos Tipas</th>
+                    <th>Prieigos Žetonas</th>
                     <th>Statusas</th>
                     <th>Asmeninė Nuoroda</th>
                     <th style="text-align:right;">Veiksmai</th>
@@ -1049,7 +1045,7 @@ Tomas Vaitkus, Aktų salė (Projektorius), t.vaitkus@mokykla.lt, 100"></textarea
           </div>
         </div>
 
-        <!-- 4. EDITIONS (FEST 2027 & ARCHIVE) TAB -->
+        <!-- 4. EDITIONS & ARCHIVE TAB -->
         <div id="editionsTab" class="d-none">
           <div class="content-card" style="margin-bottom:24px;">
             <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:12px;">
@@ -1092,7 +1088,7 @@ Tomas Vaitkus, Aktų salė (Projektorius), t.vaitkus@mokykla.lt, 100"></textarea
 
                 <div class="input-cell">
                   <label for="edTitle">Puslapio Pavadinimas (LT) *</label>
-                  <input type="text" id="edTitle" class="field" placeholder="FEST 2027" required>
+                  <input type="text" id="edTitle" class="field" placeholder="Festivalio Leidinys" required>
                 </div>
 
                 <div class="input-cell">
@@ -1117,7 +1113,7 @@ Tomas Vaitkus, Aktų salė (Projektorius), t.vaitkus@mokykla.lt, 100"></textarea
 
                 <div class="input-cell">
                   <label for="edTitleEn">Page Title (EN)</label>
-                  <input type="text" id="edTitleEn" class="field" placeholder="FEST 2027">
+                  <input type="text" id="edTitleEn" class="field" placeholder="Festival Edition">
                 </div>
 
                 <div class="input-cell">
@@ -1852,11 +1848,11 @@ Tomas Vaitkus, Aktų salė (Projektorius), t.vaitkus@mokykla.lt, 100"></textarea
       <div class="two-col-grid" style="margin-bottom:12px;">
         <div class="input-cell">
           <label for="taskAssignedName">Vykdytojo vardas</label>
-          <input type="text" id="taskAssignedName" class="field" placeholder="Lukas (Redaktorius)">
+          <input type="text" id="taskAssignedName" class="field" placeholder="Vardas Pavardė">
         </div>
         <div class="input-cell">
           <label for="taskAssignedEmail">Vykdytojo el. paštas</label>
-          <input type="email" id="taskAssignedEmail" class="field" placeholder="redaktorius@azuolynasfest.lt">
+          <input type="email" id="taskAssignedEmail" class="field" placeholder="el.pastas@domenas.lt">
         </div>
       </div>
 
@@ -1888,11 +1884,16 @@ Tomas Vaitkus, Aktų salė (Projektorius), t.vaitkus@mokykla.lt, 100"></textarea
       </div>
 
       <div class="modal-details">
-        <p><strong>Autorius:</strong> <span id="mAuthor"></span> (<span id="mEmail"></span>)</p>
+        <p><strong>Režisierius / Autorius:</strong> <span id="mAuthor"></span> (<span id="mEmail"></span>)</p>
+        <p><strong>Režisierius (vardas, pavardė):</strong> <span id="mDirectorRole">—</span></p>
+        <p><strong>Operatorius:</strong> <span id="mCameraOperatorRole">—</span></p>
+        <p><strong>Idėjos autorius:</strong> <span id="mIdeaAuthorRole">—</span></p>
+        <p><strong>Scenarijaus autorius:</strong> <span id="mScreenwriterRole">—</span></p>
         <p><strong>Amžius / Įstaiga:</strong> <span id="mAgeInst"></span></p>
         <p><strong>Vieta:</strong> <span id="mLocation"></span></p>
         <p><strong>Kameros modelis:</strong> <span id="mDevice"></span></p>
         <p><strong>Trukmė:</strong> <span id="mDuration"></span> s</p>
+        <p><strong>Video specifikacijos / PDF:</strong> <span id="mVideoSpecs">—</span></p>
         <p><strong>Publikos balsai:</strong> <span id="mVotes">0</span></p>
         <p class="modal-synopsis-label">Sinopsis / Idėja:</p>
         <p id="mSynopsis" class="modal-synopsis-text"></p>
@@ -2048,7 +2049,7 @@ Tomas Vaitkus, Aktų salė (Projektorius), t.vaitkus@mokykla.lt, 100"></textarea
           Ar tikrai norite visam laikui pašalinti vartotojo paskyrą iš sistemos?
         </p>
         <div style="background:var(--surface-color); border:1px solid var(--border-color); border-radius:var(--site-radius); padding:10px 14px; font-family:monospace; font-size:0.85rem; color:var(--accent-light);" id="deleteUserTargetLabel">
-          user@example.com
+          —
         </div>
       </div>
       <div style="display:flex; justify-content:flex-end; gap:10px;">
@@ -2262,7 +2263,7 @@ Tomas Vaitkus, Aktų salė (Projektorius), t.vaitkus@mokykla.lt, 100"></textarea
         <input type="hidden" id="pwdResetTargetEmail">
         <div style="background:var(--surface-color); border:1px solid var(--border-color); border-radius:var(--site-radius); padding:10px 14px; margin-bottom:14px;">
           <div style="font-size:0.75rem; color:var(--text-muted); text-transform:uppercase;">Pasirinktas naudotojas:</div>
-          <div style="font-weight:700; color:var(--text-color); font-size:1rem;" id="pwdResetTargetUserLabel">user@example.com</div>
+          <div style="font-weight:700; color:var(--text-color); font-size:1rem;" id="pwdResetTargetUserLabel">—</div>
         </div>
 
         <p style="font-size:0.86rem; color:var(--text-muted); line-height:1.5; margin-bottom:14px;">
@@ -2318,22 +2319,19 @@ Tomas Vaitkus, Aktų salė (Projektorius), t.vaitkus@mokykla.lt, 100"></textarea
               <div id="tokenQrTargetName" style="font-size:1rem; font-weight:700; color:#F8FAF7;">Jonas Kazlauskas - 8B klasė</div>
             </div>
             <span id="tokenQrTypeBadge" class="badge" style="background:rgba(52,211,153,0.12); color:#34D399; border:1px solid rgba(52,211,153,0.35); font-size:0.76rem;">
-              🏫 Klasė (35 įrenginiai)
+              🏫 Mokytojo / Klasės Transliacija (Projektoriui)
             </span>
           </div>
           <div style="margin-top:8px; font-size:0.78rem; color:#BAC9C0;">
-            Žetonas: <code id="tokenQrCodeDisplay" style="color:#34D399; background:rgba(0,0,0,0.4); padding:2px 6px; border-radius:2px; font-weight:700;">cfs_class_...</code>
+            Žetonas: <code id="tokenQrCodeDisplay" style="color:#34D399; background:rgba(0,0,0,0.4); padding:2px 6px; border-radius:2px; font-weight:700;">cfs_teacher_...</code>
           </div>
         </div>
 
         <!-- Rendered QR Canvas Container -->
         <div id="tokenQrPrintableArea" style="background:#FFFFFF; padding:18px; border-radius:2px; display:inline-block; margin:6px auto 14px auto; box-shadow:0 8px 30px rgba(0,0,0,0.6); text-align:center;">
           <div id="tokenQrCanvasContainer"></div>
-          <div style="margin-top:8px; font-family:-apple-system, BlinkMacSystemFont, sans-serif; font-size:0.8rem; font-weight:700; color:#041310; letter-spacing:0.04em;">
-            AISFF 2027
-          </div>
-          <div id="tokenQrPrintLabel" style="font-family:-apple-system, BlinkMacSystemFont, sans-serif; font-size:0.72rem; color:#334155; margin-top:2px;">
-            Nuskenuokite kameros programėle
+          <div id="tokenQrPrintLabel" style="font-family:-apple-system, BlinkMacSystemFont, sans-serif; font-size:0.72rem; color:#334155; margin-top:8px;">
+            Tiesioginės transliacijos QR prieiga • Nuskenuokite kameros programėle
           </div>
         </div>
 

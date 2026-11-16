@@ -119,8 +119,8 @@ function openTaskModal() {
   document.getElementById("taskDeadline").value = "";
   document.getElementById("taskPriority").value = "medium";
   document.getElementById("taskAssignedRole").value = "editor";
-  document.getElementById("taskAssignedEmail").value = "redaktorius@azuolynasfest.lt";
-  document.getElementById("taskAssignedName").value = "Lukas (Redaktorius)";
+  document.getElementById("taskAssignedEmail").value = "";
+  document.getElementById("taskAssignedName").value = "";
 
   modal.classList.remove("d-none");
   document.getElementById("taskTitle").focus();

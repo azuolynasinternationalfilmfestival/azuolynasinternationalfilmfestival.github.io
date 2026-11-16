@@ -26,6 +26,21 @@ function handleFirestoreError(error, operationType, path) {
   return errInfo;
 }
 
+async function parseApiError(res, fallbackMsg) {
+  try {
+    const contentType = res.headers.get("content-type") || "";
+    if (contentType.includes("application/json")) {
+      const data = await res.json();
+      if (data && (data.error || data.message)) {
+        return `${data.error || data.message} (HTTP ${res.status})`;
+      }
+    }
+  } catch {
+    // ignore
+  }
+  return `${fallbackMsg} (HTTP ${res.status})`;
+}
+
 let unsubscribeUsers = null;
 let allUsersList = [];
 let pendingDeleteUserId = null;
@@ -533,11 +548,11 @@ function attachTableEventHandlers() {
           showToast(`Vartotojas ${userEmail} ${newActive ? 'atblokuotas' : 'užblokuotas'}.`, "success");
         } else {
           input.checked = !newActive;
-          showToast("Nepavyko pakeisti prieigos būsenos", "error");
+          showToast(await parseApiError(resp, "Nepavyko pakeisti prieigos būsenos"), "error");
         }
       } catch (err) {
         input.checked = !newActive;
-        showToast("Ryšio klaida", "error");
+        showToast(`Klaida keičiant prieigos būseną: ${err?.message || "Serveris nepasiekiamas"}`, "error");
       } finally {
         input.disabled = false;
       }
@@ -578,10 +593,10 @@ function attachTableEventHandlers() {
         if (res.ok) {
           showToast(`Patvirtinimo laiškas sėkmingai išsiųstas į ${email}!`, "success");
         } else {
-          showToast("Nepavyko išsiųsti patvirtinimo laiško", "error");
+          showToast(await parseApiError(res, "Nepavyko išsiųsti patvirtinimo laiško"), "error");
         }
       } catch (err) {
-        showToast("Ryšio klaida", "error");
+        showToast(`Klaida siunčiant patvirtinimo laišką: ${err?.message || "Serveris nepasiekiamas"}`, "error");
       } finally {
         btn.disabled = false;
       }
@@ -646,10 +661,10 @@ async function executeDeleteUser(userId, email) {
       renderUsersTable();
       showToast(`Vartotojas ${email || userId} sėkmingai pašalintas iš sistemos.`, "success");
     } else {
-      showToast("Nepavyko pašalinti vartotojo.", "error");
+      showToast(await parseApiError(resp, "Nepavyko pašalinti vartotojo."), "error");
     }
   } catch (apiErr) {
-    showToast("Ryšio klaida šalinant vartotoją.", "error");
+    showToast(`Klaida šalinant vartotoją: ${apiErr?.message || "Serveris nepasiekiamas"}`, "error");
   }
 }
 
@@ -725,11 +740,10 @@ function initUserEditModal() {
           hideModal();
           await loadUsersFallback();
         } else {
-          const err = await res.json();
-          showToast(err.error || "Nepavyko išsaugoti profilio", "error");
+          showToast(await parseApiError(res, "Nepavyko išsaugoti profilio"), "error");
         }
       } catch (err) {
-        showToast("Ryšio klaida", "error");
+        showToast(`Klaida išsaugant profilį: ${err?.message || "Serveris nepasiekiamas"}`, "error");
       } finally {
         if (saveBtn) {
           saveBtn.disabled = false;
@@ -893,11 +907,10 @@ function initPasswordResetModal() {
             }
           }
         } else {
-          const err = await res.json();
-          showToast(err.error || "Nepavyko išsiųsti nuorodos", "error");
+          showToast(await parseApiError(res, "Nepavyko išsiųsti nuorodos"), "error");
         }
       } catch (err) {
-        showToast("Ryšio klaida", "error");
+        showToast(`Klaida siunčiant nuorodą: ${err?.message || "Serveris nepasiekiamas"}`, "error");
       } finally {
         btnSendEmail.disabled = false;
         btnSendEmail.textContent = "Atsiųsti Nuorodą El. Paštu";
@@ -932,11 +945,10 @@ function initPasswordResetModal() {
           }
           showToast("Vienkartinė slaptažodžio keitimo nuoroda sėkmingai sugeneruota!", "success");
         } else {
-          const err = await res.json();
-          showToast(err.error || "Klaida generuojant nuorodą", "error");
+          showToast(await parseApiError(res, "Klaida generuojant nuorodą"), "error");
         }
       } catch (err) {
-        showToast("Ryšio klaida", "error");
+        showToast(`Klaida generuojant nuorodą: ${err?.message || "Serveris nepasiekiamas"}`, "error");
       } finally {
         btnGenerateDirect.disabled = false;
         btnGenerateDirect.textContent = "Generuoti Vienkartinį Linką Tiesiogiai";
