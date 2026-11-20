@@ -34,9 +34,9 @@ const EMAIL_THEME = {
   borderDark: "#153D34",
   borderAccent: "rgba(111, 165, 138, 0.28)",
   logoUrl: "https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media",
-  siteUrl: "https://azuolynasinternationalfilmfestival.github.io/",
-  adminUrl: "https://azuolynasinternationalfilmfestival.github.io/admin.html",
-  liveStreamUrl: "https://azuolynasinternationalfilmfestival.github.io/live.html",
+  siteUrl: "https://www.azuolynasfilmfestival.lt/",
+  adminUrl: "https://www.azuolynasfilmfestival.lt/admin.html",
+  liveStreamUrl: "https://www.azuolynasfilmfestival.lt/live.html",
   instagramUrl: "https://www.instagram.com/azuolynas.iff",
   instagramHandle: "@azuolynas.iff",
   themeLt: "Mano pašaukimas",
@@ -176,7 +176,7 @@ const emailTexts = {
       heading: "Sveiki, {{name}}!",
       body: "Nuoširdžiai dėkojame už dalyvavimą! Jūsų filmo paraiška festivalio temai „Mano pašaukimas“ sėkmingai pasiekė AISFF organizacinį komitetą. Prie šio laiško pridėtas PDF dokumentas su visais jūsų pateiktais duomenimis. Komisija peržiūrės filmą ir atsakymą atsiųs {{responseTime}}.",
       detailsTitle: "Pateiktos paraiškos suvestinė",
-      note: "Oficiali festivalio filmų peržiūra bei laureatų apdovanojimo ceremonija vyks Kauno tarptautinėje gimnazijoje 2027 m. balandžio 27 d. Tiesioginę transliaciją galėsite stebėti per https://azuolynasinternationalfilmfestival.github.io/live.html, o naujienas sekite Instagram: @azuolynas.iff.",
+      note: "Oficiali festivalio filmų peržiūra bei laureatų apdovanojimo ceremonija vyks Kauno tarptautinėje gimnazijoje 2027 m. balandžio 27 d. Tiesioginę transliaciją galėsite stebėti per https://www.azuolynasfilmfestival.lt/live.html, o naujienas sekite Instagram: @azuolynas.iff.",
       ctaText: "Apsilankyti Festivalio Svetainėje"
     },
     adminNotification: {
@@ -247,7 +247,7 @@ const emailTexts = {
       heading: "Sveiki, {{name}}!",
       body: "Kadangi pažymėjote, kad negalėsite atvykti į festivalio ceremoniją gyvai Kaune, paruošėme jums tiesioginę transliacijos prieigą. Prie šio laiško pridėtas PDF su visa jūsų paraiškos informacija. Atsakymo dėl atrankos sulauksite {{responseTime}}, o 2027 m. balandžio 27 d. galėsite stebėti transliaciją bei balsuoti!",
       detailsTitle: "Nuotolinio dalyvio prieigos duomenys",
-      note: "Transliacija bus pasiekiama 2027 m. balandžio 27 d. su šiuo asmeniniu žetonu arba jūsų registruotu el. paštu per https://azuolynasinternationalfilmfestival.github.io/live.html. Sekite @azuolynas.iff.",
+      note: "Transliacija bus pasiekiama 2027 m. balandžio 27 d. su šiuo asmeniniu žetonu arba jūsų registruotu el. paštu per https://www.azuolynasfilmfestival.lt/live.html. Sekite @azuolynas.iff.",
       ctaText: "Atverti Tiesioginę Transliaciją"
     },
     userInvite: {
@@ -285,7 +285,7 @@ const emailTexts = {
       heading: "Hello, {{name}}!",
       body: "Thank you sincerely for participating! Your entry for the festival theme “My Purpose” has been safely received by the organizing committee of AISFF. A full PDF copy of your submission is attached to this email. Our jury will review your entry and get back to you {{responseTime}}.",
       detailsTitle: "Submission Summary",
-      note: "The gala screening and awards ceremony will take place at Kaunas International Gymnasium on April 27th, 2027. Watch the global live stream at https://azuolynasinternationalfilmfestival.github.io/live.html and follow us on Instagram: @azuolynas.iff.",
+      note: "The gala screening and awards ceremony will take place at Kaunas International Gymnasium on April 27th, 2027. Watch the global live stream at https://www.azuolynasfilmfestival.lt/live.html and follow us on Instagram: @azuolynas.iff.",
       ctaText: "Visit Festival Platform"
     },
     adminNotification: {
@@ -356,7 +356,7 @@ const emailTexts = {
       heading: "Hello, {{name}}!",
       body: "Since you indicated that you are unable to attend the awards ceremony in person, we have generated your exclusive live broadcast pass. A full PDF copy of your submission is attached, and our team will respond {{responseTime}}. On April 27th, 2027, you can watch the stream and cast your vote remotely!",
       detailsTitle: "Remote Participant Connection Details",
-      note: "The broadcast airs live on April 27th, 2027. Accessible with this personal token or your registered email at https://azuolynasinternationalfilmfestival.github.io/live.html. Follow @azuolynas.iff.",
+      note: "The broadcast airs live on April 27th, 2027. Accessible with this personal token or your registered email at https://www.azuolynasfilmfestival.lt/live.html. Follow @azuolynas.iff.",
       ctaText: "Open Live Stream Platform"
     },
     userInvite: {

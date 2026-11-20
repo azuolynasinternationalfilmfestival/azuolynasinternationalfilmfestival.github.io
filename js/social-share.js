@@ -6,7 +6,7 @@
  */
 
 (function (global) {
-  const CANONICAL_BASE = "https://azuolynasinternationalfilmfestival.github.io";
+  const CANONICAL_BASE = "https://www.azuolynasfilmfestival.lt";
 
   function getAbsoluteUrl(relativeOrAbsolute) {
     if (!relativeOrAbsolute) {

@@ -158,7 +158,7 @@ async function handleInviteSubmit(e) {
   const verificationCode = generateVerificationCode();
   const baseUrl = (typeof window !== "undefined" && window.location && window.location.origin)
     ? window.location.origin
-    : "https://azuolynasinternationalfilmfestival.github.io";
+    : "https://www.azuolynasfilmfestival.lt";
   const inviteUrl = `${baseUrl}/admin.html?invite=${token}`;
 
   let createdSuccessfully = false;

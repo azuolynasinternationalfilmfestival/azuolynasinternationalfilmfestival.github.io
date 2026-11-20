@@ -154,7 +154,7 @@ function getRequestBaseUrl(req) {
   const protoHeader = req?.headers?.['x-forwarded-proto'];
   const proto = protoHeader ? String(protoHeader).split(',')[0].trim() : (req?.protocol || 'http');
   if (host) return `${proto}://${host}`;
-  return 'https://azuolynasinternationalfilmfestival.github.io';
+  return 'https://www.azuolynasfilmfestival.lt';
 }
 
 // Security & Authentication Configuration
