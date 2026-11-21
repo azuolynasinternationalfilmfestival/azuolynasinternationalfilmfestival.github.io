@@ -1,5 +1,8 @@
 /* Static hosting uses Trigger Email; Node hosting keeps the SMTP dispatcher. */
 (() => {
+  // Reply-to address and organizer inbox (NOT used as "from").
+  // The visible sender comes from the extension's Default FROM address:
+  // AISFF <info@azuolynasfilmfestival.lt>
   const sender = 'azuolynasfilmfestival@gmail.com';
   const validAddress = value => typeof value === 'string' && /^[^\s@,;<>]+@[^\s@,;<>]+\.[^\s@,;<>]+$/.test(value);
   function buildMail({ to, subject, html, text, replyTo = sender }) {
@@ -8,7 +11,8 @@
     if (typeof subject !== 'string' || !subject.trim() || typeof html !== 'string' || !html.trim() || (text !== undefined && typeof text !== 'string')) {
       throw new Error('Laiškui reikalinga tema ir HTML turinys.');
     }
-    return { to: recipients, from: sender, replyTo,
+    // No "from" field on purpose: the extension's Default FROM is used.
+    return { to: recipients, replyTo,
       message: { subject, html, text: text ?? subject }, createdAt: new Date().toISOString() };
   }
   function viewer(data) {
