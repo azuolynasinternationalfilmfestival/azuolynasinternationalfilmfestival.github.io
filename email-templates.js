@@ -553,8 +553,8 @@ function buildEmailDocument({ lang, preheader, statusKey, childrenHtml }) {
                     <p style="margin: 4px 0 0 0; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: #9BC4AE; font-weight: 700;">
                       ${isLt ? "Tarptautinis Mokinių Filmų Festivalis" : "International Students Film Festival"}
                     </p>
-                    <p style="margin: 3px 0 0 0; font-size: 11px; font-style: italic; color: #7A9689;">
-                      ${isLt ? "„Neįprastas žvilgsnis į įprastus dalykus“" : "“An unusual view at ordinary things”"}
+                    <p style="margin: 8px 0 0 0; font-size: 16px; font-weight: 800; letter-spacing: 0.16em; text-transform: uppercase; color: #34D399; line-height: 1.3;">
+                      ${isLt ? "MANO PAŠAUKIMAS" : "MY PURPOSE"}
                     </p>
                   </td>
                 </tr>
@@ -1307,4 +1307,3 @@ if (typeof module !== "undefined" && module.exports) {
     generateSubmissionPlainText
   };
 }
-
