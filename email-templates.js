@@ -45,8 +45,8 @@ const EMAIL_THEME = {
   submissionPeriodEn: "November 1st, 2026 – April 5th, 2027",
   eventDateLt: "2027 m. balandžio 27 d.",
   eventDateEn: "April 27th, 2027",
-  venueLt: "Kauno tarptautinė gimnazija (Vytauto pr. 44, Kaunas)",
-  venueEn: "Kaunas International Gymnasium (Vytauto ave. 44, Kaunas, Lithuania)",
+  venueLt: "Kauno tarptautinė gimnazija (Vytauto pr. 50, Kaunas)",
+  venueEn: "Kaunas International Gymnasium (Vytauto ave. 50, Kaunas, Lithuania)",
   contactEmail: "azuolynasfilmfestival@gmail.com"
 };
 
