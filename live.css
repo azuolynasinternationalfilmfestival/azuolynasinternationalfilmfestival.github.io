@@ -38,7 +38,7 @@
 .broadcast-dot {
   width: 7px;
   height: 7px;
-  border-radius: 50%;
+  border-radius: var(--site-radius);
   background: var(--text-subtle);
 }
 .stream-status-pill.live {

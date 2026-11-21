@@ -18,6 +18,7 @@
   <meta property="og:image" content="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/IMG_3463.jpeg?alt=media&token=af7892ca-e78e-4198-b686-e0181472e8da">
   <link rel="icon" type="image/webp" href="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media">
   <link rel="stylesheet" href="../style.css">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
@@ -130,13 +131,13 @@
           </p>
 
           <div class="countries-cloud">
-            <span class="country-pill"><span class="country-flag">🇪🇺</span> Europe</span>
-            <span class="country-pill"><span class="country-flag">🌏</span> Asia</span>
-            <span class="country-pill"><span class="country-flag">🌎</span> North America</span>
-            <span class="country-pill"><span class="country-flag">🌍</span> Africa</span>
-            <span class="country-pill"><span class="country-flag">🇮🇹</span> Italy (Jury)</span>
-            <span class="country-pill"><span class="country-flag">🇷🇸</span> Republika Srpska (Jury)</span>
-            <span class="country-pill"><span class="country-flag">🇱🇹</span> Lithuania</span>
+            <span class="country-pill">Europe</span>
+            <span class="country-pill">Asia</span>
+            <span class="country-pill">North America</span>
+            <span class="country-pill">Africa</span>
+            <span class="country-pill">Italy (Jury)</span>
+            <span class="country-pill">Republika Srpska (Jury)</span>
+            <span class="country-pill">Lithuania</span>
           </div>
         </div>
       </div>
@@ -178,16 +179,16 @@
             <div class="meta-box" style="text-align:left;">
               <div class="meta-box-label">Senior Category</div>
               <p style="color:var(--text-color); font-size:0.95rem; line-height:1.6;">
-                <strong>🥇 1st Place</strong> – Armenia<br>
-                <strong>🥈 2nd Place</strong> – Estonia & Canada<br>
-                <strong>🥉 3rd Place</strong> – Canada
+                <strong>1st Place</strong> – Armenia<br>
+                <strong>2nd Place</strong> – Estonia & Canada<br>
+                <strong>3rd Place</strong> – Canada
               </p>
             </div>
             <div class="meta-box" style="text-align:left;">
               <div class="meta-box-label">Special Festival Honors</div>
               <p style="color:var(--text-color); font-size:0.95rem; line-height:1.6;">
-                <strong>🏆 Special Jury Prize</strong> – Vilnius Team<br>
-                <strong>🏆 Special Jury Prize</strong> – Kenya Team
+                <strong>Special Jury Prize</strong> – Vilnius Team<br>
+                <strong>Special Jury Prize</strong> – Kenya Team
               </p>
             </div>
           </div>
@@ -294,7 +295,7 @@
         </div>
       </div>
       <div class="footer-bottom-bar">
-        <span>&copy; 2026 Ąžuolynas International Students Film Festival. All rights reserved.</span>
+        <span>&copy; 2027 Ąžuolynas International Students Film Festival. All rights reserved.</span>
         <span>Official Platform: www.azuolynasfilmfestival.lt</span>
       </div>
     </div>
@@ -326,14 +327,16 @@
       if (e.key === "Escape") closeLightbox();
     });
 
-    db.collection("editions").doc("2026_en").onSnapshot((doc) => {
-      if (!doc.exists) return;
-      const data = doc.data();
-
-      if (data.title) document.getElementById("dynTitle").textContent = data.title;
-      if (data.date) document.getElementById("dynDate").textContent = data.date;
-      if (data.subtitle) document.getElementById("dynSub").textContent = data.subtitle;
-      if (data.story) document.getElementById("dynStory").textContent = data.story;
+    function applyEn2026Data(data, preferEnFieldsOnly) {
+      if (!data) return;
+      const title = data.titleEn || (!preferEnFieldsOnly ? data.title : "");
+      const date = data.dateEn || (!preferEnFieldsOnly ? data.date : "");
+      const subtitle = data.subtitleEn || (!preferEnFieldsOnly ? data.subtitle : "");
+      const story = data.storyEn || (!preferEnFieldsOnly ? data.story : "");
+      if (title) document.getElementById("dynTitle").textContent = title;
+      if (date) document.getElementById("dynDate").textContent = date;
+      if (subtitle) document.getElementById("dynSub").textContent = subtitle;
+      if (story) document.getElementById("dynStory").textContent = story;
       if (data.heroImage) {
         document.getElementById("editionHeroSection").style.backgroundImage = `url('${data.heroImage}')`;
       }
@@ -344,6 +347,16 @@
         else if (embed.includes("youtu.be/")) embed = embed.replace("youtu.be/", "www.youtube.com/embed/");
         wrap.innerHTML = `<iframe src="${embed}" allowfullscreen class="embed-media"></iframe>`;
       }
+    }
+
+    db.collection("editions").doc("2026").onSnapshot((doc) => {
+      if (doc.exists) applyEn2026Data(doc.data(), true);
+    }, (err) => {
+      console.warn("Edition 2026 listener:", err.message);
+    });
+
+    db.collection("editions").doc("2026_en").onSnapshot((doc) => {
+      if (doc.exists) applyEn2026Data(doc.data(), false);
     }, (err) => {
       console.warn("Edition 2026_en listener:", err.message);
     });

@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://firebasestorage.googleapis.com">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>AISFF | Ąžuolynas International Student Film Festival | Official Submissions</title>
   <meta name="description" content="The 7th «Ąžuolynas» International Student Film Festival (AISFF). Theme: “My Purpose”. Submissions: November 1, 2026 – April 5, 2027. Festival & Live Stream: April 27, 2027.">
@@ -34,8 +34,8 @@
     "@type": "Festival",
     "name": "Ąžuolynas International Students Film Festival",
     "description": "The «Ažuolynas» Film Festival is named after one of the sights of Kaunas, at the foot of which our studio is located.",
-    "startDate": "2026-04-17T15:00:00+03:00",
-    "endDate": "2026-04-17T18:00:00+03:00",
+    "startDate": "2027-04-27T15:00:00+03:00",
+    "endDate": "2027-04-27T18:00:00+03:00",
     "eventAttendanceMode": "https://schema.org/OnlineEventAttendanceMode",
     "eventStatus": "https://schema.org/EventScheduled",
     "location": {
@@ -115,7 +115,7 @@
 
       <!-- Header actions: Quick Submit CTA, Language switch, Burger button -->
       <div class="header-actions">
-        <a href="../voting.html" class="btn-outline btn-nav-cta">Voting</a>
+        <a href="../voting.html?lang=en" class="btn-outline btn-nav-cta">Voting</a>
         <a href="#submit" class="btn-solid btn-nav-cta">Submit Film</a>
         <div class="lang-switch">
           <a href="../lt/index.html" class="lang-btn">LT</a>
@@ -174,7 +174,7 @@
           <li id="drawerNavLinkCurrentEdition">
             <a href="azuolynas-fest-2027.html" class="drawer-nav-link highlight">
               <span class="drawer-nav-text">FEST 2027 (Upcoming Edition)</span>
-              <span class="drawer-nav-badge">2027</span>
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
             </a>
           </li>
           <li id="drawerNavLinkEditions">
@@ -222,9 +222,9 @@
         <div class="drawer-section-title">Program & Events</div>
         <ul class="drawer-nav-list">
           <li id="drawerNavLinkVoting">
-            <a href="../voting.html" class="drawer-nav-link highlight">
+            <a href="../voting.html?lang=en" class="drawer-nav-link highlight">
               <span class="drawer-nav-text">Audience Voting</span>
-              <span class="drawer-nav-badge">New</span>
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
             </a>
           </li>
           <li id="drawerNavLinkScreening">
@@ -274,28 +274,45 @@
         <!-- Architectural Masthead -->
         <div class="hero-masthead">
           <div class="hero-masthead-col">
-            <span class="masthead-mono">EDITION 07 // 2026–2027</span>
+            <span class="masthead-mono">EDITION 07 &bull; 2026–2027</span>
           </div>
           <div class="hero-masthead-col text-center">
             <span class="masthead-mono">KAUNAS &bull; LITHUANIA</span>
           </div>
           <div class="hero-masthead-col text-right">
-            <span class="masthead-status"><span class="status-pulse-dot"></span> SUBMISSIONS OPEN</span>
+            <span class="masthead-status">SUBMISSIONS OPEN</span>
           </div>
         </div>
 
         <div class="hero-title-block">
           <h1 class="hero-title">AISFF</h1>
           <p class="hero-subtitle">Ąžuolynas International Student Film Festival</p>
+          <p class="hero-human-lead">
+            A free international short film competition for students aged 10–18: shoot a story on your smartphone or tablet (up to 3 minutes), submit your entry online, and take part in the official screening and audience vote.
+          </p>
           <p class="hero-about-text" id="dynAboutText">
             The «Ažuolynas» Film Festival is named after one of the sights of Kaunas, at the foot of which our studio is located.
           </p>
+          <ol class="participation-flow" aria-label="How participation works">
+            <li class="participation-step">
+              <span class="participation-step-num">01. Film It</span>
+              <span class="participation-step-text">On any smartphone or tablet, strictly up to 3 minutes (180s).</span>
+            </li>
+            <li class="participation-step">
+              <span class="participation-step-num">02. Submit Online</span>
+              <span class="participation-step-text">Complete the entry form below before April 5, 2027.</span>
+            </li>
+            <li class="participation-step">
+              <span class="participation-step-num">03. Screening &amp; Awards</span>
+              <span class="participation-step-text">Premiere, live voting, and gala ceremony on April 27, 2027.</span>
+            </li>
+          </ol>
         </div>
 
-        <!-- Flush Editorial Grid -->
+        <!-- Editorial Grid -->
         <div class="hero-editorial-grid">
           <div class="hero-editorial-left">
-            <div class="editorial-cell-tag">FESTIVAL THEME // 2027</div>
+            <div class="editorial-cell-tag">FESTIVAL THEME &bull; 2027</div>
             <div class="hero-topic-val" id="dynTopic">“My Purpose”</div>
             <p class="hero-topic-desc" id="dynTopicDesc">
               What do you want to do with your life, and how do you find your true calling? We are looking for stories about discovering your path, making career choices, and overcoming self-doubt. Tell us what it takes to follow your passion when the people around you expect something different—whether it is family pressure to pursue a "serious" career like medicine or law, or your own fear of stepping into the arts, music, or creative fields. Show the reality of this journey, the obstacles along the way, and the exact moment you or your characters realized what you were meant to do.
@@ -328,14 +345,15 @@
         <div class="hero-countdown-wrap" id="heroCountdownTimer" aria-live="polite">
           <div class="hero-countdown-header">
             <div class="hero-countdown-title-wrap">
-              <div class="hero-countdown-icon" aria-hidden="true">⏱️</div>
+              <div class="hero-countdown-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+              </div>
               <div>
                 <div class="hero-countdown-label">Time Remaining Until Submission Deadline:</div>
                 <div class="hero-countdown-sublabel">Submit your entry before April 5, 2027 23:59</div>
               </div>
             </div>
             <div class="hero-countdown-badge-date">
-              <span class="pulse-dot" aria-hidden="true"></span>
               <span>Deadline: April 5, 2027</span>
             </div>
           </div>
@@ -358,7 +376,7 @@
             </div>
           </div>
           <div class="countdown-footer-msg" data-countdown="footer-msg">
-            <span>🎬 <strong>Submissions are currently open!</strong> Free entry for student filmmakers.</span>
+            <span><strong>Submissions are currently open.</strong> Free entry for student filmmakers.</span>
           </div>
         </div>
 
@@ -375,22 +393,6 @@
         <div class="section-head">
           <div class="section-tag">Festival Chronology</div>
           <h2 class="section-heading">Official Festival Editions</h2>
-          <div class="results-share-header-bar" style="margin-top: 16px;">
-            <span class="results-share-tagline">Share Festival Chronology:</span>
-            <div class="share-btns">
-              <button type="button" class="btn-share-icon btn-share-fb" onclick="FestivalShare.shareEditionFacebook('2026', 'FEST 2026', '../lt/azuolynas-fest-2026.html')" title="Share on Facebook" aria-label="Share on Facebook">
-                <svg class="share-icon" viewBox="0 0 24 24"><path fill="currentColor" d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
-                <span>Facebook</span>
-              </button>
-              <button type="button" class="btn-share-icon btn-share-ig" onclick="FestivalShare.shareEditionInstagram('2026', 'FEST 2026', '../lt/azuolynas-fest-2026.html', 'Youth film celebration at Kaunas International Gymnasium: four continents on one screen!')" title="Share on Instagram" aria-label="Share on Instagram">
-                <svg class="share-icon" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
-                <span>Instagram</span>
-              </button>
-              <button type="button" class="btn-share-icon btn-share-copy" onclick="FestivalShare.copyLink(window.location.pathname + '#editions', 'Festival chronology link copied!')" title="Copy link" aria-label="Copy link">
-                <svg class="share-icon" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
-              </button>
-            </div>
-          </div>
         </div>
 
         <div class="editions-showcase-grid" id="editionsContainer">
@@ -425,26 +427,26 @@
 
           <!-- 2026 Edition Card -->
           <div class="edition-card-item">
-            <div class="edition-card-bg" style="background-image: url('https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/IMG_3458.jpeg?alt=media&token=224af1bd-25ff-494e-8136-fbf330d3ad5b');"></div>
+            <div class="edition-card-bg" style="background-image: url('https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/IMG_3459.jpeg?alt=media&token=dfdda212-9ea6-433f-af80-8c5b5b57f361');"></div>
             <div class="edition-card-overlay"></div>
             <div class="edition-card-details">
               <span class="edition-card-badge">2026 Edition</span>
               <h3 class="edition-card-title">FEST 2026</h3>
               <div class="edition-card-date">April 17th, 2026</div>
               <p class="edition-card-text">Youth film celebration at Kaunas International Gymnasium: four continents on one screen! Discover winners, stories, and ceremony highlights.</p>
-              <a href="../lt/azuolynas-fest-2026.html" class="btn-solid btn-full">View FEST 2026 Overview</a>
+              <a href="azuolynas-fest-2026.html" class="btn-solid btn-full">View FEST 2026 Overview</a>
               <div class="edition-social-share">
                 <span class="share-prompt">Share highlight:</span>
                 <div class="share-btns">
-                  <button type="button" class="btn-share-icon btn-share-fb" onclick="FestivalShare.shareEditionFacebook('2026', 'FEST 2026', '../lt/azuolynas-fest-2026.html')" title="Share on Facebook" aria-label="Share on Facebook">
+                  <button type="button" class="btn-share-icon btn-share-fb" onclick="FestivalShare.shareEditionFacebook('2026', 'FEST 2026', 'azuolynas-fest-2026.html')" title="Share on Facebook" aria-label="Share on Facebook">
                     <svg class="share-icon" viewBox="0 0 24 24"><path fill="currentColor" d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
                     <span>Facebook</span>
                   </button>
-                  <button type="button" class="btn-share-icon btn-share-ig" onclick="FestivalShare.shareEditionInstagram('2026', 'FEST 2026', '../lt/azuolynas-fest-2026.html', 'Youth film celebration at Kaunas International Gymnasium: four continents on one screen!')" title="Share on Instagram" aria-label="Share on Instagram">
+                  <button type="button" class="btn-share-icon btn-share-ig" onclick="FestivalShare.shareEditionInstagram('2026', 'FEST 2026', 'azuolynas-fest-2026.html', 'Youth film celebration at Kaunas International Gymnasium: four continents on one screen!')" title="Share on Instagram" aria-label="Share on Instagram">
                     <svg class="share-icon" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
                     <span>Instagram</span>
                   </button>
-                  <button type="button" class="btn-share-icon btn-share-copy" onclick="FestivalShare.copyLink('../lt/azuolynas-fest-2026.html', 'FEST 2026 link copied!')" title="Copy link" aria-label="Copy link">
+                  <button type="button" class="btn-share-icon btn-share-copy" onclick="FestivalShare.copyLink('azuolynas-fest-2026.html', 'FEST 2026 link copied!')" title="Copy link" aria-label="Copy link">
                     <svg class="share-icon" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
                   </button>
                 </div>
@@ -617,7 +619,6 @@
           <div class="ceremony-mosaic-grid">
             <div class="ceremony-mosaic-hero" onclick="window.FestivalLightbox && window.FestivalLightbox.openAlbum('ceremony')" role="button" tabindex="0" title="Open ceremony photo">
               <img src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/IMG_3458.jpeg?alt=media&token=224af1bd-25ff-494e-8136-fbf330d3ad5b" alt="Moments from the festival ceremony in Kaunas" loading="lazy">
-              <span class="ceremony-cell-badge">CEREMONY</span>
               <div class="ceremony-hover-zoom">
                 <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.35-4.35"></path><path d="M11 8v6M8 11h6"></path></svg>
               </div>
@@ -632,7 +633,6 @@
 
             <div class="ceremony-mosaic-cell" onclick="window.FestivalLightbox && window.FestivalLightbox.openAlbum('laureates')" role="button" tabindex="0" title="Open laureates photo">
               <img src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/IMG_3459.jpeg?alt=media&token=dfdda212-9ea6-433f-af80-8c5b5b57f361" alt="Festival laureates and attendees" loading="lazy">
-              <span class="ceremony-cell-badge">LAUREATES</span>
               <div class="ceremony-hover-zoom">
                 <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.35-4.35"></path><path d="M11 8v6M8 11h6"></path></svg>
               </div>
@@ -643,7 +643,6 @@
 
             <div class="ceremony-mosaic-cell" onclick="window.FestivalLightbox && window.FestivalLightbox.openAlbum('prizes')" role="button" tabindex="0" title="Open trophies photo">
               <img src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/IMG_3463.jpeg?alt=media&token=af7892ca-e78e-4198-b686-e0181472e8da" alt="Oak statuettes and diplomas" loading="lazy">
-              <span class="ceremony-cell-badge">TROPHIES</span>
               <div class="ceremony-hover-zoom">
                 <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.35-4.35"></path><path d="M11 8v6M8 11h6"></path></svg>
               </div>
@@ -674,22 +673,6 @@
         <div class="section-head">
           <div class="section-tag">Official Laureates</div>
           <h2 class="section-heading">Festival Results & Honors</h2>
-          <div class="results-share-header-bar">
-            <span class="results-share-tagline">Share Festival Winners & Laureates:</span>
-            <div class="share-btns">
-              <button type="button" class="btn-share-icon btn-share-fb" onclick="FestivalShare.shareResultsFacebook()" title="Share on Facebook" aria-label="Share on Facebook">
-                <svg class="share-icon" viewBox="0 0 24 24"><path fill="currentColor" d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
-                <span>Facebook</span>
-              </button>
-              <button type="button" class="btn-share-icon btn-share-ig" onclick="FestivalShare.shareResultsInstagram()" title="Share on Instagram" aria-label="Share on Instagram">
-                <svg class="share-icon" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
-                <span>Instagram</span>
-              </button>
-              <button type="button" class="btn-share-icon btn-share-copy" onclick="FestivalShare.copyResultsLink()" title="Copy link" aria-label="Copy link">
-                <svg class="share-icon" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
-              </button>
-            </div>
-          </div>
         </div>
 
         <!-- Categories Filter for Laureates -->
@@ -1271,7 +1254,7 @@
   <!-- Official Vote Confirmation Modal -->
   <div id="voteConfirmModal" class="vote-confirm-overlay" role="dialog" aria-modal="true" aria-labelledby="voteConfirmHeading">
     <div class="vote-confirm-card">
-      <div class="vote-confirm-icon-wrap">★</div>
+      <div class="vote-confirm-icon-wrap"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg></div>
       <h3 id="voteConfirmHeading" class="vote-confirm-title">Confirm Your Vote</h3>
       <p style="color:var(--text-muted); font-size:0.88rem;">You are voting for the official Audience Choice Award:</p>
       <div class="vote-confirm-film-box">
@@ -1285,7 +1268,7 @@
       </p>
       <div class="vote-confirm-actions">
         <button type="button" class="btn-outline" onclick="FestivalVoting.cancelVote()">Cancel</button>
-        <button type="button" class="btn-solid" onclick="FestivalVoting.confirmVote()">★ Confirm My Vote</button>
+        <button type="button" class="btn-solid" onclick="FestivalVoting.confirmVote()">Confirm My Vote</button>
       </div>
     </div>
   </div>
@@ -1376,12 +1359,12 @@
             <p>Email: <a href="mailto:azuolynasfilmfestival@gmail.com">azuolynasfilmfestival@gmail.com</a></p>
             <p>Instagram: <a href="https://www.instagram.com/azuolynas.iff" target="_blank" rel="noopener noreferrer" style="color:var(--text-color); font-weight:600;">@azuolynas.iff</a></p>
             <p>Submissions: November 1, 2026 – April 5, 2027</p>
-            <p>Film Festival & Live Stream: April 27, 2027 (<a href="/live.html" style="color:var(--accent-mint);">Watch Live</a>)</p>
+            <p>Film Festival & Live Stream: April 27, 2027 (<a href="../live.html?lang=en" style="color:var(--accent-mint);">Watch Live</a>)</p>
           </div>
         </div>
       </div>
       <div class="footer-bottom-bar">
-        <span>&copy; 2026 Ąžuolynas International Students Film Festival. All rights reserved.</span>
+        <span>&copy; 2027 Ąžuolynas International Students Film Festival. All rights reserved.</span>
         <div class="footer-bottom-links" style="display:inline-flex; gap:16px;">
           <a href="privacy-policy.html" style="color:var(--text-muted); text-decoration:none;">Privacy Policy</a>
           <a href="terms-of-service.html" style="color:var(--text-muted); text-decoration:none;">Terms of Service</a>
@@ -1651,36 +1634,85 @@
       const container = document.getElementById("editionsContainer");
       if (!container) return;
 
-      const editionsList = [];
+      const mergedByYear = new Map();
       snapshot.forEach((doc) => {
-        editionsList.push({ id: doc.id, ...doc.data() });
+        const data = doc.data() || {};
+        const isEnDoc = String(doc.id).endsWith("_en");
+        const baseYear = String(data.year || doc.id.replace(/_en$/, "") || "").trim();
+        if (!baseYear) return;
+        const prev = mergedByYear.get(baseYear) || {};
+        if (isEnDoc) {
+          mergedByYear.set(baseYear, {
+            ...prev,
+            id: baseYear,
+            year: baseYear,
+            titleEn: data.titleEn || data.title || prev.titleEn || prev.title,
+            dateEn: data.dateEn || data.date || prev.dateEn || prev.date,
+            subtitleEn: data.subtitleEn || data.subtitle || prev.subtitleEn || prev.subtitle,
+            heroImage: prev.heroImage || data.heroImage,
+            videoUrl: prev.videoUrl || data.videoUrl,
+            pageUrlEn: data.pageUrlEn || data.pageUrl || prev.pageUrlEn
+          });
+        } else {
+          mergedByYear.set(baseYear, {
+            ...data,
+            ...prev,
+            id: baseYear,
+            year: baseYear,
+            titleEn: prev.titleEn || data.titleEn || data.title,
+            dateEn: prev.dateEn || data.dateEn || data.date,
+            subtitleEn: prev.subtitleEn || data.subtitleEn || data.subtitle,
+            pageUrlEn: prev.pageUrlEn || data.pageUrlEn
+          });
+        }
       });
+
+      const editionsList = Array.from(mergedByYear.values())
+        .sort((a, b) => Number(b.year || 0) - Number(a.year || 0));
 
       if (editionsList.length === 0) return;
 
+      const resolveEnEditionUrl = (ed, year) => {
+        const raw = String(ed.pageUrlEn || ed.pageUrl || "").trim();
+        if (year === "2026" || year === "2027") {
+          return `/en/azuolynas-fest-${year}.html`;
+        }
+        if (raw && !raw.includes("/lt/") && !raw.startsWith("lt/")) {
+          if (raw.startsWith("http://") || raw.startsWith("https://") || raw.startsWith("#")) return raw;
+          const cleanName = raw.replace(/^(\.\.\/)?(en|lt)\//, "").replace(/^\//, "");
+          if (cleanName.endsWith(".html") && !cleanName.includes("2025") && !cleanName.includes("2024") && !cleanName.includes("2023") && !cleanName.includes("2022")) {
+            return `/en/${cleanName}`;
+          }
+        }
+        return ed.videoUrl || "#archive";
+      };
+
       container.innerHTML = editionsList.map((ed) => {
-        const pageUrl = ed.pageUrl || ('azuolynas-fest-' + (ed.year || '2026') + '.html');
         const year = ed.year || '2026';
-        const title = (ed.title || ('FEST ' + year)).replace(/'/g, "\\'");
-        const subtitle = (ed.subtitle || '').replace(/'/g, "\\'");
+        const pageUrl = resolveEnEditionUrl(ed, year);
+        const displayTitle = ed.titleEn || ed.title || ('FEST ' + year);
+        const displayDate = ed.dateEn || ed.date || '';
+        const displaySub = ed.subtitleEn || ed.subtitle || '';
+        const safeTitle = displayTitle.replace(/'/g, "\\'");
+        const safeSub = displaySub.replace(/'/g, "\\'");
         return `
         <div class="edition-card-item">
           <div class="edition-card-bg" style="background-image: url('${ed.heroImage || 'https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/IMG_3458.jpeg?alt=media&token=224af1bd-25ff-494e-8136-fbf330d3ad5b'}');"></div>
           <div class="edition-card-overlay"></div>
           <div class="edition-card-details">
-            <span class="edition-card-badge">${ed.year || 'Festival'} Edition</span>
-            <h3 class="edition-card-title">${ed.title || ('FEST ' + ed.year)}</h3>
-            <div class="edition-card-date">${ed.date || ''}</div>
-            <p class="edition-card-text">${ed.subtitle || ''}</p>
-            <a href="${pageUrl}" class="btn-solid btn-full">View ${ed.title || 'FEST'} Overview</a>
+            <span class="edition-card-badge">${year} Edition</span>
+            <h3 class="edition-card-title">${displayTitle}</h3>
+            <div class="edition-card-date">${displayDate}</div>
+            <p class="edition-card-text">${displaySub}</p>
+            <a href="${pageUrl}" class="btn-solid btn-full">View ${displayTitle} Overview</a>
             <div class="edition-social-share">
               <span class="share-prompt">Share highlight:</span>
               <div class="share-btns">
-                <button type="button" class="btn-share-icon btn-share-fb" onclick="FestivalShare.shareEditionFacebook('${year}', '${title}', '${pageUrl}')" title="Share on Facebook" aria-label="Share on Facebook">
+                <button type="button" class="btn-share-icon btn-share-fb" onclick="FestivalShare.shareEditionFacebook('${year}', '${safeTitle}', '${pageUrl}')" title="Share on Facebook" aria-label="Share on Facebook">
                   <svg class="share-icon" viewBox="0 0 24 24"><path fill="currentColor" d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
                   <span>Facebook</span>
                 </button>
-                <button type="button" class="btn-share-icon btn-share-ig" onclick="FestivalShare.shareEditionInstagram('${year}', '${title}', '${pageUrl}', '${subtitle}')" title="Share on Instagram" aria-label="Share on Instagram">
+                <button type="button" class="btn-share-icon btn-share-ig" onclick="FestivalShare.shareEditionInstagram('${year}', '${safeTitle}', '${pageUrl}', '${safeSub}')" title="Share on Instagram" aria-label="Share on Instagram">
                   <svg class="share-icon" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
                   <span>Instagram</span>
                 </button>
@@ -1732,7 +1764,9 @@
             <span class="badge badge-accepted">${v.label || 'Recording'}</span>
           </div>
           <div class="video-frame-wrap">
-            <div class="video-play-indicator">▶</div>
+            <div class="video-play-indicator">
+              <svg style="width:12px; height:12px; fill:currentColor; margin-left:2px;" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+            </div>
             ${createMediaEmbed(v.url)}
           </div>
         </div>
@@ -2058,7 +2092,11 @@
       }
       if (list && Array.isArray(checks)) {
         list.innerHTML = checks.map((c) => {
-          const icon = c.ok === true ? "✓" : (c.ok === false ? "✕" : "•");
+          const icon = c.ok === true
+            ? '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>'
+            : (c.ok === false
+              ? '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>'
+              : '&mdash;');
           const cls = c.ok === true ? "is-pass" : (c.ok === false ? "is-fail" : "");
           return `<li class="validation-check-item ${cls}"><span>${icon}</span><span>${c.label}</span></li>`;
         }).join("");
@@ -2259,7 +2297,7 @@
           };
           if (feedback) {
             feedback.className = "drop-alert success";
-            feedback.textContent = `✓ Video meets all festival rules: ${videoDurationSeconds}s, ${sizeMB.toFixed(1)} MB (${file.name})`;
+            feedback.textContent = `Video meets all festival rules: ${videoDurationSeconds}s, ${sizeMB.toFixed(1)} MB (${file.name})`;
           }
           renderVideoValidationSummary("pass", checks);
         }

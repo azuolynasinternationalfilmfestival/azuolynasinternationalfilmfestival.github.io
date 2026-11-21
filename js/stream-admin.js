@@ -304,7 +304,7 @@ function renderStreamControls() {
   if (badge) {
     if (state === "live") {
       badge.className = "status-pill status-accepted";
-      badge.innerHTML = `<span class="pulse-dot" style="width:6px; height:6px;"></span><span>LIVE Transliacija Aktyvi</span>`;
+      badge.innerHTML = `<span style="display:inline-block; width:6px; height:6px; background:#ef4444; border-radius:1px;"></span><span>LIVE Transliacija Aktyvi</span>`;
     } else if (state === "paused") {
       badge.className = "status-pill";
       badge.style.background = "rgba(255, 255, 255, 0.08)";
@@ -422,8 +422,8 @@ function initTokenQrModalHandlers() {
           <head>
             <title>Ąžuolynas Film Fest - ${name}</title>
             <style>
-              body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; text-align: center; padding: 40px; margin: 0; }
-              .card { border: 2px dashed #041310; border-radius: 12px; padding: 30px; max-width: 440px; margin: 0 auto; }
+              body { font-family: 'Plus Jakarta Sans', sans-serif; text-align: center; padding: 40px; margin: 0; }
+              .card { border: 2px dashed #041310; border-radius: 2px; padding: 30px; max-width: 440px; margin: 0 auto; }
               h1 { font-size: 20px; color: #041310; margin-bottom: 6px; }
               p { color: #475569; font-size: 14px; margin: 4px 0 20px 0; }
               .link { font-family: monospace; font-size: 12px; word-break: break-all; margin-top: 14px; color: #1e293b; }
@@ -463,12 +463,12 @@ export function openTokenQrModal(viewer) {
   if (targetName) targetName.textContent = nameLabel;
   if (typeBadge) {
     if (isClassroom) {
-      typeBadge.textContent = "🏫 Mokytojo / Klasės Transliacija (Projektoriui)";
+      typeBadge.textContent = "Mokytojo / Klasės Transliacija (Projektoriui)";
       typeBadge.style.background = "rgba(255,255,255,0.08)";
       typeBadge.style.color = "#FFFFFF";
       typeBadge.style.borderColor = "rgba(255,255,255,0.2)";
     } else {
-      typeBadge.textContent = "👤 Individualus žiūrovas";
+      typeBadge.textContent = "Individualus žiūrovas";
       typeBadge.style.background = "rgba(111,165,138,0.2)";
       typeBadge.style.color = "#9BC4AE";
       typeBadge.style.borderColor = "rgba(111,165,138,0.4)";
@@ -536,21 +536,21 @@ export function renderAuthorizedViewersTable() {
       <tr>
         <td>
           ${isClassroom ? `
-            <strong style="color:#FFFFFF; font-size:0.92rem;">🏫 ${escapeHtml(viewer.classroomLabel || viewer.name)}</strong>
+            <strong style="color:#FFFFFF; font-size:0.92rem;">${escapeHtml(viewer.classroomLabel || viewer.name)}</strong>
             <div style="font-size:0.75rem; color:var(--text-muted);">${escapeHtml(viewer.email)} &bull; ${escapeHtml(viewer.name)}</div>
           ` : `
-            <strong style="color:var(--text-color); font-size:0.92rem;">👤 ${escapeHtml(viewer.name || viewer.email)}</strong>
+            <strong style="color:var(--text-color); font-size:0.92rem;">${escapeHtml(viewer.name || viewer.email)}</strong>
             <div style="font-size:0.75rem; color:var(--text-muted);">${escapeHtml(viewer.email)} &bull; Sukurta: ${dateFormatted}</div>
           `}
         </td>
         <td>
           ${isClassroom ? `
             <span class="badge" style="background:rgba(255,255,255,0.08); color:#FFFFFF; border:1px solid rgba(255,255,255,0.2); font-size:0.75rem; border-radius:2px;">
-              🏫 Mokytojas / Klasė
+              Mokytojas / Klasė
             </span>
           ` : `
             <span class="badge" style="background:rgba(111,165,138,0.18); color:#9BC4AE; border:1px solid rgba(111,165,138,0.35); font-size:0.75rem; border-radius:2px;">
-              👤 Asmeninis žiūrovas
+              Asmeninis žiūrovas
             </span>
           `}
         </td>
@@ -571,7 +571,7 @@ export function renderAuthorizedViewersTable() {
         </td>
         <td>
           <div style="display:flex; align-items:center; gap:6px;">
-            <input type="text" readonly value="${escapeHtml(liveLink)}" style="background:rgba(0,0,0,0.3); border:1px solid var(--border-color); color:var(--text-muted); padding:3px 6px; font-size:0.75rem; width:130px; border-radius:4px;" title="${escapeHtml(liveLink)}">
+            <input type="text" readonly value="${escapeHtml(liveLink)}" style="background:rgba(0,0,0,0.3); border:1px solid var(--border-color); color:var(--text-muted); padding:3px 6px; font-size:0.75rem; width:130px; border-radius:2px;" title="${escapeHtml(liveLink)}">
             <button type="button" class="btn-outline btn-xs btn-copy-viewer-link" data-link="${escapeHtml(liveLink)}" title="Kopijuoti nuorodą">
               <span>Kopijuoti</span>
             </button>
@@ -942,7 +942,7 @@ export function renderRsvpTable() {
         </td>
         <td>
           <div style="display:flex; align-items:center; gap:6px;">
-            <input type="text" readonly value="${escapeHtml(liveLink)}" style="background:rgba(0,0,0,0.3); border:1px solid var(--border-color); color:var(--text-muted); padding:3px 6px; font-size:0.75rem; width:150px; border-radius:4px;" title="${escapeHtml(liveLink)}">
+            <input type="text" readonly value="${escapeHtml(liveLink)}" style="background:rgba(0,0,0,0.3); border:1px solid var(--border-color); color:var(--text-muted); padding:3px 6px; font-size:0.75rem; width:150px; border-radius:2px;" title="${escapeHtml(liveLink)}">
             <button type="button" class="btn-outline btn-xs btn-copy-link" data-link="${escapeHtml(liveLink)}" title="Kopijuoti nuorodą">
               <span>Kopijuoti</span>
             </button>

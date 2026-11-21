@@ -136,7 +136,7 @@ export function renderLogsFeed() {
     const catLabel = categoryIcons[item.category] || item.category || "Veikla";
 
     return `
-      <div class="audit-log-item" style="background:var(--surface-card); border:1px solid var(--border-color); border-left:3px solid var(--accent-color); border-radius:var(--site-radius); padding:16px 18px; margin-bottom:12px; transition:transform 0.15s ease;">
+      <div class="audit-log-item" style="background:var(--surface-card); border:1px solid var(--border-color); border-radius:var(--site-radius); padding:16px 18px; margin-bottom:12px; transition:transform 0.15s ease;">
         <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:10px; flex-wrap:wrap; margin-bottom:6px;">
           <div style="display:flex; align-items:center; gap:8px;">
             <span class="badge" style="background:rgba(111,165,138,0.2); color:var(--accent-light); font-size:0.75rem;">
@@ -145,7 +145,7 @@ export function renderLogsFeed() {
             <strong style="color:var(--text-color); font-size:0.88rem;">${escapeHtml(item.adminName || item.adminEmail || 'Administratorius')}</strong>
             <span style="font-size:0.75rem; color:var(--text-muted);">(${escapeHtml(item.adminEmail || '')})</span>
           </div>
-          <div style="font-size:0.75rem; color:var(--text-muted); font-family:monospace;">
+          <div style="font-size:0.75rem; color:var(--text-muted); font-family:var(--font-mono, monospace);">
             ${timeFormatted}
           </div>
         </div>

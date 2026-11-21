@@ -9,7 +9,7 @@
   <link rel="stylesheet" href="style.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
   
   <!-- Firebase Compat SDK for Static Browser Execution -->
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
@@ -27,19 +27,11 @@
     }
 
     @keyframes voteCelebrationPop {
-      0% { transform: scale(0.92); opacity: 0; }
-      50% { transform: scale(1.02); }
-      100% { transform: scale(1); opacity: 1; }
-    }
-    @keyframes iconPulseGlow {
-      0%, 100% { box-shadow: 0 0 20px rgba(52, 211, 153, 0.4); transform: scale(1); }
-      50% { box-shadow: 0 0 35px rgba(52, 211, 153, 0.75); transform: scale(1.06); }
+      0% { transform: translateY(6px); opacity: 0; }
+      100% { transform: translateY(0); opacity: 1; }
     }
     .thank-you-banner.celebrate-pop {
-      animation: voteCelebrationPop 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-    }
-    .thank-you-banner.celebrate-pop .thank-you-icon {
-      animation: iconPulseGlow 1.8s ease-in-out infinite;
+      animation: voteCelebrationPop 0.35s cubic-bezier(0.2, 0.7, 0.2, 1) forwards;
     }
 
     body.obs-overlay-mode {
@@ -61,7 +53,7 @@
       align-items: center;
       background: rgba(255, 255, 255, 0.05);
       border: 1px solid var(--border-color);
-      border-radius: 4px;
+      border-radius: 2px;
       padding: 3px;
       gap: 3px;
     }
@@ -86,11 +78,41 @@
       font-weight: 700;
     }
 
+    .desktop-nav {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+    .desktop-nav .nav-link {
+      color: var(--text-muted, #94a3b8);
+      text-decoration: none;
+      font-size: 0.88rem;
+      font-weight: 500;
+      transition: color 0.2s ease;
+    }
+    .desktop-nav .nav-link:hover,
+    .desktop-nav .nav-link.active {
+      color: #FFFFFF;
+    }
+    @media (max-width: 900px) {
+      .desktop-nav {
+        display: none !important;
+      }
+    }
+    @media (max-width: 640px) {
+      #btnLiveTop {
+        display: none !important;
+      }
+      .voting-lang-btn {
+        padding: 3px 6px;
+        font-size: 0.68rem;
+      }
+    }
+
     .voting-hero {
       padding: clamp(48px, 6vw, 72px) 20px 36px 20px;
       border-bottom: 1px solid var(--border-color);
-      background: radial-gradient(ellipse 70% 50% at 50% 0%, rgba(26, 62, 50, 0.35), transparent 75%),
-                  linear-gradient(180deg, #0d1210 0%, #070908 100%);
+      background: #0B100E;
     }
     .hero-top-bar {
       display: flex;
@@ -105,7 +127,7 @@
       align-items: center;
       gap: 8px;
       padding: 6px 14px;
-      border-radius: 4px;
+      border-radius: 2px;
       font-family: var(--font-mono);
       font-size: 0.76rem;
       font-weight: 600;
@@ -141,10 +163,10 @@
 
     /* Thank you Banner Card */
     .thank-you-banner {
-      background: linear-gradient(135deg, rgba(16, 185, 129, 0.12) 0%, rgba(6, 78, 59, 0.25) 100%);
+      background: rgba(20, 44, 36, 0.5);
       border: 1px solid rgba(52, 211, 153, 0.4);
-      border-radius: 6px;
-      padding: 32px 28px;
+      border-radius: 2px;
+      padding: 28px 24px;
       margin: 0 0 32px 0;
       display: flex;
       flex-direction: column;
@@ -152,17 +174,7 @@
       gap: 16px;
       position: relative;
       overflow: hidden;
-      animation: fadeIn 0.4s ease-out;
-    }
-    .thank-you-banner::before {
-      content: "";
-      position: absolute;
-      top: -50%;
-      right: -10%;
-      width: 280px;
-      height: 280px;
-      background: radial-gradient(circle, rgba(52, 211, 153, 0.18) 0%, transparent 70%);
-      pointer-events: none;
+      animation: fadeIn 0.3s ease-out;
     }
     .thank-you-header {
       display: flex;
@@ -170,18 +182,15 @@
       gap: 14px;
     }
     .thank-you-icon {
-      width: 44px;
-      height: 44px;
-      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      border-radius: 2px;
       background: #34d399;
       color: #070908;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 1.4rem;
-      font-weight: bold;
       flex-shrink: 0;
-      box-shadow: 0 0 20px rgba(52, 211, 153, 0.4);
     }
     .thank-you-title {
       font-family: var(--font-display, sans-serif);
@@ -205,7 +214,7 @@
       padding: 8px 16px;
       background: rgba(0, 0, 0, 0.4);
       border: 1px solid rgba(52, 211, 153, 0.3);
-      border-radius: 4px;
+      border-radius: 2px;
       font-family: var(--font-mono);
       font-size: 0.88rem;
       color: #34d399;
@@ -236,7 +245,7 @@
       border: 1px solid transparent;
       color: #94a3b8;
       padding: 8px 18px;
-      border-radius: 4px;
+      border-radius: 2px;
       font-family: var(--font-mono);
       font-size: 0.82rem;
       font-weight: 600;
@@ -262,7 +271,7 @@
     .live-leaderboard-card {
       background: var(--surface-card, #0d1210);
       border: 1px solid var(--border-color, rgba(255, 255, 255, 0.1));
-      border-radius: 6px;
+      border-radius: 2px;
       padding: 20px 24px;
       margin: 22px 0 18px 0;
     }
@@ -309,7 +318,7 @@
       text-align: left;
       background: rgba(255, 255, 255, 0.025);
       border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 4px;
+      border-radius: 2px;
       padding: 11px 14px;
       display: grid;
       grid-template-columns: 36px minmax(0, 1.5fr) minmax(100px, 1fr) 96px;
@@ -410,7 +419,7 @@
       border: 1px solid var(--border-color);
       color: #cbd5e1;
       padding: 6px 14px;
-      border-radius: 3px;
+      border-radius: 2px;
       font-family: var(--font-mono);
       font-size: 0.78rem;
       letter-spacing: 0.04em;
@@ -441,7 +450,7 @@
     .film-vote-card {
       background: var(--surface-card);
       border: 1px solid var(--border-color);
-      border-radius: 4px;
+      border-radius: 2px;
       overflow: hidden;
       display: flex;
       flex-direction: column;
@@ -560,7 +569,7 @@
       text-transform: uppercase;
       font-size: 0.82rem;
       border: 1px solid #FFFFFF;
-      border-radius: 4px;
+      border-radius: 2px;
       cursor: pointer;
       display: flex;
       align-items: center;
@@ -630,7 +639,7 @@
       padding: 64px 24px;
       background: var(--surface-card);
       border: 1px solid var(--border-color);
-      border-radius: 6px;
+      border-radius: 2px;
       max-width: 720px;
       margin: 20px auto;
     }
@@ -660,7 +669,7 @@
       background: rgba(52, 211, 153, 0.1);
       display: inline-block;
       padding: 6px 14px;
-      border-radius: 3px;
+      border-radius: 2px;
     }
 
     /* Unlocked Results */
@@ -670,7 +679,7 @@
     .results-banner-live {
       background: linear-gradient(135deg, rgba(255, 215, 0, 0.12) 0%, rgba(205, 127, 50, 0.15) 100%);
       border: 1px solid rgba(255, 215, 0, 0.35);
-      border-radius: 6px;
+      border-radius: 2px;
       padding: 24px 28px;
       margin-bottom: 36px;
       display: flex;
@@ -692,25 +701,15 @@
       margin: 4px 0 0 0;
     }
 
-    /* Audience Favorite "Любимчик" Grand Card */
+    /* Audience Favorite Showcase Card */
     .audience-favorite-showcase {
-      background: linear-gradient(180deg, #16201c 0%, #0d1210 100%);
-      border: 2px solid #34d399;
-      border-radius: 8px;
+      background: #101915;
+      border: 1px solid #34d399;
+      border-radius: 2px;
       padding: 32px 28px;
       margin-bottom: 48px;
       position: relative;
-      box-shadow: 0 0 40px rgba(52, 211, 153, 0.2);
       overflow: hidden;
-    }
-    .audience-favorite-showcase::after {
-      content: "★ ★ ★ ★ ★";
-      position: absolute;
-      top: 14px;
-      right: 20px;
-      color: rgba(52, 211, 153, 0.4);
-      font-size: 1.1rem;
-      letter-spacing: 4px;
     }
     .favorite-crown-badge {
       display: inline-flex;
@@ -719,7 +718,7 @@
       padding: 6px 16px;
       background: #34d399;
       color: #070908;
-      border-radius: 4px;
+      border-radius: 2px;
       font-family: var(--font-mono);
       font-weight: 800;
       font-size: 0.85rem;
@@ -742,7 +741,7 @@
       width: 100%;
       height: 180px;
       background: #070908;
-      border-radius: 4px;
+      border-radius: 2px;
       overflow: hidden;
       border: 1px solid rgba(255, 255, 255, 0.1);
     }
@@ -781,7 +780,7 @@
       padding: 8px 18px;
       background: rgba(0, 0, 0, 0.4);
       border: 1px solid rgba(52, 211, 153, 0.35);
-      border-radius: 4px;
+      border-radius: 2px;
       font-family: var(--font-mono);
       font-size: 0.9rem;
       color: #34d399;
@@ -816,7 +815,7 @@
     .podium-card {
       background: var(--surface-card);
       border: 1px solid var(--border-color);
-      border-radius: 6px;
+      border-radius: 2px;
       padding: 24px;
       position: relative;
       display: flex;
@@ -843,7 +842,7 @@
       align-items: center;
       gap: 8px;
       padding: 4px 12px;
-      border-radius: 4px;
+      border-radius: 2px;
       font-family: var(--font-mono);
       font-size: 0.78rem;
       font-weight: 700;
@@ -902,7 +901,7 @@
       border: 1px solid #34d399;
       color: #FFFFFF;
       padding: 14px 22px;
-      border-radius: 4px;
+      border-radius: 2px;
       font-family: var(--font-mono);
       font-size: 0.85rem;
       display: flex;
@@ -994,7 +993,7 @@
     <div class="container">
       <div class="hero-top-bar">
         <div id="votingStatusBadge" class="voting-status-badge status-open">
-          <span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:currentColor;"></span>
+          <span style="display:inline-block; width:7px; height:7px; border-radius:2px; background:currentColor;"></span>
           <span id="votingStatusText">Balsavimas Aktyvus</span>
         </div>
         <div id="juryStatusBadge" class="voting-status-badge" style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); color:#cbd5e1;">
@@ -1010,7 +1009,9 @@
       <!-- Persistent Thank You Banner (Shown if user already voted) -->
       <div id="thankYouBanner" class="thank-you-banner" style="display:none;">
         <div class="thank-you-header">
-          <div class="thank-you-icon">✓</div>
+          <div class="thank-you-icon" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          </div>
           <div>
             <h2 class="thank-you-title" id="thankYouTitle">Ačiū už jūsų balsą!</h2>
             <p class="thank-you-body" id="thankYouBody">
@@ -1020,7 +1021,7 @@
         </div>
         <div class="thank-you-actions">
           <div class="thank-you-movie-badge">
-            <span>🎬</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect><line x1="7" y1="2" x2="7" y2="22"></line><line x1="17" y1="2" x2="17" y2="22"></line><line x1="2" y1="12" x2="22" y2="12"></line></svg>
             <span id="thankYouFilmName">Konkursinis filmas</span>
           </div>
           <a href="live.html" class="btn-solid btn-sm" style="text-decoration:none; padding:8px 16px;">
@@ -1035,10 +1036,12 @@
   <div class="view-switcher-bar">
     <div class="container" style="display:flex; align-items:center; gap:10px; width:100%;">
       <button type="button" class="view-tab-btn active" id="tabBtnVoting">
-        <span>🗳️</span> <span id="labelTabVoting">Balsavimas</span>
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+        <span id="labelTabVoting">Balsavimas</span>
       </button>
       <button type="button" class="view-tab-btn" id="tabBtnResults">
-        <span>🏆</span> <span id="labelTabResults">Rezultatai</span>
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path><path d="M4 22h16"></path><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"></path><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"></path><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"></path></svg>
+        <span id="labelTabResults">Rezultatai</span>
       </button>
     </div>
   </div>
@@ -1071,12 +1074,14 @@
       
       <!-- Locked State (when showResults is false) -->
       <div id="resultsLockedCard" class="results-locked-box">
-        <div class="locked-lock-icon">🔒</div>
+        <div class="locked-lock-icon" aria-hidden="true">
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+        </div>
         <h2 class="locked-title" id="lockedTitle">Official Results are Sealed</h2>
         <p class="locked-desc" id="lockedDesc">
-          The international festival jury is currently evaluating all competing entries. Official 1st, 2nd, and 3rd place winners for Senior and Junior categories, along with the Audience Favorite ("Любимчик"), will be unlocked live during the grand awards gala!
+          The international festival jury is currently evaluating all competing entries. Official 1st, 2nd, and 3rd place winners for Senior and Junior categories, along with the Audience Choice winner, will be unlocked live during the awards ceremony.
         </p>
-        <span class="locked-tagline" id="lockedTagline">Awaiting Organizer Ceremony Toggle</span>
+        <span class="locked-tagline" id="lockedTagline">Awaiting Ceremony Reveal</span>
       </div>
 
       <!-- Unlocked Ceremony Breakdown (when showResults is true) -->
@@ -1084,32 +1089,30 @@
         
         <div class="results-banner-live">
           <div>
-            <h2 class="results-banner-title" id="unlockedBannerTitle">🏆 Official Festival Winners Announced!</h2>
+            <h2 class="results-banner-title" id="unlockedBannerTitle">Official Festival Winners Announced</h2>
             <p class="results-banner-sub" id="unlockedBannerSub">
               Congratulations to all laureates, directors, and audience favorites of the Ąžuolynas International Film Festival.
             </p>
           </div>
           <button type="button" class="btn-solid btn-sm" id="btnCelebrateAgain" style="padding:8px 16px; cursor:pointer;">
-            🎉 Celebrate
+            Celebrate
           </button>
         </div>
 
-        <!-- Audience Favorite Showcase ("Любимчик") -->
+        <!-- Audience Choice Showcase -->
         <div class="audience-favorite-showcase" id="audienceFavoriteBox">
           <div class="favorite-crown-badge">
-            <span>👑</span>
-            <span id="labelAudienceFavoriteTitle">Audience Favorite Award • "Любимчик"</span>
+            <span id="labelAudienceFavoriteTitle">Audience Choice Award</span>
           </div>
           <div class="favorite-grid-layout">
             <div class="favorite-poster-box">
-              <img id="favPosterImg" src="" alt="Audience Favorite">
+              <img id="favPosterImg" src="" alt="Audience Choice Award Winner">
             </div>
             <div class="favorite-content-box">
               <h2 id="favMovieTitle">Loading Winner...</h2>
               <p class="favorite-director" id="favDirectorLine">Director: <strong>Director Name</strong></p>
               <p class="favorite-synopsis" id="favSynopsisLine">Compelling storytelling that captured the hearts of festival viewers worldwide.</p>
               <div class="favorite-tally-pill">
-                <span>❤️</span>
                 <span id="favTotalVotes">0 Total Viewer Votes</span>
               </div>
             </div>
@@ -1119,7 +1122,6 @@
         <!-- Senior Category Podium (14–18) -->
         <div class="category-results-group">
           <div class="category-results-heading">
-            <span>🎬</span>
             <span id="headingSeniorResults">Senior Category (Ages 14–18) — Official Jury Awards</span>
           </div>
           <div class="podium-grid" id="seniorPodiumGrid">
@@ -1130,7 +1132,6 @@
         <!-- Junior Category Podium (10–13) -->
         <div class="category-results-group">
           <div class="category-results-heading">
-            <span>🌱</span>
             <span id="headingJuniorResults">Junior Category (Ages 10–13) — Official Jury Awards</span>
           </div>
           <div class="podium-grid" id="juniorPodiumGrid">
@@ -1145,7 +1146,7 @@
 
   <!-- Notification Toast -->
   <div id="voteToast" class="vote-toast">
-    <span id="toastIcon">✓</span>
+    <span id="toastIcon"></span>
     <span id="toastMsg">Notification message</span>
   </div>
 
@@ -1182,20 +1183,20 @@
           directorLabel: "Režisierius:",
           btnVote: "Balsuoti už filmą",
           btnVoting: "Registruojamas balsas...",
-          btnVoted: "Jūsų balsas įskaitytas ✓",
+          btnVoted: "Jūsų balsas įskaitytas",
           btnAlreadyVoted: "Balsas jau atiduotas",
           votesLabel: "Balsai:",
           lockedTitle: "Rezultatai bus paskelbti ceremonijos metu",
           lockedDesc: "Žiūrovų simpatijų nugalėtojas ir žiuri laureatai bus atskleisti tiesioginės apdovanojimų ceremonijos transliacijoje.",
           lockedTagline: "Laukiama ceremonijos pradžios",
-          unlockedBannerTitle: "🏆 Paskelbti Oficialūs Festivalio Nugalėtojai!",
+          unlockedBannerTitle: "Paskelbti oficialūs festivalio nugalėtojai",
           unlockedBannerSub: "Sveikiname visus Ąžuolyno tarptautinio kino festivalio laureatus ir žiūrovų favoritus.",
           labelAudienceFavoriteTitle: "Žiūrovų Simpatijos Prizas (Audience Choice Award)",
           headingSeniorResults: "Vyresniųjų Grupė (14–18 m.) — Žiuri Apdovanojimai",
           headingJuniorResults: "Jaunesniųjų Grupė (10–13 m.) — Žiuri Apdovanojimai",
-          rank1: "🥇 1-oji Vieta (Nugalėtojas)",
-          rank2: "🥈 2-oji Vieta",
-          rank3: "🥉 3-ioji Vieta",
+          rank1: "1-oji Vieta (Nugalėtojas)",
+          rank2: "2-oji Vieta",
+          rank3: "3-ioji Vieta",
           noJuryAssigned: "Vertinimas baigiamas",
           errorVoteFailed: "Nepavyko įskaityti balso. Bandykite dar kartą.",
           leaderboardKicker: "TIESIOGINĖ RIKIUOTĖ",
@@ -1228,20 +1229,20 @@
           directorLabel: "Director:",
           btnVote: "Vote for Film",
           btnVoting: "Submitting vote...",
-          btnVoted: "Your Vote Cast ✓",
+          btnVoted: "Your Vote Cast",
           btnAlreadyVoted: "You have voted",
           votesLabel: "Votes:",
           lockedTitle: "Results Will Be Announced at the Ceremony",
           lockedDesc: "The Audience Choice winner and jury laureates will be revealed live during the closing ceremony.",
           lockedTagline: "Awaiting Ceremony Reveal",
-          unlockedBannerTitle: "🏆 Official Festival Winners Announced!",
+          unlockedBannerTitle: "Official Festival Winners Announced",
           unlockedBannerSub: "Congratulations to all laureates, directors, and audience favorites of the Ąžuolynas International Film Festival.",
           labelAudienceFavoriteTitle: "Audience Choice Award",
           headingSeniorResults: "Senior Category (Ages 14–18) — Official Jury Awards",
           headingJuniorResults: "Junior Category (Ages 10–13) — Official Jury Awards",
-          rank1: "🥇 1st Place (Winner)",
-          rank2: "🥈 2nd Place",
-          rank3: "🥉 3rd Place",
+          rank1: "1st Place (Winner)",
+          rank2: "2nd Place",
+          rank3: "3rd Place",
           noJuryAssigned: "Jury deliberations finalizing",
           errorVoteFailed: "Vote could not be processed. Please try again.",
           leaderboardKicker: "LIVE STANDINGS",
@@ -1320,12 +1321,13 @@
         if (navH) { navH.textContent = t.navHome; navH.href = t.homeUrl; }
         const navV = document.getElementById("navVoting");
         if (navV) navV.textContent = t.navVoting;
+        const liveTargetUrl = "live.html?lang=" + encodeURIComponent(currentLang);
         const navL = document.getElementById("navLive");
-        if (navL) navL.textContent = t.navLive;
+        if (navL) { navL.textContent = t.navLive; navL.href = liveTargetUrl; }
         const navA = document.getElementById("navAdmin");
         if (navA) navA.textContent = t.navAdmin;
         const btnL = document.getElementById("btnLiveTop");
-        if (btnL) btnL.textContent = t.btnLiveTop;
+        if (btnL) { btnL.textContent = t.btnLiveTop; btnL.href = liveTargetUrl; }
 
         const logoL = document.getElementById("logoLink");
         if (logoL) logoL.href = t.homeUrl;
@@ -1334,9 +1336,17 @@
         const drawerH = document.getElementById("drawerNavHome");
         if (drawerH) drawerH.href = t.homeUrl;
         const drawerV = document.getElementById("drawerNavVoting");
-        if (drawerV) { const sp = drawerV.querySelector("span"); if (sp) sp.textContent = t.navVoting; }
+        if (drawerV) {
+          drawerV.href = "voting.html?lang=" + encodeURIComponent(currentLang);
+          const sp = drawerV.querySelector("span");
+          if (sp) sp.textContent = t.navVoting;
+        }
         const drawerL = document.getElementById("drawerNavLive");
-        if (drawerL) { const sp = drawerL.querySelector("span"); if (sp) sp.textContent = t.navLive; }
+        if (drawerL) {
+          drawerL.href = liveTargetUrl;
+          const sp = drawerL.querySelector("span");
+          if (sp) sp.textContent = t.navLive;
+        }
         const drawerA = document.getElementById("drawerNavAdmin");
         if (drawerA) { const sp = drawerA.querySelector("span"); if (sp) sp.textContent = t.navAdmin; }
         const drawerSub = document.getElementById("drawerSubtitle");
@@ -1352,7 +1362,11 @@
         const tyBody = document.getElementById("thankYouBody");
         if (tyBody) tyBody.textContent = t.thankYouBody;
         const btnCeremony = document.getElementById("btnWatchCeremony");
-        if (btnCeremony) btnCeremony.textContent = t.btnWatchCeremony;
+        if (btnCeremony) {
+          btnCeremony.textContent = t.btnWatchCeremony;
+          const ceremonyAnchor = btnCeremony.closest("a");
+          if (ceremonyAnchor) ceremonyAnchor.href = liveTargetUrl;
+        }
 
         const lTabVote = document.getElementById("labelTabVoting");
         if (lTabVote) lTabVote.textContent = t.labelTabVoting;
@@ -1476,7 +1490,7 @@
         if (!toast || !msgEl) return;
 
         msgEl.textContent = msg;
-        iconEl.textContent = isError ? "⚠️" : "✓";
+        iconEl.textContent = isError ? "!" : "";
         toast.className = `vote-toast show ${isError ? 'error-toast' : ''}`;
         setTimeout(() => {
           toast.className = "vote-toast";
@@ -1732,7 +1746,7 @@
 
         if (filtered.length === 0) {
           votingGrid.innerHTML = `
-            <div style="grid-column: 1 / -1; text-align: center; padding: 60px 20px; color: #94a3b8; background: var(--surface-card); border-radius: 4px; border: 1px solid var(--border-color);">
+            <div style="grid-column: 1 / -1; text-align: center; padding: 60px 20px; color: #94a3b8; background: var(--surface-card); border-radius: 2px; border: 1px solid var(--border-color);">
               <p>${t.emptyNotice}</p>
             </div>
           `;
@@ -1948,7 +1962,7 @@
         resultsLockedCard.style.display = "none";
         resultsUnlockedCard.style.display = "block";
 
-        // A. Determine Audience Favorite ("Любимчик" - film with highest viewer votes)
+        // A. Determine Audience Choice winner (film with highest viewer votes)
         let topFilm = null;
         let maxVotes = -1;
         moviesList.forEach(m => {

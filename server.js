@@ -1226,7 +1226,7 @@ app.use((req, res, next) => {
     body {
       background-color: #051512;
       color: #F8FAF7;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
       min-height: 100vh;
       display: flex;
       align-items: center;
@@ -1236,8 +1236,8 @@ app.use((req, res, next) => {
     }
     .m-card {
       background: rgba(12, 36, 31, 0.85);
-      border: 1px solid rgba(212, 175, 55, 0.35);
-      border-radius: 16px;
+      border: 1px solid rgba(111, 165, 138, 0.35);
+      border-radius: 2px;
       padding: 40px 32px;
       max-width: 540px;
       width: 100%;
@@ -1736,9 +1736,9 @@ app.post('/api/admin/email/test', async (req, res) => {
 <body style="margin:0; padding:0; background-color:#051512; font-family:sans-serif; color:#F8FAF7;">
   <table width="100%" cellpadding="0" cellspacing="0" style="padding:32px 16px;">
     <tr><td align="center">
-      <table width="560" cellpadding="0" cellspacing="0" style="background:#0C241F; border:1px solid rgba(111,165,138,0.3); border-radius:14px; padding:32px; text-align:left;">
+      <table width="560" cellpadding="0" cellspacing="0" style="background:#0C241F; border:1px solid rgba(111,165,138,0.3); border-radius:2px; padding:32px; text-align:left;">
         <tr><td align="center" style="padding-bottom:16px;">
-          <img src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media" width="60" height="60" style="border-radius:50%; border:2px solid #6FA58A;">
+          <img src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media" width="60" height="60" style="border-radius:2px; border:2px solid #6FA58A;">
           <h2 style="color:#FFFFFF; margin:12px 0 4px 0; letter-spacing:0.02em;">AISFF</h2>
           <p style="color:#BAC9C0; margin:0; font-size:0.85rem;">Sistemos El. Pašto Tarnybos Patikrinimas</p>
         </td></tr>
@@ -3073,11 +3073,11 @@ app.post('/api/admin/users/send-password-reset', async (req, res) => {
   <meta charset="UTF-8">
   <title>Slaptažodžio nustatymas &bull; Ąžuolynas Film Fest</title>
 </head>
-<body style="margin:0; padding:0; background-color:#051512; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color:#F8FAF7;">
+<body style="margin:0; padding:0; background-color:#051512; font-family:'Plus Jakarta Sans', Helvetica, Arial, sans-serif; color:#F8FAF7;">
   <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#051512; padding:32px 16px;">
     <tr>
       <td align="center">
-        <table width="560" cellpadding="0" cellspacing="0" style="background:#0B110E; border:1px solid rgba(255,255,255,0.15); border-radius:4px; overflow:hidden; padding:32px; text-align:left;">
+        <table width="560" cellpadding="0" cellspacing="0" style="background:#0B110E; border:1px solid rgba(255,255,255,0.15); border-radius:2px; overflow:hidden; padding:32px; text-align:left;">
           <tr>
             <td align="center" style="padding-bottom:24px;">
               <img src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media" alt="Logo" width="60" height="60" style="border-radius:2px; border:1px solid rgba(255,255,255,0.2);">
@@ -3095,8 +3095,8 @@ app.post('/api/admin/users/send-password-reset', async (req, res) => {
                 </a>
               </div>
               <p style="font-size:0.82rem; color:#BAC9C0;">Arba nukopijuokite šią nuorodą į naršyklę:<br><a href="${resetUrl}" style="color:#34D399; word-break:break-all;">${resetUrl}</a></p>
-              <div style="background:rgba(255,255,255,0.05); border-left:3px solid #34D399; padding:10px 14px; margin:20px 0; font-size:0.8rem; color:#BAC9C0;">
-                ⏱ Nuoroda galioja <strong>24 valandas</strong>. Jei jūs neprašėte slaptažodžio keitimo, ignoruokite šį laišką.
+              <div style="background:rgba(255,255,255,0.05); border:1px solid rgba(52,211,153,0.4); border-radius:2px; padding:10px 14px; margin:20px 0; font-size:0.8rem; color:#BAC9C0;">
+                Nuoroda galioja <strong>24 valandas</strong>. Jei jūs neprašėte slaptažodžio keitimo, ignoruokite šį laišką.
               </div>
             </td>
           </tr>
@@ -3244,7 +3244,7 @@ app.post('/api/admin/users/resend-verification', async (req, res) => {
 <body style="margin:0; padding:0; background-color:#051512; font-family:sans-serif; color:#F8FAF7;">
   <table width="100%" cellpadding="0" cellspacing="0" style="padding:32px 16px;">
     <tr><td align="center">
-      <table width="560" cellpadding="0" cellspacing="0" style="background:#0C241F; border:1px solid rgba(111,165,138,0.3); border-radius:12px; padding:32px; text-align:left;">
+      <table width="560" cellpadding="0" cellspacing="0" style="background:#0C241F; border:1px solid rgba(111,165,138,0.3); border-radius:2px; padding:32px; text-align:left;">
         <tr><td align="center" style="padding-bottom:20px;">
           <h2 style="color:#6FA58A; margin:0;">Ąžuolynas Film Fest</h2>
           <p style="color:#BAC9C0; margin:4px 0 0 0; font-size:0.85rem;">El. Pašto Adreso Patvirtinimas</p>
@@ -3253,7 +3253,7 @@ app.post('/api/admin/users/resend-verification', async (req, res) => {
           <p>Sveiki, <strong>${user.name || user.email}</strong>!</p>
           <p>Prašome patvirtinti savo administratoriaus paskyros el. pašto adresą, kad galėtumėte naudotis visomis platformos funkcijomis:</p>
           <div style="text-align:center; margin:24px 0;">
-            <a href="${verifyUrl}" style="background:#6FA58A; color:#051512; text-decoration:none; padding:12px 28px; border-radius:6px; font-weight:700; display:inline-block;">
+            <a href="${verifyUrl}" style="background:#6FA58A; color:#051512; text-decoration:none; padding:12px 28px; border-radius:2px; font-weight:700; display:inline-block;">
               Patvirtinti El. Pašto Adresą
             </a>
           </div>
@@ -3425,10 +3425,10 @@ app.post('/api/admin/stream/viewers/create', async (req, res) => {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Tiesioginės Transliacijos Žetonas &bull; Ąžuolynas Film Fest</title>
 </head>
-<body style="margin:0; padding:0; background-color:#051512; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color:#F8FAF7;">
+<body style="margin:0; padding:0; background-color:#051512; font-family:'Plus Jakarta Sans', Helvetica, Arial, sans-serif; color:#F8FAF7;">
   <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#051512; padding:32px 12px;">
     <tr><td align="center">
-      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:580px; background:#0B110E; border:1px solid rgba(255,255,255,0.15); border-top:3px solid #34D399; border-radius:4px; padding:32px 24px; text-align:left; box-shadow:0 14px 34px rgba(0,0,0,0.5);">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:580px; background:#0B110E; border:1px solid rgba(255,255,255,0.15); border-top:3px solid #34D399; border-radius:2px; padding:32px 24px; text-align:left; box-shadow:0 14px 34px rgba(0,0,0,0.5);">
         <tr><td align="center" style="padding-bottom:20px;">
           <img src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media" width="68" height="68" style="border-radius:2px; border:1px solid rgba(255,255,255,0.2); display:block; margin:0 auto;" alt="Logo">
           <h2 style="color:#FFFFFF; margin:14px 0 4px 0; font-size:22px; letter-spacing:0.02em;">AISFF</h2>
@@ -3450,7 +3450,7 @@ app.post('/api/admin/stream/viewers/create', async (req, res) => {
           </div>
 
           <div style="background:#070908; border:1px solid rgba(255,255,255,0.1); border-radius:2px; padding:16px; margin:20px 0; font-size:0.86rem;">
-            <div style="font-weight:700; color:#F8FAFC; margin-bottom:8px; text-transform:uppercase; font-size:0.78rem; letter-spacing:0.05em;">🎬 Renginio ir transliacijos informacija:</div>
+            <div style="font-weight:700; color:#F8FAFC; margin-bottom:8px; text-transform:uppercase; font-size:0.78rem; letter-spacing:0.05em;">Renginio ir transliacijos informacija:</div>
             <table width="100%" cellpadding="0" cellspacing="0" border="0" style="color:#BAC9C0; font-size:0.86rem; line-height:1.6;">
               <tr><td style="width:110px; color:#7A9689; padding:2px 0;">Transliacijos data:</td><td style="color:#F8FAF7; font-weight:600; padding:2px 0;">2027 m. balandžio 27 d.</td></tr>
               <tr><td style="color:#7A9689; padding:2px 0;">Renginio vieta:</td><td style="padding:2px 0;">Kauno tarptautinė gimnazija (Vytauto pr. 44, Kaunas)</td></tr>
@@ -3604,10 +3604,10 @@ app.post('/api/admin/stream/viewers/resend', async (req, res) => {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Transliacijos Žetonas &bull; Ąžuolynas Film Fest</title>
 </head>
-<body style="margin:0; padding:0; background-color:#051512; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color:#F8FAF7;">
+<body style="margin:0; padding:0; background-color:#051512; font-family:'Plus Jakarta Sans', Helvetica, Arial, sans-serif; color:#F8FAF7;">
   <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#051512; padding:32px 12px;">
     <tr><td align="center">
-      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:580px; background:#0B110E; border:1px solid rgba(255,255,255,0.15); border-top:3px solid #34D399; border-radius:4px; padding:32px 24px; text-align:left; box-shadow:0 14px 34px rgba(0,0,0,0.5);">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:580px; background:#0B110E; border:1px solid rgba(255,255,255,0.15); border-top:3px solid #34D399; border-radius:2px; padding:32px 24px; text-align:left; box-shadow:0 14px 34px rgba(0,0,0,0.5);">
         <tr><td align="center" style="padding-bottom:20px;">
           <img src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media" width="68" height="68" style="border-radius:2px; border:1px solid rgba(255,255,255,0.2); display:block; margin:0 auto;" alt="Logo">
           <h2 style="color:#FFFFFF; margin:14px 0 4px 0; font-size:22px; letter-spacing:0.02em;">AISFF</h2>
@@ -3629,7 +3629,7 @@ app.post('/api/admin/stream/viewers/resend', async (req, res) => {
           </div>
 
           <div style="background:#070908; border:1px solid rgba(255,255,255,0.1); border-radius:2px; padding:16px; margin:20px 0; font-size:0.86rem;">
-            <div style="font-weight:700; color:#F8FAFC; margin-bottom:8px; text-transform:uppercase; font-size:0.78rem; letter-spacing:0.05em;">🎬 Renginio ir transliacijos informacija:</div>
+            <div style="font-weight:700; color:#F8FAFC; margin-bottom:8px; text-transform:uppercase; font-size:0.78rem; letter-spacing:0.05em;">Renginio ir transliacijos informacija:</div>
             <table width="100%" cellpadding="0" cellspacing="0" border="0" style="color:#BAC9C0; font-size:0.86rem; line-height:1.6;">
               <tr><td style="width:110px; color:#7A9689; padding:2px 0;">Transliacijos data:</td><td style="color:#F8FAF7; font-weight:600; padding:2px 0;">2027 m. balandžio 27 d.</td></tr>
               <tr><td style="color:#7A9689; padding:2px 0;">Renginio vieta:</td><td style="padding:2px 0;">Kauno tarptautinė gimnazija (Vytauto pr. 44, Kaunas)</td></tr>
@@ -4009,7 +4009,7 @@ app.post('/api/admin/tasks/status', (req, res) => {
       adminEmail: callerEmail,
       adminName: adminName || callerEmail.split('@')[0],
       target: task.title,
-      details: `Užduoties „${task.title}“ būsena pakeista: ${oldStatus} ➔ ${task.status.toUpperCase()}`
+      details: `Užduoties „${task.title}“ būsena pakeista: ${oldStatus} -> ${task.status.toUpperCase()}`
     });
 
     res.json({ success: true, task });
@@ -5644,8 +5644,23 @@ app.get('/live', (req, res) => {
 app.get('/stream-overlay', (req, res) => {
   res.sendFile(path.join(__dirname, 'stream-overlay.html'));
 });
+app.get('/azuolynas-fest-2026', (req, res) => {
+  res.sendFile(path.join(__dirname, 'lt', 'azuolynas-fest-2026.html'));
+});
+app.get('/azuolynas-fest-2026.html', (req, res) => {
+  res.sendFile(path.join(__dirname, 'lt', 'azuolynas-fest-2026.html'));
+});
+app.get('/lt/azuolynas-fest-2026', (req, res) => {
+  res.sendFile(path.join(__dirname, 'lt', 'azuolynas-fest-2026.html'));
+});
+app.get('/en/azuolynas-fest-2026', (req, res) => {
+  res.sendFile(path.join(__dirname, 'en', 'azuolynas-fest-2026.html'));
+});
 app.get('/azuolynas-fest-2027', (req, res) => {
   res.sendFile(path.join(__dirname, 'azuolynas-fest-2027.html'));
+});
+app.get('/lt/azuolynas-fest-2027', (req, res) => {
+  res.sendFile(path.join(__dirname, 'lt', 'azuolynas-fest-2027.html'));
 });
 app.get('/en/azuolynas-fest-2027', (req, res) => {
   res.sendFile(path.join(__dirname, 'en', 'azuolynas-fest-2027.html'));

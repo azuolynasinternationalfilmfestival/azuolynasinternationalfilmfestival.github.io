@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://firebasestorage.googleapis.com">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>AISFF | Ąžuolyno Tarptautinis Mokinių Filmų Festivalis | Oficiali Paraiškų Platforma</title>
   <meta name="description" content="7-asis „Ąžuolyno“ tarptautinis mokinių filmų festivalis (AISFF). Tema: „Mano pašaukimas“. Paraiškos: 2026 m. lapkričio 1 d. – 2027 m. balandžio 5 d. Renginys & tiesioginė transliacija: 2027 m. balandžio 27 d.">
@@ -35,8 +35,8 @@
     "name": "Ąžuolynas International Students Film Festival",
     "alternateName": "Ąžuolyno Tarptautinis Mokinių Filmų Festivalis",
     "description": "„Ąžuolyno“ filmų festivalis pavadintas vieno iš Kauno lankytinų vietų garbei, kurio papėdėje yra įsikūrusi mūsų studija.",
-    "startDate": "2026-04-17T15:00:00+03:00",
-    "endDate": "2026-04-17T18:00:00+03:00",
+    "startDate": "2027-04-27T15:00:00+03:00",
+    "endDate": "2027-04-27T18:00:00+03:00",
     "eventAttendanceMode": "https://schema.org/OnlineEventAttendanceMode",
     "eventStatus": "https://schema.org/EventScheduled",
     "location": {
@@ -116,7 +116,7 @@
 
       <!-- Header actions: Quick Submit CTA, Language switch, Burger button -->
       <div class="header-actions">
-        <a href="../voting.html" class="btn-outline btn-nav-cta">Balsavimas</a>
+        <a href="../voting.html?lang=lt" class="btn-outline btn-nav-cta">Balsavimas</a>
         <a href="#submit" class="btn-solid btn-nav-cta">Pateikti Filmą</a>
         <div class="lang-switch">
           <a href="index.html" class="lang-btn active">LT</a>
@@ -175,7 +175,7 @@
           <li id="drawerNavLinkCurrentEdition">
             <a href="azuolynas-fest-2027.html" class="drawer-nav-link highlight">
               <span class="drawer-nav-text">FEST 2027 (Nauja Edicija)</span>
-              <span class="drawer-nav-badge">2027</span>
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
             </a>
           </li>
           <li id="drawerNavLinkEditions">
@@ -223,9 +223,9 @@
         <div class="drawer-section-title">Programa ir Renginiai</div>
         <ul class="drawer-nav-list">
           <li id="drawerNavLinkVoting">
-            <a href="../voting.html" class="drawer-nav-link highlight">
+            <a href="../voting.html?lang=lt" class="drawer-nav-link highlight">
               <span class="drawer-nav-text">Žiūrovų Balsavimas</span>
-              <span class="drawer-nav-badge">Nauja</span>
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
             </a>
           </li>
           <li id="drawerNavLinkScreening">
@@ -275,28 +275,45 @@
         <!-- Architectural Masthead -->
         <div class="hero-masthead">
           <div class="hero-masthead-col">
-            <span class="masthead-mono">EDICIJA 07 // 2026–2027</span>
+            <span class="masthead-mono">EDICIJA 07 &bull; 2026–2027</span>
           </div>
           <div class="hero-masthead-col text-center">
             <span class="masthead-mono">KAUNAS &bull; LIETUVA</span>
           </div>
           <div class="hero-masthead-col text-right">
-            <span class="masthead-status"><span class="status-pulse-dot"></span> PARAIŠKOS AKTYVIOS</span>
+            <span class="masthead-status">PARAIŠKOS AKTYVIOS</span>
           </div>
         </div>
 
         <div class="hero-title-block">
           <h1 class="hero-title">AISFF</h1>
           <p class="hero-subtitle">Ąžuolyno tarptautinis mokinių filmų festivalis</p>
+          <p class="hero-human-lead">
+            Nemokamas tarptautinis trumpametražių filmų konkursas 10–18 metų mokiniams: nufilmuokite istoriją išmaniuoju telefonu ar planšete (iki 3 min.), pateikite paraišką internetu ir dalyvaukite finalinėje peržiūroje bei žiūrovų balsavime.
+          </p>
           <p class="hero-about-text" id="dynAboutText">
             „Ąžuolyno“ filmų festivalis pavadintas vieno iš Kauno lankytinų vietų – Ąžuolyno parko – garbei, kurio papėdėje yra įsikūrusi mūsų studija.
           </p>
+          <ol class="participation-flow" aria-label="Dalyvavimo eiga">
+            <li class="participation-step">
+              <span class="participation-step-num">01. Nufilmuok</span>
+              <span class="participation-step-text">Išmaniuoju telefonu ar planšete, iki 3 minučių (180 s).</span>
+            </li>
+            <li class="participation-step">
+              <span class="participation-step-num">02. Pateik paraišką</span>
+              <span class="participation-step-text">Užpildykite formą žemiau iki 2027 m. balandžio 5 d.</span>
+            </li>
+            <li class="participation-step">
+              <span class="participation-step-num">03. Peržiūra ir balsavimas</span>
+              <span class="participation-step-text">Premjera, žiūrovų balsavimas ir apdovanojimai 2027 m. balandžio 27 d.</span>
+            </li>
+          </ol>
         </div>
 
-        <!-- Flush Editorial Grid -->
+        <!-- Editorial Grid -->
         <div class="hero-editorial-grid">
           <div class="hero-editorial-left">
-            <div class="editorial-cell-tag">FESTIVALIO TEMA // 2027</div>
+            <div class="editorial-cell-tag">FESTIVALIO TEMA &bull; 2027</div>
             <div class="hero-topic-val" id="dynTopic">„Mano pašaukimas“</div>
             <p class="hero-topic-desc" id="dynTopicDesc">
               Ką norite veikti savo gyvenime ir kaip atrasti tikrąjį pašaukimą? Ieškome istorijų apie savo kelio paieškas, karjeros pasirinkimus ir vidinių abejonių įveikimą. Papasakokite, ko reikia, kad sektumėte savo aistra, kai aplinkiniai tikisi kažko kito – ar tai būtų šeimos spaudimas rinktis „rimtą“ profesiją, pavyzdžiui, mediciną ar teisę, ar jūsų pačių baimė žengti į meną, muziką ar kūrybines sritis. Parodykite šios kelionės tikrovę, kliūtis pakeliui ir tą akimirką, kai jūs ar jūsų herojai suprato, ką iš tiesų lemta daryti.
@@ -329,14 +346,15 @@
         <div class="hero-countdown-wrap" id="heroCountdownTimer" aria-live="polite">
           <div class="hero-countdown-header">
             <div class="hero-countdown-title-wrap">
-              <div class="hero-countdown-icon" aria-hidden="true">⏱️</div>
+              <div class="hero-countdown-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+              </div>
               <div>
                 <div class="hero-countdown-label">Iki paraiškų pabaigos termino liko:</div>
                 <div class="hero-countdown-sublabel">Pateikite savo filmą iki 2027 m. balandžio 5 d. 23:59</div>
               </div>
             </div>
             <div class="hero-countdown-badge-date">
-              <span class="pulse-dot" aria-hidden="true"></span>
               <span>Terminas: 2027 m. balandžio 5 d.</span>
             </div>
           </div>
@@ -359,7 +377,7 @@
             </div>
           </div>
           <div class="countdown-footer-msg" data-countdown="footer-msg">
-            <span>🎬 <strong>Paraiškų priėmimas vyksta!</strong> Nemokamas dalyvavimas moksleiviams.</span>
+            <span><strong>Paraiškų priėmimas vyksta.</strong> Nemokamas dalyvavimas moksleiviams.</span>
           </div>
         </div>
 
@@ -376,22 +394,6 @@
         <div class="section-head">
           <div class="section-tag">Festivalio Metraštis</div>
           <h2 class="section-heading">Oficialūs Festivalio Leidimai</h2>
-          <div class="results-share-header-bar" style="margin-top: 16px;">
-            <span class="results-share-tagline">Dalintis festivalio metraščiu:</span>
-            <div class="share-btns">
-              <button type="button" class="btn-share-icon btn-share-fb" onclick="FestivalShare.shareEditionFacebook('2026', 'FEST 2026', 'azuolynas-fest-2026.html')" title="Dalintis Facebook" aria-label="Facebook">
-                <svg class="share-icon" viewBox="0 0 24 24"><path fill="currentColor" d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
-                <span>Facebook</span>
-              </button>
-              <button type="button" class="btn-share-icon btn-share-ig" onclick="FestivalShare.shareEditionInstagram('2026', 'FEST 2026', 'azuolynas-fest-2026.html', 'Kino šventė Kauno tarptautinėje gimnazijoje: keturi žemynai viename ekrane!')" title="Dalintis Instagram" aria-label="Instagram">
-                <svg class="share-icon" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
-                <span>Instagram</span>
-              </button>
-              <button type="button" class="btn-share-icon btn-share-copy" onclick="FestivalShare.copyLink(window.location.pathname + '#editions', 'Festivalio metraščio nuoroda nukopijuota!')" title="Kopijuoti nuorodą" aria-label="Kopijuoti">
-                <svg class="share-icon" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
-              </button>
-            </div>
-          </div>
         </div>
 
         <div class="editions-showcase-grid" id="editionsContainer">
@@ -426,7 +428,7 @@
 
           <!-- 2026 Completed Edition Card -->
           <div class="edition-card-item">
-            <div class="edition-card-bg" style="background-image: url('https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/IMG_3458.jpeg?alt=media&token=224af1bd-25ff-494e-8136-fbf330d3ad5b');"></div>
+            <div class="edition-card-bg" style="background-image: url('https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/IMG_3459.jpeg?alt=media&token=dfdda212-9ea6-433f-af80-8c5b5b57f361');"></div>
             <div class="edition-card-overlay"></div>
             <div class="edition-card-details">
               <span class="edition-card-badge">2026 Metų Edicija</span>
@@ -618,7 +620,6 @@
           <div class="ceremony-mosaic-grid">
             <div class="ceremony-mosaic-hero" onclick="window.FestivalLightbox && window.FestivalLightbox.openAlbum('ceremony')" role="button" tabindex="0" title="Atverti ceremonijos nuotrauką">
               <img src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/IMG_3458.jpeg?alt=media&token=224af1bd-25ff-494e-8136-fbf330d3ad5b" alt="Akimirkos iš festivalio ceremonijos Kaune" loading="lazy">
-              <span class="ceremony-cell-badge">CEREMONIJA</span>
               <div class="ceremony-hover-zoom">
                 <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.35-4.35"></path><path d="M11 8v6M8 11h6"></path></svg>
               </div>
@@ -633,7 +634,6 @@
 
             <div class="ceremony-mosaic-cell" onclick="window.FestivalLightbox && window.FestivalLightbox.openAlbum('laureates')" role="button" tabindex="0" title="Atverti laureatų nuotrauką">
               <img src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/IMG_3459.jpeg?alt=media&token=dfdda212-9ea6-433f-af80-8c5b5b57f361" alt="Festivalio laureatai ir svečiai" loading="lazy">
-              <span class="ceremony-cell-badge">LAUREATAI</span>
               <div class="ceremony-hover-zoom">
                 <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.35-4.35"></path><path d="M11 8v6M8 11h6"></path></svg>
               </div>
@@ -644,7 +644,6 @@
 
             <div class="ceremony-mosaic-cell" onclick="window.FestivalLightbox && window.FestivalLightbox.openAlbum('prizes')" role="button" tabindex="0" title="Atverti prizų nuotrauką">
               <img src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/IMG_3463.jpeg?alt=media&token=af7892ca-e78e-4198-b686-e0181472e8da" alt="Ąžuolo statulėlės ir diplomai" loading="lazy">
-              <span class="ceremony-cell-badge">PRIZAI</span>
               <div class="ceremony-hover-zoom">
                 <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.35-4.35"></path><path d="M11 8v6M8 11h6"></path></svg>
               </div>
@@ -675,22 +674,6 @@
         <div class="section-head">
           <div class="section-tag">Festivalio Laureatai</div>
           <h2 class="section-heading">Festivalio Rezultatai ir Nugalėtojai</h2>
-          <div class="results-share-header-bar">
-            <span class="results-share-tagline">Pasidalinkite festivalio laureatais ir nugalėtojais:</span>
-            <div class="share-btns">
-              <button type="button" class="btn-share-icon btn-share-fb" onclick="FestivalShare.shareResultsFacebook()" title="Dalintis Facebook" aria-label="Facebook">
-                <svg class="share-icon" viewBox="0 0 24 24"><path fill="currentColor" d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
-                <span>Facebook</span>
-              </button>
-              <button type="button" class="btn-share-icon btn-share-ig" onclick="FestivalShare.shareResultsInstagram()" title="Dalintis Instagram" aria-label="Instagram">
-                <svg class="share-icon" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
-                <span>Instagram</span>
-              </button>
-              <button type="button" class="btn-share-icon btn-share-copy" onclick="FestivalShare.copyResultsLink()" title="Kopijuoti nuorodą" aria-label="Kopijuoti">
-                <svg class="share-icon" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
-              </button>
-            </div>
-          </div>
         </div>
 
         <!-- Categories Filter for Laureates -->
@@ -1271,7 +1254,7 @@
   <!-- Official Vote Confirmation Modal (LT) -->
   <div id="voteConfirmModal" class="vote-confirm-overlay" role="dialog" aria-modal="true" aria-labelledby="voteConfirmHeading">
     <div class="vote-confirm-card">
-      <div class="vote-confirm-icon-wrap">★</div>
+      <div class="vote-confirm-icon-wrap"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg></div>
       <h3 id="voteConfirmHeading" class="vote-confirm-title">Patvirtinti Savo Balsą</h3>
       <p style="color:var(--text-muted); font-size:0.88rem;">Atiduodate savo oficialų festivalio balsą už Žiūrovų simpatijų prizą:</p>
       <div class="vote-confirm-film-box">
@@ -1285,7 +1268,7 @@
       </p>
       <div class="vote-confirm-actions">
         <button type="button" class="btn-outline" onclick="FestivalVoting.cancelVote()">Atšaukti</button>
-        <button type="button" class="btn-solid" onclick="FestivalVoting.confirmVote()">★ Patvirtinti Balsą</button>
+        <button type="button" class="btn-solid" onclick="FestivalVoting.confirmVote()">Patvirtinti Balsą</button>
       </div>
     </div>
   </div>
@@ -1380,12 +1363,12 @@
             <p>El. paštas: <a href="mailto:azuolynasfilmfestival@gmail.com">azuolynasfilmfestival@gmail.com</a></p>
             <p>Instagram: <a href="https://www.instagram.com/azuolynas.iff" target="_blank" rel="noopener noreferrer" style="color:var(--text-color); font-weight:600;">@azuolynas.iff</a></p>
             <p>Paraiškos: nuo 2026 m. lapkričio 1 d. iki 2027 m. balandžio 5 d.</p>
-            <p>Festivalis & tiesioginė transliacija: 2027 m. balandžio 27 d. (<a href="/live.html" style="color:var(--accent-mint);">Žiūrėti tiesiogiai</a>)</p>
+            <p>Festivalis & tiesioginė transliacija: 2027 m. balandžio 27 d. (<a href="../live.html?lang=lt" style="color:var(--accent-mint);">Žiūrėti tiesiogiai</a>)</p>
           </div>
         </div>
       </div>
       <div class="footer-bottom-bar">
-        <span>&copy; 2026 Ąžuolynas International Students Film Festival. Visos teisės saugomos.</span>
+        <span>&copy; 2027 Ąžuolynas International Students Film Festival. Visos teisės saugomos.</span>
         <div class="footer-bottom-links" style="display:inline-flex; gap:16px;">
           <a href="privatumo-politika.html" style="color:var(--text-muted); text-decoration:none;">Privatumo politika</a>
           <a href="naudojimosi-taisykles.html" style="color:var(--text-muted); text-decoration:none;">Naudojimosi taisyklės</a>
@@ -1657,14 +1640,31 @@
 
       const editionsList = [];
       snapshot.forEach((doc) => {
+        if (String(doc.id).endsWith("_en")) return;
         editionsList.push({ id: doc.id, ...doc.data() });
       });
 
+      editionsList.sort((a, b) => Number(b.year || 0) - Number(a.year || 0));
       if (editionsList.length === 0) return;
 
+      const resolveLtEditionUrl = (ed, year) => {
+        if (year === "2026" || year === "2027") {
+          return `/lt/azuolynas-fest-${year}.html`;
+        }
+        const raw = String(ed.pageUrl || "").trim();
+        if (raw && !raw.includes("/en/") && !raw.startsWith("en/")) {
+          if (raw.startsWith("http://") || raw.startsWith("https://") || raw.startsWith("#")) return raw;
+          const cleanName = raw.replace(/^(\.\.\/)?(en|lt)\//, "").replace(/^\//, "");
+          if (cleanName.endsWith(".html") && !cleanName.includes("2025") && !cleanName.includes("2024") && !cleanName.includes("2023") && !cleanName.includes("2022")) {
+            return `/lt/${cleanName}`;
+          }
+        }
+        return ed.videoUrl || "#archive";
+      };
+
       container.innerHTML = editionsList.map((ed) => {
-        const pageUrl = ed.pageUrl || ('azuolynas-fest-' + (ed.year || '2026') + '.html');
         const year = ed.year || '2026';
+        const pageUrl = resolveLtEditionUrl(ed, year);
         const title = (ed.title || ('FEST ' + year)).replace(/'/g, "\\'");
         const subtitle = (ed.subtitle || '').replace(/'/g, "\\'");
         return `
@@ -2064,7 +2064,11 @@
       }
       if (list && Array.isArray(checks)) {
         list.innerHTML = checks.map((c) => {
-          const icon = c.ok === true ? "✓" : (c.ok === false ? "✕" : "•");
+          const icon = c.ok === true
+            ? '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>'
+            : (c.ok === false
+              ? '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>'
+              : '&mdash;');
           const cls = c.ok === true ? "is-pass" : (c.ok === false ? "is-fail" : "");
           return `<li class="validation-check-item ${cls}"><span>${icon}</span><span>${c.label}</span></li>`;
         }).join("");
@@ -2265,7 +2269,7 @@
           };
           if (feedback) {
             feedback.className = "drop-alert success";
-            feedback.textContent = `✓ Vaizdo įrašas atitinka visas festivalio taisykles: ${videoDurationSeconds} s, ${sizeMB.toFixed(1)} MB (${file.name})`;
+            feedback.textContent = `Vaizdo įrašas atitinka visas festivalio taisykles: ${videoDurationSeconds} s, ${sizeMB.toFixed(1)} MB (${file.name})`;
           }
           renderVideoValidationSummary("pass", checks);
         }

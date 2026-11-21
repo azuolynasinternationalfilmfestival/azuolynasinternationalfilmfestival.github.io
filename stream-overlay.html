@@ -8,7 +8,7 @@
   <link rel="icon" type="image/webp" href="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&family=Space+Grotesk:wght@600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
       --platinum: #FFFFFF;
@@ -30,7 +30,7 @@
     body {
       background: transparent;
       color: #fff;
-      font-family: 'Inter', sans-serif;
+      font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
       width: 100vw;
       height: 100vh;
       overflow: hidden;
@@ -43,8 +43,7 @@
     /* Lower-Third Overlay Banner Container */
     .overlay-banner-wrapper {
       background: #070908;
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      border-left: 4px solid #FFFFFF;
+      border: 1px solid rgba(255, 255, 255, 0.22);
       border-radius: 2px;
       padding: 22px 28px;
       box-shadow: 0 24px 60px rgba(0, 0, 0, 0.95);
@@ -82,7 +81,7 @@
     }
 
     .overlay-title {
-      font-family: 'Space Grotesk', sans-serif;
+      font-family: 'Space Grotesk', 'Plus Jakarta Sans', system-ui, sans-serif;
       font-size: 1.25rem;
       font-weight: 700;
       color: #FFFFFF;
@@ -100,23 +99,17 @@
       padding: 4px 10px;
       border-radius: 2px;
       font-size: 0.72rem;
-      font-family: 'JetBrains Mono', monospace;
+      font-family: 'IBM Plex Mono', monospace;
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.08em;
     }
 
-    .overlay-pulse-dot {
-      width: 7px;
-      height: 7px;
-      border-radius: 50%;
+    .overlay-live-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 1px;
       background: #ef4444;
-      box-shadow: 0 0 8px #ef4444;
-      animation: pulseLive 1.2s infinite;
-    }
-    @keyframes pulseLive {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.3; }
     }
 
     /* Real-Time Ranking Leaderboard Rows */
@@ -143,9 +136,9 @@
     }
 
     .row-rank {
-      font-family: 'Space Grotesk', sans-serif;
+      font-family: 'Space Grotesk', 'Plus Jakarta Sans', system-ui, sans-serif;
       font-size: 1.1rem;
-      font-weight: 800;
+      font-weight: 700;
       width: 32px;
       text-align: center;
       color: #FFFFFF;
@@ -189,7 +182,7 @@
       border-radius: 2px;
       font-weight: 700;
       text-transform: uppercase;
-      font-family: 'JetBrains Mono', monospace;
+      font-family: 'IBM Plex Mono', monospace;
     }
 
     .row-progress-container {
@@ -214,15 +207,15 @@
 
     .row-votes-num {
       font-size: 1.1rem;
-      font-weight: 800;
+      font-weight: 700;
       color: #FFFFFF;
-      font-family: 'Space Grotesk', sans-serif;
+      font-family: 'Space Grotesk', 'Plus Jakarta Sans', system-ui, sans-serif;
     }
 
     .row-votes-percent {
       font-size: 0.72rem;
       color: #94A3B8;
-      font-family: 'JetBrains Mono', monospace;
+      font-family: 'IBM Plex Mono', monospace;
     }
 
     .overlay-footer-row {
@@ -232,7 +225,7 @@
       margin-top: 12px;
       font-size: 0.75rem;
       color: #94A3B8;
-      font-family: 'JetBrains Mono', monospace;
+      font-family: 'IBM Plex Mono', monospace;
       padding-top: 10px;
       border-top: 1px solid rgba(255, 255, 255, 0.08);
     }
@@ -253,10 +246,10 @@
 
       <div style="display:flex; align-items:center; gap:12px;">
         <div class="overlay-badge">
-          <span class="overlay-pulse-dot"></span>
+          <span class="overlay-live-dot"></span>
           <span>Tiesiogiai Ekrane</span>
         </div>
-        <div style="font-size:0.85rem; font-weight:700; color:#FFFFFF; font-family:'JetBrains Mono', monospace;">
+        <div style="font-size:0.85rem; font-weight:700; color:#FFFFFF; font-family:'IBM Plex Mono', monospace;">
           Balsų suma: <span id="overlayTotalVotes">0</span>
         </div>
       </div>

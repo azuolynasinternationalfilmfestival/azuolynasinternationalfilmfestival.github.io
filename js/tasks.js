@@ -250,15 +250,15 @@ export function renderTasksList() {
           <div style="display:flex; gap:6px;">
             ${!isCompleted ? `
               <button type="button" class="btn-outline btn-xs btn-task-progress" data-task-id="${t.id}" data-next-status="${isInProgress ? 'completed' : 'in_progress'}" style="color:${isInProgress ? '#4ade80' : 'var(--accent-light)'};">
-                ${isInProgress ? '✓ Pažymėti atlikta' : '▶ Pradėti vykdyti'}
+                ${isInProgress ? 'Pažymėti atlikta' : 'Pradėti vykdyti'}
               </button>
             ` : `
               <button type="button" class="btn-outline btn-xs btn-task-progress" data-task-id="${t.id}" data-next-status="pending" style="color:var(--text-muted);">
-                ↩ Grąžinti
+                Grąžinti
               </button>
             `}
             <button type="button" class="btn-outline btn-xs btn-task-delete" data-task-id="${t.id}" style="color:#f87171;" title="Ištrinti užduotį">
-              ✕
+              &times;
             </button>
           </div>
         </div>

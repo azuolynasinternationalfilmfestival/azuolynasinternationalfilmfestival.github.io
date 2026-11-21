@@ -343,7 +343,7 @@ async function handleQuickTestVote(filmId, filmTitle, btn) {
           badge.style.transform = "scale(1)";
         }, 400);
       }
-      showToast(`⚡ Testinis balsas užskaitytas per ${data.latencyMs || latency} ms! Nauja suma: ${data.currentVotes} balsų. Sistema veikia sklandžiai, nestringa!`, "success");
+      showToast(`Testinis balsas užskaitytas per ${data.latencyMs || latency} ms. Nauja suma: ${data.currentVotes}.`, "success");
     } else {
       // Direct Firestore fallback
       await db.collection("submissions").doc(filmId).update({

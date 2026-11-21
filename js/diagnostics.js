@@ -129,9 +129,9 @@ export async function loadServerErrorLogs(levelFilter = "all") {
     if (logs.length === 0) {
       terminal.innerHTML = `
         <div style="text-align:center; padding:24px; color:#7A9689; font-size:0.85rem;">
-          <div style="font-size:1.5rem; margin-bottom:6px;">✨</div>
+          <div style="margin-bottom:8px; color:#52796F;"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="margin:0 auto;"><polyline points="20 6 9 17 4 12"></polyline></svg></div>
           <div>Klaidų žurnale nėra jokių ${levelFilter === 'all' ? 'sistemos' : levelFilter.toUpperCase()} įrašų.</div>
-          <div style="font-size:0.75rem; color:#52796F; margin-top:4px;">Serveris veikia stabiliai be neapdorotų klaidų (Zero 500/502).</div>
+          <div style="font-size:0.75rem; color:#52796F; margin-top:4px;">Serveris veikia stabiliai be neapdorotų klaidų.</div>
         </div>
       `;
       return;
@@ -159,7 +159,7 @@ export async function loadServerErrorLogs(levelFilter = "all") {
       return `
         <div style="padding:7px 12px; border-bottom:1px solid rgba(255,255,255,0.06); font-family:var(--font-mono, monospace); font-size:0.78rem; display:flex; align-items:flex-start; gap:10px; line-height:1.4;">
           <span style="color:#64748b; flex-shrink:0;">[${timeFormatted}]</span>
-          <span style="background:${badgeBg}; color:${badgeColor}; border:1px solid ${borderColor}; padding:1px 6px; border-radius:3px; font-weight:700; font-size:0.7rem; flex-shrink:0;">
+          <span style="background:${badgeBg}; color:${badgeColor}; border:1px solid ${borderColor}; padding:1px 6px; border-radius:2px; font-weight:700; font-size:0.7rem; flex-shrink:0;">
             ${escapeHtml(lvl)}
           </span>
           <span style="color:#94a3b8; font-weight:600; flex-shrink:0;">
@@ -189,8 +189,8 @@ function renderEmptyState() {
 
   container.classList.remove("d-none");
   container.innerHTML = `
-    <div style="background:rgba(8,27,23,0.6); border:1px dashed rgba(111,165,138,0.3); border-radius:10px; padding:28px 20px; text-align:center;">
-      <div style="font-size:2rem; margin-bottom:8px;">🔍</div>
+    <div style="background:rgba(8,27,23,0.6); border:1px dashed rgba(111,165,138,0.3); border-radius:2px; padding:28px 20px; text-align:center;">
+      <div style="margin-bottom:10px; color:#7A9689;"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="margin:0 auto;"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg></div>
       <h4 style="margin:0 0 6px 0; color:#F8FAF7;">Sistemos Būklės Tikrinimo Centras</h4>
       <p style="margin:0 auto 16px auto; max-width:540px; font-size:0.84rem; color:#94a3b8; line-height:1.5;">
         Tikrina realią debesijos infrastruktūrą: Firebase Auth, Firestore duomenų bazės kolekcijas (settings, submissions, movies, votes, stream_tokens), Storage saugyklą, el. pašto eilę ir Cloudflare transliacijos validatorius.
@@ -225,7 +225,7 @@ export async function runFullSystemCheck() {
   if (container) {
     container.classList.remove("d-none");
     container.innerHTML = `
-      <div style="background:rgba(8,27,23,0.85); border:1px solid rgba(111,165,138,0.3); border-radius:10px; padding:20px; text-align:center;">
+      <div style="background:rgba(8,27,23,0.85); border:1px solid rgba(111,165,138,0.3); border-radius:2px; padding:20px; text-align:center;">
         <div style="display:inline-block; width:28px; height:28px; border:3px solid rgba(255,255,255,0.2); border-top-color:#34D399; border-radius:50%; animation:spin 0.8s linear infinite; margin-bottom:10px;"></div>
         <div style="font-size:0.9rem; color:#F8FAF7; font-weight:600;">Tikrinamos debesijos tarnybos...</div>
         <div style="font-size:0.75rem; color:#94a3b8; margin-top:4px;" id="diagCurrentTestStep">Ruošiama...</div>
@@ -427,7 +427,7 @@ function renderTestResults() {
   const failedCount = testResults.filter(t => t.status === "FAIL").length;
 
   let html = `
-    <div style="background:rgba(8,27,23,0.92); border:1px solid rgba(111,165,138,0.3); border-radius:12px; padding:20px; box-shadow:0 12px 35px rgba(0,0,0,0.5);">
+    <div style="background:rgba(8,27,23,0.92); border:1px solid rgba(111,165,138,0.3); border-radius:2px; padding:20px; box-shadow:0 12px 35px rgba(0,0,0,0.5);">
       
       <!-- Summary Bar -->
       <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:18px; padding-bottom:14px; border-bottom:1px solid rgba(111,165,138,0.2);">
@@ -438,16 +438,16 @@ function renderTestResults() {
           </span>
         </div>
         <div style="display:flex; align-items:center; gap:8px;">
-          <span style="background:rgba(74,222,128,0.2); color:#4ade80; border:1px solid #4ade80; padding:4px 10px; border-radius:14px; font-size:0.75rem; font-weight:700;">
+          <span style="background:rgba(74,222,128,0.2); color:#4ade80; border:1px solid #4ade80; padding:4px 10px; border-radius:2px; font-size:0.75rem; font-weight:700;">
             PASS: ${passedCount}
           </span>
           ${warnedCount > 0 ? `
-            <span style="background:rgba(234,179,8,0.2); color:#facc15; border:1px solid #facc15; padding:4px 10px; border-radius:14px; font-size:0.75rem; font-weight:700;">
+            <span style="background:rgba(234,179,8,0.2); color:#facc15; border:1px solid #facc15; padding:4px 10px; border-radius:2px; font-size:0.75rem; font-weight:700;">
               WARN: ${warnedCount}
             </span>
           ` : ''}
           ${failedCount > 0 ? `
-            <span style="background:rgba(239,68,68,0.2); color:#f87171; border:1px solid #ef4444; padding:4px 10px; border-radius:14px; font-size:0.75rem; font-weight:700;">
+            <span style="background:rgba(239,68,68,0.2); color:#f87171; border:1px solid #ef4444; padding:4px 10px; border-radius:2px; font-size:0.75rem; font-weight:700;">
               FAIL: ${failedCount}
             </span>
           ` : ''}
@@ -469,20 +469,20 @@ function renderTestResults() {
     const borderColor = isPass ? "rgba(74,222,128,0.3)" : (isWarn ? "rgba(234,179,8,0.3)" : "rgba(239,68,68,0.4)");
 
     html += `
-      <div style="background:rgba(0,0,0,0.35); border:1px solid ${borderColor}; border-left:4px solid ${badgeColor}; border-radius:6px; padding:10px 14px; display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:8px;">
+      <div style="background:rgba(0,0,0,0.35); border:1px solid ${borderColor}; border-radius:2px; padding:10px 14px; display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:8px;">
         <div style="flex:1; min-width:260px;">
           <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
-            <span style="font-size:0.72rem; font-weight:800; background:${badgeBg}; color:${badgeColor}; border:1px solid ${borderColor}; padding:2px 6px; border-radius:4px;">
+            <span style="font-size:0.72rem; font-weight:800; background:${badgeBg}; color:${badgeColor}; border:1px solid ${borderColor}; padding:2px 6px; border-radius:2px;">
               ${test.status}
             </span>
             <strong style="font-size:0.88rem; color:#F8FAF7;">${escapeHtml(test.name)}</strong>
-            <span style="font-size:0.72rem; color:#64748b; font-family:monospace;">${test.durationMs}ms</span>
+            <span style="font-size:0.72rem; color:#64748b; font-family:var(--font-mono, monospace);">${test.durationMs}ms</span>
           </div>
           <div style="font-size:0.8rem; color:#cbd5e1; line-height:1.4;">
             ${escapeHtml(test.details)}
           </div>
           ${test.error ? `
-            <div style="margin-top:6px; font-size:0.76rem; color:#fca5a5; font-family:monospace; background:rgba(239,68,68,0.12); padding:4px 8px; border-radius:4px; word-break:break-word;">
+            <div style="margin-top:6px; font-size:0.76rem; color:#fca5a5; font-family:var(--font-mono, monospace); background:rgba(239,68,68,0.12); padding:4px 8px; border-radius:2px; word-break:break-word;">
               Klaida: ${escapeHtml(test.error)}
             </div>
           ` : ''}

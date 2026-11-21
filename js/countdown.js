@@ -37,8 +37,8 @@
         if (secondsEl) secondsEl.textContent = '00';
         if (footerMsgEl) {
           footerMsgEl.innerHTML = isLt
-            ? '⚠️ <strong>Paraiškų teikimas šiam etapui baigtas.</strong> Laukite festivalio transliacijos!'
-            : '⚠️ <strong>Submissions are now closed for this edition.</strong> Stay tuned for the festival stream!';
+            ? '<strong>Paraiškų teikimas šiam etapui baigtas.</strong> Laukite festivalio transliacijos.'
+            : '<strong>Submissions are now closed for this edition.</strong> Stay tuned for the festival stream.';
         }
         return;
       }

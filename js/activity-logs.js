@@ -293,7 +293,7 @@ function renderLogsTable() {
             </span>
           </td>
           <td>
-            <code style="background:var(--surface-color); border:1px solid var(--border-color); padding:3px 8px; border-radius:4px; font-size:0.8rem; color:var(--accent-light);">
+            <code style="background:var(--surface-color); border:1px solid var(--border-color); padding:3px 8px; border-radius:2px; font-size:0.8rem; color:var(--accent-light);">
               ${escapeHtml(log.target || "—")}
             </code>
           </td>

@@ -59,7 +59,7 @@ export async function openTestVotingModal() {
   modalElement.classList.remove("d-none");
   modalElement.classList.add("active");
 
-  logToConsole("🔍 Tikrinama balsavimo posistemio būsena ir ryšio užlaikymas...");
+  logToConsole("Tikrinama balsavimo posistemio būsena ir ryšio užlaikymas...");
   await checkVotingHealth();
 }
 
@@ -109,7 +109,7 @@ function populateFilmSelector() {
   films.forEach((film) => {
     const opt = document.createElement("option");
     opt.value = film.id;
-    const inVotingLabel = film.inVoting === true ? "✔ Balsavime" : "✖ Nedalyvauja";
+    const inVotingLabel = film.inVoting === true ? "Balsavime" : "Nedalyvauja";
     opt.textContent = `${film.filmTitle || 'Bevardis'} (${film.name || 'Autorius'}) [${film.votesCount || 0} balsų] - ${inVotingLabel}`;
     filmSelectElement.appendChild(opt);
   });
@@ -156,16 +156,16 @@ async function checkVotingHealth() {
           ? `Balsavimo sistema AKTYVI • Atsakas: ${data.latencyMs || latency} ms (Nestringa)`
           : `Balsavimo sistema SUSTABDYTA nustatymuose • Atsakas: ${data.latencyMs || latency} ms`;
       }
-      logToConsole(`✔ Serverio atsakas: ${data.latencyMs || latency} ms. Viso registruota balsų: ${data.totalVotesRecorded}.`, "success");
+      logToConsole(`[OK] Serverio atsakas: ${data.latencyMs || latency} ms. Viso registruota balsų: ${data.totalVotesRecorded}.`, "success");
     } else {
       if (healthDotElement) healthDotElement.style.background = "#f87171";
       if (healthTitleElement) healthTitleElement.textContent = "Ryšio klaida tikrinant būseną";
-      logToConsole(`⚠️ Nepavyko patikrinti sveikatos būsenos: ${data?.error || 'Klaida'}`, "warn");
+      logToConsole(`[WARN] Nepavyko patikrinti sveikatos būsenos: ${data?.error || 'Klaida'}`, "warn");
     }
   } catch (err) {
     if (healthDotElement) healthDotElement.style.background = "#f87171";
     if (healthTitleElement) healthTitleElement.textContent = "Tinklo klaida";
-    logToConsole(`❌ Tinklo klaida: ${err.message}`, "error");
+    logToConsole(`[ERR] Tinklo klaida: ${err.message}`, "error");
   }
 }
 
@@ -183,7 +183,7 @@ async function runSingleTestVote() {
   const film = films.find((f) => f.id === filmId);
   const filmTitle = film ? film.filmTitle : filmId;
 
-  logToConsole(`▶ Siunčiamas 1 testinis balsas filmui „${filmTitle}“...`);
+  logToConsole(`Siunčiamas 1 testinis balsas filmui „${filmTitle}“...`);
   const start = Date.now();
 
   try {
@@ -196,21 +196,21 @@ async function runSingleTestVote() {
     const roundTrip = Date.now() - start;
 
     if (res.ok && data && data.success) {
-      logToConsole(`✅ Testinis balsas patvirtintas per ${data.latencyMs || roundTrip} ms! Naujas balsų skaičius: ${data.currentVotes}. Sistema veikia sparčiai ir nestringa.`, "success");
-      showToast(`✅ Testinis balsas užskaitytas (${data.latencyMs || roundTrip} ms)! Nauja suma: ${data.currentVotes}.`, "success");
+      logToConsole(`[OK] Testinis balsas patvirtintas per ${data.latencyMs || roundTrip} ms. Naujas balsų skaičius: ${data.currentVotes}.`, "success");
+      showToast(`Testinis balsas užskaitytas (${data.latencyMs || roundTrip} ms). Nauja suma: ${data.currentVotes}.`, "success");
       updateRowBadge(filmId, data.currentVotes);
       updateFilmSelectionMeta();
     } else {
       // Fallback direct to Firestore
-      logToConsole(`⚠️ API atsakė klaida, bandoma tiesiogiai per Firestore...`, "warn");
+      logToConsole(`[WARN] API atsakė klaida, bandoma tiesiogiai per Firestore...`, "warn");
       await db.collection("submissions").doc(filmId).update({
         votesCount: (film?.votesCount || 0) + 1
       });
-      logToConsole(`✔ Firestore atnaujintas tiesiogiai. Nauja suma: ${(film?.votesCount || 0) + 1}.`, "success");
-      showToast("Balsas atnaujintas per Firestore!", "success");
+      logToConsole(`[OK] Firestore atnaujintas tiesiogiai. Nauja suma: ${(film?.votesCount || 0) + 1}.`, "success");
+      showToast("Balsas atnaujintas per Firestore.", "success");
     }
   } catch (err) {
-    logToConsole(`❌ Klaida vykdant testinį balsą: ${err.message}`, "error");
+    logToConsole(`[ERR] Klaida vykdant testinį balsą: ${err.message}`, "error");
     showToast("Klaida: " + err.message, "error");
   } finally {
     if (btn) btn.disabled = false;
@@ -231,7 +231,7 @@ async function runStressTestVotes() {
   const film = films.find((f) => f.id === filmId);
   const filmTitle = film ? film.filmTitle : filmId;
 
-  logToConsole(`⚡ Pradedamas streso testas: siunčiami 5 testiniai balsai filmui „${filmTitle}“...`);
+  logToConsole(`Pradedamas apkrovos testas: siunčiami 5 testiniai balsai filmui „${filmTitle}“...`);
   const overallStart = Date.now();
 
   try {
@@ -245,16 +245,16 @@ async function runStressTestVotes() {
 
     if (res.ok && data && data.success) {
       const avgMs = Math.round(duration / 5);
-      logToConsole(`🎉 Streso testas sėkmingas! 5 balsai užfiksuoti per ${duration} ms (vidutiniškai ~${avgMs} ms/balsas).`, "success");
-      logToConsole(`📊 Naujas bendras balsų skaičius: ${data.currentVotes}. Nėra jokių užstrigimų ar duomenų praradimo.`, "success");
-      showToast(`⚡ 5 testiniai balsai įskaityti per ${duration} ms! Sistema veikia be strigimų.`, "success");
+      logToConsole(`[OK] Apkrovos testas sėkmingas. 5 balsai užfiksuoti per ${duration} ms (~${avgMs} ms/balsas).`, "success");
+      logToConsole(`[INFO] Naujas bendras balsų skaičius: ${data.currentVotes}.`, "success");
+      showToast(`5 testiniai balsai įskaityti per ${duration} ms.`, "success");
       updateRowBadge(filmId, data.currentVotes);
       updateFilmSelectionMeta();
     } else {
       throw new Error(data?.error || "Nepavyko atlikti streso testo");
     }
   } catch (err) {
-    logToConsole(`❌ Streso testo klaida: ${err.message}`, "error");
+    logToConsole(`[ERR] Apkrovos testo klaida: ${err.message}`, "error");
     showToast("Klaida: " + err.message, "error");
   } finally {
     if (btn) btn.disabled = false;
@@ -278,7 +278,7 @@ async function executeResetVotes() {
   const confirmed = confirm(`Ar tikrai norite atstatyti filmo „${filmTitle}“ balsų skaičių į ${targetVotes}?`);
   if (!confirmed) return;
 
-  logToConsole(`🔄 Atstatomas filmo „${filmTitle}“ balsų skaičius į ${targetVotes}...`);
+  logToConsole(`Atstatomas filmo „${filmTitle}“ balsų skaičius į ${targetVotes}...`);
 
   try {
     const res = await fetch("/api/admin/reset-votes", {
@@ -289,8 +289,8 @@ async function executeResetVotes() {
     const data = await res.json().catch(() => null);
 
     if (res.ok && data && data.success) {
-      logToConsole(`✔ Balsai sėkmingai atstatyti į ${targetVotes}.`, "success");
-      showToast(`Balsai atstatyti į ${targetVotes}!`, "success");
+      logToConsole(`[OK] Balsai sėkmingai atstatyti į ${targetVotes}.`, "success");
+      showToast(`Balsai atstatyti į ${targetVotes}.`, "success");
       updateRowBadge(filmId, targetVotes);
       updateFilmSelectionMeta();
     } else {
@@ -298,13 +298,13 @@ async function executeResetVotes() {
       await db.collection("submissions").doc(filmId).update({
         votesCount: targetVotes
       });
-      logToConsole(`✔ Firestore atnaujintas tiesiogiai į ${targetVotes}.`, "success");
-      showToast(`Balsai atstatyti per Firestore!`, "success");
+      logToConsole(`[OK] Firestore atnaujintas tiesiogiai į ${targetVotes}.`, "success");
+      showToast(`Balsai atstatyti per Firestore.`, "success");
       updateRowBadge(filmId, targetVotes);
       updateFilmSelectionMeta();
     }
   } catch (err) {
-    logToConsole(`❌ Klaida atstatant balsus: ${err.message}`, "error");
+    logToConsole(`[ERR] Klaida atstatant balsus: ${err.message}`, "error");
     showToast("Klaida: " + err.message, "error");
   }
 }

@@ -114,7 +114,7 @@
         max-width: 480px;
         width: calc(100% - 48px);
         z-index: 999999;
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
         display: flex;
         flex-direction: column;
         gap: 12px;
@@ -123,8 +123,7 @@
       .asiff-error-card {
         background: rgba(18, 12, 12, 0.96);
         border: 1px solid rgba(239, 68, 68, 0.6);
-        border-left: 4px solid #ef4444;
-        border-radius: 8px;
+        border-radius: 2px;
         padding: 14px 16px;
         box-shadow: 0 12px 35px rgba(0, 0, 0, 0.65);
         color: #f8fafc;
@@ -135,8 +134,7 @@
       }
       .asiff-toast-card {
         background: rgba(11, 17, 14, 0.96);
-        border: 1px solid rgba(255, 255, 255, 0.15);
-        border-left: 3px solid #34D399;
+        border: 1px solid rgba(52, 211, 153, 0.4);
         border-radius: 2px;
         padding: 12px 16px;
         box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);

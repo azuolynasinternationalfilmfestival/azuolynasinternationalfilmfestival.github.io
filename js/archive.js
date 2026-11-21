@@ -204,10 +204,10 @@ function renderPhotosList() {
     const prizesCount = archivePhotos.filter((p) => p.album === "prizes").length;
 
     statsChips.innerHTML = `
-      <span class="badge" style="background:rgba(18,55,47,0.7); color:var(--accent-light); font-size:0.74rem; padding:4px 10px; border-radius:12px; border:1px solid rgba(111,165,138,0.3);">Viso: <strong>${total}</strong></span>
-      <span class="badge" style="background:rgba(18,55,47,0.7); color:var(--text-color); font-size:0.74rem; padding:4px 10px; border-radius:12px; border:1px solid rgba(111,165,138,0.25);">Ceremonija: <strong>${ceremonyCount}</strong></span>
-      <span class="badge" style="background:rgba(18,55,47,0.7); color:var(--text-color); font-size:0.74rem; padding:4px 10px; border-radius:12px; border:1px solid rgba(111,165,138,0.25);">Laureatai: <strong>${laureatesCount}</strong></span>
-      <span class="badge" style="background:rgba(18,55,47,0.7); color:var(--text-color); font-size:0.74rem; padding:4px 10px; border-radius:12px; border:1px solid rgba(111,165,138,0.25);">Prizai: <strong>${prizesCount}</strong></span>
+      <span class="badge" style="background:rgba(18,55,47,0.7); color:var(--accent-light); font-size:0.74rem; padding:4px 10px; border-radius:2px; border:1px solid rgba(111,165,138,0.3);">Viso: <strong>${total}</strong></span>
+      <span class="badge" style="background:rgba(18,55,47,0.7); color:var(--text-color); font-size:0.74rem; padding:4px 10px; border-radius:2px; border:1px solid rgba(111,165,138,0.25);">Ceremonija: <strong>${ceremonyCount}</strong></span>
+      <span class="badge" style="background:rgba(18,55,47,0.7); color:var(--text-color); font-size:0.74rem; padding:4px 10px; border-radius:2px; border:1px solid rgba(111,165,138,0.25);">Laureatai: <strong>${laureatesCount}</strong></span>
+      <span class="badge" style="background:rgba(18,55,47,0.7); color:var(--text-color); font-size:0.74rem; padding:4px 10px; border-radius:2px; border:1px solid rgba(111,165,138,0.25);">Prizai: <strong>${prizesCount}</strong></span>
     `;
   }
 
@@ -250,9 +250,9 @@ function renderPhotosList() {
     return `
       <div class="admin-media-card">
         <div>
-          <div class="admin-media-thumb" style="position:relative; aspect-ratio:16/9; background:#000; border-radius:6px; overflow:hidden;">
+          <div class="admin-media-thumb" style="position:relative; aspect-ratio:16/9; background:#000; border-radius:2px; overflow:hidden;">
             <img src="${p.url}" alt="${p.caption || 'Foto'}" class="admin-media-img" loading="lazy" style="width:100%; height:100%; object-fit:cover;">
-            <span style="position:absolute; top:6px; left:6px; background:rgba(7,28,24,0.9); color:var(--accent-light); font-size:0.68rem; font-weight:700; padding:2px 7px; border-radius:3px; border:1px solid rgba(111,165,138,0.35); text-transform:uppercase; letter-spacing:0.04em;">
+            <span style="position:absolute; top:6px; left:6px; background:rgba(7,28,24,0.9); color:var(--accent-light); font-size:0.68rem; font-weight:700; padding:2px 7px; border-radius:2px; border:1px solid rgba(111,165,138,0.35); text-transform:uppercase; letter-spacing:0.04em;">
               ${albName}
             </span>
           </div>

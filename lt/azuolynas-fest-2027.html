@@ -19,7 +19,7 @@
   <link rel="stylesheet" href="../style.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
@@ -38,12 +38,13 @@
           <a href="azuolynas-fest-2027.html" class="lang-btn active">LT</a>
           <a href="../en/azuolynas-fest-2027.html" class="lang-btn">EN</a>
         </div>
-        <button type="button" class="burger-menu-btn" id="menuBurgerBtn" aria-label="Meniu">
+        <button type="button" class="burger-menu-btn" id="menuBurgerBtn" aria-label="Atverti navigacijos meniu" aria-expanded="false" aria-controls="mobileMenuDrawer">
           <span class="burger-icon" aria-hidden="true">
             <span class="bar bar-1"></span>
             <span class="bar bar-2"></span>
             <span class="bar bar-3"></span>
           </span>
+          <span class="burger-label">Meniu</span>
         </button>
       </div>
     </div>
@@ -69,14 +70,14 @@
         <li><a href="#rules" class="drawer-nav-link">Taisyklės ir Sąlygos</a></li>
         <li><a href="index.html#submit" class="drawer-nav-link highlight">Pateikti Darbą</a></li>
         <li><a href="azuolynas-fest-2026.html" class="drawer-nav-link">FEST 2026 Archyvas</a></li>
-        <li><a href="../live.html" class="drawer-nav-link">Tiesioginė Transliacija</a></li>
+        <li><a href="../live.html?lang=lt" class="drawer-nav-link">Tiesioginė Transliacija</a></li>
       </ul>
     </div>
   </aside>
 
   <!-- Hero Section (CMS Editable) -->
   <section class="hero-screen" id="heroAnchor" style="min-height:75vh; display:flex; align-items:center; background-size:cover; background-position:center; position:relative; padding:120px 0 60px 0;">
-    <div class="hero-curtain" style="position:absolute; inset:0; background:radial-gradient(circle at 50% 20%, rgba(12, 38, 32, 0.7) 0%, rgba(5, 21, 18, 0.95) 85%);"></div>
+    <div class="hero-curtain" style="position:absolute; inset:0; background:linear-gradient(180deg, rgba(10, 14, 12, 0.72) 0%, rgba(7, 9, 8, 0.94) 100%);"></div>
     <div class="container" style="position:relative; z-index:2; text-align:center;">
       <div class="section-tag" id="cmsBadge" style="margin-bottom:12px;">7-ASIS TARPTAUTINIS MOKINIŲ KINO FESTIVALIS</div>
       <h1 id="cmsTitle" style="font-family:var(--font-cinema); font-size:clamp(2rem, 5vw, 3.6rem); color:var(--text-color); margin:0 0 14px 0; text-transform:uppercase; letter-spacing:0.04em;">
@@ -103,7 +104,7 @@
       </div>
       <div style="display:flex; justify-content:center; gap:14px; flex-wrap:wrap;">
         <a href="index.html#submit" class="btn-solid">Pateikti Paraišką 2027</a>
-        <a href="../live.html" class="btn-outline">Tiesioginė Transliacija (Live)</a>
+        <a href="../live.html?lang=lt" class="btn-outline">Tiesioginė Transliacija (Live)</a>
       </div>
     </div>
   </section>
@@ -124,7 +125,7 @@
             <p style="margin-bottom:14px;">
               Kviečiame moksleivius nuo 10 iki 18 metų kurti trumpametražius filmus iki 3 minučių naudojant tik išmaniuosius telefonus. Pagrindinė 2027 m. tema: <em>„Mano pašaukimas“</em>.
             </p>
-            <p style="margin-bottom:14px; font-style:italic; border-left:3px solid var(--accent-color); padding-left:14px; color:var(--text-color);">
+            <p style="margin-bottom:16px; font-style:italic; border:1px solid rgba(255,255,255,0.12); background:rgba(255,255,255,0.03); padding:16px 20px; border-radius:var(--site-radius); color:var(--text-color);">
               Ką norite veikti savo gyvenime ir kaip atrasti tikrąjį pašaukimą? Ieškome istorijų apie savo kelio paieškas, karjeros pasirinkimus ir vidinių abejonių įveikimą. Papasakokite, ko reikia, kad sektumėte savo aistra, kai aplinkiniai tikisi kažko kito – ar tai būtų šeimos spaudimas rinktis „rimtą“ profesiją, pavyzdžiui, mediciną ar teisę, ar jūsų pačių baimė žengti į meną, muziką ar kūrybines sritis. Parodykite šios kelionės tikrovę, kliūtis pakeliui ir tą akimirką, kai jūs ar jūsų herojai suprato, ką iš tiesų lemta daryti.
             </p>
             <p>
@@ -152,19 +153,32 @@
 
       <div class="features-grid" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(260px, 1fr)); gap:20px;">
         <div class="feature-card" style="background:var(--surface-card); border:1px solid var(--border-color); border-radius:var(--site-radius); padding:24px;">
-          <div style="font-size:2rem; margin-bottom:10px;">📱</div>
+          <div style="margin-bottom:14px; color:var(--accent-light);">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>
+          </div>
           <h3 style="font-size:1.15rem; color:var(--text-color); margin-bottom:8px;">Tik Telefonu arba Planšete</h3>
-          <p style="font-size:0.88rem; color:var(--text-muted); line-height:1.5;">Visi filmai privalo būti nufilmuoti išmaniuoju telefonu arba planšete. Profesionali kino technika draudžiama.</p>
+          <p style="font-size:0.88rem; color:var(--text-muted); line-height:1.5;">Visi filmai privalo būti nufilmuoti išmaniuoju telefonu arba planšetiniu kompiuteriu. Profesionali kino technika neleidžiama.</p>
         </div>
         <div class="feature-card" style="background:var(--surface-card); border:1px solid var(--border-color); border-radius:var(--site-radius); padding:24px;">
-          <div style="font-size:2rem; margin-bottom:10px;">⏱️</div>
-          <h3 style="font-size:1.15rem; color:var(--text-color); margin-bottom:8px;">Iki 3 Minučių Trukmė</h3>
-          <p style="font-size:0.88rem; color:var(--text-muted); line-height:1.5;">Maksimali filmo trukmė – griežtai iki 3 minučių (įskaitant titrus). Kompaktiška ir taikli kino forma.</p>
+          <div style="margin-bottom:14px; color:var(--accent-light);">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+          </div>
+          <h3 style="font-size:1.15rem; color:var(--text-color); margin-bottom:8px;">Iki 3 Minučių (180 s)</h3>
+          <p style="font-size:0.88rem; color:var(--text-muted); line-height:1.5;">Griežtas laiko limitas – iki 3 minučių su titrais. Kūrybiškumas ir gebėjimas glaustai perteikti idėją yra svarbiausia vertybė.</p>
         </div>
         <div class="feature-card" style="background:var(--surface-card); border:1px solid var(--border-color); border-radius:var(--site-radius); padding:24px;">
-          <div style="font-size:2rem; margin-bottom:10px;">👥</div>
-          <h3 style="font-size:1.15rem; color:var(--text-color); margin-bottom:8px;">10–18 Metų Kūrėjai</h3>
-          <p style="font-size:0.88rem; color:var(--text-muted); line-height:1.5;">Dvi amžiaus kategorijos: I kategorija (10–13 m.) ir II kategorija (14–18 m.). Autentiškas vaikų ir jaunimo požiūris.</p>
+          <div style="margin-bottom:14px; color:var(--accent-light);">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+          </div>
+          <h3 style="font-size:1.15rem; color:var(--text-color); margin-bottom:8px;">Dvi Amžiaus Kategorijos</h3>
+          <p style="font-size:0.88rem; color:var(--text-muted); line-height:1.5;"><strong>I Kategorija:</strong> 10–13 metų mokiniai.<br><strong>II Kategorija:</strong> 14–18 metų mokiniai iš Lietuvos ir viso pasaulio.</p>
+        </div>
+        <div class="feature-card" style="background:var(--surface-card); border:1px solid var(--border-color); border-radius:var(--site-radius); padding:24px;">
+          <div style="margin-bottom:14px; color:#FFFFFF;">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="7"></circle><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline></svg>
+          </div>
+          <h3 style="font-size:1.15rem; color:var(--text-color); margin-bottom:8px;">Ąžuolo Statulėlės & Prizai</h3>
+          <p style="font-size:0.88rem; color:var(--text-muted); line-height:1.5;">Grand Prix, 1-osios vietos, Žiūrovų simpatijų diplomas bei rankų darbo natūralaus ąžuolo statulėlės kiekvienam laureatui.</p>
         </div>
       </div>
     </div>
@@ -182,15 +196,12 @@
       <div class="ceremony-mosaic-grid">
         <div class="ceremony-mosaic-cell">
           <img src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/IMG_3458.jpeg?alt=media&token=224af1bd-25ff-494e-8136-fbf330d3ad5b" alt="Festivalio scena">
-          <span class="ceremony-cell-badge">SCENA</span>
         </div>
         <div class="ceremony-mosaic-cell">
           <img src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/IMG_3462.jpeg?alt=media&token=f03ee32c-74f8-450f-a39e-26f50b9ebfd7" alt="Vedėjai ir komisija">
-          <span class="ceremony-cell-badge">VEDĖJAI</span>
         </div>
         <div class="ceremony-mosaic-cell">
           <img src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/IMG_3463.jpeg?alt=media&token=af7892ca-e78e-4198-b686-e0181472e8da" alt="Ąžuolo statulėlės">
-          <span class="ceremony-cell-badge">PRIZAI</span>
         </div>
       </div>
     </div>
@@ -207,7 +218,7 @@
         <div style="display:flex; gap:16px; font-size:0.85rem;">
           <a href="privatumo-politika.html" style="color:var(--text-muted); text-decoration:none;">Privatumo politika</a>
           <a href="naudojimosi-taisykles.html" style="color:var(--text-muted); text-decoration:none;">Naudojimosi taisyklės</a>
-          <a href="../live.html" style="color:var(--accent-light); font-weight:700; text-decoration:none;">Tiesioginė transliacija</a>
+          <a href="../live.html?lang=lt" style="color:var(--accent-light); font-weight:700; text-decoration:none;">Tiesioginė transliacija</a>
         </div>
       </div>
     </div>

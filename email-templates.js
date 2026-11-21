@@ -53,7 +53,7 @@ const EMAIL_THEME = {
 // Status badges metadata (color, icon, Lithuanian & English labels)
 const STATUS_BADGES = {
   submissionReceived: {
-    icon: "📋",
+    icon: "",
     color: "#6FA58A",
     bg: "rgba(111, 165, 138, 0.16)",
     border: "#6FA58A",
@@ -61,7 +61,7 @@ const STATUS_BADGES = {
     labelEn: "SUBMISSION RECEIVED"
   },
   accepted: {
-    icon: "🎬",
+    icon: "",
     color: "#78C29D",
     bg: "rgba(120, 194, 157, 0.18)",
     border: "#78C29D",
@@ -69,7 +69,7 @@ const STATUS_BADGES = {
     labelEn: "OFFICIALLY ACCEPTED"
   },
   semiFinalist: {
-    icon: "🌟",
+    icon: "",
     color: "#8AE0BA",
     bg: "rgba(138, 224, 186, 0.18)",
     border: "#8AE0BA",
@@ -77,23 +77,23 @@ const STATUS_BADGES = {
     labelEn: "SEMI-FINALIST"
   },
   finalist: {
-    icon: "🏆",
-    color: "#F3C969",
-    bg: "rgba(243, 201, 105, 0.18)",
-    border: "#F3C969",
+    icon: "",
+    color: "#9BC4AE",
+    bg: "rgba(155, 196, 174, 0.18)",
+    border: "#9BC4AE",
     labelLt: "FESTIVALIO FINALAS",
     labelEn: "FESTIVAL FINALIST"
   },
   winner: {
-    icon: "👑",
-    color: "#FFD700",
-    bg: "rgba(255, 215, 0, 0.22)",
-    border: "#FFD700",
+    icon: "",
+    color: "#E2E8F0",
+    bg: "rgba(226, 232, 240, 0.16)",
+    border: "#E2E8F0",
     labelLt: "FESTIVALIO LAUREATAS",
     labelEn: "FESTIVAL LAUREATE"
   },
   rejected: {
-    icon: "✉️",
+    icon: "",
     color: "#BAC9C0",
     bg: "rgba(186, 201, 192, 0.14)",
     border: "#BAC9C0",
@@ -101,7 +101,7 @@ const STATUS_BADGES = {
     labelEn: "SELECTION UPDATE"
   },
   eventReminder: {
-    icon: "🍿",
+    icon: "",
     color: "#8AE0BA",
     bg: "rgba(138, 224, 186, 0.18)",
     border: "#8AE0BA",
@@ -109,7 +109,7 @@ const STATUS_BADGES = {
     labelEn: "FESTIVAL BROADCAST"
   },
   remoteLivePass: {
-    icon: "📡",
+    icon: "",
     color: "#4ade80",
     bg: "rgba(74, 222, 128, 0.18)",
     border: "#4ade80",
@@ -117,7 +117,7 @@ const STATUS_BADGES = {
     labelEn: "LIVE STREAM PASS"
   },
   userInvite: {
-    icon: "🔑",
+    icon: "",
     color: "#F8FAFC",
     bg: "rgba(255, 255, 255, 0.12)",
     border: "rgba(255, 255, 255, 0.3)",
@@ -125,7 +125,7 @@ const STATUS_BADGES = {
     labelEn: "TEAM INVITATION"
   },
   adminNotification: {
-    icon: "⚡",
+    icon: "",
     color: "#6FA58A",
     bg: "rgba(111, 165, 138, 0.18)",
     border: "#6FA58A",
@@ -133,7 +133,7 @@ const STATUS_BADGES = {
     labelEn: "NEW APPLICANT DOSSIER"
   },
   accessRequest: {
-    icon: "🔑",
+    icon: "",
     color: "#E5A93C",
     bg: "rgba(229, 169, 60, 0.18)",
     border: "#E5A93C",
@@ -141,7 +141,7 @@ const STATUS_BADGES = {
     labelEn: "ACCESS REQUEST"
   },
   accessGranted: {
-    icon: "🛡️",
+    icon: "",
     color: "#6FA58A",
     bg: "rgba(111, 165, 138, 0.18)",
     border: "#6FA58A",
@@ -499,7 +499,7 @@ function buildEmailDocument({ lang, preheader, statusKey, childrenHtml }) {
     body, table, td, a { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
     table, td { mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
     img { -ms-interpolation-mode: bicubic; border: 0; outline: none; text-decoration: none; }
-    body { margin: 0 !important; padding: 0 !important; width: 100% !important; min-width: 100% !important; background-color: #051512; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+    body { margin: 0 !important; padding: 0 !important; width: 100% !important; min-width: 100% !important; background-color: #051512; font-family: 'Plus Jakarta Sans', Helvetica, Arial, sans-serif; }
     a { color: #9BC4AE; text-decoration: none; }
     a:hover { text-decoration: underline !important; }
     .btn-primary:hover { background-color: #17453B !important; border-color: #8AE0BA !important; }
@@ -541,7 +541,7 @@ function buildEmailDocument({ lang, preheader, statusKey, childrenHtml }) {
                 <tr>
                   <td align="center" style="padding-bottom: 10px;">
                     <a href="${EMAIL_THEME.siteUrl}" target="_blank" style="text-decoration: none;">
-                      <img src="${EMAIL_THEME.logoUrl}" alt="Ąžuolynas Film Festival" width="72" height="72" style="display: block; width: 72px; height: 72px; border-radius: 50%; border: 2px solid rgba(111,165,138,0.45); background-color: #0C241F;" />
+                      <img src="${EMAIL_THEME.logoUrl}" alt="Ąžuolynas Film Festival" width="72" height="72" style="display: block; width: 72px; height: 72px; border-radius: 2px; border: 2px solid rgba(111,165,138,0.45); background-color: #0C241F;" />
                     </a>
                   </td>
                 </tr>
@@ -565,16 +565,16 @@ function buildEmailDocument({ lang, preheader, statusKey, childrenHtml }) {
           <!-- MAIN CARD CONTAINER -->
           <tr>
             <td>
-              <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" class="email-card" style="background-color: #0C241F; border-radius: 8px; border-top: 3px solid ${badge.color}; border-left: 1px solid rgba(111,165,138,0.22); border-right: 1px solid rgba(111,165,138,0.22); border-bottom: 1px solid rgba(111,165,138,0.22); box-shadow: 0 16px 36px rgba(0,0,0,0.55); padding: 32px 24px;">
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" class="email-card" style="background-color: #0C241F; border-radius: 2px; border-top: 3px solid ${badge.color}; border-left: 1px solid rgba(111,165,138,0.22); border-right: 1px solid rgba(111,165,138,0.22); border-bottom: 1px solid rgba(111,165,138,0.22); box-shadow: 0 16px 36px rgba(0,0,0,0.55); padding: 32px 24px;">
                 <tr>
                   <td>
                     <!-- STATUS BANNER PILL -->
                     <div style="margin-bottom: 20px;">
                       <table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center">
                         <tr>
-                          <td style="background-color: ${badge.bg}; border: 1px solid ${badge.border}; border-radius: 20px; padding: 6px 16px;">
+                          <td style="background-color: ${badge.bg}; border: 1px solid ${badge.border}; border-radius: 2px; padding: 6px 16px;">
                             <span style="font-size: 11px; font-weight: 700; color: ${badge.color}; letter-spacing: 0.08em; text-transform: uppercase;">
-                              ${badge.icon}&nbsp;&nbsp;${escapeHtml(badgeLabel)}
+                              ${badge.icon ? `${badge.icon}&nbsp;&nbsp;` : ""}${escapeHtml(badgeLabel)}
                             </span>
                           </td>
                         </tr>
@@ -594,11 +594,11 @@ function buildEmailDocument({ lang, preheader, statusKey, childrenHtml }) {
           <tr>
             <td align="center" class="footer-cell" style="padding: 24px 16px 12px 16px; color: #7A9689; font-size: 11px; line-height: 1.6; text-align: center;">
               <!-- Highlights Info Card -->
-              <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color: #081B17; border: 1px solid rgba(111, 165, 138, 0.28); border-radius: 8px; margin-bottom: 20px; padding: 16px; text-align: left;">
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color: #081B17; border: 1px solid rgba(111, 165, 138, 0.28); border-radius: 2px; margin-bottom: 20px; padding: 16px; text-align: left;">
                 <tr>
                   <td>
                     <div style="font-size: 11px; font-weight: 700; color: #F8FAFC; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px;">
-                      ${isLt ? "🎬 AISFF: DATA, TEMA IR TIESIOGINĖ TRANSLIACIJA" : "🎬 AISFF: EVENT, THEME & LIVE STREAM"}
+                      ${isLt ? "AISFF: DATA, TEMA IR TIESIOGINĖ TRANSLIACIJA" : "AISFF: EVENT, THEME & LIVE STREAM"}
                     </div>
                     <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="font-size: 12px; line-height: 1.6; color: #BAC9C0;">
                       <tr>
@@ -725,9 +725,9 @@ function generateEmailHtml(p1, p2, p3) {
   if (data.institution) {
     metaRows += buildMetaRow(isLt ? "Mokykla / Studija:" : "Institution:", escapeHtml(data.institution));
   }
-  metaRows += buildMetaRow(isLt ? "Filmavimo įranga:" : "Filming Device:", `📱 ${escapeHtml(deviceModel)}`);
+  metaRows += buildMetaRow(isLt ? "Filmavimo įranga:" : "Filming Device:", `${escapeHtml(deviceModel)}`);
   if (duration) {
-    metaRows += buildMetaRow(isLt ? "Trukmė:" : "Runtime:", `⏱️ ${escapeHtml(duration)} (&le; 180 s)`);
+    metaRows += buildMetaRow(isLt ? "Trukmė:" : "Runtime:", `${escapeHtml(duration)} (&le; 180 s)`);
   }
   if (data.videoFileName) {
     metaRows += buildMetaRow(isLt ? "Vaizdo failas:" : "Video File:", escapeHtml(data.videoFileName));
@@ -748,12 +748,12 @@ function generateEmailHtml(p1, p2, p3) {
   if (data.attendanceType) {
     const isRemote = data.attendanceType === 'remote';
     const rsvpLabel = isRemote
-      ? (isLt ? '📡 Negalėsiu atvykti gyvai (Nuotolinis stebėtojas / balsuotojas)' : '📡 Cannot attend in person (Remote participant & voter)')
-      : (isLt ? '🏛️ Dalyvausiu gyvai (Kauno tarptautinėje gimnazijoje)' : '🏛️ Attending in person (Kaunas International Gymnasium)');
-    metaRows += buildMetaRow(isLt ? "Dalyvavimas (RSVP):" : "Attendance (RSVP):", `<strong style="color:${isRemote ? '#4ade80' : '#F3C969'};">${rsvpLabel}</strong>`);
+      ? (isLt ? 'Negalėsiu atvykti gyvai (Nuotolinis stebėtojas / balsuotojas)' : 'Cannot attend in person (Remote participant & voter)')
+      : (isLt ? 'Dalyvausiu gyvai (Kauno tarptautinėje gimnazijoje)' : 'Attending in person (Kaunas International Gymnasium)');
+    metaRows += buildMetaRow(isLt ? "Dalyvavimas (RSVP):" : "Attendance (RSVP):", `<strong style="color:${isRemote ? '#4ade80' : '#E2E8F0'};">${rsvpLabel}</strong>`);
   }
   if (data.liveToken) {
-    metaRows += buildMetaRow(isLt ? "Transliacijos žetonas:" : "Live Stream Token:", `<code style="background:rgba(74,222,128,0.15); color:#4ade80; padding:3px 7px; border-radius:4px; font-weight:700; letter-spacing:1px;">${escapeHtml(data.liveToken)}</code>`);
+    metaRows += buildMetaRow(isLt ? "Transliacijos žetonas:" : "Live Stream Token:", `<code style="background:rgba(74,222,128,0.15); color:#4ade80; padding:3px 7px; border-radius:2px; font-weight:700; letter-spacing:1px;">${escapeHtml(data.liveToken)}</code>`);
     const streamUrl = data.liveStreamUrl || `${EMAIL_THEME.siteUrl}live.html?token=${encodeURIComponent(data.liveToken)}`;
     metaRows += buildMetaRow(isLt ? "Tiesioginė transliacija:" : "Live Stream Link:", `<a href="${streamUrl}" style="color:#9BC4AE; font-weight:700; text-decoration:underline;" target="_blank">${escapeHtml(streamUrl)}</a>`);
   }
@@ -777,7 +777,7 @@ function generateEmailHtml(p1, p2, p3) {
   let customMessageBlock = "";
   if (data.customMessage) {
     customMessageBlock = `
-      <div style="background-color: rgba(111, 165, 138, 0.12); border-left: 3px solid #6FA58A; padding: 14px 16px; margin: 18px 0; border-radius: 4px;">
+      <div style="background-color: rgba(111, 165, 138, 0.12); border: 1px solid #6FA58A; padding: 14px 16px; margin: 18px 0; border-radius: 2px;">
         <p style="margin: 0 0 4px 0; font-size: 11px; font-weight: 700; color: #9BC4AE; text-transform: uppercase; letter-spacing: 0.08em;">
           ${isLt ? "Komisijos pastaba:" : "Note from the Committee:"}
         </p>
@@ -792,8 +792,8 @@ function generateEmailHtml(p1, p2, p3) {
   const ctaButtonHtml = `
     <table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center" class="cta-table" style="margin: 24px auto 14px auto;">
       <tr>
-        <td align="center" style="border-radius: 6px; background-color: #12372F; border: 1px solid #6FA58A;">
-          <a href="${ctaUrl}" target="_blank" class="btn-primary" style="display: inline-block; padding: 13px 28px; font-size: 13px; font-weight: 700; color: #F8FAF7; text-decoration: none; border-radius: 6px; letter-spacing: 0.02em;">
+        <td align="center" style="border-radius: 2px; background-color: #12372F; border: 1px solid #6FA58A;">
+          <a href="${ctaUrl}" target="_blank" class="btn-primary" style="display: inline-block; padding: 13px 28px; font-size: 13px; font-weight: 700; color: #F8FAF7; text-decoration: none; border-radius: 2px; letter-spacing: 0.02em;">
             ${escapeHtml(t.ctaText)} &rarr;
           </a>
         </td>
@@ -809,7 +809,7 @@ function generateEmailHtml(p1, p2, p3) {
       ${bodyText}
     </p>
 
-    <div style="background-color: #081B17; border: 1px solid rgba(111,165,138,0.22); border-radius: 6px; padding: 18px 20px; margin: 18px 0;">
+    <div style="background-color: #081B17; border: 1px solid rgba(111,165,138,0.22); border-radius: 2px; padding: 18px 20px; margin: 18px 0;">
       <p style="margin: 0 0 10px 0; font-weight: 700; color: #9BC4AE; font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em;">
         ${t.detailsTitle}
       </p>
@@ -875,10 +875,10 @@ function generateAdminNotificationHtml(p1, p2, p3) {
   dossierRows += buildMetaRow(isLt ? "Kategorija ir amžius:" : "Category & Age:", `${escapeHtml(data.category || '-')} (${escapeHtml(data.age || '-')} ${isLt ? 'm.' : 'y/o'})`);
   dossierRows += buildMetaRow(isLt ? "Šalis ir miestas:" : "Location:", escapeHtml(data.location || data.countryCity || '-'));
   dossierRows += buildMetaRow(isLt ? "Mokykla / Studija:" : "Institution:", escapeHtml(data.institution || '-'));
-  dossierRows += buildMetaRow(isLt ? "Įrenginio modelis:" : "Device Model:", `📱 ${escapeHtml(data.deviceModel || '-')}`);
+  dossierRows += buildMetaRow(isLt ? "Įrenginio modelis:" : "Device Model:", `${escapeHtml(data.deviceModel || '-')}`);
   dossierRows += buildMetaRow(
     isLt ? "Vaizdo šaltinis:" : "Video Source:",
-    data.videoSourceType === 'link' ? (isLt ? "🔗 Nuoroda" : "🔗 External Link") : (isLt ? "📁 Įkeltas failas" : "📁 File Upload")
+    data.videoSourceType === 'link' ? (isLt ? "Nuoroda" : "External Link") : (isLt ? "Įkeltas failas" : "File Upload")
   );
   if (data.videoFileName) {
     dossierRows += buildMetaRow(isLt ? "Vaizdo failas:" : "File Name:", escapeHtml(data.videoFileName));
@@ -889,7 +889,7 @@ function generateAdminNotificationHtml(p1, p2, p3) {
   if (data.videoResolution) {
     dossierRows += buildMetaRow(isLt ? "Raiška:" : "Resolution:", escapeHtml(data.videoResolution));
   }
-  dossierRows += buildMetaRow(isLt ? "Vaizdo įrašo trukmė:" : "Video Runtime:", `⏱️ ${escapeHtml(duration)} ${data.videoDurationSeconds && Number(data.videoDurationSeconds) <= 180 ? '✅ (&le; 180s)' : 'ℹ️'}`);
+  dossierRows += buildMetaRow(isLt ? "Vaizdo įrašo trukmė:" : "Video Runtime:", `${escapeHtml(duration)} ${data.videoDurationSeconds && Number(data.videoDurationSeconds) <= 180 ? '(&le; 180s)' : ''}`);
   if (data.submittedAt) {
     dossierRows += buildMetaRow(isLt ? "Pateikta:" : "Submitted:", escapeHtml(new Date(data.submittedAt).toLocaleString(isLt ? "lt-LT" : "en-US")));
   }
@@ -897,12 +897,12 @@ function generateAdminNotificationHtml(p1, p2, p3) {
   if (data.attendanceType) {
     const isRemote = data.attendanceType === 'remote';
     const rsvpBadge = isRemote
-      ? '<span style="color:#4ade80; font-weight:700;">📡 Nuotolinis stebėtojas (Negalės atvykti gyvai)</span>'
-      : '<span style="color:#F3C969; font-weight:700;">🏛️ Dalyvaus gyvai (Kaune)</span>';
+      ? '<span style="color:#4ade80; font-weight:700;">Nuotolinis stebėtojas (Negalės atvykti gyvai)</span>'
+      : '<span style="color:#E2E8F0; font-weight:700;">Dalyvaus gyvai (Kaune)</span>';
     dossierRows += buildMetaRow(isLt ? "Dalyvavimas (RSVP):" : "Attendance (RSVP):", rsvpBadge);
   }
   if (data.liveToken) {
-    dossierRows += buildMetaRow(isLt ? "Sugeneruotas žetonas:" : "Generated Token:", `<code style="color:#4ade80; background:rgba(74,222,128,0.15); padding:2px 6px; border-radius:3px;">${escapeHtml(data.liveToken)}</code>`);
+    dossierRows += buildMetaRow(isLt ? "Sugeneruotas žetonas:" : "Generated Token:", `<code style="color:#4ade80; background:rgba(74,222,128,0.15); padding:2px 6px; border-radius:2px;">${escapeHtml(data.liveToken)}</code>`);
   }
 
   if (data.storagePath) {
@@ -916,7 +916,7 @@ function generateAdminNotificationHtml(p1, p2, p3) {
         <p style="margin: 0 0 6px 0; font-size: 11px; color: #9BC4AE; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em;">
           ${isLt ? "Filmo idėja / Sinopsis:" : "Concept / Synopsis:"}
         </p>
-        <p style="margin: 0; font-size: 13px; color: #F8FAF7; font-style: italic; line-height: 1.6; background-color: rgba(5, 21, 18, 0.5); padding: 10px 14px; border-radius: 4px;">
+        <p style="margin: 0; font-size: 13px; color: #F8FAF7; font-style: italic; line-height: 1.6; background-color: rgba(5, 21, 18, 0.5); padding: 10px 14px; border-radius: 2px;">
           ${escapeHtml(data.synopsis)}
         </p>
       </div>
@@ -927,8 +927,8 @@ function generateAdminNotificationHtml(p1, p2, p3) {
   if (data.videoUrl) {
     videoLinkHtml = `
       <div style="text-align: center; margin: 16px 0 6px 0;">
-        <a href="${escapeHtml(data.videoUrl)}" target="_blank" style="display: inline-block; background-color: transparent; border: 1px solid rgba(111,165,138,0.4); color: #9BC4AE; font-size: 12px; font-weight: 600; padding: 8px 18px; border-radius: 4px; text-decoration: none;">
-          ▶️ ${isLt ? "Atsisiųsti / Peržiūrėti originalų vaizdo failą" : "Download / Stream raw video file"}
+        <a href="${escapeHtml(data.videoUrl)}" target="_blank" style="display: inline-block; background-color: transparent; border: 1px solid rgba(111,165,138,0.4); color: #9BC4AE; font-size: 12px; font-weight: 600; padding: 8px 18px; border-radius: 2px; text-decoration: none;">
+          ${isLt ? "Atsisiųsti / Peržiūrėti originalų vaizdo failą" : "Download / Stream raw video file"}
         </a>
       </div>
     `;
@@ -942,7 +942,7 @@ function generateAdminNotificationHtml(p1, p2, p3) {
       ${t.body}
     </p>
 
-    <div style="background-color: #081B17; border: 1px solid rgba(111,165,138,0.24); border-radius: 6px; padding: 18px 20px; margin: 18px 0;">
+    <div style="background-color: #081B17; border: 1px solid rgba(111,165,138,0.24); border-radius: 2px; padding: 18px 20px; margin: 18px 0;">
       <p style="margin: 0 0 12px 0; font-weight: 700; color: #9BC4AE; font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em;">
         ${t.detailsTitle}
       </p>
@@ -955,8 +955,8 @@ function generateAdminNotificationHtml(p1, p2, p3) {
 
     <table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center" class="cta-table" style="margin: 24px auto 8px auto;">
       <tr>
-        <td align="center" style="border-radius: 6px; background-color: #12372F; border: 1px solid #6FA58A;">
-          <a href="${adminUrl}" target="_blank" class="btn-primary" style="display: inline-block; padding: 13px 28px; font-size: 13px; font-weight: 700; color: #F8FAF7; text-decoration: none; border-radius: 6px; letter-spacing: 0.02em;">
+        <td align="center" style="border-radius: 2px; background-color: #12372F; border: 1px solid #6FA58A;">
+          <a href="${adminUrl}" target="_blank" class="btn-primary" style="display: inline-block; padding: 13px 28px; font-size: 13px; font-weight: 700; color: #F8FAF7; text-decoration: none; border-radius: 2px; letter-spacing: 0.02em;">
             ${escapeHtml(t.ctaText)} &rarr;
           </a>
         </td>
@@ -1001,7 +1001,7 @@ function generateInviteEmailHtml(p1, p2, p3) {
 
   let metaRows = "";
   metaRows += buildMetaRow(isLt ? "Gavėjas:" : "Invitee:", `<b>${escapeHtml(inviteeName)}</b> (<a href="mailto:${escapeHtml(email)}" style="color:#9BC4AE; text-decoration:none;">${escapeHtml(email)}</a>)`);
-  metaRows += buildMetaRow(isLt ? "Priskirta rolė:" : "Assigned Role:", `<span style="color:#34D399; font-weight:700; text-transform:uppercase; letter-spacing:0.04em;">🛡️ ${escapeHtml(roleDisplay)}</span>`);
+  metaRows += buildMetaRow(isLt ? "Priskirta rolė:" : "Assigned Role:", `<span style="color:#34D399; font-weight:700; text-transform:uppercase; letter-spacing:0.04em;">${escapeHtml(roleDisplay)}</span>`);
   if (data.invitedBy) {
     metaRows += buildMetaRow(isLt ? "Pakvietė:" : "Invited By:", escapeHtml(data.invitedBy));
   }
@@ -1015,11 +1015,11 @@ function generateInviteEmailHtml(p1, p2, p3) {
       ${t.body}
     </p>
 
-    <div style="background-color: #081B17; border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 4px; padding: 20px; margin: 20px 0; text-align: center;">
+    <div style="background-color: #081B17; border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 2px; padding: 20px; margin: 20px 0; text-align: center;">
       <p style="margin: 0 0 6px 0; font-size: 11px; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: 0.1em;">
         ${isLt ? "Jūsų unikalus patvirtinimo kodas:" : "Your Unique Verification Code:"}
       </p>
-      <div style="font-family: 'Courier New', Courier, monospace; font-size: 28px; font-weight: 800; letter-spacing: 8px; color: #F8FAF7; padding: 8px 0;">
+      <div style="font-family: 'IBM Plex Mono', 'Courier New', monospace; font-size: 28px; font-weight: 800; letter-spacing: 8px; color: #F8FAF7; padding: 8px 0;">
         ${escapeHtml(code)}
       </div>
       <p style="margin: 6px 0 0 0; font-size: 11px; color: #7A9689;">
@@ -1027,7 +1027,7 @@ function generateInviteEmailHtml(p1, p2, p3) {
       </p>
     </div>
 
-    <div style="background-color: #081B17; border: 1px solid rgba(111,165,138,0.22); border-radius: 4px; padding: 18px 20px; margin: 18px 0;">
+    <div style="background-color: #081B17; border: 1px solid rgba(111,165,138,0.22); border-radius: 2px; padding: 18px 20px; margin: 18px 0;">
       <p style="margin: 0 0 12px 0; font-weight: 700; color: #9BC4AE; font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em;">
         ${t.detailsTitle}
       </p>
@@ -1038,8 +1038,8 @@ function generateInviteEmailHtml(p1, p2, p3) {
 
     <table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center" class="cta-table" style="margin: 24px auto 14px auto;">
       <tr>
-        <td align="center" style="border-radius: 4px; background-color: #17453B; border: 1px solid rgba(255,255,255,0.3);">
-          <a href="${inviteUrl}" target="_blank" class="btn-primary" style="display: inline-block; padding: 14px 32px; font-size: 13px; font-weight: 800; color: #F8FAF7; text-decoration: none; border-radius: 4px; letter-spacing: 0.04em;">
+        <td align="center" style="border-radius: 2px; background-color: #17453B; border: 1px solid rgba(255,255,255,0.3);">
+          <a href="${inviteUrl}" target="_blank" class="btn-primary" style="display: inline-block; padding: 14px 32px; font-size: 13px; font-weight: 800; color: #F8FAF7; text-decoration: none; border-radius: 2px; letter-spacing: 0.04em;">
             ${escapeHtml(t.ctaText)} &rarr;
           </a>
         </td>
@@ -1088,7 +1088,7 @@ function generateAccessRequestEmailHtml(p1, p2, p3) {
       ${t.body}
     </p>
 
-    <div style="background-color: #081B17; border: 1px solid rgba(111,165,138,0.22); border-radius: 6px; padding: 18px 20px; margin: 18px 0;">
+    <div style="background-color: #081B17; border: 1px solid rgba(111,165,138,0.22); border-radius: 2px; padding: 18px 20px; margin: 18px 0;">
       <p style="margin: 0 0 12px 0; font-weight: 700; color: #9BC4AE; font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em;">
         ${t.detailsTitle}
       </p>
@@ -1100,7 +1100,7 @@ function generateAccessRequestEmailHtml(p1, p2, p3) {
         <p style="margin: 0 0 6px 0; font-size: 11px; color: #E5A93C; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em;">
           ${isLt ? "Nurodyta priežastis / Pareigos:" : "Stated Reason / Role:"}
         </p>
-        <p style="margin: 0; font-size: 13px; color: #F8FAF7; line-height: 1.6; background-color: rgba(5, 21, 18, 0.5); padding: 10px 14px; border-radius: 4px;">
+        <p style="margin: 0; font-size: 13px; color: #F8FAF7; line-height: 1.6; background-color: rgba(5, 21, 18, 0.5); padding: 10px 14px; border-radius: 2px;">
           ${escapeHtml(reason)}
         </p>
       </div>
@@ -1108,8 +1108,8 @@ function generateAccessRequestEmailHtml(p1, p2, p3) {
 
     <table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center" class="cta-table" style="margin: 24px auto 14px auto;">
       <tr>
-        <td align="center" style="border-radius: 6px; background-color: #17453B; border: 1px solid #6FA58A;">
-          <a href="${adminUrl}" target="_blank" class="btn-primary" style="display: inline-block; padding: 14px 32px; font-size: 13px; font-weight: 800; color: #F8FAF7; text-decoration: none; border-radius: 6px; letter-spacing: 0.04em;">
+        <td align="center" style="border-radius: 2px; background-color: #17453B; border: 1px solid #6FA58A;">
+          <a href="${adminUrl}" target="_blank" class="btn-primary" style="display: inline-block; padding: 14px 32px; font-size: 13px; font-weight: 800; color: #F8FAF7; text-decoration: none; border-radius: 2px; letter-spacing: 0.04em;">
             ${escapeHtml(t.ctaText)} &rarr;
           </a>
         </td>
@@ -1148,7 +1148,7 @@ function generateAccessGrantedEmailHtml(p1, p2, p3) {
   let metaRows = "";
   metaRows += buildMetaRow(isLt ? "Vartotojas:" : "User:", `<b>${escapeHtml(userName)}</b>`);
   metaRows += buildMetaRow(isLt ? "Paskyros el. paštas:" : "Account Email:", `<a href="mailto:${escapeHtml(email)}" style="color:#9BC4AE; text-decoration:none;">${escapeHtml(email)}</a>`);
-  metaRows += buildMetaRow(isLt ? "Suteikta rolė:" : "Assigned Role:", `<span style="color:#6FA58A; font-weight:700; text-transform:uppercase;">🛡️ ${escapeHtml(role)}</span>`);
+  metaRows += buildMetaRow(isLt ? "Suteikta rolė:" : "Assigned Role:", `<span style="color:#6FA58A; font-weight:700; text-transform:uppercase;">${escapeHtml(role)}</span>`);
   metaRows += buildMetaRow(isLt ? "Patvirtino:" : "Approved By:", escapeHtml(grantedBy));
 
   const childrenHtml = `
@@ -1159,7 +1159,7 @@ function generateAccessGrantedEmailHtml(p1, p2, p3) {
       ${t.body}
     </p>
 
-    <div style="background-color: #081B17; border: 1px solid rgba(111,165,138,0.22); border-radius: 6px; padding: 18px 20px; margin: 18px 0;">
+    <div style="background-color: #081B17; border: 1px solid rgba(111,165,138,0.22); border-radius: 2px; padding: 18px 20px; margin: 18px 0;">
       <p style="margin: 0 0 12px 0; font-weight: 700; color: #9BC4AE; font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em;">
         ${t.detailsTitle}
       </p>
@@ -1170,8 +1170,8 @@ function generateAccessGrantedEmailHtml(p1, p2, p3) {
 
     <table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center" class="cta-table" style="margin: 24px auto 14px auto;">
       <tr>
-        <td align="center" style="border-radius: 6px; background-color: #17453B; border: 1px solid #6FA58A;">
-          <a href="${adminUrl}" target="_blank" class="btn-primary" style="display: inline-block; padding: 14px 32px; font-size: 13px; font-weight: 800; color: #F8FAF7; text-decoration: none; border-radius: 6px; letter-spacing: 0.04em;">
+        <td align="center" style="border-radius: 2px; background-color: #17453B; border: 1px solid #6FA58A;">
+          <a href="${adminUrl}" target="_blank" class="btn-primary" style="display: inline-block; padding: 14px 32px; font-size: 13px; font-weight: 800; color: #F8FAF7; text-decoration: none; border-radius: 2px; letter-spacing: 0.04em;">
             ${escapeHtml(t.ctaText)} &rarr;
           </a>
         </td>

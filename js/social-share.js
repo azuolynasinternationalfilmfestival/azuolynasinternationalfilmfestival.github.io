@@ -95,7 +95,7 @@
      */
     shareEditionFacebook(year, title, pageUrl) {
       const isLt = document.documentElement.lang === "lt" || window.location.pathname.includes("/lt/");
-      const heading = title || `FEST ${year || "2026"}`;
+      const heading = title || `FEST ${year || "2027"}`;
       const url = getAbsoluteUrl(pageUrl || window.location.pathname);
       const quote = isLt
         ? `Atraskite ${heading} – Ąžuolyno tarptautinis mokinių filmų festivalis! Keturios žemynų istorijos viename ekrane.`
@@ -126,8 +126,8 @@
 
       if (winner) {
         quote = isLt
-          ? `Sveikiname! „${winner.filmTitle || 'Kūrinys'}“ (${winner.name || 'Dalyvis'}) pelnė ${winner.awardTitle || 'Apdovanojimą'} Ąžuolyno filmų festivalyje! 🎬 Žiūrėkite filmą:`
-          : `Congratulations! "${winner.filmTitle || 'Film'}" by ${winner.name || 'Filmmaker'} won ${winner.awardTitle || 'Award'} at Ąžuolynas Students Film Festival! 🎬 Watch it here:`;
+          ? `Sveikiname! „${winner.filmTitle || 'Kūrinys'}“ (${winner.name || 'Dalyvis'}) pelnė ${winner.awardTitle || 'Apdovanojimą'} Ąžuolyno filmų festivalyje. Žiūrėkite filmą:`
+          : `Congratulations! "${winner.filmTitle || 'Film'}" by ${winner.name || 'Filmmaker'} won ${winner.awardTitle || 'Award'} at Ąžuolynas Students Film Festival. Watch it here:`;
       } else {
         quote = isLt
           ? "Ąžuolyno tarptautinio mokinių filmų festivalio nugalėtojai!"
@@ -142,7 +142,7 @@
      */
     async openInstagramModal(highlightText, url, options = {}) {
       const isLt = document.documentElement.lang === "lt" || window.location.pathname.includes("/lt/");
-      const fullShareText = `${highlightText}\n\n🔗 ${getAbsoluteUrl(url)}\n\n#AzuolynasFilmFest #YouthCinema #StudentsFilmFestival #ShortFilms #Kaunas`;
+      const fullShareText = `${highlightText}\n\n${getAbsoluteUrl(url)}\n\n#AzuolynasFilmFest #YouthCinema #StudentsFilmFestival #ShortFilms #Kaunas`;
 
       // Copy highlight text to clipboard
       const copied = await copyToClipboard(fullShareText);
@@ -208,11 +208,11 @@
      */
     shareEditionInstagram(year, title, pageUrl, subtitle) {
       const isLt = document.documentElement.lang === "lt" || window.location.pathname.includes("/lt/");
-      const heading = title || `FEST ${year || "2026"}`;
+      const heading = title || `FEST ${year || "2027"}`;
       const url = pageUrl || window.location.pathname;
       const text = isLt
-        ? `🎬 ${heading} – Ąžuolyno tarptautinis mokinių filmų festivalis!\n${subtitle || 'Keturios žemynų istorijos ir talentingiausi jaunieji kūrėjai viename ekrane.'}\nPeržiūrėkite festivalio akimirkas ir laureatus!`
-        : `🎬 ${heading} – Ąžuolynas International Students Film Festival!\n${subtitle || 'Youth films from four continents uniting on one screen.'}\nExplore highlights, stories, and winners!`;
+        ? `${heading} – Ąžuolyno tarptautinis mokinių filmų festivalis.\n${subtitle || 'Keturios žemynų istorijos ir talentingiausi jaunieji kūrėjai viename ekrane.'}\nPeržiūrėkite festivalio akimirkas ir laureatus.`
+        : `${heading} – Ąžuolynas International Students Film Festival.\n${subtitle || 'Youth films from four continents uniting on one screen.'}\nExplore highlights, stories, and winners.`;
 
       this.openInstagramModal(text, url, {
         heading: isLt ? `Dalintis ${heading} „Instagram“` : `Share ${heading} on Instagram`,
@@ -227,8 +227,8 @@
       const isLt = document.documentElement.lang === "lt" || window.location.pathname.includes("/lt/");
       const url = window.location.pathname + "#results";
       const text = isLt
-        ? `🏆 Oficialūs Ąžuolyno tarptautinio mokinių filmų festivalio REZULTATAI!\nSveikiname visus talentinguosius laureatus ir dalyvius iš viso pasaulio. Žiūrėkite nugalėtojų filmus ir ceremoniją:`
-        : `🏆 Official Ąžuolynas International Students Film Festival RESULTS!\nCelebrating outstanding youth directors and laureates worldwide. Watch the winning films:`;
+        ? `Oficialūs Ąžuolyno tarptautinio mokinių filmų festivalio rezultatai.\nSveikiname visus laureatus ir dalyvius iš viso pasaulio. Žiūrėkite nugalėtojų filmus ir ceremoniją:`
+        : `Official Ąžuolynas International Students Film Festival results.\nCelebrating youth directors and laureates worldwide. Watch the winning films:`;
 
       this.openInstagramModal(text, url, {
         heading: isLt ? "Dalintis festivalio rezultatais" : "Share Festival Results on Instagram",
@@ -247,12 +247,12 @@
 
       if (winner) {
         text = isLt
-          ? `🌟 Laureatas! „${winner.filmTitle || 'Filmas'}“\nAutorius: ${winner.name || 'Dalyvis'} (${winner.institution || winner.location || ''})\nNominacija: ${winner.awardTitle || 'Laureatas'}\nKategorija: ${winner.category || ''}\n\nŽiūrėkite filmą Ąžuolyno filmų festivalio platformoje!`
-          : `🌟 Winner Highlight! "${winner.filmTitle || 'Film'}"\nFilmmaker: ${winner.name || 'Student'} (${winner.institution || winner.location || ''})\nAward: ${winner.awardTitle || 'Laureate'}\nCategory: ${winner.category || ''}\n\nWatch this winning film on the Ąžuolynas Fest platform!`;
+          ? `Laureatas: „${winner.filmTitle || 'Filmas'}“\nAutorius: ${winner.name || 'Dalyvis'} (${winner.institution || winner.location || ''})\nNominacija: ${winner.awardTitle || 'Laureatas'}\nKategorija: ${winner.category || ''}\n\nŽiūrėkite filmą Ąžuolyno filmų festivalio platformoje.`
+          : `Winner: "${winner.filmTitle || 'Film'}"\nFilmmaker: ${winner.name || 'Student'} (${winner.institution || winner.location || ''})\nAward: ${winner.awardTitle || 'Laureate'}\nCategory: ${winner.category || ''}\n\nWatch this winning film on the Ąžuolynas Fest platform.`;
       } else {
         text = isLt
-          ? `🏆 Ąžuolyno tarptautinio mokinių filmų festivalio laureatas! Žiūrėkite nugalėtojo darbą:`
-          : `🏆 Ąžuolynas International Students Film Festival winner! Watch the winning film:`;
+          ? `Ąžuolyno tarptautinio mokinių filmų festivalio laureatas. Žiūrėkite nugalėtojo darbą:`
+          : `Ąžuolynas International Students Film Festival winner. Watch the winning film:`;
       }
 
       this.openInstagramModal(text, url, {

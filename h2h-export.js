@@ -135,7 +135,7 @@
   <title>AISFF - Broadcast Lower Third & H2H Graphic</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&family=Space+Grotesk:wght@600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     html, body {
@@ -143,7 +143,7 @@
       height: 1080px;
       background: transparent;
       overflow: hidden;
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
       color: #FFFFFF;
     }
     .obs-canvas {
@@ -184,7 +184,7 @@
       background: rgba(239, 68, 68, 0.15);
       border: 1px solid rgba(239, 68, 68, 0.5);
       color: #FCA5A5;
-      font-family: 'JetBrains Mono', monospace;
+      font-family: 'IBM Plex Mono', monospace;
       font-size: 12px;
       font-weight: 700;
       letter-spacing: 0.1em;
@@ -195,13 +195,11 @@
     .live-dot {
       width: 7px;
       height: 7px;
-      border-radius: 50%;
+      border-radius: 2px;
       background: #EF4444;
-      box-shadow: 0 0 10px #EF4444;
-      animation: pulse 1.5s infinite;
     }
     .festival-name {
-      font-family: 'Space Grotesk', sans-serif;
+      font-family: 'Plus Jakarta Sans', sans-serif;
       font-size: 13px;
       letter-spacing: 0.12em;
       text-transform: uppercase;
@@ -209,13 +207,12 @@
       font-weight: 700;
     }
     .film-title {
-      font-family: 'Space Grotesk', sans-serif;
+      font-family: 'Space Grotesk', 'Plus Jakarta Sans', system-ui, sans-serif;
       font-size: 36px;
       font-weight: 700;
       color: #FFFFFF;
       letter-spacing: -0.02em;
       line-height: 1.15;
-      text-transform: uppercase;
     }
     .film-meta {
       display: flex;
@@ -224,7 +221,7 @@
       font-size: 15px;
       color: #CBD5E1;
       font-weight: 500;
-      font-family: 'JetBrains Mono', monospace;
+      font-family: 'IBM Plex Mono', monospace;
     }
     .film-meta-sep {
       color: rgba(255, 255, 255, 0.3);
@@ -249,7 +246,7 @@
       text-transform: uppercase;
       letter-spacing: 0.08em;
       font-size: 11px;
-      font-family: 'JetBrains Mono', monospace;
+      font-family: 'IBM Plex Mono', monospace;
     }
     .up-next-title {
       color: #FFFFFF;
@@ -273,7 +270,7 @@
       gap: 12px;
     }
     .bug-title {
-      font-family: 'Space Grotesk', sans-serif;
+      font-family: 'Space Grotesk', 'Plus Jakarta Sans', system-ui, sans-serif;
       font-size: 13px;
       font-weight: 700;
       color: #FFFFFF;
@@ -281,7 +278,7 @@
       text-transform: uppercase;
     }
     .bug-year {
-      font-family: 'JetBrains Mono', monospace;
+      font-family: 'IBM Plex Mono', monospace;
       font-size: 12px;
       color: #34D399;
       font-weight: 600;

@@ -367,7 +367,7 @@ async function dispatchInvitationViaFirebaseCloudFunctions({
         });
       } else {
         htmlContent = `
-          <div style="background:#051512; color:#F8FAF7; padding:24px; font-family:sans-serif; border-radius:8px;">
+          <div style="background:#051512; color:#F8FAF7; padding:24px; font-family:'Plus Jakarta Sans', sans-serif; border-radius:2px;">
             <h2 style="color:#6FA58A;">Kvietimas prisijungti prie Kauno Tarptautinės Gimnazijos kino festivalio komandos</h2>
             <p>Sveiki, <b>${fullName}</b>!</p>
             <p>Jums suteikta prieiga prie festivalio valdymo platformos su role: <b>${role.toUpperCase()}</b>.</p>

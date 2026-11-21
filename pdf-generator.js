@@ -352,7 +352,7 @@ export async function generateSubmissionPdf(submissionData = {}) {
 
   drawTwoColumnRows([
     { label: isLt ? 'Pateikimo būdas:' : 'Submission Method:', value: sourceLabel },
-    { label: isLt ? 'Taisyklių patikra:' : 'Validation Result:', value: `✓ ${validationLabel}`, accent: true, boldValue: true },
+    { label: isLt ? 'Taisyklių patikra:' : 'Validation Result:', value: validationLabel, accent: true, boldValue: true },
     { label: isLt ? 'Failo pavadinimas:' : 'File Name:', value: submissionData.videoFileName || '—' },
     { label: isLt ? 'Failo dydis ir formatas:' : 'File Size & Format:', value: `${formatBytes(fileSizeBytes)}${submissionData.videoMimeType ? `  (${submissionData.videoMimeType})` : ''}` },
     { label: isLt ? 'Trukmė ir raiška:' : 'Duration & Resolution:', value: `${submissionData.videoDurationSeconds ? `${submissionData.videoDurationSeconds} s` : '—'}  |  ${submissionData.videoResolution || '—'}` },

@@ -143,14 +143,14 @@
       if (!winners || winners.length === 0) {
         container.innerHTML = `
           <div class="winner-deliberation-box">
-            <div class="winner-deliberation-icon">🏆</div>
+            <div class="winner-deliberation-icon"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path><path d="M4 22h16"></path><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"></path><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"></path><path d="M18 2H6v7a6 6 0 0 0 12 0V2z"></path></svg></div>
             <h3 class="winner-deliberation-title">
               ${isLt ? "Festivalio Laureatų Skelbimas" : "Official Laureates Reveal"}
             </h3>
             <p class="winner-deliberation-text">
               ${isLt
-                ? "Tarptautinė vertinimo komisija šiuo metu vertina konkursinius darbus. Oficialūs festivalio nugalėtojai, Grand Prix laureatai ir nominacijų nugalėtojai bus paskelbti iškilmingos apdovanojimų ceremonijos metu Kauno „Ąžuolyno“ gimnazijoje 2026 m. balandžio 17 d.!"
-                : "The international festival jury is currently evaluating all competing entries. Official festival laureates, the Grand Prix winner, and special jury mentions will be unveiled during the grand award gala at Kaunas 'Ąžuolynas' International Gymnasium on April 17, 2026!"}
+                ? "Tarptautinė vertinimo komisija vertina konkursinius darbus. Oficialūs festivalio nugalėtojai, Grand Prix laureatai ir nominacijų nugalėtojai bus paskelbti iškilmingos apdovanojimų ceremonijos metu Kauno tarptautinėje gimnazijoje 2027 m. balandžio 27 d."
+                : "The international festival jury evaluates all competing entries. Official festival laureates, the Grand Prix winner, and special jury mentions will be unveiled during the award gala at Kaunas International Gymnasium on April 27, 2027."}
             </p>
             <div class="winner-deliberation-pills">
               <span class="chip">Grand Prix</span>
@@ -208,7 +208,7 @@
               <div class="winner-laurel-wrap">
                 ${LAUREL_BRANCH_SVG}
                 <div class="winner-badge">
-                  <span>${isTop ? "🏆" : "🌟"} ${award}</span>
+                  <span>${award}</span>
                 </div>
                 ${LAUREL_BRANCH_SVG}
               </div>
@@ -218,20 +218,19 @@
               <div class="winner-thumb-box" onclick="openPublicModal('${w.id}')" title="${isLt ? "Žiūrėti filmą" : "Watch film"}">
                 <video src="${w.videoUrl || ""}" preload="metadata" muted playsinline></video>
                 <div class="winner-thumb-play-overlay">
-                  <div class="winner-play-btn-circle">▶</div>
+                  <div class="winner-play-btn-circle"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="6 4 20 12 6 20 6 4"></polygon></svg></div>
                 </div>
-                ${durationText ? `<span class="winner-duration-pill">⏱ ${durationText}</span>` : ""}
+                ${durationText ? `<span class="winner-duration-pill">${durationText}</span>` : ""}
               </div>
 
               <div class="winner-meta">
                 <div class="winner-director-line">
-                  <span>🎬</span>
                   <strong>${w.name || (isLt ? "Autorius" : "Filmmaker")}</strong>
                 </div>
                 <div>${w.institution ? `${w.institution} • ` : ""}${w.location || ""}</div>
                 <div class="winner-tags-row">
                   <span class="winner-tag-pill">${w.category || (isLt ? "Konkursas" : "Competition")}</span>
-                  ${w.deviceModel ? `<span class="winner-tag-pill">📱 ${w.deviceModel}</span>` : ""}
+                  ${w.deviceModel ? `<span class="winner-tag-pill">${w.deviceModel}</span>` : ""}
                 </div>
                 ${synopsis ? `<div class="winner-synopsis-teaser">“${synopsis}”</div>` : ""}
               </div>
@@ -239,7 +238,7 @@
 
             <div class="winner-actions-col">
               <button class="btn-solid btn-full" onclick="openPublicModal('${w.id}')">
-                ▶ ${isLt ? "ŽIŪRĖTI LAUREATO FILMĄ" : "WATCH AWARD-WINNING FILM"}
+                ${isLt ? "ŽIŪRĖTI LAUREATO FILMĄ" : "WATCH AWARD-WINNING FILM"}
               </button>
 
               <div class="winner-social-share">
@@ -341,19 +340,19 @@
         banner.className = "voter-status-banner has-voted";
         banner.innerHTML = `
           <span>
-            ★ ${isLt ? "Jūsų oficialus festivalio balsas atiduotas už:" : "You have officially cast your festival vote for:"} 
-            <strong class="status-highlight">“${title}”</strong>. ${isLt ? "Ačiū už jaunimo kino palaikymą!" : "Thank you for supporting youth cinema!"}
+            ${isLt ? "Jūsų oficialus festivalio balsas atiduotas už:" : "You have officially cast your festival vote for:"} 
+            <strong class="status-highlight">“${title}”</strong>. ${isLt ? "Ačiū už jaunimo kino palaikymą." : "Thank you for supporting youth cinema."}
           </span>
           <button type="button" class="btn-campaign-link" onclick="FestivalVoting.shareCampaign('${votedFilmId}', 'copy')">
-            🔗 ${isLt ? "Kviesti draugus balsuoti" : "Invite friends to vote"}
+            ${isLt ? "Kviesti draugus balsuoti" : "Invite friends to vote"}
           </button>
         `;
       } else {
         banner.className = "voter-status-banner";
         banner.innerHTML = `
           <span>
-            💡 <strong>${isLt ? "Žiūrovų Simpatijų Balsavimas:" : "Audience Choice Award Voting:"}</strong> 
-            ${isLt ? "Kiekvienas festivalio lankytojas turi 1 oficialų balsą. Peržiūrėkite filmus ir palaikykite geriausią jaunąjį kūrėją!" : "Each festival visitor receives 1 official vote. Watch student films and vote for your favorite young director!"}
+            <strong>${isLt ? "Žiūrovų Simpatijų Balsavimas:" : "Audience Choice Award Voting:"}</strong> 
+            ${isLt ? "Kiekvienas lankytojas turi 1 oficialų balsą. Peržiūrėkite filmus ir balsuokite už geriausią darbą." : "Each festival visitor receives 1 official vote. Watch the student films and vote for your favorite work."}
           </span>
           <span class="status-highlight">${this.cachedFilms.length} ${isLt ? "konkursiniai filmai" : "contending films"}</span>
         `;
@@ -513,7 +512,7 @@
         let voteBtnDisabled = false;
 
         if (isThisFilmVoted) {
-          voteBtnText = isLt ? "★ Jūsų balsas atiduotas" : "★ Your Official Vote Cast";
+          voteBtnText = isLt ? "Jūsų balsas atiduotas" : "Your Official Vote Cast";
           voteBtnClass = "btn-vote btn-voted";
           voteBtnDisabled = true;
         } else if (isUserAlreadyVoted) {
@@ -526,11 +525,11 @@
         let rankBadgeHtml = "";
         if (this.sortMode === "votes") {
           if (index === 0 && votes > 0) {
-            rankBadgeHtml = `<span class="film-rank-badge rank-1">🏆 #1 ${isLt ? "Lyderis" : "Favorite"}</span>`;
+            rankBadgeHtml = `<span class="film-rank-badge rank-1">#1 ${isLt ? "Lyderis" : "Leader"}</span>`;
           } else if (index === 1 && votes > 0) {
-            rankBadgeHtml = `<span class="film-rank-badge rank-2">🥈 #2 ${isLt ? "Vieta" : "Runner-up"}</span>`;
+            rankBadgeHtml = `<span class="film-rank-badge rank-2">#2 ${isLt ? "Vieta" : "Runner-up"}</span>`;
           } else if (index === 2 && votes > 0) {
-            rankBadgeHtml = `<span class="film-rank-badge rank-3">🥉 #3 ${isLt ? "Vieta" : "Contender"}</span>`;
+            rankBadgeHtml = `<span class="film-rank-badge rank-3">#3 ${isLt ? "Vieta" : "Contender"}</span>`;
           } else {
             rankBadgeHtml = `<span class="film-rank-badge rank-other">#${index + 1}</span>`;
           }
@@ -541,15 +540,15 @@
         return `
           <div class="film-card ${isThisFilmVoted ? "voted-card" : ""}" id="film-card-${film.id}">
             ${rankBadgeHtml}
-            ${isThisFilmVoted ? `<div class="film-card-voted-stamp">★ ${isLt ? "JŪSŲ BALSAS" : "VOTED"}</div>` : ""}
+            ${isThisFilmVoted ? `<div class="film-card-voted-stamp">${isLt ? "JŪSŲ BALSAS" : "VOTED"}</div>` : ""}
 
             <div>
               <div class="film-card-thumb" onclick="openPublicModal('${film.id}')" style="cursor: pointer;" title="${isLt ? "Žiūrėti filmą" : "Watch film"}">
                 <video src="${film.videoUrl || ""}" preload="metadata" muted playsinline></video>
                 <div class="winner-thumb-play-overlay">
-                  <div class="winner-play-btn-circle">▶</div>
+                  <div class="winner-play-btn-circle"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="6 4 20 12 6 20 6 4"></polygon></svg></div>
                 </div>
-                ${duration ? `<span class="winner-duration-pill">⏱ ${duration}</span>` : ""}
+                ${duration ? `<span class="winner-duration-pill">${duration}</span>` : ""}
               </div>
 
               <div class="film-card-title">${film.filmTitle || (isLt ? "Bevardis filmas" : "Untitled Film")}</div>
@@ -562,7 +561,7 @@
 
             <div>
               <button class="btn-preview" onclick="openPublicModal('${film.id}')">
-                ▶ ${isLt ? "ŽIŪRĖTI FILMĄ" : "WATCH FILM"}
+                ${isLt ? "ŽIŪRĖTI FILMĄ" : "WATCH FILM"}
               </button>
 
               <div class="vote-box">
@@ -588,7 +587,7 @@
                       FB
                     </button>
                     <button type="button" class="btn-campaign-link" onclick="FestivalVoting.shareCampaign('${film.id}', 'copy')" title="Copy Link">
-                      🔗
+                      URL
                     </button>
                   </div>
                 </div>
@@ -776,8 +775,8 @@
 
       const shareUrl = window.location.origin + window.location.pathname + "#competition";
       const text = isLt
-        ? `Balsuokite už filmą „${title}“${director ? ` (autorius: ${director})` : ""} Tarptautiniame Ąžuolyno filmų festivalyje! 🎬 Žiūrėti ir balsuoti čia: ${shareUrl}`
-        : `Vote for the film "${title}"${director ? ` by ${director}` : ""} at the Ąžuolynas International Film Festival! 🎬 Watch & vote here: ${shareUrl}`;
+        ? `Balsuokite už filmą „${title}“${director ? ` (autorius: ${director})` : ""} Tarptautiniame Ąžuolyno filmų festivalyje. Žiūrėti ir balsuoti čia: ${shareUrl}`
+        : `Vote for the film "${title}"${director ? ` by ${director}` : ""} at the Ąžuolynas International Film Festival. Watch & vote here: ${shareUrl}`;
 
       if (platform === "whatsapp") {
         window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, "_blank");
@@ -818,7 +817,7 @@
       const btn = document.getElementById("modalVoteBtn");
       if (btn) {
         if (isThisFilmVoted) {
-          btn.textContent = isLt ? "★ Jūsų balsas atiduotas" : "★ Your Vote Cast";
+          btn.textContent = isLt ? "Jūsų balsas atiduotas" : "Your Vote Cast";
           btn.className = "btn-solid btn-voted";
           btn.disabled = true;
           btn.onclick = null;

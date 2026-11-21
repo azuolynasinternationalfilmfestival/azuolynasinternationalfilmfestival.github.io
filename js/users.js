@@ -453,7 +453,7 @@ function renderUsersTable() {
                   ${isSuperAdmin ? `<span class="badge badge-winner" style="font-size:0.68rem; margin-left:4px;">Vyr. Admin</span>` : ""}
                 </div>
                 <div class="user-name-sub">
-                  ${userPhone ? `📞 ${userPhone} &bull; ` : ""}Sukurta: ${formattedDate}
+                  ${userPhone ? `Tel. ${userPhone} &bull; ` : ""}Sukurta: ${formattedDate}
                 </div>
               </div>
             </div>

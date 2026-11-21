@@ -155,7 +155,7 @@ function renderAdminEditionsList() {
     const isUpcoming = ed.status === "upcoming" || ed.year === "2027";
 
     return `
-      <div class="admin-media-card" style="border:1px solid ${isUpcoming ? 'rgba(212,175,55,0.4)' : 'var(--border-color)'};">
+      <div class="admin-media-card" style="border:1px solid ${isUpcoming ? 'var(--accent-light)' : 'var(--border-color)'};">
         <div>
           <div class="admin-media-frame" style="position:relative; background-image:url('${bgImage}'); background-size:cover; background-position:center; height:150px;">
             <div style="position:absolute; inset:0; background:rgba(7,28,24,0.7); display:flex; flex-direction:column; justify-content:flex-end; padding:12px;">
@@ -167,7 +167,7 @@ function renderAdminEditionsList() {
             </div>
           </div>
           <div style="padding:10px 0 4px 0;">
-            <div style="font-size:0.8rem; color:var(--accent-light); margin-bottom:4px;">📅 ${ed.date || ''} ${ed.dateEn ? `(${ed.dateEn})` : ''}</div>
+            <div style="font-size:0.8rem; color:var(--accent-light); margin-bottom:4px;">${ed.date || ''} ${ed.dateEn ? `(${ed.dateEn})` : ''}</div>
             <div class="admin-media-caption" style="line-height:1.4;">${ed.subtitle || ''}</div>
             ${ed.submissionDeadline ? `
               <div style="font-size:0.75rem; color:var(--text-muted); margin-top:4px;">

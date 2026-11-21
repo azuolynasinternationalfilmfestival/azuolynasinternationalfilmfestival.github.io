@@ -9,7 +9,7 @@
   <link rel="icon" type="image/webp" href="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="live.css">
   <script src="error-reporting.js"></script>
@@ -35,7 +35,7 @@
       border-radius: 2px;
       cursor: pointer;
       transition: all 0.15s ease;
-      font-family: 'JetBrains Mono', monospace;
+      font-family: var(--font-mono);
     }
     .live-lang-btn:hover {
       color: #FFFFFF;
@@ -54,7 +54,7 @@
       justify-content: center;
       padding: 32px 16px;
       position: relative;
-      background: radial-gradient(circle at 50% 15%, #0F1E19 0%, #070908 75%);
+      background: #0B100E;
     }
     .gate-top-lang {
       position: absolute;
@@ -86,7 +86,7 @@
       margin-bottom: 24px;
     }
     .token-gate-title {
-      font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-family: var(--font-display);
       font-size: 1.5rem;
       font-weight: 700;
       color: #FFFFFF;
@@ -95,7 +95,7 @@
       margin: 0 0 10px 0;
     }
     .token-gate-desc {
-      font-family: 'Inter', sans-serif;
+      font-family: var(--font-body);
       font-size: 0.88rem;
       color: #94A3B8;
       line-height: 1.6;
@@ -110,7 +110,7 @@
       font-size: 0.72rem;
       letter-spacing: 0.08em;
       text-transform: uppercase;
-      font-family: 'JetBrains Mono', monospace;
+      font-family: var(--font-mono);
       color: #E2E8F0;
       margin-bottom: 8px;
       font-weight: 600;
@@ -123,7 +123,7 @@
       border-radius: 2px;
       color: #FFFFFF;
       font-size: 0.95rem;
-      font-family: 'JetBrains Mono', monospace;
+      font-family: var(--font-mono);
       letter-spacing: 0.02em;
       outline: none;
       transition: border-color 0.15s ease;
@@ -149,7 +149,7 @@
       padding: 13px 16px;
       background: #FFFFFF;
       color: #070908;
-      font-family: 'Space Grotesk', sans-serif;
+      font-family: var(--font-body);
       font-size: 0.85rem;
       font-weight: 700;
       letter-spacing: 0.06em;
@@ -221,7 +221,7 @@
       min-width: 0;
     }
     .live-brand-title {
-      font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-family: var(--font-display);
       font-size: clamp(1.2rem, 3.5vw, 1.55rem);
       font-weight: 700;
       color: #FFFFFF;
@@ -276,7 +276,7 @@
       padding: 5px 12px;
       border-radius: 2px;
       font-size: 0.74rem;
-      font-family: 'JetBrains Mono', monospace;
+      font-family: var(--font-mono);
       color: #FFFFFF;
       max-width: 260px;
       white-space: nowrap;
@@ -295,7 +295,7 @@
       padding: 5px 12px;
       border-radius: 2px;
       font-size: 0.72rem;
-      font-family: 'Space Grotesk', sans-serif;
+      font-family: var(--font-body);
       font-weight: 600;
       letter-spacing: 0.05em;
       text-transform: uppercase;
@@ -337,27 +337,14 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      background: radial-gradient(circle, #0F1E19 0%, #070908 100%);
+      background: #0B100E;
       color: #FFFFFF;
       text-align: center;
       padding: 24px;
       z-index: 5;
     }
-    .stream-offline-pulse {
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      background: #FFFFFF;
-      box-shadow: 0 0 16px rgba(255, 255, 255, 0.8);
-      margin-bottom: 16px;
-      animation: asiffPulseDot 2s infinite ease-in-out;
-    }
-    @keyframes asiffPulseDot {
-      0%, 100% { transform: scale(1); opacity: 0.6; }
-      50% { transform: scale(1.4); opacity: 1; }
-    }
     .stream-offline-title {
-      font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-family: var(--font-display);
       font-size: clamp(1.15rem, 3vw, 1.4rem);
       font-weight: 700;
       letter-spacing: -0.02em;
@@ -377,7 +364,7 @@
       align-items: center;
       gap: 6px;
       font-size: 0.74rem;
-      font-family: 'JetBrains Mono', monospace;
+      font-family: var(--font-mono);
       color: #94A3B8;
       background: rgba(255, 255, 255, 0.04);
       padding: 6px 12px;
@@ -400,7 +387,7 @@
       padding: 6px 14px;
       border-radius: 2px;
       font-size: 0.76rem;
-      font-family: 'JetBrains Mono', monospace;
+      font-family: var(--font-mono);
       font-weight: 600;
       letter-spacing: 0.06em;
       text-transform: uppercase;
@@ -418,7 +405,7 @@
     .live-status-dot {
       width: 7px;
       height: 7px;
-      border-radius: 50%;
+      border-radius: 2px;
       background: currentColor;
     }
     .live-bottom-actions {
@@ -434,7 +421,7 @@
       padding: 8px 14px;
       border-radius: 2px;
       font-size: 0.78rem;
-      font-family: 'Space Grotesk', sans-serif;
+      font-family: var(--font-body);
       font-weight: 600;
       letter-spacing: 0.04em;
       text-transform: uppercase;
@@ -454,7 +441,7 @@
       color: #070908;
       padding: 8px 18px;
       font-size: 0.78rem;
-      font-family: 'Space Grotesk', sans-serif;
+      font-family: var(--font-body);
       font-weight: 700;
       letter-spacing: 0.06em;
       text-transform: uppercase;
@@ -862,8 +849,8 @@
 
         const isClassroom = auth.tokenType === "classroom";
         const badgeLabel = isClassroom 
-          ? `🏫 ${escapeHtml(auth.label || t.classroomLabel)}`
-          : `👤 ${escapeHtml(auth.label || t.defaultViewer)}`;
+          ? `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg><span>${escapeHtml(auth.label || t.classroomLabel)}</span>`
+          : `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg><span>${escapeHtml(auth.label || t.defaultViewer)}</span>`;
 
         stage.innerHTML = `
           <!-- Row 1: Festival Branding Header -->
@@ -906,7 +893,6 @@
 
             <!-- Offline Overlay (Initially hidden if live, shown if broadcast not yet started) -->
             <div id="streamOfflineOverlay" class="stream-offline-overlay d-none">
-              <div class="stream-offline-pulse"></div>
               <h2 class="stream-offline-title" id="offlineTitle">${t.offlineTitle}</h2>
               <p class="stream-offline-desc" id="offlineDesc">${t.offlineDesc}</p>
               <div class="stream-retry-badge" id="offlineRetry">
@@ -929,7 +915,7 @@
                 <span id="btnFullscreenLabel">${t.btnFullscreen}</span>
               </button>
 
-              <a href="voting.html" id="stageVotingLink" class="btn-voting-direct">
+              <a href="voting.html?lang=${encodeURIComponent(currentLang)}" id="stageVotingLink" class="btn-voting-direct">
                 ${t.btnVoting}
               </a>
             </div>
@@ -987,7 +973,10 @@
         if (fsLabel) fsLabel.textContent = t.btnFullscreen;
 
         const votingLink = stage.querySelector("#stageVotingLink");
-        if (votingLink) votingLink.innerHTML = t.btnVoting;
+        if (votingLink) {
+          votingLink.innerHTML = t.btnVoting;
+          votingLink.href = "voting.html?lang=" + encodeURIComponent(currentLang);
+        }
 
         const offTitle = stage.querySelector("#offlineTitle");
         if (offTitle) offTitle.textContent = t.offlineTitle;
