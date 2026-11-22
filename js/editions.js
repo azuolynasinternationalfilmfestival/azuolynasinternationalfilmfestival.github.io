@@ -268,7 +268,9 @@ async function saveCurrentEdition() {
 
   btn.disabled = true;
 
+  const callerEmail = (sessionStorage.getItem("admin_user_email") || "azuolynasfilmfestival@gmail.com").toLowerCase();
   const payload = {
+    id: year,
     year: year,
     status: document.getElementById("edStatus")?.value || "upcoming",
     title: document.getElementById("edTitle").value.trim() || `FEST ${year}`,
@@ -283,32 +285,48 @@ async function saveCurrentEdition() {
     submissionDeadline: document.getElementById("edDeadline")?.value.trim() || "",
     videoUrl: document.getElementById("edVideoUrl").value.trim(),
     pageUrl: document.getElementById("edPageUrl").value.trim() || `azuolynas-fest-${year}.html`,
-    adminEmail: sessionStorage.getItem("admin_user_email") || "azuolynasfilmfestival@gmail.com"
+    adminEmail: callerEmail
   };
 
+  let savedToFirestore = false;
+  let savedToServer = false;
+  let lastError = null;
+
   try {
-    // 1. Save to server backend API
-    const res = await fetch("/api/admin/editions", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
-    });
-
-    if (!res.ok) {
-      const errData = await res.json().catch(() => ({}));
-      throw new Error(errData.error || "Serverio klaida išsaugant leidinį");
-    }
-
-    // 2. Also sync to Firestore if db is available
+    // 1. Primary: Sync directly to Firestore (required for static/Firebase hosting)
     if (db && typeof db.collection === "function") {
       try {
         await db.collection("editions").doc(year).set({
           ...payload,
           updatedAt: firebase.firestore.FieldValue.serverTimestamp()
         }, { merge: true });
+        savedToFirestore = true;
       } catch (fsErr) {
+        lastError = fsErr;
         console.warn("Firestore edition sync notice:", fsErr.message);
       }
+    }
+
+    // 2. Secondary: Mirror to Node backend API when available
+    try {
+      const res = await fetch("/api/admin/editions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+      const ct = res.headers?.get("content-type") || "";
+      if (res.ok && ct.includes("application/json")) {
+        savedToServer = true;
+      } else if (![404, 405].includes(res.status) && !savedToFirestore) {
+        const errData = await res.json().catch(() => ({}));
+        lastError = new Error(errData.error || `HTTP ${res.status}`);
+      }
+    } catch (apiErr) {
+      if (!savedToFirestore && !lastError) lastError = apiErr;
+    }
+
+    if (!savedToFirestore && !savedToServer) {
+      throw lastError || new Error("Nepavyko išsaugoti leidinio");
     }
 
     showToast(`Metų leidinio FEST ${year} duomenys sėkmingai išsaugoti!`, "success");
@@ -327,12 +345,6 @@ async function deleteEdition(yearId) {
   const callerEmail = sessionStorage.getItem("admin_user_email") || "azuolynasfilmfestival@gmail.com";
 
   try {
-    await fetch("/api/admin/editions/delete", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ year: yearId, adminEmail: callerEmail })
-    });
-
     if (db && typeof db.collection === "function") {
       try {
         await db.collection("editions").doc(String(yearId)).delete();
@@ -340,6 +352,14 @@ async function deleteEdition(yearId) {
         console.warn(e);
       }
     }
+
+    try {
+      await fetch("/api/admin/editions/delete", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ year: yearId, adminEmail: callerEmail })
+      });
+    } catch (e) {}
 
     showToast(`Leidinys ${yearId} pašalintas.`);
     await loadEditionsFromApi();

@@ -102,6 +102,47 @@ let activeAlbumYear = "2027";
 let editingPhotos = [];
 let unsubscribeAlbums = null;
 
+const OperationType = {
+  CREATE: "create",
+  UPDATE: "update",
+  DELETE: "delete",
+  LIST: "list",
+  GET: "get",
+  WRITE: "write"
+};
+
+function handleFirestoreError(error, operationType, path) {
+  const user = auth?.currentUser || null;
+  const errInfo = {
+    error: error instanceof Error ? error.message : String(error),
+    operationType,
+    path,
+    authInfo: {
+      userId: user?.uid || null,
+      email: user?.email || null,
+      emailVerified: user?.emailVerified ?? null,
+      isAnonymous: user?.isAnonymous ?? null,
+      tenantId: user?.tenantId || null,
+      providerInfo: Array.isArray(user?.providerData)
+        ? user.providerData.map((p) => ({ providerId: p.providerId, email: p.email }))
+        : []
+    }
+  };
+  console.error("Firestore Error:", JSON.stringify(errInfo));
+  return new Error(errInfo.error);
+}
+
+async function testFirestoreConnection() {
+  if (!db || typeof db.collection !== "function") return;
+  try {
+    await db.collection("settings").doc("festival").get({ source: "server" });
+  } catch (err) {
+    if (err && typeof err.message === "string" && err.message.includes("the client is offline")) {
+      console.error("Firestore connection check: client is offline. Verify Firebase configuration.");
+    }
+  }
+}
+
 function escapeHtml(str) {
   if (str === null || str === undefined) return "";
   return String(str)
@@ -123,7 +164,16 @@ function sanitizeStoryHtml(raw) {
 
 async function getAdminAuthHeaders() {
   const headers = { "Content-Type": "application/json" };
-  const sessionToken = sessionStorage.getItem("admin_session_token");
+  const adminEmail =
+    auth?.currentUser?.email ||
+    sessionStorage.getItem("admin_user_email") ||
+    "";
+  if (adminEmail) {
+    headers["x-admin-email"] = adminEmail;
+  }
+  const sessionToken =
+    sessionStorage.getItem("admin_jwt_token") ||
+    sessionStorage.getItem("admin_session_token");
   if (sessionToken) {
     headers["Authorization"] = `Bearer ${sessionToken}`;
   }
@@ -142,6 +192,8 @@ async function getAdminAuthHeaders() {
 }
 
 export function initAlbums() {
+  testFirestoreConnection();
+
   const yearTabsContainer = document.getElementById("albumYearTabs");
   if (yearTabsContainer) {
     yearTabsContainer.addEventListener("click", (e) => {
@@ -154,7 +206,7 @@ export function initAlbums() {
   const addYearBtn = document.getElementById("albumAddYearBtn");
   const newYearInput = document.getElementById("albumNewYearInput");
   if (addYearBtn && newYearInput) {
-    addYearBtn.addEventListener("click", () => {
+    const addYearHandler = () => {
       const yr = newYearInput.value.replace(/[^0-9]/g, "").slice(0, 4);
       if (!yr || yr.length !== 4) {
         showToast("Įveskite 4 skaitmenų metus (pvz. 2028).", "error");
@@ -181,8 +233,20 @@ export function initAlbums() {
       }
       newYearInput.value = "";
       selectAlbumYear(yr);
-      showToast(`Sukurtas arba atidarytas albumas ${yr} m.`, "success");
+      showToast(`Sukurtas arba atidarytas ${yr} m. albumas. Nepamirškite paspausti „Išsaugoti ir Paskelbti Albumą“.`, "success");
+    };
+    addYearBtn.addEventListener("click", addYearHandler);
+    newYearInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        addYearHandler();
+      }
     });
+  }
+
+  const deleteYearBtn = document.getElementById("albumDeleteYearBtn");
+  if (deleteYearBtn) {
+    deleteYearBtn.addEventListener("click", () => deleteCustomAlbumYear(activeAlbumYear));
   }
 
   // Formatting toolbar buttons (LT & EN story)
@@ -238,13 +302,21 @@ export function initAlbums() {
     });
   }
 
-  // Batch Multi-Photo Input + Drag & Drop
+  // Batch Multi-Photo Input + File Picker Button + Drag & Drop
   const multiInput = document.getElementById("albumMultiPhotoInput");
   const dropzone = document.getElementById("albumBatchDropzone");
+  const selectFilesBtn = document.getElementById("albumSelectFilesBtn");
+
+  if (selectFilesBtn && multiInput) {
+    selectFilesBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      multiInput.click();
+    });
+  }
 
   if (dropzone && multiInput) {
     dropzone.addEventListener("click", (e) => {
-      if (e.target.tagName !== "INPUT") {
+      if (e.target.tagName !== "INPUT" && e.target !== selectFilesBtn) {
         multiInput.click();
       }
     });
@@ -407,7 +479,8 @@ export function subscribeAlbums() {
             updateOpenPageButtons();
           }
         },
-        () => {
+        (err) => {
+          handleFirestoreError(err, OperationType.LIST, "editions");
           loadAlbumsFromApi();
         }
       );
@@ -427,18 +500,26 @@ export function unsubscribeAlbumsListener() {
 async function loadAlbumsFromApi() {
   try {
     const res = await fetch("/api/editions");
-    if (res.ok) {
+    const contentType = res.headers?.get("content-type") || "";
+    if (res.ok && contentType.includes("application/json")) {
       const payload = await res.json();
       const list = Array.isArray(payload.editions) ? payload.editions : [];
       list.forEach((ed) => {
         const year = String(ed.year || ed.id || "").trim();
         if (!year) return;
+        const existing = albumsCatalog[year] || {};
         const fallback = DEFAULT_EDITIONS_MAP[year] || {};
         albumsCatalog[year] = {
           ...fallback,
           ...ed,
+          ...existing,
           year,
-          photos: Array.isArray(ed.photos) && ed.photos.length > 0 ? ed.photos : (fallback.photos || [])
+          photos:
+            Array.isArray(existing.photos) && existing.photos.length > 0
+              ? existing.photos
+              : Array.isArray(ed.photos) && ed.photos.length > 0
+                ? ed.photos
+                : (fallback.photos || [])
         };
       });
     }
@@ -451,24 +532,24 @@ async function loadAlbumsFromApi() {
 }
 
 function ensureCoreYearsExist() {
-  if (!albumsCatalog["2027"]) albumsCatalog["2027"] = { ...DEFAULT_EDITIONS_MAP["2027"] };
   if (!albumsCatalog["2026"]) albumsCatalog["2026"] = { ...DEFAULT_EDITIONS_MAP["2026"] };
+  if (!albumsCatalog["2027"]) albumsCatalog["2027"] = { ...DEFAULT_EDITIONS_MAP["2027"] };
 }
 
 function renderYearPills() {
   const container = document.getElementById("albumYearTabs");
   if (!container) return;
 
-  const years = Object.keys(albumsCatalog).sort((a, b) => Number(b) - Number(a));
+  const years = Object.keys(albumsCatalog).sort((a, b) => Number(a) - Number(b));
   container.innerHTML = years
     .map((yr) => {
       const ed = albumsCatalog[yr];
       const count = Array.isArray(ed?.photos) ? ed.photos.length : 0;
       const isActive = yr === activeAlbumYear;
       return `
-        <button type="button" class="album-year-pill ${isActive ? "active" : ""}" data-album-year="${escapeHtml(yr)}">
-          <span>FEST ${escapeHtml(yr)}</span>
-          <span style="opacity:0.75; font-size:0.7rem;">(${count} nuotr.)</span>
+        <button type="button" role="tab" aria-selected="${isActive ? "true" : "false"}" class="album-year-pill ${isActive ? "active" : ""}" data-album-year="${escapeHtml(yr)}">
+          <span>${escapeHtml(yr)} m.</span>
+          <span class="album-year-count">${count} nuotr.</span>
         </button>
       `;
     })
@@ -478,11 +559,13 @@ function renderYearPills() {
 function updateOpenPageButtons() {
   const ltBtn = document.getElementById("albumOpenLtBtn");
   const enBtn = document.getElementById("albumOpenEnBtn");
+  const delBtn = document.getElementById("albumDeleteYearBtn");
   const isKnownYear = activeAlbumYear === "2026" || activeAlbumYear === "2027";
   const ltHref = isKnownYear ? `/lt/azuolynas-fest-${activeAlbumYear}.html` : "/lt/index.html#editions";
   const enHref = isKnownYear ? `/en/azuolynas-fest-${activeAlbumYear}.html` : "/en/index.html#editions";
   if (ltBtn) ltBtn.href = ltHref;
   if (enBtn) enBtn.href = enHref;
+  if (delBtn) delBtn.classList.toggle("d-none", isKnownYear);
 }
 
 function selectAlbumYear(year) {
@@ -499,7 +582,7 @@ function selectAlbumYear(year) {
   updateOpenPageButtons();
 
   const heading = document.getElementById("albumActiveYearHeading");
-  if (heading) heading.textContent = `Albumo ir puslapio redaktorius — FEST ${activeAlbumYear}`;
+  if (heading) heading.textContent = `Albumo redaktorius — ${activeAlbumYear} m.`;
 
   const setVal = (id, val) => {
     const el = document.getElementById(id);
@@ -660,21 +743,21 @@ function openAlbumPhotoPreview(photo) {
   modal.classList.remove("d-none");
 }
 
-function compressImageDataUrl(file, maxDim = 2000, quality = 0.88) {
+function compressImageDataUrl(file, maxDim = 1400, quality = 0.8) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onerror = () => reject(new Error("Nepavyko perskaityti failo"));
     reader.onload = () => {
       const rawUrl = String(reader.result || "");
-      // If small enough (< 4MB), send raw file as Data URL without re-encoding
-      if (file.size <= 4 * 1024 * 1024) {
-        resolve(rawUrl);
-        return;
-      }
       const img = new Image();
       img.onerror = () => resolve(rawUrl);
       img.onload = () => {
-        const scale = Math.min(1, maxDim / Math.max(img.width || 1, img.height || 1));
+        const longest = Math.max(img.width || 1, img.height || 1);
+        const scale = Math.min(1, maxDim / longest);
+        if (scale >= 1 && file.size <= 350 * 1024) {
+          resolve(rawUrl);
+          return;
+        }
         const canvas = document.createElement("canvas");
         canvas.width = Math.max(1, Math.round(img.width * scale));
         canvas.height = Math.max(1, Math.round(img.height * scale));
@@ -717,27 +800,40 @@ async function uploadSingleImage(file, year, idx) {
       });
       if (url) return url;
     } catch (storageErr) {
-      console.warn("Firebase Storage fallback to server upload:", storageErr.message);
+      console.warn("Firebase Storage fallback notice:", storageErr.message);
     }
   }
 
-  // 2. Fallback to authenticated backend local upload endpoint
-  const dataUrl = await compressImageDataUrl(file);
-  const headers = await getAdminAuthHeaders();
-  const res = await fetch("/api/admin/albums/upload", {
-    method: "POST",
-    headers,
-    body: JSON.stringify({
-      year,
-      filename: safeName,
-      dataUrl
-    })
-  });
-  const data = await res.json().catch(() => ({}));
-  if (!res.ok || !data.url) {
-    throw new Error(data.error || `HTTP ${res.status}`);
+  // 2. Try backend local upload endpoint when Node server is available
+  const dataUrl = await compressImageDataUrl(file, 1600, 0.84);
+  try {
+    const headers = await getAdminAuthHeaders();
+    const res = await fetch("/api/admin/albums/upload", {
+      method: "POST",
+      headers,
+      body: JSON.stringify({
+        year,
+        filename: safeName,
+        dataUrl
+      })
+    });
+    const contentType = res.headers?.get("content-type") || "";
+    if (res.ok && contentType.includes("application/json")) {
+      const data = await res.json().catch(() => ({}));
+      if (data.url) return data.url;
+    }
+    if (![404, 405].includes(res.status) && contentType.includes("application/json")) {
+      const errData = await res.json().catch(() => ({}));
+      if (errData.error) throw new Error(errData.error);
+    }
+  } catch (apiErr) {
+    if (apiErr && apiErr.message && !apiErr.message.includes("Failed to fetch")) {
+      console.warn("Server upload fallback notice:", apiErr.message);
+    }
   }
-  return data.url;
+
+  // 3. Static-hosting fallback: compact JPEG Data URL stored cleanly within Firestore doc
+  return compressImageDataUrl(file, 1080, 0.72);
 }
 
 async function handleBatchUpload(rawFiles) {
@@ -787,11 +883,54 @@ async function handleBatchUpload(rawFiles) {
   renderAlbumPhotosGrid();
 
   if (uploadedCount > 0) {
-    await saveCurrentAlbum(true);
-    showToast(`Sėkmingai įkelta ir išsaugota ${uploadedCount} nuotr. į FEST ${activeAlbumYear} albumą!`, "success");
+    const saved = await saveCurrentAlbum(true);
+    if (saved) {
+      showToast(`Sėkmingai įkelta ir išsaugota ${uploadedCount} nuotr. į ${activeAlbumYear} m. albumą!`, "success");
+    }
   } else {
     showToast("Nepavyko įkelti pasirinktų nuotraukų.", "error");
   }
+}
+
+async function deleteCustomAlbumYear(year) {
+  const cleanYear = String(year || "").trim();
+  if (!cleanYear || cleanYear === "2026" || cleanYear === "2027") {
+    showToast("Pagrindinių 2026 ir 2027 m. albumų ištrinti negalima.", "error");
+    return;
+  }
+  if (!confirm(`Ar tikrai norite pašalinti ${cleanYear} m. albumą?`)) return;
+
+  let deletedFirestore = false;
+  let deletedServer = false;
+  const callerEmail = (auth?.currentUser?.email || sessionStorage.getItem("admin_user_email") || "azuolynasfilmfestival@gmail.com").toLowerCase();
+
+  if (db && typeof db.collection === "function") {
+    try {
+      await db.collection("editions").doc(cleanYear).delete();
+      deletedFirestore = true;
+    } catch (fsErr) {
+      handleFirestoreError(fsErr, OperationType.DELETE, `editions/${cleanYear}`);
+    }
+  }
+
+  try {
+    const headers = await getAdminAuthHeaders();
+    const res = await fetch("/api/admin/editions/delete", {
+      method: "POST",
+      headers,
+      body: JSON.stringify({ year: cleanYear, adminEmail: callerEmail })
+    });
+    if (res.ok) deletedServer = true;
+  } catch (e) {}
+
+  if (!deletedFirestore && !deletedServer && albumsCatalog[cleanYear]?.updatedAt) {
+    showToast("Nepavyko ištrinti albumo iš duomenų bazės. Patikrinkite administratoriaus teises.", "error");
+    return;
+  }
+
+  delete albumsCatalog[cleanYear];
+  selectAlbumYear("2027");
+  showToast(`${cleanYear} m. albumas pašalintas.`);
 }
 
 async function saveCurrentAlbum(isAutoSave = false) {
@@ -802,8 +941,11 @@ async function saveCurrentAlbum(isAutoSave = false) {
   const getVal = (id) => (document.getElementById(id)?.value || "").trim();
 
   const existing = albumsCatalog[year] || DEFAULT_EDITIONS_MAP[year] || {};
+  const callerEmail = (auth?.currentUser?.email || sessionStorage.getItem("admin_user_email") || "azuolynasfilmfestival@gmail.com").toLowerCase();
+
   const payload = {
     ...existing,
+    id: year,
     year,
     status: getVal("albStatus") || existing.status || (year === "2027" ? "upcoming" : "completed"),
     submissionDeadline: getVal("albDeadline"),
@@ -827,44 +969,78 @@ async function saveCurrentAlbum(isAutoSave = false) {
       album: p.album || "ceremony",
       uploadedAt: p.uploadedAt || new Date().toISOString()
     })),
-    adminEmail: sessionStorage.getItem("admin_user_email") || "azuolynasfilmfestival@gmail.com"
+    updatedAt: new Date().toISOString(),
+    updatedBy: callerEmail,
+    adminEmail: callerEmail
   };
 
+  let savedToFirestore = false;
+  let savedToServer = false;
+  let lastError = null;
+
   try {
-    const headers = await getAdminAuthHeaders();
-    const res = await fetch("/api/admin/editions", {
-      method: "POST",
-      headers,
-      body: JSON.stringify(payload)
-    });
-
-    if (!res.ok) {
-      const errData = await res.json().catch(() => ({}));
-      throw new Error(errData.error || `HTTP ${res.status}`);
-    }
-
+    // 1. Primary on static/Firebase Hosting: Save directly to Firestore
     if (db && typeof db.collection === "function") {
+      const approxBytes = new Blob([JSON.stringify(payload)]).size;
+      if (approxBytes > 950000) {
+        throw new Error(
+          "Albumo dydis viršija Firestore 1 MB ribą dėl įterptų nuotraukų. Sumažinkite nuotraukų kiekį arba pridėkite jas per URL nuorodą."
+        );
+      }
       try {
         await db.collection("editions").doc(year).set(
           {
             ...payload,
-            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            updatedAtServer: firebase.firestore.FieldValue.serverTimestamp()
           },
           { merge: true }
         );
+        savedToFirestore = true;
       } catch (fsErr) {
-        console.warn("Firestore album sync notice:", fsErr.message);
+        lastError = handleFirestoreError(fsErr, OperationType.WRITE, `editions/${year}`);
       }
+    }
+
+    // 2. Mirror to Node backend when running with server routes (silently skip 404/405 static hosting responses)
+    try {
+      const headers = await getAdminAuthHeaders();
+      const res = await fetch("/api/admin/editions", {
+        method: "POST",
+        headers,
+        body: JSON.stringify(payload)
+      });
+      const contentType = res.headers?.get("content-type") || "";
+      if (res.ok && contentType.includes("application/json")) {
+        savedToServer = true;
+      } else if (![404, 405].includes(res.status) && contentType.includes("application/json")) {
+        const errData = await res.json().catch(() => ({}));
+        if (!savedToFirestore) {
+          lastError = new Error(errData.error || `HTTP ${res.status}`);
+        }
+      }
+    } catch (apiErr) {
+      if (!savedToFirestore && !lastError) {
+        lastError = apiErr;
+      }
+    }
+
+    if (!savedToFirestore && !savedToServer) {
+      if (!auth?.currentUser) {
+        throw new Error("Prisijunkite iš naujo su Google arba administratoriaus paskyra, kad galėtumėte išsaugoti į Firestore.");
+      }
+      throw lastError || new Error("Nepavyko išsaugoti albumo duomenų bazėje.");
     }
 
     albumsCatalog[year] = payload;
     renderYearPills();
     if (!isAutoSave) {
-      showToast(`Albumas FEST ${year} (${editingPhotos.length} nuotr.) ir tekstai išsaugoti svetainėje!`, "success");
+      showToast(`Albumas ${year} m. (${editingPhotos.length} nuotr.) sėkmingai išsaugotas!`, "success");
     }
     window.dispatchEvent(new CustomEvent("refresh-notifications"));
+    return true;
   } catch (err) {
     showToast("Klaida išsaugant albumą: " + err.message, "error");
+    return false;
   } finally {
     if (btn && !isAutoSave) btn.disabled = false;
   }

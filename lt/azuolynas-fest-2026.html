@@ -409,9 +409,12 @@
       }
     }
 
+    let hasFirestoreEditionsData = false;
+
     fetch("/api/editions")
-      .then((r) => (r.ok ? r.json() : null))
+      .then((r) => (r.ok && (r.headers.get("content-type") || "").includes("application/json") ? r.json() : null))
       .then((payload) => {
+        if (hasFirestoreEditionsData) return;
         const ed = (payload?.editions || []).find((x) => String(x.year) === "2026" || x.id === "2026");
         if (ed) applyEdition2026Data(ed);
       })
@@ -419,7 +422,10 @@
 
     if (typeof db !== "undefined" && db) {
       db.collection("editions").doc("2026").onSnapshot((doc) => {
-        if (doc.exists) applyEdition2026Data(doc.data());
+        if (doc.exists) {
+          hasFirestoreEditionsData = true;
+          applyEdition2026Data(doc.data());
+        }
       }, (err) => {
         console.warn("Edition 2026 listener:", err.message);
       });

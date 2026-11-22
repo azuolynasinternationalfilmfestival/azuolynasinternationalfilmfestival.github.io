@@ -1700,9 +1700,12 @@
     }).join("");
   }
 
+  let hasFirestoreEditionsData = false;
+
   fetch("/api/editions")
-    .then((r) => (r.ok ? r.json() : null))
+    .then((r) => (r.ok && (r.headers.get("content-type") || "").includes("application/json") ? r.json() : null))
     .then((data) => {
+      if (hasFirestoreEditionsData) return;
       if (data && Array.isArray(data.editions) && data.editions.length > 0) {
         renderEnEditionsList(data.editions);
       }
@@ -1745,7 +1748,10 @@
       });
 
       const editionsList = Array.from(mergedByYear.values());
-      if (editionsList.length > 0) renderEnEditionsList(editionsList);
+      if (editionsList.length > 0) {
+        hasFirestoreEditionsData = true;
+        renderEnEditionsList(editionsList);
+      }
     }, (err) => {
       console.warn("Editions snapshot listener:", err.message);
     });

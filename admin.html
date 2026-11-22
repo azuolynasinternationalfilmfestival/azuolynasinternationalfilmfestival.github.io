@@ -227,7 +227,7 @@
 
         <button id="tabAlbumsBtn" class="admin-sidebar-nav-item">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
-          <span>Albumai (2026 / 2027)</span>
+          <span>Albumai</span>
         </button>
 
         <button id="tabArchiveBtn" class="admin-sidebar-nav-item">
@@ -1167,18 +1167,19 @@ Tomas Vaitkus, Aktų salė (Projektorius), t.vaitkus@mokykla.lt"></textarea>
           </div>
         </div>
 
-        <!-- 3B. ALBUMS & YEAR CONTENT EDITOR TAB (2026 / 2027) -->
+        <!-- 3B. ALBUMS & YEAR CONTENT EDITOR TAB -->
         <div id="albumsTab" class="d-none">
           <div class="album-year-bar">
-            <div style="display:flex; flex-direction:column; gap:6px;">
-              <span style="font-size:0.74rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.06em;">Pasirinkite albumo metus</span>
-              <div id="albumYearTabs" class="album-year-pills"></div>
+            <div style="display:flex; flex-direction:column; gap:8px; min-width:0; flex:1;">
+              <span style="font-size:0.74rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.06em;">Metų albumai (2026, 2027 ir kiti)</span>
+              <div id="albumYearTabs" class="album-year-pills" role="tablist" aria-label="Albumų metai"></div>
             </div>
             <div class="album-add-year-wrap">
-              <input type="text" id="albumNewYearInput" class="field" placeholder="Metai (pvz. 2028)" maxlength="4" style="width:140px; padding:7px 10px;">
-              <button type="button" id="albumAddYearBtn" class="btn-outline btn-sm">+ Pridėti Metus</button>
-              <a id="albumOpenLtBtn" href="/lt/azuolynas-fest-2027.html" target="_blank" rel="noopener" class="btn-outline btn-sm">Peržiūra LT</a>
-              <a id="albumOpenEnBtn" href="/en/azuolynas-fest-2027.html" target="_blank" rel="noopener" class="btn-outline btn-sm">Peržiūra EN</a>
+              <input type="text" id="albumNewYearInput" class="field" placeholder="Metai (pvz. 2028)" maxlength="4" style="width:136px; padding:7px 10px;">
+              <button type="button" id="albumAddYearBtn" class="btn-outline btn-sm" style="white-space:nowrap;">+ Pridėti</button>
+              <button type="button" id="albumDeleteYearBtn" class="btn-delete btn-xs d-none" style="white-space:nowrap;" title="Pašalinti pasirinktą albumą">Ištrinti metus</button>
+              <a id="albumOpenLtBtn" href="/lt/azuolynas-fest-2027.html" target="_blank" rel="noopener" class="btn-outline btn-sm" style="white-space:nowrap;">Peržiūra LT</a>
+              <a id="albumOpenEnBtn" href="/en/azuolynas-fest-2027.html" target="_blank" rel="noopener" class="btn-outline btn-sm" style="white-space:nowrap;">Peržiūra EN</a>
             </div>
           </div>
 
@@ -1186,10 +1187,10 @@ Tomas Vaitkus, Aktų salė (Projektorius), t.vaitkus@mokykla.lt"></textarea>
           <div class="content-card" style="margin-bottom:22px;">
             <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:16px;">
               <div>
-                <h3 class="content-card-title" id="albumActiveYearHeading" style="margin-bottom:4px;">Albumo ir puslapio redaktorius — FEST 2027</h3>
-                <p class="content-card-sub" style="margin:0;">Redaguokite konkretaus festivalio metų tekstus (LT ir EN), viršelį ir ceremonijos nuotraukų galeriją vienoje vietoje.</p>
+                <h3 class="content-card-title" id="albumActiveYearHeading" style="margin-bottom:4px;">Albumo redaktorius — 2027 m.</h3>
+                <p class="content-card-sub" style="margin:0;">Redaguokite pasirinktų metų albumo pavadinimą, aprašymą (LT ir EN), viršelį bei nuotraukų galeriją.</p>
               </div>
-              <button type="button" id="saveAlbumBtn" class="btn-solid">Išsaugoti ir Paskelbti Albumą</button>
+              <button type="button" id="saveAlbumBtn" class="btn-solid" style="white-space:nowrap;">Išsaugoti ir Paskelbti Albumą</button>
             </div>
 
             <div class="two-col-grid" style="margin-bottom:14px;">
@@ -1322,7 +1323,8 @@ Tomas Vaitkus, Aktų salė (Projektorius), t.vaitkus@mokykla.lt"></textarea>
                 <line x1="12" y1="3" x2="12" y2="15"></line>
               </svg>
               <div style="font-weight:600; color:#FFFFFF; margin-bottom:4px;">Spustelėkite arba nutempkite kelias nuotraukas čia</div>
-              <div style="font-size:0.82rem; color:var(--text-muted);">Galite pasirinkti dešimtis JPG, PNG arba WEBP nuotraukų vienu metu</div>
+              <div style="font-size:0.82rem; color:var(--text-muted); margin-bottom:12px;">Galite pasirinkti kelias JPG, PNG, WEBP arba GIF nuotraukas vienu metu</div>
+              <button type="button" id="albumSelectFilesBtn" class="btn-outline btn-sm">Pasirinkti nuotraukas iš įrenginio</button>
               <input type="file" id="albumMultiPhotoInput" accept="image/jpeg,image/png,image/webp,image/gif" multiple style="display:none;">
             </div>
 
@@ -1353,6 +1355,13 @@ Tomas Vaitkus, Aktų salė (Projektorius), t.vaitkus@mokykla.lt"></textarea>
 
         <!-- 4. ARCHIVE TAB -->
         <div id="archiveTab" class="d-none">
+          <div class="content-card" style="margin-bottom:18px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+            <div>
+              <h3 class="content-card-title" style="margin-bottom:4px;">Metų Nuotraukų Albumai (2026, 2027 ir kiti)</h3>
+              <p class="content-card-sub" style="margin:0;">Norėdami masiškai įkelti nuotraukas, redaguoti aprašymus ir valdyti atskirų metų albumus, naudokite skirtuką „Albumai“.</p>
+            </div>
+            <button type="button" onclick="document.getElementById('tabAlbumsBtn')?.click()" class="btn-solid btn-sm" style="white-space:nowrap;">Atverti „Albumai“</button>
+          </div>
           <div class="two-col-grid">
             <div class="content-card">
               <h3 class="content-card-title">Pridėti Vaizdo Įrašą (Retrospektyva)</h3>

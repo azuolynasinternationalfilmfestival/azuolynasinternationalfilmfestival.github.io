@@ -8857,11 +8857,11 @@ svg {
    ============================================================================ */
 .album-year-bar {
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   justify-content: space-between;
   flex-wrap: wrap;
-  gap: 12px;
-  padding: 14px 18px;
+  gap: 14px;
+  padding: 16px 18px;
   background: var(--surface-card);
   border: 1px solid var(--border-color);
   border-radius: 2px;
@@ -8878,22 +8878,26 @@ svg {
 .album-year-pill {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 7px 14px;
+  gap: 8px;
+  padding: 8px 14px;
   border: 1px solid var(--border-color);
   border-radius: 2px;
   background: rgba(255, 255, 255, 0.03);
   color: var(--text-muted);
   font-family: var(--font-mono);
-  font-size: 0.78rem;
+  font-size: 0.8rem;
   font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  flex-shrink: 0;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease;
 }
 
 .album-year-pill:hover {
   color: #FFFFFF;
   border-color: var(--accent-light);
+  background: rgba(255, 255, 255, 0.06);
 }
 
 .album-year-pill.active {
@@ -8902,9 +8906,16 @@ svg {
   border-color: var(--accent-light);
 }
 
+.album-year-count {
+  font-size: 0.72rem;
+  opacity: 0.78;
+  font-variant-numeric: tabular-nums;
+}
+
 .album-add-year-wrap {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 8px;
 }
 
@@ -8917,6 +8928,10 @@ svg {
 @media (max-width: 960px) {
   .album-editor-grid {
     grid-template-columns: 1fr;
+  }
+  .album-year-bar {
+    flex-direction: column;
+    align-items: stretch;
   }
 }
 
@@ -8940,13 +8955,14 @@ svg {
 }
 
 .album-format-btn {
-  padding: 4px 9px;
+  padding: 5px 10px;
   background: rgba(255, 255, 255, 0.06);
   border: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: 2px;
   color: #F8FAF7;
-  font-size: 0.74rem;
+  font-size: 0.75rem;
   font-weight: 600;
+  white-space: nowrap;
   cursor: pointer;
   transition: background 0.15s ease, border-color 0.15s ease;
 }
@@ -8973,13 +8989,13 @@ svg {
 .album-story-preview blockquote {
   margin: 10px 0;
   padding: 10px 14px;
-  border-left: 2px solid var(--accent-light);
+  border: 1px solid rgba(111, 165, 138, 0.32);
   background: rgba(255, 255, 255, 0.04);
   font-style: italic;
 }
 
 .album-batch-drop {
-  border: 1.5px dashed rgba(111, 165, 138, 0.5);
+  border: 1px dashed rgba(111, 165, 138, 0.55);
   border-radius: 2px;
   background: rgba(12, 38, 32, 0.25);
   padding: 24px 20px;
@@ -8999,6 +9015,12 @@ svg {
   grid-template-columns: repeat(auto-fill, minmax(275px, 1fr));
   gap: 16px;
   margin-top: 18px;
+}
+
+@media (max-width: 600px) {
+  .album-photos-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 .album-photo-card {
@@ -9050,6 +9072,7 @@ svg {
   color: #FFFFFF;
   font-family: var(--font-mono);
   font-size: 0.7rem;
+  font-variant-numeric: tabular-nums;
   padding: 2px 6px;
   border-radius: 2px;
   border: 1px solid rgba(255, 255, 255, 0.15);

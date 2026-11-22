@@ -1701,9 +1701,12 @@
     }).join("");
   }
 
+  let hasFirestoreEditionsData = false;
+
   fetch("/api/editions")
-    .then((r) => (r.ok ? r.json() : null))
+    .then((r) => (r.ok && (r.headers.get("content-type") || "").includes("application/json") ? r.json() : null))
     .then((data) => {
+      if (hasFirestoreEditionsData) return;
       if (data && Array.isArray(data.editions) && data.editions.length > 0) {
         renderLtEditionsList(data.editions);
       }
@@ -1717,7 +1720,10 @@
         if (String(doc.id).endsWith("_en")) return;
         editionsList.push({ id: doc.id, ...doc.data() });
       });
-      if (editionsList.length > 0) renderLtEditionsList(editionsList);
+      if (editionsList.length > 0) {
+        hasFirestoreEditionsData = true;
+        renderLtEditionsList(editionsList);
+      }
     }, (err) => {
       console.warn("Editions snapshot listener:", err.message);
     });

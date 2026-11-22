@@ -667,13 +667,14 @@ test('header 2026/2027 navigation routes match active language across LT, EN, an
   assert.doesNotMatch(votingHtml, /AISFF 2027/);
 });
 
-test('admin panel exposes dedicated Albums (2026/2027) editor tab and multi-photo upload backend route', () => {
+test('admin panel exposes Albumai tab (without dates in sidebar) with year sub-tabs, file picker, and multi-photo upload route', () => {
   const adminHtml = fs.readFileSync(new URL('../admin.html', import.meta.url), 'utf8');
   const adminMainJs = fs.readFileSync(new URL('../js/admin-main.js', import.meta.url), 'utf8');
   const albumsJs = fs.readFileSync(new URL('../js/albums.js', import.meta.url), 'utf8');
   const serverJs = fs.readFileSync(new URL('../server.js', import.meta.url), 'utf8');
 
-  for (const id of ['tabAlbumsBtn', 'albumsTab', 'albumYearTabs', 'albStory', 'albStoryEn', 'albumMultiPhotoInput', 'albumPhotosGrid', 'saveAlbumBtn']) {
+  assert.match(adminHtml, /id="tabAlbumsBtn"[\s\S]*?>\s*<span>Albumai<\/span>\s*<\/button>/);
+  for (const id of ['tabAlbumsBtn', 'albumsTab', 'albumYearTabs', 'albumNewYearInput', 'albumAddYearBtn', 'albumDeleteYearBtn', 'albumSelectFilesBtn', 'albStory', 'albStoryEn', 'albumMultiPhotoInput', 'albumPhotosGrid', 'saveAlbumBtn']) {
     assert.ok(adminHtml.includes(`id="${id}"`), `Missing #${id} in admin.html`);
   }
   assert.match(adminHtml, /id="albumMultiPhotoInput"[^>]*multiple/);
@@ -684,4 +685,108 @@ test('admin panel exposes dedicated Albums (2026/2027) editor tab and multi-phot
   assert.match(serverJs, /app\.post\('\/api\/admin\/albums\/upload',\s*requireAdminAuth/);
 });
 
+test('albums.js saves album and uploads image cleanly via Firestore-first fallback when /api/* returns HTTP 405', async () => {
+  const f = fixture();
+  const elements = new Map();
+  function makeEl(id) {
+    if (!elements.has(id)) {
+      const classes = new Set();
+      elements.set(id, {
+        id,
+        value: '',
+        src: '',
+        href: '',
+        innerHTML: '',
+        textContent: '',
+        disabled: false,
+        handlers: {},
+        style: {},
+        classList: {
+          add: c => classes.add(c),
+          remove: c => classes.delete(c),
+          contains: c => classes.has(c),
+          toggle: (c, force) => (force === undefined ? (classes.has(c) ? !classes.delete(c) : !!classes.add(c)) : (force ? !!classes.add(c) : !classes.delete(c)))
+        },
+        addEventListener(evt, fn) { this.handlers[evt] = fn; },
+        click() { if (this.handlers.click) this.handlers.click({ target: this, stopPropagation() {}, preventDefault() {} }); }
+      });
+    }
+    return elements.get(id);
+  }
+
+  const toasts = [];
+  const apiCalls = [];
+  const dispatched = [];
+  class MockFileReader {
+    readAsDataURL() {
+      this.result = 'data:image/jpeg;base64,/9j/4AAQSkZJRg==';
+      if (this.onload) this.onload();
+    }
+  }
+  class MockImage {
+    set src(v) {
+      this._src = v;
+      this.width = 800;
+      this.height = 600;
+      if (this.onload) this.onload();
+    }
+  }
+
+  const albumsSrc = fs.readFileSync(new URL('../js/albums.js', import.meta.url), 'utf8')
+    .replace(/^import .*;\n/gm, '')
+    .replace(/^export /gm, '');
+
+  Object.assign(f.context, {
+    db: f.database,
+    storage: null,
+    auth: f.authentication,
+    showToast: (message, type) => toasts.push({ message, type }),
+    sessionStorage: { getItem: (k) => (k === 'admin_user_email' ? 'azuolynasfilmfestival@gmail.com' : 'jwt-tok') },
+    Blob,
+    Headers,
+    FileReader: MockFileReader,
+    Image: MockImage,
+    CustomEvent: class CustomEvent { constructor(name) { this.type = name; } },
+    dispatchEvent: (e) => dispatched.push(e.type),
+    document: {
+      getElementById: makeEl,
+      createElement: () => ({ width: 800, height: 600, getContext: () => ({ drawImage() {} }), toDataURL: () => 'data:image/jpeg;base64,compressed' })
+    },
+    fetch: async (route, opts) => {
+      apiCalls.push({ route, method: opts?.method || 'GET' });
+      return {
+        ok: false,
+        status: 405,
+        headers: new Headers({ 'content-type': 'text/html' }),
+        json: async () => { throw new Error('Unexpected token <'); }
+      };
+    }
+  });
+
+  vm.runInContext(albumsSrc, f.context);
+  f.context.initAlbums();
+  f.context.selectAlbumYear('2027');
+
+  assert.match(makeEl('albumYearTabs').innerHTML, /2026 m\./);
+  assert.match(makeEl('albumYearTabs').innerHTML, /2027 m\./);
+
+  // Add custom year 2028 via sub-tab bar
+  makeEl('albumNewYearInput').value = '2028';
+  await makeEl('albumAddYearBtn').handlers.click();
+  makeEl('albTitle').value = 'FEST 2028';
+  makeEl('albStory').value = 'Custom 2028 album story';
+
+  const saved = await f.context.saveCurrentAlbum(false);
+  assert.equal(saved, true);
+  assert.ok(apiCalls.some(c => c.route === '/api/admin/editions' && c.method === 'POST'));
+  assert.equal(toasts.at(-1).type, 'success');
+  assert.doesNotMatch(toasts.at(-1).message, /405/);
+  assert.equal(f.store.get('editions/2028')?.title, 'FEST 2028');
+  assert.equal(f.store.get('editions/2028')?.story, 'Custom 2028 album story');
+
+  // Verify uploadSingleImage falls back cleanly when /api/admin/albums/upload returns HTTP 405
+  const fallbackUrl = await f.context.uploadSingleImage({ name: 'photo.jpg', size: 1000, type: 'image/jpeg' }, '2028', 0);
+  assert.ok(apiCalls.some(c => c.route === '/api/admin/albums/upload' && c.method === 'POST'));
+  assert.match(fallbackUrl, /^data:image\/jpeg;base64,/);
+});
 

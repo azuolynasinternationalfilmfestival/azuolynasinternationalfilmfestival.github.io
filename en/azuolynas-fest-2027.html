@@ -324,9 +324,12 @@
       }
     }
 
+    let hasFirestoreEditionsData = false;
+
     fetch("/api/editions")
-      .then((r) => (r.ok ? r.json() : null))
+      .then((r) => (r.ok && (r.headers.get("content-type") || "").includes("application/json") ? r.json() : null))
       .then((data) => {
+        if (hasFirestoreEditionsData) return;
         const edition2027 = (data?.editions || []).find((e) => String(e.year) === "2027" || e.id === "2027");
         if (edition2027) applyEdition2027En(edition2027);
       })
@@ -334,7 +337,10 @@
 
     if (typeof db !== "undefined" && db) {
       db.collection("editions").doc("2027").onSnapshot((doc) => {
-        if (doc.exists) applyEdition2027En(doc.data());
+        if (doc.exists) {
+          hasFirestoreEditionsData = true;
+          applyEdition2027En(doc.data());
+        }
       }, () => {});
     }
   </script>
