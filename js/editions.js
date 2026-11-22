@@ -151,8 +151,10 @@ function renderAdminEditionsList() {
 
   container.innerHTML = allEditionsList.map((ed) => {
     const bgImage = ed.heroImage || "https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/IMG_3458.jpeg?alt=media&token=224af1bd-25ff-494e-8136-fbf330d3ad5b";
-    const pageUrl = ed.pageUrl || `azuolynas-fest-${ed.year || '2027'}.html`;
-    const isUpcoming = ed.status === "upcoming" || ed.year === "2027";
+    const year = String(ed.year || '2027').trim();
+    const ltUrl = (year === '2026' || year === '2027') ? `/lt/azuolynas-fest-${year}.html` : `/lt/${ed.pageUrl || 'index.html'}`;
+    const enUrl = (year === '2026' || year === '2027') ? `/en/azuolynas-fest-${year}.html` : `/en/${ed.pageUrl || 'index.html'}`;
+    const isUpcoming = ed.status === "upcoming" || year === "2027";
 
     return `
       <div class="admin-media-card" style="border:1px solid ${isUpcoming ? 'var(--accent-light)' : 'var(--border-color)'};">
@@ -179,7 +181,8 @@ function renderAdminEditionsList() {
         <div style="display:flex; flex-direction:column; gap:6px; margin-top:8px;">
           <div style="display:flex; gap:6px;">
             <button type="button" class="btn-solid btn-xs" style="flex:1;" data-action="edit-edition" data-id="${ed.year || ed.id}">Redaguoti (LT/EN)</button>
-            <a href="${pageUrl}" target="_blank" class="btn-outline btn-xs" style="display:inline-flex; align-items:center; justify-content:center;">Atverti</a>
+            <a href="${ltUrl}" target="_blank" rel="noopener" class="btn-outline btn-xs" style="display:inline-flex; align-items:center; justify-content:center;">LT</a>
+            <a href="${enUrl}" target="_blank" rel="noopener" class="btn-outline btn-xs" style="display:inline-flex; align-items:center; justify-content:center;">EN</a>
           </div>
           <button type="button" class="btn-delete btn-xs" style="width:100%; justify-content:center;" data-action="delete-edition" data-id="${ed.year || ed.id}">Ištrinti leidinį</button>
         </div>

@@ -257,6 +257,39 @@ header {
   width: 100%;
 }
 
+.header-edition-nav {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+  margin-right: 4px;
+  flex-shrink: 0;
+}
+
+.header-edition-link {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 11px;
+  border: 1px solid var(--border-color);
+  border-radius: 2px;
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+  text-decoration: none;
+  background: rgba(255, 255, 255, 0.02);
+  transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+  white-space: nowrap;
+}
+
+.header-edition-link:hover,
+.header-edition-link.active {
+  color: #FFFFFF;
+  border-color: var(--accent-light);
+  background: rgba(255, 255, 255, 0.08);
+}
+
 .lang-switch {
   display: inline-flex;
   align-items: center;
@@ -4229,6 +4262,7 @@ footer {
 
 @media (max-width: 900px) {
   .nav-links { display: none; }
+  .header-edition-nav { display: none !important; }
   .meta-row, .meta-row-4 { grid-template-columns: 1fr 1fr; }
   .two-col-grid { grid-template-columns: 1fr; }
   .metrics-row { grid-template-columns: 1fr 1fr; }
@@ -8817,3 +8851,238 @@ svg {
     grid-template-columns: 1fr;
   }
 }
+
+/* ============================================================================
+   ADMIN ALBUMS & YEAR CONTENT EDITOR (#albumsTab)
+   ============================================================================ */
+.album-year-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 14px 18px;
+  background: var(--surface-card);
+  border: 1px solid var(--border-color);
+  border-radius: 2px;
+  margin-bottom: 18px;
+}
+
+.album-year-pills {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.album-year-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border: 1px solid var(--border-color);
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.album-year-pill:hover {
+  color: #FFFFFF;
+  border-color: var(--accent-light);
+}
+
+.album-year-pill.active {
+  background: var(--accent-light);
+  color: #070908;
+  border-color: var(--accent-light);
+}
+
+.album-add-year-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.album-editor-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+@media (max-width: 960px) {
+  .album-editor-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.album-lang-panel {
+  background: rgba(12, 38, 32, 0.35);
+  border: 1px solid rgba(111, 165, 138, 0.25);
+  border-radius: 2px;
+  padding: 16px;
+}
+
+.album-editor-toolbar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 6px 8px;
+  background: rgba(0, 0, 0, 0.32);
+  border: 1px solid rgba(111, 165, 138, 0.22);
+  border-bottom: none;
+  border-radius: 2px 2px 0 0;
+}
+
+.album-format-btn {
+  padding: 4px 9px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 2px;
+  color: #F8FAF7;
+  font-size: 0.74rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.album-format-btn:hover,
+.album-format-btn.active {
+  background: rgba(111, 165, 138, 0.25);
+  border-color: var(--accent-light);
+}
+
+.album-story-preview {
+  background: rgba(7, 15, 12, 0.9);
+  border: 1px solid rgba(111, 165, 138, 0.3);
+  border-radius: 2px;
+  padding: 14px;
+  margin-top: 8px;
+  font-size: 0.9rem;
+  line-height: 1.65;
+  color: var(--text-color);
+  max-height: 260px;
+  overflow-y: auto;
+}
+
+.album-story-preview blockquote {
+  margin: 10px 0;
+  padding: 10px 14px;
+  border-left: 2px solid var(--accent-light);
+  background: rgba(255, 255, 255, 0.04);
+  font-style: italic;
+}
+
+.album-batch-drop {
+  border: 1.5px dashed rgba(111, 165, 138, 0.5);
+  border-radius: 2px;
+  background: rgba(12, 38, 32, 0.25);
+  padding: 24px 20px;
+  text-align: center;
+  transition: border-color 0.2s ease, background 0.2s ease;
+  cursor: pointer;
+}
+
+.album-batch-drop:hover,
+.album-batch-drop.is-dragover {
+  border-color: var(--accent-light);
+  background: rgba(111, 165, 138, 0.12);
+}
+
+.album-photos-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(275px, 1fr));
+  gap: 16px;
+  margin-top: 18px;
+}
+
+.album-photo-card {
+  background: var(--surface-card);
+  border: 1px solid var(--border-color);
+  border-radius: 2px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.album-photo-thumb {
+  position: relative;
+  aspect-ratio: 16 / 10;
+  background: #040706;
+  border-radius: 2px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.album-photo-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.album-cover-badge {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  background: var(--accent-light);
+  color: #070908;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 2px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.album-photo-index {
+  position: absolute;
+  bottom: 6px;
+  right: 6px;
+  background: rgba(7, 9, 8, 0.85);
+  color: #FFFFFF;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  padding: 2px 6px;
+  border-radius: 2px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.album-photo-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.album-photo-fields label {
+  display: block;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  margin-bottom: 3px;
+}
+
+.album-photo-fields .field {
+  padding: 6px 9px;
+  font-size: 0.82rem;
+}
+
+.album-photo-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding-top: 4px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.album-photo-actions button {
+  flex: 1;
+  min-width: 60px;
+}
+

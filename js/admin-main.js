@@ -17,6 +17,11 @@ import {
   unsubscribeEditionsListener 
 } from "./editions.js";
 import {
+  initAlbums,
+  subscribeAlbums,
+  unsubscribeAlbumsListener
+} from "./albums.js";
+import {
   initUsers,
   subscribeUsers,
   unsubscribeUsersListener,
@@ -43,6 +48,7 @@ function bootAdmin() {
         }
         try { subscribeSubmissions(); } catch (e) { console.error("subscribeSubmissions error:", e); }
         try { subscribeEditions(); } catch (e) { console.error("subscribeEditions error:", e); }
+        try { subscribeAlbums(); } catch (e) { console.error("subscribeAlbums error:", e); }
         try { loadVotingAnalytics(); } catch (e) { console.error("loadVotingAnalytics error:", e); }
         try { loadStreamData(); } catch (e) { console.error("loadStreamData error:", e); }
         try { loadActivityLogs(); } catch (e) { console.error("loadActivityLogs error:", e); }
@@ -57,6 +63,7 @@ function bootAdmin() {
         try { evaluateUserManagementAccess(null); } catch (e) { console.error(e); }
         try { unsubscribeSubmissionsListener(); } catch (e) { console.error(e); }
         try { unsubscribeEditionsListener(); } catch (e) { console.error(e); }
+        try { unsubscribeAlbumsListener(); } catch (e) { console.error(e); }
         try { unsubscribeUsersListener(); } catch (e) { console.error(e); }
         try { unsubscribeSettingsListener(); } catch (e) { console.error(e); }
       }
@@ -71,6 +78,7 @@ function bootAdmin() {
   try { initStreamAdmin(); } catch (e) { console.error("initStreamAdmin error:", e); }
   try { initGraphicsManager(); } catch (e) { console.error("initGraphicsManager error:", e); }
   try { initEditions(); } catch (e) { console.error("initEditions error:", e); }
+  try { initAlbums(); } catch (e) { console.error("initAlbums error:", e); }
   try { initArchive(); } catch (e) { console.error("initArchive error:", e); }
   try { initNotificationsLog(); } catch (e) { console.error("initNotificationsLog error:", e); }
   try { initDiagnostics(); } catch (e) { console.error("initDiagnostics error:", e); }
@@ -95,6 +103,7 @@ function initTabNavigation() {
     { btn: "tabStreamBtn", content: "streamTab" },
     { btn: "tabGraphicsBtn", content: "graphicsTab" },
     { btn: "tabEditionsBtn", content: "editionsTab" },
+    { btn: "tabAlbumsBtn", content: "albumsTab" },
     { btn: "tabArchiveBtn", content: "archiveTab" },
     { btn: "tabUsersBtn", content: "usersTab" },
     { btn: "tabNotificationsBtn", content: "notificationsTab" },

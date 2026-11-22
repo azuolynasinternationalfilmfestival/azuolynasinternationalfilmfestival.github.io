@@ -4202,6 +4202,7 @@ app.post('/api/admin/editions', (req, res) => {
       status, submissionDeadline,
       votingStartDate, votingEndDate,
       categories, categoriesEn,
+      photos,
       adminEmail, adminName
     } = req.body || {};
 
@@ -4214,27 +4215,43 @@ app.post('/api/admin/editions', (req, res) => {
     const existingIdx = data.editions.findIndex(e => String(e.year) === cleanYear || e.id === cleanYear);
     const existing = existingIdx >= 0 ? data.editions[existingIdx] : {};
 
+    const normalizedPhotos = Array.isArray(photos)
+      ? photos
+          .filter(p => p && typeof p === 'object' && String(p.url || '').trim())
+          .map((p, idx) => ({
+            id: String(p.id || `alb_${cleanYear}_${Date.now()}_${idx}`).trim(),
+            url: String(p.url).trim(),
+            caption: String(p.caption || '').trim(),
+            captionEn: String(p.captionEn || '').trim(),
+            album: ['ceremony', 'laureates', 'prizes'].includes(String(p.album || '').trim())
+              ? String(p.album).trim()
+              : 'ceremony',
+            uploadedAt: String(p.uploadedAt || new Date().toISOString())
+          }))
+      : (Array.isArray(existing.photos) ? existing.photos : []);
+
     const editionRecord = {
       id: cleanYear,
       year: cleanYear,
       status: status || existing.status || (cleanYear === '2027' ? 'upcoming' : 'completed'),
       title: title !== undefined && String(title).trim() ? String(title).trim() : (existing.title || `FEST ${cleanYear}`),
       titleEn: titleEn !== undefined && String(titleEn).trim() ? String(titleEn).trim() : (existing.titleEn || `FEST ${cleanYear}`),
-      date: date !== undefined && String(date).trim() ? String(date).trim() : (existing.date || ''),
-      dateEn: dateEn !== undefined && String(dateEn).trim() ? String(dateEn).trim() : (existing.dateEn || ''),
-      subtitle: subtitle !== undefined && String(subtitle).trim() ? String(subtitle).trim() : (existing.subtitle || ''),
-      subtitleEn: subtitleEn !== undefined && String(subtitleEn).trim() ? String(subtitleEn).trim() : (existing.subtitleEn || ''),
-      story: story !== undefined && String(story).trim() ? String(story).trim() : (existing.story || ''),
-      storyEn: storyEn !== undefined && String(storyEn).trim() ? String(storyEn).trim() : (existing.storyEn || ''),
-      heroImage: heroImage !== undefined && String(heroImage).trim() ? String(heroImage).trim() : (existing.heroImage || ''),
-      videoUrl: videoUrl !== undefined && String(videoUrl).trim() ? String(videoUrl).trim() : (existing.videoUrl || ''),
+      date: date !== undefined ? String(date).trim() : (existing.date || ''),
+      dateEn: dateEn !== undefined ? String(dateEn).trim() : (existing.dateEn || ''),
+      subtitle: subtitle !== undefined ? String(subtitle).trim() : (existing.subtitle || ''),
+      subtitleEn: subtitleEn !== undefined ? String(subtitleEn).trim() : (existing.subtitleEn || ''),
+      story: story !== undefined ? String(story).trim() : (existing.story || ''),
+      storyEn: storyEn !== undefined ? String(storyEn).trim() : (existing.storyEn || ''),
+      heroImage: heroImage !== undefined ? String(heroImage).trim() : (existing.heroImage || ''),
+      videoUrl: videoUrl !== undefined ? String(videoUrl).trim() : (existing.videoUrl || ''),
       pageUrl: pageUrl !== undefined && String(pageUrl).trim() ? String(pageUrl).trim() : (existing.pageUrl || `azuolynas-fest-${cleanYear}.html`),
       pageUrlEn: pageUrlEn !== undefined && String(pageUrlEn).trim() ? String(pageUrlEn).trim() : (existing.pageUrlEn || `../en/azuolynas-fest-${cleanYear}.html`),
-      submissionDeadline: submissionDeadline !== undefined && String(submissionDeadline).trim() ? String(submissionDeadline).trim() : (existing.submissionDeadline || ''),
-      votingStartDate: votingStartDate !== undefined && String(votingStartDate).trim() ? String(votingStartDate).trim() : (existing.votingStartDate || ''),
-      votingEndDate: votingEndDate !== undefined && String(votingEndDate).trim() ? String(votingEndDate).trim() : (existing.votingEndDate || ''),
+      submissionDeadline: submissionDeadline !== undefined ? String(submissionDeadline).trim() : (existing.submissionDeadline || ''),
+      votingStartDate: votingStartDate !== undefined ? String(votingStartDate).trim() : (existing.votingStartDate || ''),
+      votingEndDate: votingEndDate !== undefined ? String(votingEndDate).trim() : (existing.votingEndDate || ''),
       categories: categories !== undefined && String(categories).trim() ? String(categories).trim() : (existing.categories || 'I Kategorija (10-13 m.), II Kategorija (14-18 m.)'),
       categoriesEn: categoriesEn !== undefined && String(categoriesEn).trim() ? String(categoriesEn).trim() : (existing.categoriesEn || 'Category I (10-13 yrs), Category II (14-18 yrs)'),
+      photos: normalizedPhotos,
       updatedAt: new Date().toISOString(),
       updatedBy: String(adminEmail || PRIMARY_SUPERADMIN_EMAIL).trim().toLowerCase()
     };
@@ -4248,20 +4265,22 @@ app.post('/api/admin/editions', (req, res) => {
 
     // Sync to Firestore editions collection
     syncToFirestore('editions', cleanYear, {
-      year: { stringValue: cleanYear },
-      title: { stringValue: editionRecord.title },
-      titleEn: { stringValue: editionRecord.titleEn },
-      date: { stringValue: editionRecord.date },
-      dateEn: { stringValue: editionRecord.dateEn },
-      subtitle: { stringValue: editionRecord.subtitle },
-      subtitleEn: { stringValue: editionRecord.subtitleEn },
-      story: { stringValue: editionRecord.story },
-      storyEn: { stringValue: editionRecord.storyEn },
-      heroImage: { stringValue: editionRecord.heroImage },
-      videoUrl: { stringValue: editionRecord.videoUrl },
-      pageUrl: { stringValue: editionRecord.pageUrl },
-      pageUrlEn: { stringValue: editionRecord.pageUrlEn },
-      status: { stringValue: editionRecord.status }
+      year: cleanYear,
+      title: editionRecord.title,
+      titleEn: editionRecord.titleEn,
+      date: editionRecord.date,
+      dateEn: editionRecord.dateEn,
+      subtitle: editionRecord.subtitle,
+      subtitleEn: editionRecord.subtitleEn,
+      story: editionRecord.story,
+      storyEn: editionRecord.storyEn,
+      heroImage: editionRecord.heroImage,
+      videoUrl: editionRecord.videoUrl,
+      pageUrl: editionRecord.pageUrl,
+      pageUrlEn: editionRecord.pageUrlEn,
+      status: editionRecord.status,
+      photos: editionRecord.photos,
+      updatedAt: editionRecord.updatedAt
     });
 
     const callerEmail = String(adminEmail || PRIMARY_SUPERADMIN_EMAIL).trim().toLowerCase();
@@ -4271,12 +4290,41 @@ app.post('/api/admin/editions', (req, res) => {
       adminEmail: callerEmail,
       adminName: adminName || callerEmail.split('@')[0],
       target: `FEST ${cleanYear}`,
-      details: `Išsaugota festivalio leidinio informacija: FEST ${cleanYear} (LT ir EN versijos)`
+      details: `Išsaugota festivalio leidinio ir albumo informacija: FEST ${cleanYear} (${normalizedPhotos.length} nuotr.)`
     });
 
     res.json({ success: true, edition: editionRecord });
   } catch (err) {
     res.status(500).json({ error: 'Failed to save edition' });
+  }
+});
+
+// Fallback local image upload for Albums Editor when Firebase Storage is unavailable
+app.post('/api/admin/albums/upload', requireAdminAuth, (req, res) => {
+  try {
+    const { year, filename, dataUrl } = req.body || {};
+    const cleanYear = String(year || 'general').replace(/[^a-zA-Z0-9_-]/g, '');
+    const rawData = String(dataUrl || '').trim();
+    const match = rawData.match(/^data:image\/(jpeg|jpg|png|webp|gif);base64,([A-Za-z0-9+/=]+)$/i);
+    if (!match) {
+      return res.status(400).json({ error: 'Palaikomi tik JPG, PNG, WEBP arba GIF paveikslėliai.' });
+    }
+    const ext = match[1].toLowerCase() === 'jpeg' ? 'jpg' : match[1].toLowerCase();
+    const buffer = Buffer.from(match[2], 'base64');
+    if (buffer.length === 0) {
+      return res.status(400).json({ error: 'Tuščias failas' });
+    }
+    const safeBase = String(filename || 'photo')
+      .replace(/\.[^.]+$/, '')
+      .replace(/[^a-zA-Z0-9_-]/g, '_')
+      .slice(0, 40) || 'photo';
+    const targetDir = path.join(__dirname, 'uploads', 'albums', cleanYear);
+    fs.mkdirSync(targetDir, { recursive: true });
+    const outName = `${Date.now()}_${crypto.randomBytes(3).toString('hex')}_${safeBase}.${ext}`;
+    fs.writeFileSync(path.join(targetDir, outName), buffer);
+    res.json({ success: true, url: `/uploads/albums/${cleanYear}/${outName}` });
+  } catch (err) {
+    res.status(500).json({ error: 'Nepavyko įkelti nuotraukos į serverį: ' + err.message });
   }
 });
 
@@ -5645,10 +5693,10 @@ app.get('/stream-overlay', (req, res) => {
   res.sendFile(path.join(__dirname, 'stream-overlay.html'));
 });
 app.get('/azuolynas-fest-2026', (req, res) => {
-  res.sendFile(path.join(__dirname, 'lt', 'azuolynas-fest-2026.html'));
+  res.redirect(302, '/lt/azuolynas-fest-2026.html');
 });
 app.get('/azuolynas-fest-2026.html', (req, res) => {
-  res.sendFile(path.join(__dirname, 'lt', 'azuolynas-fest-2026.html'));
+  res.redirect(302, '/lt/azuolynas-fest-2026.html');
 });
 app.get('/lt/azuolynas-fest-2026', (req, res) => {
   res.sendFile(path.join(__dirname, 'lt', 'azuolynas-fest-2026.html'));
@@ -5657,7 +5705,7 @@ app.get('/en/azuolynas-fest-2026', (req, res) => {
   res.sendFile(path.join(__dirname, 'en', 'azuolynas-fest-2026.html'));
 });
 app.get('/azuolynas-fest-2027', (req, res) => {
-  res.sendFile(path.join(__dirname, 'azuolynas-fest-2027.html'));
+  res.redirect(302, '/lt/azuolynas-fest-2027.html');
 });
 app.get('/lt/azuolynas-fest-2027', (req, res) => {
   res.sendFile(path.join(__dirname, 'lt', 'azuolynas-fest-2027.html'));

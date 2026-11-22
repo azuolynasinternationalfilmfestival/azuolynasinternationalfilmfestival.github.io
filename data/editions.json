@@ -21,6 +21,29 @@
       "votingEndDate": "2027-04-22",
       "categories": "I Kategorija (10-13 m.), II Kategorija (14-18 m.)",
       "categoriesEn": "Category I (10-13 yrs), Category II (14-18 yrs)",
+      "photos": [
+        {
+          "id": "ed2027_ph_1",
+          "url": "https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/IMG_3458.jpeg?alt=media&token=224af1bd-25ff-494e-8136-fbf330d3ad5b",
+          "caption": "Festivalio scena ir Kauno tarptautinės gimnazijos kino šventė",
+          "captionEn": "Festival stage and celebration at Kaunas International Gymnasium",
+          "album": "ceremony"
+        },
+        {
+          "id": "ed2027_ph_2",
+          "url": "https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/IMG_3462.jpeg?alt=media&token=f03ee32c-74f8-450f-a39e-26f50b9ebfd7",
+          "caption": "Vedėjai, tarptautinė komisija ir dalyviai",
+          "captionEn": "Festival hosts, international jury and laureates",
+          "album": "laureates"
+        },
+        {
+          "id": "ed2027_ph_3",
+          "url": "https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/IMG_3463.jpeg?alt=media&token=af7892ca-e78e-4198-b686-e0181472e8da",
+          "caption": "Rankų darbo ąžuolo statulėlės ir apdovanojimai",
+          "captionEn": "Handcrafted oak statuettes and festival awards",
+          "album": "prizes"
+        }
+      ],
       "updatedAt": "2026-10-10T16:00:00.000Z",
       "updatedBy": "azuolynasfilmfestival@gmail.com"
     },
@@ -45,6 +68,29 @@
       "votingEndDate": "2026-04-15",
       "categories": "I Kategorija (10-13 m.), II Kategorija (14-18 m.)",
       "categoriesEn": "Category I (10-13 yrs), Category II (14-18 yrs)",
+      "photos": [
+        {
+          "id": "ed2026_ph_1",
+          "url": "https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/IMG_3463.jpeg?alt=media&token=af7892ca-e78e-4198-b686-e0181472e8da",
+          "caption": "Oficialūs festivalio trofėjai ir laureatų statulėlės",
+          "captionEn": "Official laureate statuettes and festival awards",
+          "album": "prizes"
+        },
+        {
+          "id": "ed2026_ph_2",
+          "url": "https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/IMG_3458.jpeg?alt=media&token=224af1bd-25ff-494e-8136-fbf330d3ad5b",
+          "caption": "Ceremonijos akimirkos ir festivalio dalyviai",
+          "captionEn": "Ceremony moments and student participants",
+          "album": "ceremony"
+        },
+        {
+          "id": "ed2026_ph_3",
+          "url": "https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/IMG_3459.jpeg?alt=media&token=dfdda212-9ea6-433f-af80-8c5b5b57f361",
+          "caption": "Laureatų diplomų įteikimas ir svečių sveikinimai",
+          "captionEn": "Presentation of diplomas and international awards",
+          "album": "laureates"
+        }
+      ],
       "updatedAt": "2026-04-18T10:00:00.000Z",
       "updatedBy": "azuolynasfilmfestival@gmail.com"
     },

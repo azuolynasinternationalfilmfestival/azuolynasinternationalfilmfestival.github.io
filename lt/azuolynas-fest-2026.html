@@ -32,6 +32,10 @@
         <img src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media" alt="Ąžuolynas Fest" class="logo-img">
         <span class="logo-text">FEST 2026</span>
       </a>
+      <nav class="header-edition-nav" aria-label="Festivalio metai">
+        <a href="azuolynas-fest-2027.html" class="header-edition-link">2027</a>
+        <a href="azuolynas-fest-2026.html" class="header-edition-link active">2026</a>
+      </nav>
       <div class="header-actions">
         <a href="index.html#submit" class="btn-solid btn-nav-cta">Pateikti Filmą</a>
         <div class="lang-switch">
@@ -81,6 +85,8 @@
         <div class="drawer-section-title">Navigacija</div>
         <ul class="drawer-nav-list">
           <li><a href="index.html" class="drawer-nav-link"><span>Pagrindinis puslapis</span></a></li>
+          <li><a href="azuolynas-fest-2027.html" class="drawer-nav-link highlight"><span>FEST 2027 (7-oji Edicija)</span></a></li>
+          <li><a href="azuolynas-fest-2026.html" class="drawer-nav-link"><span>FEST 2026 (Metraštis)</span></a></li>
           <li><a href="#about" class="drawer-nav-link"><span>Apie festivalį</span></a></li>
           <li><a href="faq.html" class="drawer-nav-link"><span>DUK (Klausimai ir atsakymai)</span></a></li>
           <li><a href="#wins" class="drawer-nav-link"><span>Mūsų pergalės</span></a></li>
@@ -126,9 +132,9 @@
         </div>
 
         <div class="content-card">
-          <p id="dynStory" style="font-size:1.05rem; line-height:1.8; color:var(--text-color); margin-bottom:20px;">
+          <div id="dynStory" style="font-size:1.05rem; line-height:1.8; color:var(--text-color); margin-bottom:20px;">
             Jau šeštus metus iš eilės mūsų gimnazija tampa jaunimo kino meno centru. Mokykloje vyko tradicinis tarptautinis mokinių kino festivalis „Ąžuolynas“. Šių metų festivalio mastas išties stulbinantis: kaip pastebėjo direktoriaus pavaduotoja ugdymui atliekanti direktoriaus funkcijas Marija Daunorienė, dalyvių geografija išsiplėtė net iki 4 žemynų. Konkurse varžėsi jaunieji talentai iš Europos, Azijos, Šiaurės Amerikos ir net Afrikos! Dalyvių meistriškumą vertino profesionali komisija, kurią sudarė televizijos ir tarptautinių santykių ekspertai iš Italijos, Serbų Respublikos ir Lietuvos.
-          </p>
+          </div>
 
           <div class="countries-cloud">
             <span class="country-pill">Europa</span>
@@ -328,14 +334,59 @@
       window.FestivalLightbox.init(fest2026Photos, "lt");
     }
 
-    db.collection("editions").doc("2026").onSnapshot((doc) => {
-      if (!doc.exists) return;
-      const data = doc.data();
+    function sanitizeEditorialStory(raw) {
+      const escaped = String(raw || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+      return escaped
+        .replace(/&lt;(\/?(b|strong|i|em|blockquote|u))&gt;/gi, "<$1>")
+        .split(/\n{2,}/)
+        .map((p) => `<p style="margin:0 0 14px 0;">${p.replace(/\n/g, "<br>")}</p>`)
+        .join("");
+    }
 
+    function escapeAttr(val) {
+      return String(val || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+
+    function renderEdition2026Gallery(photos) {
+      const grid = document.getElementById("editionGalleryGrid");
+      if (!grid || !Array.isArray(photos) || photos.length === 0) return;
+      grid.innerHTML = photos.map((p, idx) => {
+        const cap = p.caption || p.captionEn || "Festivalio akimirka";
+        return `
+          <div class="gallery-item" data-alb-idx="${idx}">
+            <div class="gallery-item-media">
+              <img src="${escapeAttr(p.url)}" alt="${escapeAttr(cap)}" loading="lazy">
+              <div class="gallery-overlay-hint"><span>Žiūrėti</span></div>
+            </div>
+            <div class="gallery-caption">${escapeAttr(cap)}</div>
+          </div>
+        `;
+      }).join("");
+      grid.querySelectorAll(".gallery-item[data-alb-idx]").forEach((el) => {
+        el.addEventListener("click", () => {
+          const item = photos[Number(el.dataset.albIdx)];
+          if (item && window.openLightboxFromSrc) {
+            window.openLightboxFromSrc(item.url, item.caption || item.captionEn || "");
+          }
+        });
+      });
+    }
+
+    function applyEdition2026Data(data) {
+      if (!data) return;
       if (data.title) document.getElementById("dynTitle").textContent = data.title;
       if (data.date) document.getElementById("dynDate").textContent = data.date;
       if (data.subtitle) document.getElementById("dynSub").textContent = data.subtitle;
-      if (data.story) document.getElementById("dynStory").textContent = data.story;
+      if (data.story) document.getElementById("dynStory").innerHTML = sanitizeEditorialStory(data.story);
       if (data.heroImage) {
         document.getElementById("editionHeroSection").style.backgroundImage = `url('${data.heroImage}')`;
       }
@@ -346,9 +397,33 @@
         else if (embed.includes("youtu.be/")) embed = embed.replace("youtu.be/", "www.youtube.com/embed/");
         wrap.innerHTML = `<iframe src="${embed}" allowfullscreen class="embed-media"></iframe>`;
       }
-    }, (err) => {
-      console.warn("Edition 2026 listener:", err.message);
-    });
+      if (Array.isArray(data.photos) && data.photos.length > 0) {
+        renderEdition2026Gallery(data.photos);
+        if (window.FestivalLightbox) {
+          window.FestivalLightbox.init(data.photos.map((p) => ({
+            url: p.url,
+            caption: p.caption || p.captionEn || "",
+            album: p.album || "ceremony"
+          })), "lt");
+        }
+      }
+    }
+
+    fetch("/api/editions")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((payload) => {
+        const ed = (payload?.editions || []).find((x) => String(x.year) === "2026" || x.id === "2026");
+        if (ed) applyEdition2026Data(ed);
+      })
+      .catch(() => {});
+
+    if (typeof db !== "undefined" && db) {
+      db.collection("editions").doc("2026").onSnapshot((doc) => {
+        if (doc.exists) applyEdition2026Data(doc.data());
+      }, (err) => {
+        console.warn("Edition 2026 listener:", err.message);
+      });
+    }
   </script>
 </body>
 </html>

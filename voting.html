@@ -939,6 +939,8 @@
 
       <nav class="desktop-nav" aria-label="Main Navigation">
         <a href="lt/index.html" class="nav-link" id="navHome">Pradinis</a>
+        <a href="lt/azuolynas-fest-2027.html" class="nav-link" id="navFest2027">FEST 2027</a>
+        <a href="lt/azuolynas-fest-2026.html" class="nav-link" id="navFest2026">FEST 2026</a>
         <a href="voting.html" class="nav-link active" id="navVoting">Balsavimas</a>
         <a href="live.html" class="nav-link" id="navLive">Transliacija</a>
       </nav>
@@ -982,6 +984,8 @@
       <div class="drawer-section-title" id="drawerNavTitle">Navigacija</div>
       <ul class="drawer-nav-list">
         <li><a href="lt/index.html" class="drawer-nav-link" id="drawerNavHome"><span>Pradinis puslapis</span></a></li>
+        <li><a href="lt/azuolynas-fest-2027.html" class="drawer-nav-link" id="drawerNavFest2027"><span>FEST 2027</span></a></li>
+        <li><a href="lt/azuolynas-fest-2026.html" class="drawer-nav-link" id="drawerNavFest2026"><span>FEST 2026</span></a></li>
         <li><a href="voting.html" class="drawer-nav-link highlight" id="drawerNavVoting"><span>Balsavimas už filmus</span></a></li>
         <li><a href="live.html" class="drawer-nav-link" id="drawerNavLive"><span>Tiesioginė transliacija</span></a></li>
       </ul>
@@ -1319,6 +1323,13 @@
 
         const navH = document.getElementById("navHome");
         if (navH) { navH.textContent = t.navHome; navH.href = t.homeUrl; }
+        const langPrefix = currentLang === "lt" ? "lt/" : "en/";
+        const fest2027Url = langPrefix + "azuolynas-fest-2027.html";
+        const fest2026Url = langPrefix + "azuolynas-fest-2026.html";
+        const nav2027 = document.getElementById("navFest2027");
+        if (nav2027) nav2027.href = fest2027Url;
+        const nav2026 = document.getElementById("navFest2026");
+        if (nav2026) nav2026.href = fest2026Url;
         const navV = document.getElementById("navVoting");
         if (navV) navV.textContent = t.navVoting;
         const liveTargetUrl = "live.html?lang=" + encodeURIComponent(currentLang);
@@ -1335,6 +1346,10 @@
         if (drawerLogo) drawerLogo.href = t.homeUrl;
         const drawerH = document.getElementById("drawerNavHome");
         if (drawerH) drawerH.href = t.homeUrl;
+        const drawer2027 = document.getElementById("drawerNavFest2027");
+        if (drawer2027) drawer2027.href = fest2027Url;
+        const drawer2026 = document.getElementById("drawerNavFest2026");
+        if (drawer2026) drawer2026.href = fest2026Url;
         const drawerV = document.getElementById("drawerNavVoting");
         if (drawerV) {
           drawerV.href = "voting.html?lang=" + encodeURIComponent(currentLang);

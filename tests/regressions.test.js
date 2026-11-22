@@ -615,3 +615,73 @@ test('voting.html queries only published/winner submissions and firestore.rules 
   assert.doesNotMatch(subsBlock, /allow get, list: if true;/);
 });
 
+test('header 2026/2027 navigation routes match active language across LT, EN, and voting pages', () => {
+  const ltPages = [
+    '../lt/index.html',
+    '../lt/azuolynas-fest-2026.html',
+    '../lt/azuolynas-fest-2027.html',
+    '../lt/azuolynas-festival-2026.html',
+    '../lt/faq.html',
+    '../lt/privatumo-politika.html',
+    '../lt/naudojimosi-taisykles.html'
+  ];
+  for (const rel of ltPages) {
+    const html = fs.readFileSync(new URL(rel, import.meta.url), 'utf8');
+    const navMatch = html.match(/<nav class="header-edition-nav"[\s\S]*?<\/nav>/);
+    assert.ok(navMatch, `Missing .header-edition-nav in ${rel}`);
+    assert.match(navMatch[0], /href="azuolynas-fest-2027\.html"/, `LT 2027 link invalid in ${rel}`);
+    assert.match(navMatch[0], /href="azuolynas-fest-2026\.html"/, `LT 2026 link invalid in ${rel}`);
+    assert.doesNotMatch(navMatch[0], /\.\.\/en\//, `LT edition nav leaked EN path in ${rel}`);
+  }
+
+  const enPages = [
+    '../en/index.html',
+    '../en/azuolynas-fest-2026.html',
+    '../en/azuolynas-fest-2027.html',
+    '../en/faq.html',
+    '../en/privacy-policy.html',
+    '../en/terms-of-service.html'
+  ];
+  for (const rel of enPages) {
+    const html = fs.readFileSync(new URL(rel, import.meta.url), 'utf8');
+    const navMatch = html.match(/<nav class="header-edition-nav"[\s\S]*?<\/nav>/);
+    assert.ok(navMatch, `Missing .header-edition-nav in ${rel}`);
+    assert.match(navMatch[0], /href="azuolynas-fest-2027\.html"/, `EN 2027 link invalid in ${rel}`);
+    assert.match(navMatch[0], /href="azuolynas-fest-2026\.html"/, `EN 2026 link invalid in ${rel}`);
+    assert.doesNotMatch(navMatch[0], /\.\.\/lt\//, `EN edition nav leaked LT path in ${rel}`);
+  }
+
+  const legacy2026 = fs.readFileSync(new URL('../lt/azuolynas-festival-2026.html', import.meta.url), 'utf8');
+  assert.match(legacy2026, /href="\.\.\/en\/azuolynas-fest-2026\.html"/);
+
+  const root2027 = fs.readFileSync(new URL('../azuolynas-fest-2027.html', import.meta.url), 'utf8');
+  assert.match(root2027, /href="lt\/privatumo-politika\.html"/);
+  assert.match(root2027, /href="lt\/naudojimosi-taisykles\.html"/);
+
+  const votingHtml = fs.readFileSync(new URL('../voting.html', import.meta.url), 'utf8');
+  assert.match(votingHtml, /id="navFest2027"/);
+  assert.match(votingHtml, /id="navFest2026"/);
+  assert.match(votingHtml, /id="drawerNavFest2027"/);
+  assert.match(votingHtml, /id="drawerNavFest2026"/);
+  assert.match(votingHtml, /const langPrefix = currentLang === "lt" \? "lt\/" : "en\/";/);
+  assert.doesNotMatch(votingHtml, /AISFF 2027/);
+});
+
+test('admin panel exposes dedicated Albums (2026/2027) editor tab and multi-photo upload backend route', () => {
+  const adminHtml = fs.readFileSync(new URL('../admin.html', import.meta.url), 'utf8');
+  const adminMainJs = fs.readFileSync(new URL('../js/admin-main.js', import.meta.url), 'utf8');
+  const albumsJs = fs.readFileSync(new URL('../js/albums.js', import.meta.url), 'utf8');
+  const serverJs = fs.readFileSync(new URL('../server.js', import.meta.url), 'utf8');
+
+  for (const id of ['tabAlbumsBtn', 'albumsTab', 'albumYearTabs', 'albStory', 'albStoryEn', 'albumMultiPhotoInput', 'albumPhotosGrid', 'saveAlbumBtn']) {
+    assert.ok(adminHtml.includes(`id="${id}"`), `Missing #${id} in admin.html`);
+  }
+  assert.match(adminHtml, /id="albumMultiPhotoInput"[^>]*multiple/);
+  assert.match(adminMainJs, /from ["']\.\/albums\.js["']/);
+  assert.match(adminMainJs, /btn:\s*"tabAlbumsBtn",\s*content:\s*"albumsTab"/);
+  assert.match(albumsJs, /export function initAlbums/);
+  assert.match(albumsJs, /\/api\/admin\/albums\/upload/);
+  assert.match(serverJs, /app\.post\('\/api\/admin\/albums\/upload',\s*requireAdminAuth/);
+});
+
+

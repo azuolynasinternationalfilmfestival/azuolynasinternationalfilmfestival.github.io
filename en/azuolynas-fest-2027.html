@@ -32,6 +32,10 @@
         <img src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media" alt="AISFF" class="logo-img">
         <span class="logo-text">AISFF 2027</span>
       </a>
+      <nav class="header-edition-nav" aria-label="Festival Editions">
+        <a href="azuolynas-fest-2027.html" class="header-edition-link active">2027</a>
+        <a href="azuolynas-fest-2026.html" class="header-edition-link">2026</a>
+      </nav>
       <div class="header-actions">
         <a href="index.html#submit" class="btn-solid btn-nav-cta">Submit Film</a>
         <div class="lang-switch">
@@ -69,6 +73,7 @@
         <li><a href="#about" class="drawer-nav-link"><span>About FEST 2027</span></a></li>
         <li><a href="#rules" class="drawer-nav-link"><span>Rules & Eligibility</span></a></li>
         <li><a href="#gallery" class="drawer-nav-link"><span>Photo Gallery</span></a></li>
+        <li><a href="azuolynas-fest-2026.html" class="drawer-nav-link"><span>FEST 2026 Archive</span></a></li>
         <li><a href="../live.html?lang=en" class="drawer-nav-link highlight"><span>Live Broadcast & Voting</span></a></li>
         <li><a href="index.html#submit" class="drawer-nav-link"><span>Submit Film</span></a></li>
       </ul>
@@ -196,7 +201,7 @@
         <p class="section-sub">Experience the atmosphere, awards ceremony, and celebration at Kaunas International Gymnasium.</p>
       </div>
 
-      <div class="ceremony-mosaic-grid">
+      <div class="ceremony-mosaic-grid" id="edition2027GalleryGrid">
         <div class="ceremony-mosaic-hero">
           <img src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/IMG_3458.jpeg?alt=media&token=224af1bd-25ff-494e-8136-fbf330d3ad5b" alt="Awards Gala">
         </div>
@@ -209,6 +214,14 @@
       </div>
     </div>
   </section>
+
+  <div id="lightboxModal" class="lightbox-modal" role="dialog" aria-modal="true" aria-label="Photo preview">
+    <button class="lightbox-close" onclick="closeLightbox()" aria-label="Close">&times;</button>
+    <div class="lightbox-content">
+      <img id="lightboxImg" class="lightbox-img" src="" alt="Preview">
+      <div id="lightboxCaption" class="lightbox-caption"></div>
+    </div>
+  </div>
 
   <!-- Footer -->
   <footer class="site-footer">
@@ -229,30 +242,101 @@
 
   <script src="../config.js"></script>
   <script src="../js/burger-menu.js"></script>
-  <script type="module">
-    // CMS Dynamic Sync: load latest 2027 English data from editions endpoint / Firestore
-    async function syncEditionData() {
-      try {
-        const res = await fetch("/api/editions");
-        if (res.ok) {
-          const data = await res.json();
-          const edition2027 = (data.editions || []).find(e => String(e.year) === "2027" || e.id === "2027");
-          if (edition2027) {
-            if (edition2027.titleEn) document.getElementById("cmsTitle").textContent = edition2027.titleEn;
-            if (edition2027.subtitleEn) document.getElementById("cmsSubtitle").textContent = edition2027.subtitleEn;
-            if (edition2027.dateEn) document.getElementById("cmsDate").textContent = edition2027.dateEn;
-            if (edition2027.storyEn) {
-              const storyHtml = edition2027.storyEn.split("\n\n").map(p => `<p style="margin-bottom:14px;">${p}</p>`).join("");
-              document.getElementById("cmsStory").innerHTML = storyHtml;
-            }
-            if (edition2027.heroImage) {
-              document.getElementById("cmsHeroImg").src = edition2027.heroImage;
-            }
-          }
-        }
-      } catch (e) {}
+  <script>
+    window.openLightboxFromSrc = function(src, caption) {
+      const modal = document.getElementById("lightboxModal");
+      if (!modal) return;
+      document.getElementById("lightboxImg").src = src;
+      document.getElementById("lightboxCaption").textContent = caption || "";
+      modal.classList.add("active");
+    };
+    window.closeLightbox = function() {
+      const modal = document.getElementById("lightboxModal");
+      if (!modal) return;
+      modal.classList.remove("active");
+      document.getElementById("lightboxImg").src = "";
+    };
+    document.getElementById("lightboxModal")?.addEventListener("click", (e) => {
+      if (e.target.id === "lightboxModal") window.closeLightbox();
+    });
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") window.closeLightbox();
+    });
+
+    function sanitizeEditorialStory(raw) {
+      const escaped = String(raw || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+      return escaped
+        .replace(/&lt;(\/?(b|strong|i|em|blockquote|u))&gt;/gi, "<$1>")
+        .split(/\n{2,}/)
+        .map((p) => `<p style="margin-bottom:14px;">${p.replace(/\n/g, "<br>")}</p>`)
+        .join("");
     }
-    syncEditionData();
+
+    function escapeAttr(val) {
+      return String(val || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+
+    function applyEdition2027En(ed) {
+      if (!ed) return;
+      const title = ed.titleEn || ed.title;
+      const sub = ed.subtitleEn || ed.subtitle;
+      const dt = ed.dateEn || ed.date;
+      const story = ed.storyEn || ed.story;
+      if (title) document.getElementById("cmsTitle").textContent = title;
+      if (sub) document.getElementById("cmsSubtitle").textContent = sub;
+      if (dt) document.getElementById("cmsDate").textContent = dt;
+      if (story) document.getElementById("cmsStory").innerHTML = sanitizeEditorialStory(story);
+      if (ed.heroImage) {
+        document.getElementById("cmsHeroImg").src = ed.heroImage;
+        const anchor = document.getElementById("heroAnchor");
+        if (anchor) anchor.style.backgroundImage = `url('${ed.heroImage}')`;
+      }
+      const grid = document.getElementById("edition2027GalleryGrid");
+      if (grid && Array.isArray(ed.photos) && ed.photos.length > 0) {
+        grid.innerHTML = ed.photos.map((p, idx) => {
+          const cap = p.captionEn || p.caption || "Festival highlight";
+          return `
+            <div class="gallery-item" data-alb-idx="${idx}" style="cursor:pointer;">
+              <div class="gallery-item-media">
+                <img src="${escapeAttr(p.url)}" alt="${escapeAttr(cap)}" loading="lazy">
+                <div class="gallery-overlay-hint"><span>View</span></div>
+              </div>
+              <div class="gallery-caption">${escapeAttr(cap)}</div>
+            </div>
+          `;
+        }).join("");
+        grid.className = "gallery-grid";
+        grid.querySelectorAll(".gallery-item[data-alb-idx]").forEach((el) => {
+          el.addEventListener("click", () => {
+            const item = ed.photos[Number(el.dataset.albIdx)];
+            if (item) window.openLightboxFromSrc(item.url, item.captionEn || item.caption || "");
+          });
+        });
+      }
+    }
+
+    fetch("/api/editions")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        const edition2027 = (data?.editions || []).find((e) => String(e.year) === "2027" || e.id === "2027");
+        if (edition2027) applyEdition2027En(edition2027);
+      })
+      .catch(() => {});
+
+    if (typeof db !== "undefined" && db) {
+      db.collection("editions").doc("2027").onSnapshot((doc) => {
+        if (doc.exists) applyEdition2027En(doc.data());
+      }, () => {});
+    }
   </script>
 </body>
 </html>

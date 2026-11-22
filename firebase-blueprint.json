@@ -29,17 +29,27 @@
     },
     "FestivalEdition": {
       "title": "FestivalEdition",
-      "description": "Information about a specific annual edition of the festival",
+      "description": "Information and photo album for a specific annual edition of the festival",
       "type": "object",
       "properties": {
         "year": { "type": "string", "description": "Edition year" },
-        "title": { "type": "string", "description": "Edition title" },
-        "subtitle": { "type": "string", "description": "Edition subtitle" },
-        "date": { "type": "string", "description": "Ceremony date" },
+        "status": { "type": "string", "description": "Edition status: upcoming, active, or completed" },
+        "title": { "type": "string", "description": "Edition title (LT)" },
+        "titleEn": { "type": "string", "description": "Edition title (EN)" },
+        "subtitle": { "type": "string", "description": "Edition subtitle (LT)" },
+        "subtitleEn": { "type": "string", "description": "Edition subtitle (EN)" },
+        "date": { "type": "string", "description": "Ceremony date (LT)" },
+        "dateEn": { "type": "string", "description": "Ceremony date (EN)" },
         "heroImage": { "type": "string", "description": "Banner photo URL" },
-        "story": { "type": "string", "description": "Edition story text" },
+        "story": { "type": "string", "description": "Edition story text (LT)" },
+        "storyEn": { "type": "string", "description": "Edition story text (EN)" },
         "videoUrl": { "type": "string", "description": "Video recording URL" },
-        "pageUrl": { "type": "string", "description": "Relative page URL" }
+        "pageUrl": { "type": "string", "description": "Relative page URL (LT)" },
+        "pageUrlEn": { "type": "string", "description": "Relative page URL (EN)" },
+        "submissionDeadline": { "type": "string", "description": "Submission deadline ISO date" },
+        "categories": { "type": "string", "description": "Competition categories summary (LT)" },
+        "categoriesEn": { "type": "string", "description": "Competition categories summary (EN)" },
+        "photos": { "type": "array", "description": "Album photo objects with url, captions, and category" }
       },
       "required": ["year", "title"]
     },
