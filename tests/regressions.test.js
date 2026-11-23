@@ -790,3 +790,121 @@ test('albums.js saves album and uploads image cleanly via Firestore-first fallba
   assert.match(fallbackUrl, /^data:image\/jpeg;base64,/);
 });
 
+test('SEO metadata, canonical, og:image, twitter cards, sitemap, and valid JSON-LD across all public pages', () => {
+  const publicHtmlPages = [
+    '../index.html',
+    '../lt/index.html',
+    '../en/index.html',
+    '../azuolynas-fest-2027.html',
+    '../lt/azuolynas-fest-2027.html',
+    '../en/azuolynas-fest-2027.html',
+    '../lt/azuolynas-fest-2026.html',
+    '../en/azuolynas-fest-2026.html',
+    '../lt/azuolynas-festival-2026.html',
+    '../lt/faq.html',
+    '../en/faq.html',
+    '../voting.html',
+    '../live.html',
+    '../lt/privatumo-politika.html',
+    '../en/privacy-policy.html',
+    '../lt/naudojimosi-taisykles.html',
+    '../en/terms-of-service.html',
+    '../privacy-policy.html',
+    '../terms-of-service.html'
+  ];
+
+  for (const relPath of publicHtmlPages) {
+    const html = fs.readFileSync(new URL(relPath, import.meta.url), 'utf8');
+    assert.match(html, /<meta\s+name="keywords"\s+content="/i, `${relPath} should define keywords`);
+    assert.match(html, /<link\s+rel="canonical"\s+href="https:\/\/www\.azuolynasfilmfestival\.lt\//i, `${relPath} should define canonical`);
+    assert.match(html, /<meta\s+property="og:image"\s+content="https:\/\//i, `${relPath} should define og:image`);
+    assert.match(html, /<meta\s+name="twitter:card"\s+content="summary_large_image"/i, `${relPath} should define twitter:card`);
+
+    const ldMatches = [...html.matchAll(/<script\s+type="application\/ld\+json">([\s\S]*?)<\/script>/gi)];
+    assert.ok(ldMatches.length > 0, `${relPath} should include at least one Schema.org JSON-LD block`);
+    for (const m of ldMatches) {
+      assert.doesNotThrow(() => JSON.parse(m[1]), `${relPath} JSON-LD must be valid JSON`);
+    }
+  }
+
+  const adminHtml = fs.readFileSync(new URL('../admin.html', import.meta.url), 'utf8');
+  assert.match(adminHtml, /<meta\s+name="robots"\s+content="noindex,\s*nofollow"/i);
+
+  const sitemap = fs.readFileSync(new URL('../sitemap.xml', import.meta.url), 'utf8');
+  for (const requiredUrl of [
+    'https://www.azuolynasfilmfestival.lt/lt/index.html',
+    'https://www.azuolynasfilmfestival.lt/en/index.html',
+    'https://www.azuolynasfilmfestival.lt/lt/azuolynas-fest-2027.html',
+    'https://www.azuolynasfilmfestival.lt/en/azuolynas-fest-2027.html',
+    'https://www.azuolynasfilmfestival.lt/lt/azuolynas-fest-2026.html',
+    'https://www.azuolynasfilmfestival.lt/en/azuolynas-fest-2026.html',
+    'https://www.azuolynasfilmfestival.lt/voting.html',
+    'https://www.azuolynasfilmfestival.lt/live.html'
+  ]) {
+    assert.ok(sitemap.includes(requiredUrl), `sitemap.xml should include ${requiredUrl}`);
+  }
+  assert.equal(sitemap.includes('admin.html'), false, 'sitemap.xml must not expose admin.html');
+});
+
+test('2026 edition uses 6612 cover and all 7 new ceremony/laureate photos while preserving statuette photo', () => {
+  const COVER_6612 = 'https://i.postimg.cc/vmKKp6m6/ceremonija-2026-03-6612.jpg';
+  const STATUETTE_URL = 'https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/IMG_3463.jpeg?alt=media&token=af7892ca-e78e-4198-b686-e0181472e8da';
+  const ALL_NEW_2026_PHOTOS = [
+    'https://i.postimg.cc/5trrZFtv/ceremonija-2026-02.jpg',
+    COVER_6612,
+    'https://i.postimg.cc/25ttPB5n/ceremonija-2026-04-30-01.jpg',
+    'https://i.postimg.cc/jj11GJjD/ceremonija-2026-04-30-02.jpg',
+    'https://i.postimg.cc/25ttPB5q/laureatai-2026-04-30-01.jpg',
+    'https://i.postimg.cc/vmKKp6mV/laureatai-2026-04-30-02.jpg',
+    'https://i.postimg.cc/tgccLVgZ/laureatai-2026-04-30-03.jpg'
+  ];
+
+  const editionsJson = JSON.parse(fs.readFileSync(new URL('../data/editions.json', import.meta.url), 'utf8'));
+  const ed2026 = editionsJson.editions.find(e => e.id === '2026');
+  assert.ok(ed2026, 'data/editions.json must include 2026 edition');
+  assert.equal(ed2026.heroImage, COVER_6612);
+  assert.equal(ed2026.date, '2026 m. balandžio 30 d.');
+  assert.equal(ed2026.dateEn, 'April 30, 2026');
+  assert.match(ed2026.story, /What If/);
+  assert.ok(ed2026.photos.some(p => p.url === STATUETTE_URL && p.album === 'prizes'));
+  for (const photoUrl of ALL_NEW_2026_PHOTOS) {
+    assert.ok(ed2026.photos.some(p => p.url === photoUrl), `data/editions.json 2026 missing ${photoUrl}`);
+  }
+
+  for (const relPath of [
+    '../js/albums.js',
+    '../lt/azuolynas-fest-2026.html',
+    '../en/azuolynas-fest-2026.html',
+    '../lt/azuolynas-festival-2026.html'
+  ]) {
+    const content = fs.readFileSync(new URL(relPath, import.meta.url), 'utf8');
+    assert.ok(content.includes(STATUETTE_URL), `${relPath} must preserve statuette URL`);
+    assert.match(content, /What If/, `${relPath} must mention What If theme`);
+    assert.doesNotMatch(content, /2026-04-17|2026 m\. balandžio 17 d\.|April 17(?:th)?,\s*2026/, `${relPath} must not use outdated April 17 date`);
+    for (const photoUrl of ALL_NEW_2026_PHOTOS) {
+      assert.ok(content.includes(photoUrl), `${relPath} must include ${photoUrl}`);
+    }
+  }
+
+  for (const relPath of [
+    '../lt/azuolynas-fest-2026.html',
+    '../en/azuolynas-fest-2026.html',
+    '../lt/azuolynas-festival-2026.html'
+  ]) {
+    const html = fs.readFileSync(new URL(relPath, import.meta.url), 'utf8');
+    assert.match(html, new RegExp(`<meta\\s+property="og:image"\\s+content="${COVER_6612.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}"`), `${relPath} og:image should be 6612`);
+    assert.match(html, new RegExp(`id="editionHeroSection"[^>]*${COVER_6612.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`), `${relPath} hero bg should be 6612`);
+    assert.match(html, new RegExp(`id="editionGalleryGrid"[\\s\\S]*?${STATUETTE_URL.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`), `${relPath} gallery must keep statuettes`);
+    assert.match(html, /2026-04-30T15:00:00\+03:00/, `${relPath} JSON-LD startDate should be 2026-04-30`);
+  }
+
+  for (const indexRel of ['../lt/index.html', '../en/index.html']) {
+    const idxHtml = fs.readFileSync(new URL(indexRel, import.meta.url), 'utf8');
+    assert.ok(idxHtml.includes(COVER_6612), `${indexRel} 2026 edition card should use cover 6612`);
+    assert.ok(idxHtml.includes(STATUETTE_URL), `${indexRel} must preserve statuette URL`);
+    assert.match(idxHtml, /What If/, `${indexRel} should mention FEST 2026 What If theme`);
+    assert.doesNotMatch(idxHtml, /2026 m\. balandžio 17 d\.|April 17th, 2026/, `${indexRel} must use April 30 date for FEST 2026`);
+  }
+});
+
+

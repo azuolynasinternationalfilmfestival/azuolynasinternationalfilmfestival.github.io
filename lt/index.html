@@ -11,8 +11,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>AISFF | Ąžuolyno Tarptautinis Mokinių Filmų Festivalis | Oficiali Paraiškų Platforma</title>
   <meta name="description" content="7-asis „Ąžuolyno“ tarptautinis mokinių filmų festivalis (AISFF). Tema: „Mano pašaukimas“. Paraiškos: 2026 m. lapkričio 1 d. – 2027 m. balandžio 5 d. Renginys & tiesioginė transliacija: 2027 m. balandžio 27 d.">
+  <meta name="keywords" content="Ąžuolyno filmų festivalis, AISFF, tarptautinis mokinių kino festivalis, trumpametražiai filmai telefonu, Kauno tarptautinė gimnazija, Mano pašaukimas, What If, FEST 2027, FEST 2026, jaunimo kinas Lietuva, moksleivių konkursas, paraiškos teikimas, tiesioginė transliacija, žiūrovų balsavimas">
+  <meta name="author" content="Kauno tarptautinė gimnazija / Ąžuolynas International Students Film Festival">
   <meta name="robots" content="index, follow, max-image-preview:large, max-video-preview:-1">
   <link rel="canonical" href="https://www.azuolynasfilmfestival.lt/lt/index.html">
+  <link rel="alternate" hreflang="lt" href="https://www.azuolynasfilmfestival.lt/lt/index.html">
+  <link rel="alternate" hreflang="en" href="https://www.azuolynasfilmfestival.lt/en/index.html">
+  <link rel="alternate" hreflang="x-default" href="https://www.azuolynasfilmfestival.lt/">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="AISFF - Ąžuolynas International Student Film Festival">
   <meta property="og:title" content="AISFF | Oficiali Paraiškų Platforma">
@@ -21,35 +26,103 @@
   <meta property="og:image" content="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/IMG_3463.jpeg?alt=media&token=af7892ca-e78e-4198-b686-e0181472e8da">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Ąžuolynas International Students Film Festival oficialios statulėlės ir apdovanojimai">
   <meta property="og:locale" content="lt_LT">
+  <meta property="og:locale:alternate" content="en_US">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="AISFF - Ąžuolynas International Student Film Festival">
   <meta name="twitter:description" content="Tema: „Mano pašaukimas“. Paraiškos iki 2027 m. balandžio 5 d. Festivalis ir transliacija: 2027 m. balandžio 27 d.">
   <meta name="twitter:image" content="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/IMG_3463.jpeg?alt=media&token=af7892ca-e78e-4198-b686-e0181472e8da">
+  <meta name="twitter:image:alt" content="Ąžuolynas filmų festivalio statulėlės">
   <link rel="icon" type="image/webp" href="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media">
   <link rel="stylesheet" href="../style.css">
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
-    "@type": "Festival",
-    "name": "Ąžuolynas International Students Film Festival",
-    "alternateName": "Ąžuolyno Tarptautinis Mokinių Filmų Festivalis",
-    "description": "„Ąžuolyno“ filmų festivalis pavadintas vieno iš Kauno lankytinų vietų garbei, kurio papėdėje yra įsikūrusi mūsų studija.",
-    "startDate": "2027-04-27T15:00:00+03:00",
-    "endDate": "2027-04-27T18:00:00+03:00",
-    "eventAttendanceMode": "https://schema.org/OnlineEventAttendanceMode",
-    "eventStatus": "https://schema.org/EventScheduled",
-    "location": {
-      "@type": "VirtualLocation",
-      "url": "https://www.azuolynasfilmfestival.lt/"
-    },
-    "image": "https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/IMG_3463.jpeg?alt=media&token=af7892ca-e78e-4198-b686-e0181472e8da",
-    "organizer": {
-      "@type": "Organization",
-      "name": "Ąžuolynas Film Festival Committee",
-      "email": "azuolynasfilmfestival@gmail.com",
-      "url": "https://www.azuolynasfilmfestival.lt/"
-    }
+    "@graph": [
+      {
+        "@type": "WebSite",
+        "@id": "https://www.azuolynasfilmfestival.lt/#website",
+        "name": "Ąžuolynas International Students Film Festival (AISFF)",
+        "url": "https://www.azuolynasfilmfestival.lt/lt/index.html",
+        "inLanguage": ["lt", "en"],
+        "publisher": {
+          "@id": "https://www.azuolynasfilmfestival.lt/#organization"
+        }
+      },
+      {
+        "@type": "Organization",
+        "@id": "https://www.azuolynasfilmfestival.lt/#organization",
+        "name": "Ąžuolynas International Students Film Festival Committee",
+        "url": "https://www.azuolynasfilmfestival.lt/",
+        "logo": "https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media",
+        "email": "azuolynasfilmfestival@gmail.com",
+        "location": {
+          "@type": "Place",
+          "name": "Kauno tarptautinė gimnazija",
+          "address": {
+            "@type": "PostalAddress",
+            "addressLocality": "Kaunas",
+            "addressCountry": "LT"
+          }
+        }
+      },
+      {
+        "@type": "Festival",
+        "@id": "https://www.azuolynasfilmfestival.lt/lt/index.html#festival",
+        "name": "Ąžuolynas International Students Film Festival (AISFF 2027)",
+        "alternateName": "Ąžuolyno Tarptautinis Mokinių Filmų Festivalis",
+        "url": "https://www.azuolynasfilmfestival.lt/lt/index.html",
+        "description": "7-asis tarptautinis mokinių trumpametražių filmų, sukurtų išmaniuoju telefonu, festivalis Kauno tarptautinėje gimnazijoje. Tema: „Mano pašaukimas“ (My Purpose).",
+        "startDate": "2027-04-27T15:00:00+03:00",
+        "endDate": "2027-04-27T18:00:00+03:00",
+        "eventAttendanceMode": "https://schema.org/MixedEventAttendanceMode",
+        "eventStatus": "https://schema.org/EventScheduled",
+        "isAccessibleForFree": true,
+        "inLanguage": ["lt", "en"],
+        "typicalAgeRange": "10-18",
+        "location": [
+          {
+            "@type": "Place",
+            "name": "Kauno tarptautinė gimnazija",
+            "address": {
+              "@type": "PostalAddress",
+              "addressLocality": "Kaunas",
+              "addressCountry": "LT"
+            }
+          },
+          {
+            "@type": "VirtualLocation",
+            "url": "https://www.azuolynasfilmfestival.lt/live.html"
+          }
+        ],
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "EUR",
+          "availability": "https://schema.org/InStock",
+          "url": "https://www.azuolynasfilmfestival.lt/lt/index.html#submit"
+        },
+        "image": [
+          "https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/IMG_3463.jpeg?alt=media&token=af7892ca-e78e-4198-b686-e0181472e8da",
+          "https://i.postimg.cc/vmKKp6m6/ceremonija-2026-03-6612.jpg"
+        ],
+        "organizer": {
+          "@id": "https://www.azuolynasfilmfestival.lt/#organization"
+        }
+      },
+      {
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Pradžia",
+            "item": "https://www.azuolynasfilmfestival.lt/lt/index.html"
+          }
+        ]
+      }
+    ]
   }
   </script>
   <script type="application/ld+json">
@@ -439,13 +512,13 @@
 
           <!-- 2026 Completed Edition Card -->
           <div class="edition-card-item">
-            <div class="edition-card-bg" style="background-image: url('https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/IMG_3459.jpeg?alt=media&token=dfdda212-9ea6-433f-af80-8c5b5b57f361');"></div>
+            <div class="edition-card-bg" style="background-image: url('https://i.postimg.cc/vmKKp6m6/ceremonija-2026-03-6612.jpg');"></div>
             <div class="edition-card-overlay"></div>
             <div class="edition-card-details">
               <span class="edition-card-badge">2026 Metų Edicija</span>
               <h3 class="edition-card-title">FEST 2026</h3>
-              <div class="edition-card-date">2026 m. balandžio 17 d.</div>
-              <p class="edition-card-text">Kino šventė Kauno tarptautinėje gimnazijoje: net keturi žemynai viename ekrane! Sužinokite, kas laimėjo ir pamatykite ceremonijos akimirkas.</p>
+              <div class="edition-card-date">2026 m. balandžio 30 d.</div>
+              <p class="edition-card-text">Tema: „What If“ • Kino šventė Kauno tarptautinėje gimnazijoje: net keturi žemynai viename ekrane! Sužinokite, kas laimėjo ir pamatykite ceremonijos akimirkas.</p>
               <a href="azuolynas-fest-2026.html" class="btn-solid btn-full">Atverti FEST 2026 Apžvalgą</a>
               <div class="edition-social-share">
                 <span class="share-prompt">Dalintis leidiniu:</span>
@@ -608,7 +681,7 @@
             <div class="ceremony-showcase-titles">
               <span class="ceremony-location-tag">
                 <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
-                Kauno Tarptautinė Gimnazija &bull; Balandžio 17 d.
+                Kauno Tarptautinė Gimnazija &bull; Balandžio 30 d.
               </span>
               <h3 class="ceremony-title">Ceremonijos Akimirkos ir Apdovanojimų Salė</h3>
               <p class="ceremony-lead">
@@ -1665,19 +1738,29 @@
     };
 
     container.innerHTML = sorted.map((ed) => {
-      const year = ed.year || '2026';
+      const year = String(ed.year || '2026').trim();
       const pageUrl = resolveLtEditionUrl(ed, year);
       const title = (ed.title || ('FEST ' + year)).replace(/'/g, "\\'");
       const subtitle = (ed.subtitle || '').replace(/'/g, "\\'");
+      const isLegacy2026 = year === '2026' && (!ed.updatedAt || String(ed.updatedAt) < '2026-11-23T09:00:00.000Z') && (!ed.heroImage || String(ed.heroImage).includes('IMG_3458') || String(ed.heroImage).includes('IMG_3459') || String(ed.date || '').includes('balandžio 17'));
+      const cardDate = isLegacy2026 ? '2026 m. balandžio 30 d.' : (ed.date || '');
+      const cardSub = isLegacy2026
+        ? 'Tema: „What If“ • Kino šventė Kauno tarptautinėje gimnazijoje: net keturi žemynai viename ekrane!'
+        : (ed.subtitle || '');
+      const cardHero = isLegacy2026
+        ? 'https://i.postimg.cc/vmKKp6m6/ceremonija-2026-03-6612.jpg'
+        : (ed.heroImage || (year === '2026'
+            ? 'https://i.postimg.cc/vmKKp6m6/ceremonija-2026-03-6612.jpg'
+            : 'https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/IMG_3458.jpeg?alt=media&token=224af1bd-25ff-494e-8136-fbf330d3ad5b'));
       return `
       <div class="edition-card-item">
-        <div class="edition-card-bg" style="background-image: url('${ed.heroImage || 'https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/IMG_3458.jpeg?alt=media&token=224af1bd-25ff-494e-8136-fbf330d3ad5b'}');"></div>
+        <div class="edition-card-bg" style="background-image: url('${cardHero}');"></div>
         <div class="edition-card-overlay"></div>
         <div class="edition-card-details">
           <span class="edition-card-badge">${ed.year || 'Festivalis'} Edicija</span>
           <h3 class="edition-card-title">${ed.title || ('FEST ' + ed.year)}</h3>
-          <div class="edition-card-date">${ed.date || ''}</div>
-          <p class="edition-card-text">${ed.subtitle || ''}</p>
+          <div class="edition-card-date">${cardDate}</div>
+          <p class="edition-card-text">${cardSub}</p>
           <a href="${pageUrl}" class="btn-solid btn-full">Atverti ${ed.title || 'FEST'} Apžvalgą</a>
           <div class="edition-social-share">
             <span class="share-prompt">Dalintis leidiniu:</span>

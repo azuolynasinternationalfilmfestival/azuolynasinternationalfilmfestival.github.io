@@ -11,8 +11,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>AISFF | Ąžuolynas International Student Film Festival | Official Submissions</title>
   <meta name="description" content="The 7th «Ąžuolynas» International Student Film Festival (AISFF). Theme: “My Purpose”. Submissions: November 1, 2026 – April 5, 2027. Festival & Live Stream: April 27, 2027.">
+  <meta name="keywords" content="Azuolynas International Student Film Festival, AISFF, smartphone short film festival, Kaunas International Gymnasium, My Purpose theme, What If theme, FEST 2027, FEST 2026, youth film competition, student filmmaking, live stream, audience voting">
+  <meta name="author" content="Kaunas International Gymnasium / Ąžuolynas International Students Film Festival">
   <meta name="robots" content="index, follow, max-image-preview:large, max-video-preview:-1">
   <link rel="canonical" href="https://www.azuolynasfilmfestival.lt/en/index.html">
+  <link rel="alternate" hreflang="lt" href="https://www.azuolynasfilmfestival.lt/lt/index.html">
+  <link rel="alternate" hreflang="en" href="https://www.azuolynasfilmfestival.lt/en/index.html">
+  <link rel="alternate" hreflang="x-default" href="https://www.azuolynasfilmfestival.lt/">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="AISFF - Ąžuolynas International Student Film Festival">
   <meta property="og:title" content="AISFF | Official Submissions Platform">
@@ -21,34 +26,102 @@
   <meta property="og:image" content="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/IMG_3463.jpeg?alt=media&token=af7892ca-e78e-4198-b686-e0181472e8da">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Ąžuolynas International Students Film Festival official oak statuettes and awards">
   <meta property="og:locale" content="en_US">
+  <meta property="og:locale:alternate" content="lt_LT">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="AISFF - Ąžuolynas International Student Film Festival">
   <meta name="twitter:description" content="Theme: “My Purpose”. Submissions open until April 5, 2027. Gala & Live Stream: April 27, 2027.">
   <meta name="twitter:image" content="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/IMG_3463.jpeg?alt=media&token=af7892ca-e78e-4198-b686-e0181472e8da">
+  <meta name="twitter:image:alt" content="Ąžuolynas Film Festival handcrafted oak statuettes">
   <link rel="icon" type="image/webp" href="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media">
   <link rel="stylesheet" href="../style.css">
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
-    "@type": "Festival",
-    "name": "Ąžuolynas International Students Film Festival",
-    "description": "The «Ažuolynas» Film Festival is named after one of the sights of Kaunas, at the foot of which our studio is located.",
-    "startDate": "2027-04-27T15:00:00+03:00",
-    "endDate": "2027-04-27T18:00:00+03:00",
-    "eventAttendanceMode": "https://schema.org/OnlineEventAttendanceMode",
-    "eventStatus": "https://schema.org/EventScheduled",
-    "location": {
-      "@type": "VirtualLocation",
-      "url": "https://www.azuolynasfilmfestival.lt/"
-    },
-    "image": "https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/IMG_3463.jpeg?alt=media&token=af7892ca-e78e-4198-b686-e0181472e8da",
-    "organizer": {
-      "@type": "Organization",
-      "name": "Ąžuolynas Film Festival Committee",
-      "email": "azuolynasfilmfestival@gmail.com",
-      "url": "https://www.azuolynasfilmfestival.lt/"
-    }
+    "@graph": [
+      {
+        "@type": "WebSite",
+        "@id": "https://www.azuolynasfilmfestival.lt/#website",
+        "name": "Ąžuolynas International Students Film Festival (AISFF)",
+        "url": "https://www.azuolynasfilmfestival.lt/en/index.html",
+        "inLanguage": ["en", "lt"],
+        "publisher": {
+          "@id": "https://www.azuolynasfilmfestival.lt/#organization"
+        }
+      },
+      {
+        "@type": "Organization",
+        "@id": "https://www.azuolynasfilmfestival.lt/#organization",
+        "name": "Ąžuolynas International Students Film Festival Committee",
+        "url": "https://www.azuolynasfilmfestival.lt/",
+        "logo": "https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media",
+        "email": "azuolynasfilmfestival@gmail.com",
+        "location": {
+          "@type": "Place",
+          "name": "Kaunas International Gymnasium",
+          "address": {
+            "@type": "PostalAddress",
+            "addressLocality": "Kaunas",
+            "addressCountry": "LT"
+          }
+        }
+      },
+      {
+        "@type": "Festival",
+        "@id": "https://www.azuolynasfilmfestival.lt/en/index.html#festival",
+        "name": "Ąžuolynas International Students Film Festival (AISFF 2027)",
+        "url": "https://www.azuolynasfilmfestival.lt/en/index.html",
+        "description": "The 7th International Student Smartphone Short Film Festival at Kaunas International Gymnasium. Theme: 'My Purpose' (Mano pašaukimas).",
+        "startDate": "2027-04-27T15:00:00+03:00",
+        "endDate": "2027-04-27T18:00:00+03:00",
+        "eventAttendanceMode": "https://schema.org/MixedEventAttendanceMode",
+        "eventStatus": "https://schema.org/EventScheduled",
+        "isAccessibleForFree": true,
+        "inLanguage": ["en", "lt"],
+        "typicalAgeRange": "10-18",
+        "location": [
+          {
+            "@type": "Place",
+            "name": "Kaunas International Gymnasium",
+            "address": {
+              "@type": "PostalAddress",
+              "addressLocality": "Kaunas",
+              "addressCountry": "LT"
+            }
+          },
+          {
+            "@type": "VirtualLocation",
+            "url": "https://www.azuolynasfilmfestival.lt/live.html"
+          }
+        ],
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "EUR",
+          "availability": "https://schema.org/InStock",
+          "url": "https://www.azuolynasfilmfestival.lt/en/index.html#submit"
+        },
+        "image": [
+          "https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/IMG_3463.jpeg?alt=media&token=af7892ca-e78e-4198-b686-e0181472e8da",
+          "https://i.postimg.cc/vmKKp6m6/ceremonija-2026-03-6612.jpg"
+        ],
+        "organizer": {
+          "@id": "https://www.azuolynasfilmfestival.lt/#organization"
+        }
+      },
+      {
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Home",
+            "item": "https://www.azuolynasfilmfestival.lt/en/index.html"
+          }
+        ]
+      }
+    ]
   }
   </script>
   <script type="application/ld+json">
@@ -438,13 +511,13 @@
 
           <!-- 2026 Edition Card -->
           <div class="edition-card-item">
-            <div class="edition-card-bg" style="background-image: url('https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/IMG_3459.jpeg?alt=media&token=dfdda212-9ea6-433f-af80-8c5b5b57f361');"></div>
+            <div class="edition-card-bg" style="background-image: url('https://i.postimg.cc/vmKKp6m6/ceremonija-2026-03-6612.jpg');"></div>
             <div class="edition-card-overlay"></div>
             <div class="edition-card-details">
               <span class="edition-card-badge">2026 Edition</span>
               <h3 class="edition-card-title">FEST 2026</h3>
-              <div class="edition-card-date">April 17th, 2026</div>
-              <p class="edition-card-text">Youth film celebration at Kaunas International Gymnasium: four continents on one screen! Discover winners, stories, and ceremony highlights.</p>
+              <div class="edition-card-date">April 30th, 2026</div>
+              <p class="edition-card-text">Theme: “What If” • Youth film celebration at Kaunas International Gymnasium: four continents on one screen! Discover winners, stories, and ceremony highlights.</p>
               <a href="azuolynas-fest-2026.html" class="btn-solid btn-full">View FEST 2026 Overview</a>
               <div class="edition-social-share">
                 <span class="share-prompt">Share highlight:</span>
@@ -607,7 +680,7 @@
             <div class="ceremony-showcase-titles">
               <span class="ceremony-location-tag">
                 <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
-                Kaunas International Gymnasium &bull; April 17
+                Kaunas International Gymnasium &bull; April 30
               </span>
               <h3 class="ceremony-title">Ceremony Highlights & Awards Hall</h3>
               <p class="ceremony-lead">
@@ -1661,22 +1734,32 @@
     };
 
     container.innerHTML = sorted.map((ed) => {
-      const year = ed.year || '2026';
+      const year = String(ed.year || '2026').trim();
       const pageUrl = resolveEnEditionUrl(ed, year);
       const displayTitle = ed.titleEn || ed.title || ('FEST ' + year);
       const displayDate = ed.dateEn || ed.date || '';
       const displaySub = ed.subtitleEn || ed.subtitle || '';
       const safeTitle = displayTitle.replace(/'/g, "\\'");
       const safeSub = displaySub.replace(/'/g, "\\'");
+      const isLegacy2026 = year === '2026' && (!ed.updatedAt || String(ed.updatedAt) < '2026-11-23T09:00:00.000Z') && (!ed.heroImage || String(ed.heroImage).includes('IMG_3458') || String(ed.heroImage).includes('IMG_3459') || String(ed.dateEn || ed.date || '').includes('17'));
+      const resolvedDate = isLegacy2026 ? 'April 30, 2026' : displayDate;
+      const resolvedSub = isLegacy2026
+        ? "Theme: 'What If' • Cinema Celebration at Kaunas International Gymnasium: Four Continents on One Screen!"
+        : displaySub;
+      const cardHero = isLegacy2026
+        ? 'https://i.postimg.cc/vmKKp6m6/ceremonija-2026-03-6612.jpg'
+        : (ed.heroImage || (year === '2026'
+            ? 'https://i.postimg.cc/vmKKp6m6/ceremonija-2026-03-6612.jpg'
+            : 'https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/IMG_3458.jpeg?alt=media&token=224af1bd-25ff-494e-8136-fbf330d3ad5b'));
       return `
       <div class="edition-card-item">
-        <div class="edition-card-bg" style="background-image: url('${ed.heroImage || 'https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/IMG_3458.jpeg?alt=media&token=224af1bd-25ff-494e-8136-fbf330d3ad5b'}');"></div>
+        <div class="edition-card-bg" style="background-image: url('${cardHero}');"></div>
         <div class="edition-card-overlay"></div>
         <div class="edition-card-details">
           <span class="edition-card-badge">${year} Edition</span>
           <h3 class="edition-card-title">${displayTitle}</h3>
-          <div class="edition-card-date">${displayDate}</div>
-          <p class="edition-card-text">${displaySub}</p>
+          <div class="edition-card-date">${resolvedDate}</div>
+          <p class="edition-card-text">${resolvedSub}</p>
           <a href="${pageUrl}" class="btn-solid btn-full">View ${displayTitle} Overview</a>
           <div class="edition-social-share">
             <span class="share-prompt">Share highlight:</span>

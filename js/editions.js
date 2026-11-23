@@ -37,13 +37,13 @@ const DEFAULT_2026_EDITION = {
   status: "completed",
   title: "FEST 2026",
   titleEn: "FEST 2026",
-  date: "2026 m. balandžio 17 d.",
-  dateEn: "April 17, 2026",
-  subtitle: "Kino šventė Kauno tarptautinėje gimnazijoje: net keturi žemynai viename ekrane!",
-  subtitleEn: "Cinema Celebration at Kaunas International Gymnasium: Four Continents on One Screen!",
-  story: "Jau šeštus metus iš eilės mūsų gimnazija tampa jaunimo kino meno centru. Mokykloje vyko tradicinis tarptautinis mokinių kino festivalis „Ąžuolynas“. Šių metų festivalio mastas išties stulbinantis: kaip pastebėjo direktoriaus pavaduotoja ugdymui atliekanti direktoriaus funkcijas Marija Daunorienė, dalyvių geografija išsiplėtė net iki 4 žemynų. Konkurse varžėsi jaunieji talentai iš Europos, Azijos, Šiaurės Amerikos ir net Afrikos!",
-  storyEn: "For the sixth consecutive year, our gymnasium has become a youth cinema art center. The traditional international student film festival 'Ąžuolynas' expanded to 4 continents.",
-  heroImage: "https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/IMG_3458.jpeg?alt=media&token=224af1bd-25ff-494e-8136-fbf330d3ad5b",
+  date: "2026 m. balandžio 30 d.",
+  dateEn: "April 30, 2026",
+  subtitle: "Tema: „What If“ • Kino šventė Kauno tarptautinėje gimnazijoje: net keturi žemynai viename ekrane!",
+  subtitleEn: "Theme: 'What If' • Cinema Celebration at Kaunas International Gymnasium: Four Continents on One Screen!",
+  story: "Jau šeštus metus iš eilės mūsų gimnazija tampa jaunimo kino meno centru. 2026 m. balandžio 30 d. mokykloje vyko tradicinis tarptautinis mokinių kino festivalis „Ąžuolynas“, kurio tema buvo „What If“. Šių metų festivalio mastas išties stulbinantis: kaip pastebėjo direktoriaus pavaduotoja ugdymui atliekanti direktoriaus funkcijas Marija Daunorienė, dalyvių geografija išsiplėtė net iki 4 žemynų. Konkurse varžėsi jaunieji talentai iš Europos, Azijos, Šiaurės Amerikos ir net Afrikos!",
+  storyEn: "For the sixth consecutive year, on April 30, 2026, our gymnasium became a youth cinema art center under the theme 'What If'. The traditional international student film festival 'Ąžuolynas' expanded to 4 continents.",
+  heroImage: "https://i.postimg.cc/vmKKp6m6/ceremonija-2026-03-6612.jpg",
   videoUrl: "https://www.youtube.com/watch?v=INGtv",
   pageUrl: "azuolynas-fest-2026.html",
   pageUrlEn: "../en/azuolynas-fest-2026.html"
@@ -150,8 +150,15 @@ function renderAdminEditionsList() {
   if (!container) return;
 
   container.innerHTML = allEditionsList.map((ed) => {
-    const bgImage = ed.heroImage || "https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/IMG_3458.jpeg?alt=media&token=224af1bd-25ff-494e-8136-fbf330d3ad5b";
     const year = String(ed.year || '2027').trim();
+    const isLegacy2026 = year === '2026' && (!ed.updatedAt || String(ed.updatedAt) < '2026-11-23T09:00:00.000Z') && (!ed.heroImage || String(ed.heroImage).includes('IMG_3458') || String(ed.date || '').includes('balandžio 17'));
+    const displayDate = isLegacy2026 ? DEFAULT_2026_EDITION.date : (ed.date || '');
+    const displayDateEn = isLegacy2026 ? DEFAULT_2026_EDITION.dateEn : (ed.dateEn || '');
+    const bgImage = isLegacy2026
+      ? "https://i.postimg.cc/vmKKp6m6/ceremonija-2026-03-6612.jpg"
+      : (ed.heroImage || (year === '2026'
+          ? "https://i.postimg.cc/vmKKp6m6/ceremonija-2026-03-6612.jpg"
+          : "https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/IMG_3458.jpeg?alt=media&token=224af1bd-25ff-494e-8136-fbf330d3ad5b"));
     const ltUrl = (year === '2026' || year === '2027') ? `/lt/azuolynas-fest-${year}.html` : `/lt/${ed.pageUrl || 'index.html'}`;
     const enUrl = (year === '2026' || year === '2027') ? `/en/azuolynas-fest-${year}.html` : `/en/${ed.pageUrl || 'index.html'}`;
     const isUpcoming = ed.status === "upcoming" || year === "2027";
@@ -169,7 +176,7 @@ function renderAdminEditionsList() {
             </div>
           </div>
           <div style="padding:10px 0 4px 0;">
-            <div style="font-size:0.8rem; color:var(--accent-light); margin-bottom:4px;">${ed.date || ''} ${ed.dateEn ? `(${ed.dateEn})` : ''}</div>
+            <div style="font-size:0.8rem; color:var(--accent-light); margin-bottom:4px;">${displayDate} ${displayDateEn ? `(${displayDateEn})` : ''}</div>
             <div class="admin-media-caption" style="line-height:1.4;">${ed.subtitle || ''}</div>
             ${ed.submissionDeadline ? `
               <div style="font-size:0.75rem; color:var(--text-muted); margin-top:4px;">

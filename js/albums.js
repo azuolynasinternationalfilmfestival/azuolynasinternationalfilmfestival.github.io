@@ -59,15 +59,16 @@ const DEFAULT_EDITIONS_MAP = {
     status: "completed",
     title: "FEST 2026",
     titleEn: "FEST 2026",
-    date: "2026 m. balandžio 17 d.",
-    dateEn: "April 17, 2026",
-    subtitle: "Kino šventė Kauno tarptautinėje gimnazijoje: net keturi žemynai viename ekrane!",
-    subtitleEn: "Cinema Celebration at Kaunas International Gymnasium: Four Continents on One Screen!",
+    date: "2026 m. balandžio 30 d.",
+    dateEn: "April 30, 2026",
+    theme: "What If",
+    subtitle: "Tema: „What If“ • Kino šventė Kauno tarptautinėje gimnazijoje: net keturi žemynai viename ekrane!",
+    subtitleEn: "Theme: 'What If' • Cinema Celebration at Kaunas International Gymnasium: Four Continents on One Screen!",
     story:
-      "Jau šeštus metus iš eilės mūsų gimnazija tampa jaunimo kino meno centru. Mokykloje vyko tradicinis tarptautinis mokinių kino festivalis „Ąžuolynas“. Dalyvių geografija išsiplėtė net iki 4 žemynų — varžėsi jaunieji talentai iš Europos, Azijos, Šiaurės Amerikos ir Afrikos!",
+      "Jau šeštus metus iš eilės mūsų gimnazija tampa jaunimo kino meno centru. 2026 m. balandžio 30 d. mokykloje vyko tradicinis tarptautinis mokinių kino festivalis „Ąžuolynas“, kurio tema buvo „What If“. Dalyvių geografija išsiplėtė net iki 4 žemynų — varžėsi jaunieji talentai iš Europos, Azijos, Šiaurės Amerikos ir Afrikos!",
     storyEn:
-      "For the sixth consecutive year, Kaunas International Gymnasium became a vibrant hub of youth cinema, welcoming young filmmakers across 4 continents — Europe, Asia, North America, and Africa.",
-    heroImage: DEFAULT_HERO_FALLBACK,
+      "For the sixth consecutive year, Kaunas International Gymnasium became a vibrant hub of youth cinema on April 30, 2026, celebrating the theme 'What If' and welcoming young filmmakers across 4 continents — Europe, Asia, North America, and Africa.",
+    heroImage: "https://i.postimg.cc/vmKKp6m6/ceremonija-2026-03-6612.jpg",
     videoUrl: "https://www.youtube.com/watch?v=INGtv",
     pageUrl: "azuolynas-fest-2026.html",
     pageUrlEn: "../en/azuolynas-fest-2026.html",
@@ -81,16 +82,51 @@ const DEFAULT_EDITIONS_MAP = {
       },
       {
         id: "alb_2026_2",
-        url: DEFAULT_HERO_FALLBACK,
-        caption: "Kino šventė Kauno tarptautinėje gimnazijoje: ceremonijos akimirkos ir dalyviai",
-        captionEn: "Festival opening and attendees at Kaunas International Gymnasium",
+        url: "https://i.postimg.cc/vmKKp6m6/ceremonija-2026-03-6612.jpg",
+        caption: "FEST 2026 iškilmingos ceremonijos akimirka Kauno tarptautinėje gimnazijoje",
+        captionEn: "FEST 2026 Gala Ceremony at Kaunas International Gymnasium",
         album: "ceremony"
       },
       {
         id: "alb_2026_3",
-        url: "https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/IMG_3459.jpeg?alt=media&token=dfdda212-9ea6-433f-af80-8c5b5b57f361",
-        caption: "Festivalio laureatai, svečiai ir komisijos nariai ant scenos",
-        captionEn: "Award presentation to student laureates",
+        url: "https://i.postimg.cc/5trrZFtv/ceremonija-2026-02.jpg",
+        caption: "Tarptautinio mokinių filmų festivalio ceremonijos pradžia ir svečiai",
+        captionEn: "Opening of the international student film festival ceremony and guests",
+        album: "ceremony"
+      },
+      {
+        id: "alb_2026_4",
+        url: "https://i.postimg.cc/25ttPB5n/ceremonija-2026-04-30-01.jpg",
+        caption: "Festivalio renginio atmosfera ir bendruomenės susibūrimas salėje",
+        captionEn: "Festival celebration atmosphere and school community gathering",
+        album: "ceremony"
+      },
+      {
+        id: "alb_2026_5",
+        url: "https://i.postimg.cc/jj11GJjD/ceremonija-2026-04-30-02.jpg",
+        caption: "Kino šventės programa ir dalyvių prisistatymai ant scenos",
+        captionEn: "Cinema program and participant presentations on stage",
+        album: "ceremony"
+      },
+      {
+        id: "alb_2026_6",
+        url: "https://i.postimg.cc/25ttPB5q/laureatai-2026-04-30-01.jpg",
+        caption: "FEST 2026 laureatų apdovanojimas ir sveikinimai",
+        captionEn: "FEST 2026 laureate award ceremony and congratulations",
+        album: "laureates"
+      },
+      {
+        id: "alb_2026_7",
+        url: "https://i.postimg.cc/vmKKp6mV/laureatai-2026-04-30-02.jpg",
+        caption: "Jaunieji kūrėjai ir nugalėtojai su festivalio diplomais",
+        captionEn: "Young filmmakers and winners with festival diplomas",
+        album: "laureates"
+      },
+      {
+        id: "alb_2026_8",
+        url: "https://i.postimg.cc/tgccLVgZ/laureatai-2026-04-30-03.jpg",
+        caption: "Tarptautinės komisijos įvertinti laureatai ir prizininkai",
+        captionEn: "International jury award recipients and prizewinners",
         album: "laureates"
       }
     ]
@@ -463,11 +499,22 @@ export function subscribeAlbums() {
             const year = String(data.year || id).trim();
             if (!year) return;
             const base = albumsCatalog[year] || DEFAULT_EDITIONS_MAP[year] || {};
+            const isLegacy2026 =
+              year === "2026" &&
+              (!data.updatedAt || String(data.updatedAt) < "2026-11-23T09:00:00.000Z") &&
+              (!data.heroImage || String(data.heroImage).includes("IMG_3458") || String(data.date || "").includes("balandžio 17"));
             albumsCatalog[year] = {
               ...base,
               ...data,
               year,
-              photos: Array.isArray(data.photos) && data.photos.length > 0 ? data.photos : (base.photos || [])
+              date: isLegacy2026 ? DEFAULT_EDITIONS_MAP["2026"].date : (data.date || base.date),
+              dateEn: isLegacy2026 ? DEFAULT_EDITIONS_MAP["2026"].dateEn : (data.dateEn || base.dateEn),
+              subtitle: isLegacy2026 ? DEFAULT_EDITIONS_MAP["2026"].subtitle : (data.subtitle || base.subtitle),
+              subtitleEn: isLegacy2026 ? DEFAULT_EDITIONS_MAP["2026"].subtitleEn : (data.subtitleEn || base.subtitleEn),
+              heroImage: isLegacy2026 ? DEFAULT_EDITIONS_MAP["2026"].heroImage : (data.heroImage || base.heroImage),
+              photos: isLegacy2026
+                ? DEFAULT_EDITIONS_MAP["2026"].photos
+                : (Array.isArray(data.photos) && data.photos.length > 0 ? data.photos : (base.photos || []))
             };
           });
           ensureCoreYearsExist();
