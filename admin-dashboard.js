@@ -46,12 +46,17 @@
         } catch (e) {}
       }
 
-      // 3. Fallback server API
-      const res = await fetch("/api/admin/submissions");
-      if (res.ok) {
-        const data = await res.json();
-        cachedSubmissions = data.submissions || [];
-        renderDashboardData();
+      // 3. Fallback server API only when Express backend exists
+      const hasServer = window.FestivalApi && typeof window.FestivalApi.hasServer === "function"
+        ? await window.FestivalApi.hasServer().catch(() => false)
+        : false;
+      if (hasServer) {
+        const res = await fetch("/api/admin/submissions");
+        if (res.ok) {
+          const data = await res.json();
+          cachedSubmissions = data.submissions || [];
+          renderDashboardData();
+        }
       }
     } catch (err) {
       console.warn("Dashboard submissions load notice:", err);

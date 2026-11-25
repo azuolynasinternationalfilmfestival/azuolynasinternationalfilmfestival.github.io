@@ -16,6 +16,15 @@
 })(typeof window !== "undefined" ? window : this, function () {
   "use strict";
 
+  function formatParticipantName(film) {
+    if (!film) return "";
+    const full = [film.directorFirstName, film.directorLastName]
+      .filter((v) => typeof v === "string" && v.trim())
+      .join(" ")
+      .trim();
+    return full || film.director || film.directorName || film.name || "";
+  }
+
   const LAUREL_SVG = `
     <svg class="winner-laurel-icon" viewBox="0 0 24 24" fill="currentColor">
       <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
@@ -229,9 +238,18 @@
         return;
       }
 
-      container.innerHTML = filtered.map((w) => {
+      const sortedWinners = [...filtered].sort((a, b) => {
+        const rankA = Number(a.juryPlace || a.place || 999);
+        const rankB = Number(b.juryPlace || b.place || 999);
+        if (rankA !== rankB) return rankA - rankB;
+        return Number(b.votesCount || 0) - Number(a.votesCount || 0);
+      });
+
+      container.innerHTML = sortedWinners.map((w) => {
         const award = w.awardTitle || (isLt ? "Laureatas" : "Laureate");
+        const placeLabel = w.juryPlace ? `${w.juryPlace}${isLt ? " vieta" : (w.juryPlace === 1 ? "st" : w.juryPlace === 2 ? "nd" : "rd")} • ` : "";
         const isTop =
+          Number(w.juryPlace) === 1 ||
           award.toLowerCase().includes("grand") ||
           award.toLowerCase().includes("1-oji") ||
           award.toLowerCase().includes("1st") ||
@@ -239,6 +257,7 @@
 
         const durationText = w.videoDurationSeconds ? `${w.videoDurationSeconds}s` : "";
         const synopsis = w.synopsis || "";
+        const participantName = formatParticipantName(w) || (isLt ? "Autorius" : "Filmmaker");
 
         return `
           <div class="winner-card ${isTop ? "top-honor" : ""}" id="winner-${w.id}">
@@ -246,7 +265,7 @@
               <div class="winner-laurel-wrap">
                 ${LAUREL_BRANCH_SVG}
                 <div class="winner-badge">
-                  <span>${award}</span>
+                  <span>${placeLabel}${award}</span>
                 </div>
                 ${LAUREL_BRANCH_SVG}
               </div>
@@ -263,7 +282,7 @@
 
               <div class="winner-meta">
                 <div class="winner-director-line">
-                  <strong>${w.name || (isLt ? "Autorius" : "Filmmaker")}</strong>
+                  <strong>${participantName}</strong>
                 </div>
                 <div>${w.institution ? `${w.institution} • ` : ""}${w.location || ""}</div>
                 <div class="winner-tags-row">
@@ -468,7 +487,7 @@
             const rankNum = String(idx + 1).padStart(2, "0");
             const rankClass = idx < 3 ? `rank-${idx + 1}` : "";
             const isVoted = userVotedFilmId === film.id;
-            const director = film.name || film.directorName || (isLt ? "Autorius" : "Filmmaker");
+            const director = formatParticipantName(film) || (isLt ? "Autorius" : "Filmmaker");
             const cat = film.category ? ` • ${film.category}` : "";
 
             return `
@@ -606,7 +625,7 @@
 
               <div class="film-card-title">${film.filmTitle || (isLt ? "Bevardis filmas" : "Untitled Film")}</div>
               <div class="film-card-meta">
-                <strong style="color:var(--text-color);">${film.name || ""}</strong><br>
+                <strong style="color:var(--text-color);">${formatParticipantName(film)}</strong><br>
                 <span>${film.category || ""} • ${film.location || ""}</span>
                 ${film.institution ? `<br><small style="color:var(--text-subtle);">${film.institution}</small>` : ""}
               </div>
@@ -698,8 +717,9 @@
         return;
       }
 
+      const directorName = formatParticipantName(film);
       document.getElementById("voteConfirmFilmTitle").textContent = film.filmTitle || (isLt ? "Filmas" : "Film");
-      document.getElementById("voteConfirmDirector").textContent = film.name ? `${isLt ? "Režisierius" : "Director"}: ${film.name}` : "";
+      document.getElementById("voteConfirmDirector").textContent = directorName ? `${isLt ? "Režisierius" : "Director"}: ${directorName}` : "";
       document.getElementById("voteConfirmCategory").textContent = film.category ? `${film.category} • ${film.location || ""}` : "";
 
       modal.classList.add("active");
@@ -853,7 +873,7 @@
     shareCampaign: function (filmId, platform) {
       const film = this.cachedFilms.find((f) => f.id === filmId);
       const title = film ? film.filmTitle : "Short Film";
-      const director = film ? film.name : "";
+      const director = formatParticipantName(film);
       const isLt = this.currentLang === "lt";
 
       const shareUrl = window.location.origin + window.location.pathname + "#competition";

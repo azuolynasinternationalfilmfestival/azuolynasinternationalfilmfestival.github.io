@@ -218,6 +218,43 @@
       font-family: 'IBM Plex Mono', monospace;
     }
 
+    .overlay-now-playing {
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 12px;
+      padding: 10px 14px;
+      background: rgba(52, 211, 153, 0.08);
+      border: 1px solid rgba(52, 211, 153, 0.35);
+      border-radius: 2px;
+    }
+
+    .overlay-now-playing.visible {
+      display: flex;
+    }
+
+    .np-kicker {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.68rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #34D399;
+    }
+
+    .np-film-title {
+      font-family: 'Space Grotesk', 'Plus Jakarta Sans', system-ui, sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      color: #FFFFFF;
+    }
+
+    .np-film-meta {
+      font-size: 0.78rem;
+      color: #CBD5E1;
+    }
+
     .overlay-footer-row {
       display: flex;
       justify-content: space-between;
@@ -240,7 +277,7 @@
         <img src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media" alt="Logo" width="32" height="32" decoding="async">
         <div>
           <div class="overlay-title">AISFF &bull; Tiesioginiai Rezultatai</div>
-          <div style="font-size:0.75rem; color:#94A3B8;">Žiūrovų simpatijų apdovanojimas (Live Voting)</div>
+          <div style="font-size:0.75rem; color:#94A3B8;">Atrinkti finalo filmai ir žiūrovų simpatijos (Live Voting)</div>
         </div>
       </div>
 
@@ -255,6 +292,16 @@
       </div>
     </div>
 
+    <!-- Active Broadcast Lower-Third Strip -->
+    <div class="overlay-now-playing" id="overlayNowPlayingStrip">
+      <div>
+        <div class="np-kicker">DABAR ETERIS</div>
+        <div class="np-film-title" id="overlayNpTitle"></div>
+        <div class="np-film-meta" id="overlayNpMeta"></div>
+      </div>
+      <div style="text-align:right; font-family:'IBM Plex Mono', monospace; font-size:0.74rem; color:#94A3B8;" id="overlayNextHint"></div>
+    </div>
+
     <!-- Real-Time Dynamic Leaderboard Rows -->
     <div class="leaderboard-items" id="overlayLeaderboardRows">
       <div style="text-align:center; padding:16px; color:#94A3B8; font-size:0.88rem;">
@@ -263,51 +310,126 @@
     </div>
 
     <div class="overlay-footer-row">
-      <span>Balsuokite savo įrenginyje: <strong>www.azuolynasfilmfestival.lt/live</strong></span>
+      <span>Balsuokite savo įrenginyje: <strong>www.azuolynasfilmfestival.lt/voting</strong></span>
       <span>Kauno Tarptautinė Gimnazija &bull; AISFF</span>
     </div>
   </div>
 
   <script>
+    const FS_BASE = "https://firestore.googleapis.com/v1/projects/filmfest-509606/databases/ai-studio-azuolynasinterna-cd7ce36e-5213-4751-8aa0-a7141d397a83/documents";
     let films = [];
-    let votesMap = {};
+
+    function decodeFirestoreValue(val) {
+      if (!val || typeof val !== "object") return undefined;
+      if ("stringValue" in val) return val.stringValue;
+      if ("booleanValue" in val) return val.booleanValue;
+      if ("integerValue" in val) return Number(val.integerValue);
+      if ("doubleValue" in val) return Number(val.doubleValue);
+      if ("nullValue" in val) return null;
+      if ("arrayValue" in val) return (val.arrayValue.values || []).map(decodeFirestoreValue);
+      if ("mapValue" in val) {
+        const out = {};
+        const fields = val.mapValue.fields || {};
+        Object.keys(fields).forEach((k) => {
+          out[k] = decodeFirestoreValue(fields[k]);
+        });
+        return out;
+      }
+      return undefined;
+    }
+
+    function decodeFirestoreDoc(doc) {
+      const id = (doc.name || "").split("/").pop();
+      const fields = doc.fields || {};
+      const out = { id };
+      Object.keys(fields).forEach((k) => {
+        out[k] = decodeFirestoreValue(fields[k]);
+      });
+      return out;
+    }
+
+    function formatParticipantFullName(film) {
+      if (!film) return "";
+      const full = [film.directorFirstName, film.directorLastName]
+        .filter((v) => typeof v === "string" && v.trim())
+        .join(" ")
+        .trim();
+      return full || film.director || film.directorName || film.author || film.name || "";
+    }
+
+    function updateNowPlayingBanner(broadcast) {
+      const strip = document.getElementById("overlayNowPlayingStrip");
+      const npTitle = document.getElementById("overlayNpTitle");
+      const npMeta = document.getElementById("overlayNpMeta");
+      const nextHint = document.getElementById("overlayNextHint");
+      if (!strip || !npTitle || !npMeta) return;
+
+      const np = broadcast && broadcast.nowPlaying;
+      if (broadcast && broadcast.isPublicVisible === false) {
+        strip.classList.remove("visible");
+        return;
+      }
+
+      if (np && np.title) {
+        strip.classList.add("visible");
+        npTitle.textContent = `„${np.title}“`;
+        const parts = [];
+        if (np.director) parts.push(`Dalyvis: ${np.director}`);
+        if (np.category) parts.push(np.category);
+        if (np.awardTitle) parts.push(np.awardTitle);
+        npMeta.textContent = parts.join(" • ");
+        if (nextHint) {
+          const next = broadcast.nextFilm;
+          nextHint.textContent = (next && next.title)
+            ? `Kitas: ${next.title}${next.director ? ` (${next.director})` : ""}`
+            : "";
+        }
+      } else {
+        strip.classList.remove("visible");
+      }
+    }
 
     function updateOverlayUI() {
       const container = document.getElementById("overlayLeaderboardRows");
       if (!container) return;
 
       if (!films || films.length === 0) {
-        container.innerHTML = `<div style="text-align:center; padding:12px; color:var(--accent-light);">Laukiama žiūrovų balsų...</div>`;
+        container.innerHTML = `<div style="text-align:center; padding:12px; color:var(--accent-light);">Laukiama atrinktų finalo filmų ir žiūrovų balsų...</div>`;
         return;
       }
 
       // Calculate total votes
-      const totalVotes = films.reduce((acc, f) => acc + (f.votes || 0), 0);
+      const totalVotes = films.reduce((acc, f) => acc + Number(f.votes || f.votesCount || 0), 0);
       document.getElementById("overlayTotalVotes").textContent = totalVotes;
 
-      // Sort films by votes descending
-      const sorted = [...films].sort((a, b) => (b.votes || 0) - (a.votes || 0)).slice(0, 4);
+      // Sort films by podium placement or votes descending
+      const sorted = [...films].sort((a, b) => Number(b.votes || b.votesCount || 0) - Number(a.votes || a.votesCount || 0)).slice(0, 5);
 
       container.innerHTML = sorted.map((film, index) => {
-        const isLeader = index === 0 && (film.votes || 0) > 0;
-        const votes = film.votes || 0;
+        const votes = Number(film.votes || film.votesCount || 0);
+        const isLeader = index === 0 && votes > 0;
         const percent = totalVotes > 0 ? Math.round((votes / totalVotes) * 100) : 0;
         const rankBadge = index === 0
-          ? `<span style="display:inline-flex; align-items:center; justify-content:center; gap:3px; color:var(--gold-color, #facc15);"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="7"></circle><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline></svg>1</span>`
+          ? `<span style="display:inline-flex; align-items:center; justify-content:center; gap:3px; color:#facc15;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="7"></circle><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline></svg>1</span>`
           : index === 1
           ? `<span style="color:#cbd5e1; font-weight:700;">#2</span>`
           : index === 2
           ? `<span style="color:#fbbf24; font-weight:700;">#3</span>`
-          : `<span style="color:var(--text-muted);">#${index + 1}</span>`;
+          : `<span style="color:#94A3B8;">#${index + 1}</span>`;
+
+        const participantName = formatParticipantFullName(film);
+        const badgeLabel = film.isWinner && film.awardTitle
+          ? film.awardTitle
+          : (isLeader ? "Lyderis" : "");
 
         return `
           <div class="leaderboard-row ${isLeader ? 'leader' : ''}">
             <div class="row-rank">${rankBadge}</div>
             <div class="row-info">
               <div class="row-title-row">
-                <span class="row-title">„${escapeHtml(film.title || film.filmTitle)}“</span>
-                <span class="row-author">${escapeHtml(film.author || film.name || '')}</span>
-                ${isLeader ? `<span class="row-leader-badge">Lyderis</span>` : ''}
+                <span class="row-title">„${escapeHtml(film.filmTitle || film.title || 'Be pavadinimo')}“</span>
+                <span class="row-author">${escapeHtml(participantName)}${film.category ? ` • ${escapeHtml(film.category)}` : ''}</span>
+                ${badgeLabel ? `<span class="row-leader-badge">${escapeHtml(badgeLabel)}</span>` : ''}
               </div>
               <div class="row-progress-container">
                 <div class="row-progress-bar" style="width: ${percent}%;"></div>
@@ -327,27 +449,88 @@
       return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
     }
 
-    async function fetchLatestVotes() {
+    async function fetchFirestoreOverlayData() {
       try {
-        const hasServer = window.FestivalApi && typeof window.FestivalApi.hasServer === "function"
-          ? await window.FestivalApi.hasServer().catch(() => false)
-          : false;
-        if (!hasServer) return;
-        const res = await fetch("/api/submissions");
-        if (res.ok) {
-          const data = await res.json();
-          const all = data.submissions || [];
-          films = all.filter(s => s.inVoting === true || s.votesCount > 0);
-          if (films.length === 0) films = all.slice(0, 4);
-          films.forEach(f => {
-            f.votes = f.votesCount || f.votes || 0;
+        // 1. Fetch stream_config/broadcast
+        fetch(`${FS_BASE}/stream_config/broadcast`)
+          .then((r) => (r.ok ? r.json() : null))
+          .then((doc) => {
+            if (doc && doc.fields) {
+              updateNowPlayingBanner(decodeFirestoreDoc(doc));
+            }
+          })
+          .catch(() => {});
+
+        // 2. Query public finalists / winners in submissions (allowed by security rules)
+        const queryBody = (field) => JSON.stringify({
+          structuredQuery: {
+            from: [{ collectionId: "submissions" }],
+            where: {
+              fieldFilter: {
+                field: { fieldPath: field },
+                op: "EQUAL",
+                value: { booleanValue: true }
+              }
+            }
+          }
+        });
+
+        const [inVotingRes, winnerRes] = await Promise.all([
+          fetch(`${FS_BASE}:runQuery`, { method: "POST", headers: { "Content-Type": "application/json" }, body: queryBody("inVoting") }).catch(() => null),
+          fetch(`${FS_BASE}:runQuery`, { method: "POST", headers: { "Content-Type": "application/json" }, body: queryBody("isWinner") }).catch(() => null)
+        ]);
+
+        const merged = new Map();
+        for (const res of [inVotingRes, winnerRes]) {
+          if (!res || !res.ok) continue;
+          const rows = await res.json().catch(() => []);
+          if (!Array.isArray(rows)) continue;
+          rows.forEach((row) => {
+            if (!row || !row.document) return;
+            const d = decodeFirestoreDoc(row.document);
+            d.votes = Number(d.votesCount || d.votes || 0);
+            merged.set(d.id, d);
           });
+        }
+
+        if (merged.size > 0) {
+          films = Array.from(merged.values());
           updateOverlayUI();
         }
       } catch (e) {}
     }
 
-    // Connect to Server-Sent Events (SSE) for Real-Time Zero Latency Updates
+    async function fetchLatestVotes() {
+      try {
+        const hasServer = window.FestivalApi && typeof window.FestivalApi.hasServer === "function"
+          ? await window.FestivalApi.hasServer().catch(() => false)
+          : false;
+        if (hasServer) {
+          const [subRes, ovRes] = await Promise.all([
+            fetch("/api/submissions").catch(() => null),
+            fetch("/api/broadcast/overlay").catch(() => null)
+          ]);
+          if (ovRes && ovRes.ok) {
+            const bData = await ovRes.json().catch(() => null);
+            if (bData) updateNowPlayingBanner(bData);
+          }
+          if (subRes && subRes.ok) {
+            const data = await subRes.json();
+            const all = data.submissions || [];
+            films = all.filter((s) => s.inVoting === true || s.isWinner === true || s.votesCount > 0);
+            films.forEach((f) => {
+              f.votes = Number(f.votesCount || f.votes || 0);
+            });
+            updateOverlayUI();
+            return;
+          }
+        }
+      } catch (e) {}
+
+      await fetchFirestoreOverlayData();
+    }
+
+    // Connect to Server-Sent Events (SSE) for Real-Time Updates when backend server exists
     async function connectSSE() {
       try {
         const hasServer = window.FestivalApi && typeof window.FestivalApi.hasServer === "function"
@@ -365,7 +548,7 @@
                 updateOverlayUI();
               }
             } else if (parsed.type === "VOTE_UPDATE") {
-              const target = films.find(f => f.id === parsed.data.filmId);
+              const target = films.find((f) => f.id === parsed.data.filmId);
               if (target) {
                 target.votes = parsed.data.votesCount;
               } else {
@@ -377,18 +560,17 @@
         };
 
         evtSource.onerror = () => {
-          // SSE reconnect or fallback
           setTimeout(fetchLatestVotes, 2500);
         };
       } catch (e) {
-        setInterval(fetchLatestVotes, 2500);
+        setInterval(fetchLatestVotes, 4000);
       }
     }
 
     function bootStreamOverlay() {
       fetchLatestVotes();
       connectSSE();
-      setInterval(fetchLatestVotes, 3000); // Polling safeguard
+      setInterval(fetchLatestVotes, 4000);
     }
     if (document.readyState === "loading") {
       document.addEventListener("DOMContentLoaded", bootStreamOverlay);

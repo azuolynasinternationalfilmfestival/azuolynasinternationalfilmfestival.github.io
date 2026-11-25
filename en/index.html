@@ -2123,8 +2123,9 @@
       if (!film) return;
 
       lastPublicModalFocusEl = document.activeElement;
+      const authorFull = [film.directorFirstName, film.directorLastName].filter(Boolean).join(" ").trim() || film.director || film.directorName || film.name || "";
       document.getElementById("publicModalTitle").textContent = film.filmTitle || "";
-      document.getElementById("publicModalAuthor").textContent = film.name || "";
+      document.getElementById("publicModalAuthor").textContent = authorFull;
       document.getElementById("publicModalCategory").textContent = `${film.age || ''} yrs | ${film.category || ''}`;
       document.getElementById("publicModalLocation").textContent = film.location || "";
       document.getElementById("publicModalInstitution").textContent = film.institution || "-";

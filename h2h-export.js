@@ -3,6 +3,15 @@
  * Generates JSON, CSV, and Standalone HTML files formatted for live television graphics (H2H Graphic, CasparCG, OBS Browser Source, vMix).
  */
 (function(window) {
+  function resolveDirectorName(item) {
+    if (!item) return "";
+    const full = [item.directorFirstName, item.directorLastName]
+      .filter((v) => typeof v === "string" && v.trim())
+      .join(" ")
+      .trim();
+    return full || item.director || item.directorName || item.author || item.name || "";
+  }
+
   const H2HExport = {
     /**
      * Build unified, normalized broadcast payload
@@ -10,22 +19,22 @@
     buildGraphicsPayload(nominations = [], nowPlaying = null, nextFilm = null, votesData = {}) {
       const now = nowPlaying ? {
         id: nowPlaying.id || "",
-        title: nowPlaying.filmTitle || nowPlaying.title || "Filmo Pavadinimas",
-        director: nowPlaying.director || nowPlaying.name || "Režisierius",
-        country: nowPlaying.country || "Lietuva",
-        duration: nowPlaying.duration || "",
-        category: nowPlaying.category || "Bendroji nominacija",
+        title: nowPlaying.filmTitle || nowPlaying.title || "",
+        director: resolveDirectorName(nowPlaying),
+        country: nowPlaying.country || nowPlaying.location || "Lietuva",
+        duration: nowPlaying.duration || (nowPlaying.videoDurationSeconds ? `${nowPlaying.videoDurationSeconds}s` : ""),
+        category: nowPlaying.category || "Konkursinė programa",
         synopsis: nowPlaying.synopsis || "",
         status: "ON_AIR"
       } : null;
 
       const next = nextFilm ? {
         id: nextFilm.id || "",
-        title: nextFilm.filmTitle || nextFilm.title || "Sekantis Filmas",
-        director: nextFilm.director || nextFilm.name || "Režisierius",
-        country: nextFilm.country || "Lietuva",
-        duration: nextFilm.duration || "",
-        category: nextFilm.category || "Bendroji nominacija",
+        title: nextFilm.filmTitle || nextFilm.title || "",
+        director: resolveDirectorName(nextFilm),
+        country: nextFilm.country || nextFilm.location || "Lietuva",
+        duration: nextFilm.duration || (nextFilm.videoDurationSeconds ? `${nextFilm.videoDurationSeconds}s` : ""),
+        category: nextFilm.category || "Konkursinė programa",
         status: "UP_NEXT"
       } : null;
 
@@ -35,10 +44,10 @@
         category: nom.category || nom.title || nom.name || "Kategorija",
         films: (nom.films || []).map(f => ({
           id: f.id || "",
-          title: f.filmTitle || f.title || "Filmas",
-          director: f.director || f.name || "Autorius",
-          country: f.country || "LT",
-          duration: f.duration || "",
+          title: f.filmTitle || f.title || "",
+          director: resolveDirectorName(f),
+          country: f.country || f.location || "LT",
+          duration: f.duration || (f.videoDurationSeconds ? `${f.videoDurationSeconds}s` : ""),
           votes: (votesData && votesData[f.id] !== undefined) ? votesData[f.id] : (f.votesCount || f.votes || 0)
         }))
       }));

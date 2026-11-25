@@ -687,7 +687,8 @@ function generateEmailHtml(p1, p2, p3) {
   const t = texts[templateKey] || texts.submissionReceived;
   const isLt = lang === "lt";
 
-  const applicantName = data.directorName || data.name || (isLt ? "Dalyvi" : "Filmmaker");
+  const combinedDirectorName = [data.directorFirstName, data.directorLastName].filter(Boolean).join(" ").trim();
+  const applicantName = data.directorName || combinedDirectorName || data.name || (isLt ? "Dalyvi" : "Filmmaker");
   const filmTitle = data.filmTitle || "-";
   const category = data.category || "-";
   const deviceModel = data.deviceModel || "-";
@@ -697,12 +698,29 @@ function generateEmailHtml(p1, p2, p3) {
   const headingText = t.heading.replace("{{name}}", escapeHtml(applicantName));
   const bodyText = t.body.replace("{{responseTime}}", escapeHtml(responseTimeDisplay));
 
+  const juryPlaceNum = Number(data.juryPlace || data.place || 0);
+  const juryPlaceLabel = juryPlaceNum > 0
+    ? (isLt ? `${juryPlaceNum}-oji vieta` : `${juryPlaceNum}${juryPlaceNum === 1 ? "st" : juryPlaceNum === 2 ? "nd" : juryPlaceNum === 3 ? "rd" : "th"} Place`)
+    : "";
+
   let metaRows = "";
   metaRows += buildMetaRow(isLt ? "Filmo pavadinimas:" : "Film Title:", `<span style="color:#9BC4AE; font-weight:700;">„${escapeHtml(filmTitle)}“</span>`);
   metaRows += buildMetaRow(
-    isLt ? "Režisierius / Autorius:" : "Director / Author:",
-    escapeHtml(applicantName) + (data.directorFirstName && data.directorLastName ? ` <span style="color:#7A9689;font-size:11px;">(${escapeHtml(isLt ? 'Vardas' : 'First')}: ${escapeHtml(data.directorFirstName)}, ${escapeHtml(isLt ? 'Pavardė' : 'Last')}: ${escapeHtml(data.directorLastName)})</span>` : '')
+    isLt ? "Dalyvis / Režisierius:" : "Participant / Director:",
+    `<strong>${escapeHtml(applicantName)}</strong>`
   );
+  if (data.awardTitle) {
+    metaRows += buildMetaRow(
+      isLt ? "Apdovanojimas / Nominacija:" : "Award / Nomination:",
+      `<strong style="color:#34D399; font-weight:700;">${escapeHtml(data.awardTitle)}</strong>`
+    );
+  }
+  if (juryPlaceLabel) {
+    metaRows += buildMetaRow(
+      isLt ? "Komisijos įvertinimo vieta:" : "Jury Ranking:",
+      `<strong style="color:#F8FAF7;">${escapeHtml(juryPlaceLabel)}</strong>`
+    );
+  }
   if (data.cameraOperatorName) {
     metaRows += buildMetaRow(isLt ? "Operatorius:" : "Camera Operator:", escapeHtml(data.cameraOperatorName));
   }
@@ -725,7 +743,9 @@ function generateEmailHtml(p1, p2, p3) {
   if (data.institution) {
     metaRows += buildMetaRow(isLt ? "Mokykla / Studija:" : "Institution:", escapeHtml(data.institution));
   }
-  metaRows += buildMetaRow(isLt ? "Filmavimo įranga:" : "Filming Device:", `${escapeHtml(deviceModel)}`);
+  if (deviceModel && deviceModel !== "-") {
+    metaRows += buildMetaRow(isLt ? "Filmavimo įranga:" : "Filming Device:", `${escapeHtml(deviceModel)}`);
+  }
   if (duration) {
     metaRows += buildMetaRow(isLt ? "Trukmė:" : "Runtime:", `${escapeHtml(duration)} (&le; 180 s)`);
   }
@@ -744,7 +764,9 @@ function generateEmailHtml(p1, p2, p3) {
   if (data.submittedAt) {
     metaRows += buildMetaRow(isLt ? "Pateikimo laikas:" : "Submitted At:", escapeHtml(new Date(data.submittedAt).toLocaleString(isLt ? "lt-LT" : "en-US")));
   }
-  metaRows += buildMetaRow(isLt ? "Atsakymo terminas:" : "Response Time:", `<strong style="color:#9BC4AE;">${escapeHtml(responseTimeDisplay)}</strong>`);
+  if (templateKey === "submissionReceived" || templateKey === "remoteLivePass") {
+    metaRows += buildMetaRow(isLt ? "Atsakymo terminas:" : "Response Time:", `<strong style="color:#9BC4AE;">${escapeHtml(responseTimeDisplay)}</strong>`);
+  }
   if (data.attendanceType) {
     const isRemote = data.attendanceType === 'remote';
     const rsvpLabel = isRemote
@@ -756,6 +778,24 @@ function generateEmailHtml(p1, p2, p3) {
     metaRows += buildMetaRow(isLt ? "Transliacijos žetonas:" : "Live Stream Token:", `<code style="background:rgba(74,222,128,0.15); color:#4ade80; padding:3px 7px; border-radius:2px; font-weight:700; letter-spacing:1px;">${escapeHtml(data.liveToken)}</code>`);
     const streamUrl = data.liveStreamUrl || `${EMAIL_THEME.siteUrl}live.html?token=${encodeURIComponent(data.liveToken)}`;
     metaRows += buildMetaRow(isLt ? "Tiesioginė transliacija:" : "Live Stream Link:", `<a href="${streamUrl}" style="color:#9BC4AE; font-weight:700; text-decoration:underline;" target="_blank">${escapeHtml(streamUrl)}</a>`);
+  }
+
+  let awardHighlightBlock = "";
+  if (templateKey === "winner" || data.awardTitle) {
+    const awardHeadline = data.awardTitle || (isLt ? "Oficialus Festivalio Laureatas" : "Official Festival Laureate");
+    awardHighlightBlock = `
+      <div style="background-color: rgba(52, 211, 153, 0.1); border: 1px solid rgba(52, 211, 153, 0.45); border-radius: 2px; padding: 14px 18px; margin: 16px 0; text-align: center;">
+        <p style="margin: 0 0 4px 0; font-size: 11px; color: #34D399; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em;">
+          ${isLt ? "APDOVANOJIMAS / NOMINACIJA" : "OFFICIAL AWARD / NOMINATION"}
+        </p>
+        <p style="margin: 0 0 4px 0; font-size: 18px; font-weight: 800; color: #F8FAF7;">
+          ${escapeHtml(awardHeadline)}${juryPlaceLabel ? ` &bull; ${escapeHtml(juryPlaceLabel)}` : ""}
+        </p>
+        <p style="margin: 0; font-size: 13px; color: #BAC9C0;">
+          „${escapeHtml(filmTitle)}“ &mdash; ${escapeHtml(applicantName)}
+        </p>
+      </div>
+    `;
   }
 
   // Synopsis block if provided
@@ -788,7 +828,7 @@ function generateEmailHtml(p1, p2, p3) {
     `;
   }
 
-  const ctaUrl = data.ctaUrl || EMAIL_THEME.siteUrl;
+  const ctaUrl = data.ctaUrl || data.streamLink || EMAIL_THEME.siteUrl;
   const ctaButtonHtml = `
     <table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center" class="cta-table" style="margin: 24px auto 14px auto;">
       <tr>
@@ -808,6 +848,8 @@ function generateEmailHtml(p1, p2, p3) {
     <p style="font-size: 14px; color: #BAC9C0; line-height: 1.65; margin: 0 0 20px 0;">
       ${bodyText}
     </p>
+
+    ${awardHighlightBlock}
 
     <div style="background-color: #081B17; border: 1px solid rgba(111,165,138,0.22); border-radius: 2px; padding: 18px 20px; margin: 18px 0;">
       <p style="margin: 0 0 10px 0; font-weight: 700; color: #9BC4AE; font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em;">
@@ -1238,6 +1280,8 @@ function generateSubmissionPlainText(p1, p2, p3) {
     "",
     isLt ? "--- FILMO DUOMENYS ---" : "--- FILM DETAILS ---",
     `${isLt ? "Filmo pavadinimas" : "Film Title"}: ${data.filmTitle || "-"}`,
+    data.awardTitle ? `${isLt ? "Apdovanojimas / Nominacija" : "Award / Nomination"}: ${data.awardTitle}` : null,
+    data.juryPlace ? `${isLt ? "Komisijos vieta" : "Jury Ranking"}: ${data.juryPlace}` : null,
     `${isLt ? "Kategorija" : "Category"}: ${data.category || "-"}`,
     `${isLt ? "Amžius" : "Age"}: ${data.age || "-"}`,
     `${isLt ? "Šalis ir miestas" : "Location"}: ${data.location || data.countryCity || "-"}`,

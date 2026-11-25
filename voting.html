@@ -1729,15 +1729,20 @@
       }
 
       function getMovieDirector(film) {
-        return film.director || film.directorName || film.name || (currentLang === "lt" ? "Nepriklausomas kūrėjas" : "Independent Filmmaker");
+        if (!film) return "";
+        const full = [film.directorFirstName, film.directorLastName]
+          .filter(v => typeof v === "string" && v.trim())
+          .join(" ")
+          .trim();
+        return full || film.director || film.directorName || film.name || "";
       }
 
       function getMovieSynopsis(film) {
-        return resolveLocalizedField(film, "synopsis") || 
-               resolveLocalizedField(film, "description") || 
-               film.synopsis || 
-               film.description || 
-               (currentLang === "lt" ? "Oficiali festivalio konkursinė programa." : "Official festival competition selection.");
+        return resolveLocalizedField(film, "synopsis") ||
+               resolveLocalizedField(film, "description") ||
+               film.synopsis ||
+               film.description ||
+               "";
       }
 
       function getMoviePoster(film) {
@@ -1748,18 +1753,24 @@
         return typeof film.votes === "number" ? film.votes : (typeof film.votesCount === "number" ? film.votesCount : 0);
       }
 
+      function getVotingCandidates() {
+        const candidates = (moviesList || []).filter(f => f && (f.inVoting === true || f._collection === "movies"));
+        return candidates.length > 0 ? candidates : (moviesList || []);
+      }
+
       function renderLeaderboard() {
         const widget = document.getElementById("liveLeaderboardWidget");
         if (!widget) return;
         const t = I18N[currentLang] || I18N.en;
+        const candidates = getVotingCandidates();
 
-        if (!moviesList || moviesList.length === 0) {
+        if (!candidates || candidates.length === 0) {
           widget.style.display = "none";
           widget.innerHTML = "";
           return;
         }
 
-        const top5 = [...moviesList]
+        const top5 = [...candidates]
           .sort((a, b) => {
             const diff = getMovieVotes(b) - getMovieVotes(a);
             if (diff !== 0) return diff;
@@ -1767,7 +1778,7 @@
           })
           .slice(0, 5);
 
-        const totalVotes = moviesList.reduce((sum, f) => sum + getMovieVotes(f), 0);
+        const totalVotes = candidates.reduce((sum, f) => sum + getMovieVotes(f), 0);
         const maxVotes = Math.max(...top5.map(f => getMovieVotes(f)), 1);
 
         widget.style.display = "block";
@@ -1829,9 +1840,10 @@
       function renderVotingCards() {
         renderLeaderboard();
         const t = I18N[currentLang] || I18N.en;
-        let filtered = moviesList;
+        const candidates = getVotingCandidates();
+        let filtered = candidates;
         if (selectedCategory !== "all") {
-          filtered = moviesList.filter(f => resolveMovieCategory(f) === selectedCategory);
+          filtered = candidates.filter(f => resolveMovieCategory(f) === selectedCategory);
         }
 
         if (filtered.length === 0) {
@@ -1843,7 +1855,7 @@
           return;
         }
 
-        const maxVotes = Math.max(...moviesList.map(f => getMovieVotes(f)), 1);
+        const maxVotes = Math.max(...candidates.map(f => getMovieVotes(f)), 1);
 
         votingGrid.innerHTML = filtered.map(film => {
           const catKey = resolveMovieCategory(film);
@@ -1871,10 +1883,10 @@
                 }
               </div>
               <div class="film-card-content">
-                <span class="category-tag-badge ${catBadgeClass}">${catLabel}</span>
+                <span class="category-tag-badge ${catBadgeClass}">${catLabel}${film.isWinner && film.awardTitle ? ` • ${escapeHtml(film.awardTitle)}` : ''}</span>
                 <h2 class="film-card-title">${escapeHtml(title)}</h2>
-                <p class="film-card-director">${t.directorLabel} <strong>${escapeHtml(director)}</strong></p>
-                <p class="film-card-synopsis">${escapeHtml(synopsis)}</p>
+                ${director ? `<p class="film-card-director">${t.directorLabel} <strong>${escapeHtml(director)}</strong>${film.institution ? ` • ${escapeHtml(film.institution)}` : ''}</p>` : ''}
+                ${synopsis ? `<p class="film-card-synopsis">${escapeHtml(synopsis)}</p>` : ''}
 
                 <div class="film-vote-action">
                   ${isThisVoted ? `
@@ -1935,8 +1947,9 @@
 
         // Lock button during async operation
         btnElement.disabled = true;
-        const originalText = btnElement.querySelector("span").textContent;
-        btnElement.querySelector("span").textContent = t.btnVoting;
+        const btnLabelEl = btnElement.querySelector("span") || btnElement;
+        const originalText = btnLabelEl.textContent;
+        btnLabelEl.textContent = t.btnVoting;
 
         try {
           let votedViaServer = false;
@@ -1981,7 +1994,7 @@
                 } else if (srvData.error === "voting-closed") {
                   showToast(t.statusClosed, true);
                   btnElement.disabled = false;
-                  btnElement.querySelector("span").textContent = originalText;
+                  btnLabelEl.textContent = originalText;
                   return;
                 }
               }
@@ -2042,7 +2055,7 @@
           console.error("Voting submission error:", err);
           showToast(err.message || t.errorVoteFailed, true);
           btnElement.disabled = false;
-          btnElement.querySelector("span").textContent = originalText;
+          btnLabelEl.textContent = originalText;
         }
       }
 
@@ -2102,10 +2115,10 @@
         if (!container) return;
         const t = I18N[currentLang] || I18N.en;
 
-        // Sort by explicit juryPlace / place if set, else sort by highest votes
+        // Sort by winner status, then explicit juryPlace / place if set, else highest votes
         const sorted = [...films].sort((a, b) => {
-          const rankA = a.juryPlace || a.place || 999;
-          const rankB = b.juryPlace || b.place || 999;
+          const rankA = a.juryPlace || a.place || (a.isWinner ? 100 : 999);
+          const rankB = b.juryPlace || b.place || (b.isWinner ? 100 : 999);
           if (rankA !== rankB) return rankA - rankB;
           return getMovieVotes(b) - getMovieVotes(a);
         });
@@ -2133,13 +2146,14 @@
           const director = getMovieDirector(film);
           const synopsis = getMovieSynopsis(film);
           const votes = getMovieVotes(film);
+          const awardBadge = film.awardTitle ? escapeHtml(film.awardTitle) : "";
 
           return `
             <div class="podium-card ${r.cardClass}">
-              <span class="podium-rank-tag ${r.tagClass}">${r.label}</span>
+              <span class="podium-rank-tag ${r.tagClass}">${r.label}${awardBadge ? ` • ${awardBadge}` : ""}</span>
               <h3 class="podium-movie-title">${escapeHtml(title)}</h3>
-              <p class="podium-movie-director">${t.directorLabel} <strong>${escapeHtml(director)}</strong></p>
-              <p class="podium-movie-synopsis">${escapeHtml(synopsis)}</p>
+              <p class="podium-movie-director">${director ? `${t.directorLabel} <strong>${escapeHtml(director)}</strong>` : ""}</p>
+              ${synopsis ? `<p class="podium-movie-synopsis">${escapeHtml(synopsis)}</p>` : ""}
               <div style="margin-top:auto; padding-top:10px; border-top:1px solid rgba(255,255,255,0.06); font-family:var(--font-mono); font-size:0.78rem; color:#94a3b8;">
                 <span>${t.votesLabel} <strong>${votes}</strong></span>
               </div>
@@ -2168,6 +2182,31 @@
         };
         let serverVotesByFilm = {};
 
+        const settingsBySource = {
+          festival: null,
+          api: null,
+          global: null
+        };
+
+        function recomputeSettings() {
+          const wasHidden = !globalSettings.showResults;
+          const primary = settingsBySource.festival || settingsBySource.api || settingsBySource.global || {};
+          const hasInVotingFilms = moviesList.some(f => f && f.inVoting === true);
+          const settingsPermitVoting = primary.votingOpen !== false && primary.votingActive !== false;
+
+          // Mirror index.html behavior: competing films marked inVoting: true remain votable
+          globalSettings.votingOpen = hasInVotingFilms || settingsPermitVoting || primary.showVoting === true;
+          globalSettings.showResults = primary.showResults === true || primary.resultsPublished === true || primary.publicWinners === true;
+
+          updateStatusBadges();
+          renderVotingCards();
+          renderResultsView();
+
+          if (wasHidden && globalSettings.showResults) {
+            triggerConfetti();
+          }
+        }
+
         function rebuildMoviesList() {
           const merged = new Map();
           const applyFilm = (film, sourceCollection) => {
@@ -2188,22 +2227,13 @@
           filmsBySource.isWinner.forEach(f => applyFilm(f, "submissions"));
 
           moviesList = Array.from(merged.values());
-          renderVotingCards();
-          renderResultsView();
+          recomputeSettings();
         }
 
-        function applySettingsData(data) {
+        function applySettingsData(data, sourceKey = "festival") {
           if (!data || typeof data !== "object") return;
-          const wasHidden = !globalSettings.showResults;
-          globalSettings.votingOpen = data.votingOpen !== false && data.votingActive !== false && data.showVoting !== false;
-          globalSettings.showResults = data.showResults === true || data.resultsPublished === true || data.publicWinners === true;
-
-          updateStatusBadges();
-          renderResultsView();
-
-          if (wasHidden && globalSettings.showResults) {
-            triggerConfetti();
-          }
+          settingsBySource[sourceKey] = data;
+          recomputeSettings();
         }
 
         // Hydrate from Express REST API when backend is available
@@ -2220,7 +2250,7 @@
             ]);
             if (settingsRes && settingsRes.ok) {
               const sJson = await settingsRes.json().catch(() => null);
-              if (sJson) applySettingsData(sJson.settings || sJson);
+              if (sJson) applySettingsData(sJson.settings || sJson, "api");
             }
             if (votesRes && votesRes.ok) {
               const vJson = await votesRes.json().catch(() => null);
@@ -2241,11 +2271,11 @@
         const bindVotingSnapshots = (db) => {
           if (!db || typeof db.collection !== "function") return;
           try {
-            // A. Settings Listeners (settings/festival & settings/global)
+            // A. Settings Listeners (settings/festival is primary; settings/global is fallback only)
             for (const settingsDocId of ["festival", "global"]) {
               db.collection("settings").doc(settingsDocId).onSnapshot((doc) => {
                 if (doc.exists) {
-                  applySettingsData(doc.data());
+                  applySettingsData(doc.data(), settingsDocId);
                 }
               }, (err) => {
                 console.warn(`Settings (${settingsDocId}) snapshot listener notice:`, err.message);

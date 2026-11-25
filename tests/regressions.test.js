@@ -1032,5 +1032,130 @@ test('Priority 5 & 6: public images include explicit dimensions, CSS/JS assets a
   }
 });
 
+test('Admin participant PDF download avoids static HTTP 405 and builds a valid client PDF fallback', async () => {
+  const pdfClient = await import('../js/submission-pdf-client.js');
+  const filename = pdfClient.buildReadablePdfFilename({
+    directorFirstName: 'Ąžuolas',
+    directorLastName: 'Žukauskas',
+    filmTitle: 'Šviesa tamsoje'
+  });
+  assert.equal(filename, 'Azuolas_Zukauskas_-_Sviesa_tamsoje.pdf');
+
+  const fakeJpeg = new Uint8Array([0xff, 0xd8, 0xff, 0xe0, 0x00, 0x10, 0x4a, 0x46, 0x49, 0x46, 0xff, 0xd9]);
+  const pdfBytes = pdfClient.buildPdfFromJpegPages([
+    { jpegBytes: fakeJpeg, pixelWidth: 1240, pixelHeight: 1754 }
+  ]);
+  const asciiHead = Buffer.from(pdfBytes.slice(0, 8)).toString('ascii');
+  const asciiTail = Buffer.from(pdfBytes.slice(-32)).toString('ascii');
+  assert.ok(asciiHead.startsWith('%PDF-1.4'), 'Client PDF must emit valid %PDF-1.4 header');
+  assert.ok(asciiTail.includes('%%EOF'), 'Client PDF must terminate with %%EOF');
+
+  const submissionsJs = fs.readFileSync(new URL('../js/submissions.js', import.meta.url), 'utf8');
+  assert.match(submissionsJs, /generateClientSubmissionPdf/);
+  assert.match(submissionsJs, /hasBackendServer\(\)/);
+  assert.ok(submissionsJs.indexOf('hasBackendServer()') < submissionsJs.indexOf('/api/admin/submissions/pdf'));
+});
+
+test('voting.html permits voting when inVoting films exist even if settings/festival.showVoting or settings/global.votingOpen is false', () => {
+  const votingHtml = fs.readFileSync(new URL('../voting.html', import.meta.url), 'utf8');
+  assert.match(votingHtml, /const hasInVotingFilms = moviesList\.some/);
+  assert.match(votingHtml, /globalSettings\.votingOpen = hasInVotingFilms \|\| settingsPermitVoting \|\| primary\.showVoting === true/);
+  assert.doesNotMatch(votingHtml, /data\.votingOpen !== false && data\.votingActive !== false && data\.showVoting !== false/);
+});
+
+test('Admin Jury & Winners UI keeps winners clickable/editable live with Firestore-first sync and no raw prompts', () => {
+  const adminHtml = fs.readFileSync(new URL('../admin.html', import.meta.url), 'utf8');
+  for (const requiredId of [
+    'id="filterVotingStage"',
+    'id="winnersManagerCard"',
+    'id="adminSelectFilm"',
+    'id="adminAwardTitle"',
+    'id="adminJuryPlace"',
+    'id="assignWinnerBtn"',
+    'id="adminWinnersList"',
+    'id="winnerEditModal"',
+    'id="mJuryPlace"'
+  ]) {
+    assert.ok(adminHtml.includes(requiredId), `admin.html missing ${requiredId}`);
+  }
+
+  const votingAnalyticsJs = fs.readFileSync(new URL('../js/voting-analytics.js', import.meta.url), 'utf8');
+  assert.match(votingAnalyticsJs, /subscribeVotingAnalytics/);
+  assert.match(votingAnalyticsJs, /collection\(["']judge_evaluations["']\)\.onSnapshot/);
+  assert.match(votingAnalyticsJs, /openWinnerEditModal/);
+  assert.match(votingAnalyticsJs, /Keisti laureatą/);
+  assert.match(votingAnalyticsJs, /btn-toggle-live-voting/);
+  assert.match(votingAnalyticsJs, /collection\(["']stream_config["']\)\.doc\(["']broadcast["']\)/);
+  assert.doesNotMatch(votingAnalyticsJs, /\bwindow\.prompt\(|\bprompt\(/);
+
+  const submissionsJs = fs.readFileSync(new URL('../js/submissions.js', import.meta.url), 'utf8');
+  assert.match(submissionsJs, /openWinnerEditModal/);
+  assert.match(submissionsJs, /edit-winner/);
+  assert.match(submissionsJs, /notifySubmissionsUpdated/);
+  assert.ok(submissionsJs.indexOf('db.collection("submissions").doc(filmId).update') < submissionsJs.indexOf('/api/admin/declare-winner'));
+  assert.ok(submissionsJs.indexOf('hasBackendServer()') < submissionsJs.indexOf('/api/admin/revoke-winner'));
+});
+
+test('Real finalist films & full participant names power admin graphics, stream overlay, public voting, and HTML emails', () => {
+  const adminMainJs = fs.readFileSync(new URL('../js/admin-main.js', import.meta.url), 'utf8');
+  assert.match(adminMainJs, /subscribeVotingAnalytics/);
+  assert.match(adminMainJs, /db\.collection\(["']stream_config["']\)\.doc\(["']broadcast["']\)/);
+  assert.match(adminMainJs, /directorFirstName,\s*film\.directorLastName/);
+
+  const overlayHtml = fs.readFileSync(new URL('../stream-overlay.html', import.meta.url), 'utf8');
+  assert.match(overlayHtml, /firestore\.googleapis\.com\/v1\/projects\/filmfest-509606/);
+  assert.match(overlayHtml, /stream_config\/broadcast/);
+  assert.match(overlayHtml, /directorFirstName,\s*film\.directorLastName/);
+
+  const h2hJs = fs.readFileSync(new URL('../h2h-export.js', import.meta.url), 'utf8');
+  assert.match(h2hJs, /directorFirstName,\s*item\.directorLastName/);
+
+  const votingHtml = fs.readFileSync(new URL('../voting.html', import.meta.url), 'utf8');
+  assert.match(votingHtml, /\[film\.directorFirstName,\s*film\.directorLastName\]/);
+  assert.doesNotMatch(votingHtml, /Official festival competition selection\./);
+  assert.match(votingHtml, /film\.awardTitle/);
+
+  const votingJs = fs.readFileSync(new URL('../js/voting-and-winners.js', import.meta.url), 'utf8');
+  assert.match(votingJs, /formatParticipantName/);
+  assert.match(votingJs, /directorFirstName,\s*film\.directorLastName/);
+  assert.match(votingJs, /juryPlace/);
+
+  const dashboardJs = fs.readFileSync(new URL('../admin-dashboard.js', import.meta.url), 'utf8');
+  assert.match(dashboardJs, /hasServer/);
+
+  const emailCtx = vm.createContext({ module: { exports: {} }, exports: {} });
+  emailCtx.window = emailCtx;
+  vm.runInContext(fs.readFileSync(new URL('../email-templates.js', import.meta.url), 'utf8'), emailCtx);
+  const { generateEmailHtml, generateSubmissionPlainText } = emailCtx;
+
+  const htmlLt = generateEmailHtml('winner', 'lt', {
+    directorFirstName: 'Aistė',
+    directorLastName: 'Kazlauskaitė',
+    filmTitle: 'Šviesos šešėlyje',
+    category: 'II Kategorija (14–18 m.)',
+    institution: 'Kauno gimnazija',
+    awardTitle: 'Grand Prix — Geriausias filmas',
+    juryPlace: 1
+  });
+  assert.match(htmlLt, /Aistė Kazlauskaitė/);
+  assert.match(htmlLt, /Šviesos šešėlyje/);
+  assert.match(htmlLt, /Grand Prix — Geriausias filmas/);
+  assert.match(htmlLt, /1-oji vieta/);
+
+  const plainLt = generateSubmissionPlainText({
+    name: 'Aistė Kazlauskaitė',
+    filmTitle: 'Šviesos šešėlyje',
+    category: 'II Kategorija',
+    email: 'aiste@example.lt',
+    phone: '+37060000000',
+    location: 'Kaunas, Lietuva',
+    awardTitle: 'Grand Prix',
+    juryPlace: 1
+  });
+  assert.match(plainLt, /Grand Prix/);
+  assert.match(plainLt, /Komisijos vieta:\s*1/);
+});
+
+
 
 

@@ -608,7 +608,14 @@
                   Realaus laiko žiūrovų balsai ir profesionalios vertinimo komisijos įvertinimai (1–10 balų).
                 </p>
               </div>
-              <div style="display:flex; gap:10px; align-items:center;">
+              <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+                <select id="filterVotingStage" class="field toolbar-select" style="min-width:210px;">
+                  <option value="selected" selected>Atrinkti (Finalas / Balsavimas / Laureatai)</option>
+                  <option value="inVoting">Tik viešame balsavime</option>
+                  <option value="final">Tik Finalas ir Laureatai</option>
+                  <option value="winner">Tik Laureatai / Nugalėtojai</option>
+                  <option value="all">Visi pateikti filmai</option>
+                </select>
                 <select id="filterVotingAnalyticsCategory" class="field toolbar-select" style="min-width:180px;">
                   <option value="all">Visos kategorijos</option>
                   <option value="Category I (10-13)">I Kategorija (10-13)</option>
@@ -625,17 +632,65 @@
                 <thead>
                   <tr>
                     <th>Vieta</th>
-                    <th>Filmas & Kūrėjas</th>
+                    <th>Filmas &amp; Dalyvis</th>
                     <th>Kategorija</th>
                     <th style="text-align:center;">Žiūrovų Balsai</th>
                     <th style="text-align:center;">Komisijos Balas</th>
-                    <th>Statusas</th>
+                    <th>Statusas &amp; Eteris</th>
                     <th style="text-align:right;">Veiksmai</th>
                   </tr>
                 </thead>
                 <tbody id="votingLeaderboardBody"></tbody>
               </table>
             </div>
+          </div>
+
+          <!-- LIVE LAUREATES & FINALISTS WINNERS MANAGER -->
+          <div id="winnersManagerCard" class="content-card">
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:14px;">
+              <div>
+                <h3 class="content-card-title" style="margin:0;">Laureatų ir Prizinių Vietų Valdymas (Gyvai)</h3>
+                <p class="content-card-sub" style="margin:4px 0 0 0;">
+                  Pasirinkite realų pateiktą / atrinktą filmą iš sąrašo, paskirkite nominaciją bei podiumo vietą ir redaguokite bet kada tiesioginiame eteryje.
+                </p>
+              </div>
+              <span id="winnerPanelYearBadge" class="badge badge-accepted" style="font-family:monospace;">Visi metai</span>
+            </div>
+
+            <datalist id="awardPresetsList">
+              <option value="Grand Prix">
+              <option value="1-oji vieta">
+              <option value="2-oji vieta">
+              <option value="3-ioji vieta">
+              <option value="Žiūrovų simpatijų prizas">
+              <option value="Už geriausią režisūrą">
+              <option value="Už geriausią kinematografiją">
+            </datalist>
+
+            <div style="display:grid; grid-template-columns:minmax(220px, 2fr) minmax(180px, 1.4fr) minmax(140px, 1fr) auto; gap:10px; align-items:end; margin-bottom:16px;">
+              <div class="input-cell" style="margin:0;">
+                <label for="adminSelectFilm">Dalyvio filmas (iš pateiktų darbų) *</label>
+                <select id="adminSelectFilm" class="field"></select>
+              </div>
+              <div class="input-cell" style="margin:0;">
+                <label for="adminAwardTitle">Nominacija / Apdovanojimas *</label>
+                <input type="text" id="adminAwardTitle" class="field" list="awardPresetsList" placeholder="pvz. Grand Prix arba 1-oji vieta">
+              </div>
+              <div class="input-cell" style="margin:0;">
+                <label for="adminJuryPlace">Podiumo vieta</label>
+                <select id="adminJuryPlace" class="field">
+                  <option value="">Nepaskirta</option>
+                  <option value="1">1-oji vieta</option>
+                  <option value="2">2-oji vieta</option>
+                  <option value="3">3-ioji vieta</option>
+                </select>
+              </div>
+              <button type="button" id="assignWinnerBtn" class="btn-solid btn-sm" style="height:38px; white-space:nowrap;">
+                Paskelbti / Išsaugoti
+              </button>
+            </div>
+
+            <div id="adminWinnersList"></div>
           </div>
         </div>
 
@@ -2005,6 +2060,88 @@ Tomas Vaitkus, Aktų salė (Projektorius), t.vaitkus@mokykla.lt"></textarea>
     </div>
   </div>
 
+  <!-- 1B. WINNER & LIVE STATUS EDITOR MODAL -->
+  <div id="winnerEditModal" class="admin-modal-overlay d-none">
+    <div class="admin-modal-card" style="max-width:580px;">
+      <div class="admin-modal-header">
+        <div>
+          <h3 class="admin-modal-title" style="margin:0;">Laureato ir Statuso Valdymas (Gyvai)</h3>
+          <span style="font-size:0.75rem; color:var(--accent-light);" id="winnerEditAuthorMeta">Atrinkto filmo redagavimas</span>
+        </div>
+        <button type="button" id="closeWinnerEditModalBtn" style="background:transparent; border:none; color:var(--text-muted); font-size:1.5rem; cursor:pointer;">&times;</button>
+      </div>
+
+      <input type="hidden" id="winnerEditFilmId">
+
+      <div style="margin-bottom:14px; background:rgba(8,27,23,0.75); border:1px solid var(--border-color); border-radius:var(--site-radius); padding:12px 14px;">
+        <h4 id="winnerEditFilmTitle" style="color:var(--text-color); margin:0 0 6px 0; font-family:var(--font-cinema); font-size:1.15rem;">Filmas</h4>
+        <div id="winnerEditMetricsBadge" style="font-family:monospace; font-size:0.78rem; color:var(--text-muted);">
+          Balsai: 0 • Komisija: —
+        </div>
+      </div>
+
+      <div class="two-col-grid" style="margin-bottom:12px;">
+        <div class="input-cell">
+          <label for="winnerEditStatus">Konkurso statusas</label>
+          <select id="winnerEditStatus" class="field">
+            <option value="submitted">Pateikta (Submitted)</option>
+            <option value="accepted">Priimta (Accepted)</option>
+            <option value="semifinal">Pusfinalis (Semi-Final)</option>
+            <option value="final">Finalas (Final)</option>
+            <option value="winner">Laureatas (Winner)</option>
+            <option value="rejected">Atmesta (Rejected)</option>
+          </select>
+        </div>
+        <div class="input-cell">
+          <label for="winnerEditYear">Festivalio metai</label>
+          <select id="winnerEditYear" class="field">
+            <option value="2027">2027 m.</option>
+            <option value="2026">2026 m.</option>
+            <option value="2025">2025 m.</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="two-col-grid" style="margin-bottom:12px;">
+        <div class="input-cell">
+          <label for="winnerEditAwardTitle">Nominacija / Apdovanojimas</label>
+          <input type="text" id="winnerEditAwardTitle" class="field" list="awardPresetsList" placeholder="pvz. Grand Prix arba 1-oji vieta">
+        </div>
+        <div class="input-cell">
+          <label for="winnerEditJuryPlace">Podiumo vieta (voting.html)</label>
+          <select id="winnerEditJuryPlace" class="field">
+            <option value="">Nepaskirta</option>
+            <option value="1">1-oji vieta (Auksas / #1)</option>
+            <option value="2">2-oji vieta (Sidabras / #2)</option>
+            <option value="3">3-ioji vieta (Bronza / #3)</option>
+          </select>
+        </div>
+      </div>
+
+      <div style="display:grid; gap:8px; background:var(--surface-color); border:1px solid var(--border-color); border-radius:var(--site-radius); padding:12px 14px; margin-bottom:16px;">
+        <label style="display:flex; align-items:center; gap:10px; cursor:pointer; margin:0;">
+          <input type="checkbox" id="winnerEditInVoting" style="width:16px; height:16px; accent-color:#34D399;">
+          <span style="font-size:0.84rem; color:var(--text-color);">Rodomas viešame žiūrovų balsavime (gyvai svetainėje)</span>
+        </label>
+        <label style="display:flex; align-items:center; gap:10px; cursor:pointer; margin:0;">
+          <input type="checkbox" id="winnerEditIsWinner" style="width:16px; height:16px; accent-color:#34D399;">
+          <span style="font-size:0.84rem; color:var(--text-color);">Paskelbtas oficialiu laureatu / nugalėtoju (rodomas rezultatų galerijoje)</span>
+        </label>
+      </div>
+
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <button type="button" class="btn-delete btn-xs" id="winnerEditRevokeBtn">Nuimti laureato statusą</button>
+          <button type="button" class="btn-outline btn-xs" id="winnerEditSendToLiveBtn" style="border-color:rgba(52,211,153,0.45); color:#34D399;">Į tiesioginį eterį</button>
+        </div>
+        <div style="display:flex; gap:8px;">
+          <button type="button" class="btn-outline btn-sm" id="cancelWinnerEditModalBtn">Atšaukti</button>
+          <button type="button" class="btn-solid btn-sm" id="saveWinnerEditBtn">Išsaugoti gyvai</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- 2. TASK CREATION MODAL -->
   <div id="taskModal" class="admin-modal-overlay d-none">
     <div class="admin-modal-card" style="max-width:540px;">
@@ -2189,7 +2326,14 @@ Tomas Vaitkus, Aktų salė (Projektorius), t.vaitkus@mokykla.lt"></textarea>
           </div>
           <div class="input-cell" id="mAwardTitleWrap" style="display:none;">
             <label for="mAwardTitle">Nominacija / Laureato vieta:</label>
-            <input type="text" id="mAwardTitle" class="field" placeholder="pvz. 1-oji vieta arba Žiūrovų simpatijų prizas">
+            <input type="text" id="mAwardTitle" class="field" list="awardPresetsList" placeholder="pvz. 1-oji vieta arba Žiūrovų simpatijų prizas">
+            <label for="mJuryPlace" style="margin-top:8px;">Podiumo vieta (nebūtina):</label>
+            <select id="mJuryPlace" class="field">
+              <option value="">Nepaskirta</option>
+              <option value="1">1-oji vieta</option>
+              <option value="2">2-oji vieta</option>
+              <option value="3">3-ioji vieta</option>
+            </select>
           </div>
           <div class="input-cell">
             <label for="mEmailTemplate">Siunčiamas laiškas:</label>
