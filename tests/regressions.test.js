@@ -219,7 +219,7 @@ for (const lang of ['lt', 'en']) {
       assert.equal(f.errors.length, 0);
       for (const [, mail] of mails) {
         assert.ok(Array.isArray(mail.to));
-        assert.equal(mail.from, 'azuolynasfilmfestival@gmail.com');
+        assert.equal(mail.from, undefined);
         assert.equal(typeof mail.replyTo, 'string');
         for (const value of Object.values(mail.message)) assert.equal(typeof value, 'string');
       }
@@ -906,5 +906,131 @@ test('2026 edition uses 6612 cover and all 7 new ceremony/laureate photos while 
     assert.doesNotMatch(idxHtml, /2026 m\. balandžio 17 d\.|April 17th, 2026/, `${indexRel} must use April 30 date for FEST 2026`);
   }
 });
+
+test('Priority 1: ARIA tablist/tab/tabpanel semantics, keyboard navigation, and accessible lightbox dialog', () => {
+  for (const rel of ['../lt/index.html', '../en/index.html']) {
+    const html = fs.readFileSync(new URL(rel, import.meta.url), 'utf8');
+    assert.match(html, /<div class="photo-albums-tabs" id="photoAlbumTabs" role="tablist"/);
+    assert.match(html, /id="archivePhotosContainer"[^>]*role="tabpanel"[^>]*aria-labelledby=/);
+    assert.match(html, /id="resultsFilterBar"[^>]*role="tablist"/);
+    assert.match(html, /id="winnersListContainer"[^>]*role="tabpanel"/);
+    assert.match(html, /id="votingTabsGroup"[^>]*role="tablist"/);
+    assert.match(html, /id="filmsGalleryContainer"[^>]*role="tabpanel"/);
+    assert.match(html, /id="lightboxModal"[^>]*role="dialog"[^>]*aria-modal="true"/);
+  }
+
+  const votingHtml = fs.readFileSync(new URL('../voting.html', import.meta.url), 'utf8');
+  assert.match(votingHtml, /role="tablist"/);
+  assert.match(votingHtml, /role="tab"[^>]*aria-selected="true"[^>]*aria-controls="votingFilmsContainer"/);
+  assert.match(votingHtml, /id="votingFilmsContainer"[^>]*role="tabpanel"/);
+
+  const lightboxJs = fs.readFileSync(new URL('../js/photo-lightbox.js', import.meta.url), 'utf8');
+  assert.match(lightboxJs, /role="tab"[^>]*aria-selected=/);
+  assert.match(lightboxJs, /aria-controls="archivePhotosContainer"/);
+  assert.match(lightboxJs, /ArrowLeft/);
+  assert.match(lightboxJs, /ArrowRight/);
+  assert.match(lightboxJs, /e\.key === "Home"/);
+  assert.match(lightboxJs, /e\.key === "End"/);
+  assert.match(lightboxJs, /e\.key === "Tab"/);
+  assert.match(lightboxJs, /role="dialog"/);
+  assert.match(lightboxJs, /aria-modal="true"/);
+
+  const votingJs = fs.readFileSync(new URL('../js/voting-and-winners.js', import.meta.url), 'utf8');
+  assert.match(votingJs, /aria-selected/);
+  assert.match(votingJs, /ArrowRight/);
+  assert.match(votingJs, /ArrowLeft/);
+});
+
+test('Priority 2 & 3: YouTube embeds use click-to-load facades and static pages avoid unconditional /api/* calls', async () => {
+  for (const rel of ['../lt/index.html', '../en/index.html', '../lt/azuolynas-fest-2026.html', '../en/azuolynas-fest-2026.html', '../lt/azuolynas-festival-2026.html']) {
+    const html = fs.readFileSync(new URL(rel, import.meta.url), 'utf8');
+    assert.doesNotMatch(html, /<iframe[^>]+youtube(?:-nocookie)?\.com/i, `${rel} must not load eager YouTube iframes`);
+  }
+
+  const ytJs = fs.readFileSync(new URL('../js/yt-facade.js', import.meta.url), 'utf8');
+  assert.match(ytJs, /<button type="button" class="yt-facade-btn"/);
+  assert.match(ytJs, /youtube-nocookie\.com\/embed\//);
+  assert.match(ytJs, /loading="lazy"/);
+  assert.match(ytJs, /ensureYouTubePreconnect/);
+
+  let calls = [];
+  const ctx = vm.createContext({
+    URL, Headers, Request,
+    sessionStorage: { getItem: () => null },
+    location: { href: 'https://www.azuolynasfilmfestival.lt/lt/index.html', origin: 'https://www.azuolynasfilmfestival.lt', hostname: 'www.azuolynasfilmfestival.lt' },
+    fetch: async (url) => { calls.push(url); return { ok: true }; }
+  });
+  ctx.window = ctx;
+  vm.runInContext(fs.readFileSync(new URL('../js/server-api.js', import.meta.url), 'utf8'), ctx);
+  assert.equal(await ctx.FestivalApi.hasServer(), false);
+  assert.equal(calls.length, 0, 'Static custom domain must not probe /health or /api/*');
+
+  for (const rel of ['../lt/index.html', '../en/index.html', '../lt/azuolynas-fest-2026.html', '../en/azuolynas-fest-2026.html', '../voting.html', '../live.html', '../stream-overlay.html']) {
+    const html = fs.readFileSync(new URL(rel, import.meta.url), 'utf8');
+    assert.doesNotMatch(html, /fetch\(["']\/api\/editions["']\)/, `${rel} must not call missing /api/editions`);
+  }
+});
+
+test('Priority 4: public pages use modular lazy Firebase v10.8.0 (no compat SDK) with transaction support', () => {
+  for (const rel of [
+    '../lt/index.html', '../en/index.html', '../voting.html', '../live.html',
+    '../azuolynas-fest-2027.html', '../lt/azuolynas-fest-2027.html', '../en/azuolynas-fest-2027.html',
+    '../lt/azuolynas-fest-2026.html', '../en/azuolynas-fest-2026.html', '../lt/azuolynas-festival-2026.html'
+  ]) {
+    const html = fs.readFileSync(new URL(rel, import.meta.url), 'utf8');
+    assert.doesNotMatch(html, /firebase-app-compat\.js|firebase-auth-compat\.js|firebase-firestore-compat\.js/, `${rel} must not load compat SDK`);
+  }
+  const lazyJs = fs.readFileSync(new URL('../js/firebase-public-lazy.js', import.meta.url), 'utf8');
+  assert.match(lazyJs, /firebasejs\/10\.8\.0\//);
+  assert.match(lazyJs, /IntersectionObserver/);
+  assert.match(lazyJs, /runTransaction:/);
+  assert.match(lazyJs, /delete:\s*\(/);
+  assert.doesNotMatch(lazyJs, /enableIndexedDbPersistence/);
+});
+
+test('Priority 5 & 6: public images include explicit dimensions, CSS/JS assets are minified, and pages inline critical CSS with deferred scripts', () => {
+  const publicHtml = [
+    '../lt/index.html', '../en/index.html',
+    '../azuolynas-fest-2027.html', '../lt/azuolynas-fest-2027.html', '../en/azuolynas-fest-2027.html',
+    '../lt/azuolynas-fest-2026.html', '../en/azuolynas-fest-2026.html', '../lt/azuolynas-festival-2026.html',
+    '../voting.html', '../live.html',
+    '../lt/faq.html', '../en/faq.html',
+    '../lt/privatumo-politika.html', '../lt/naudojimosi-taisykles.html',
+    '../en/privacy-policy.html', '../en/terms-of-service.html',
+    '../privacy-policy.html', '../terms-of-service.html'
+  ];
+  for (const rel of publicHtml) {
+    const html = fs.readFileSync(new URL(rel, import.meta.url), 'utf8');
+    assert.match(html, /<style id="criticalCss">/, `${rel} missing inline criticalCss`);
+    assert.match(html, /style\.min\.css" media="print" onload="this\.media='all'"/, `${rel} missing async style.min.css`);
+    for (const m of html.matchAll(/<img\b[^>]*>/g)) {
+      assert.match(m[0], /width=/i, `${rel} <img> missing width: ${m[0].slice(0, 80)}`);
+      assert.match(m[0], /height=/i, `${rel} <img> missing height: ${m[0].slice(0, 80)}`);
+    }
+    for (const s of html.matchAll(/<script\b([^>]*src="[^"]+"[^>]*)>/g)) {
+      assert.match(s[1], /\bdefer\b/, `${rel} external script must be deferred: ${s[0]}`);
+      if (!/https?:/.test(s[1])) {
+        assert.match(s[1], /\.min\.js["']/, `${rel} local script should use .min.js: ${s[0]}`);
+      }
+    }
+  }
+
+  for (const [srcRel, minRel] of [
+    ['../style.css', '../style.min.css'],
+    ['../live.css', '../live.min.css'],
+    ['../config.js', '../config.min.js'],
+    ['../js/firebase-public-lazy.js', '../js/firebase-public-lazy.min.js'],
+    ['../js/yt-facade.js', '../js/yt-facade.min.js'],
+    ['../js/photo-lightbox.js', '../js/photo-lightbox.min.js'],
+    ['../js/voting-and-winners.js', '../js/voting-and-winners.min.js'],
+    ['../js/burger-menu.js', '../js/burger-menu.min.js'],
+    ['../js/server-api.js', '../js/server-api.min.js']
+  ]) {
+    const rawSize = fs.statSync(new URL(srcRel, import.meta.url)).size;
+    const minSize = fs.statSync(new URL(minRel, import.meta.url)).size;
+    assert.ok(minSize < rawSize, `${minRel} (${minSize} B) must be smaller than ${srcRel} (${rawSize} B)`);
+  }
+});
+
 
 

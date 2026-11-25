@@ -73,9 +73,13 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css">
-  <link rel="stylesheet" href="live.css">
-  <script src="error-reporting.js"></script>
+  <style id="criticalCss">:root{--bg-color:#070908;--surface-color:#0D1210;--surface-light:#131A17;--surface-card:#0A0F0D;--surface-elevated:#16201C;--accent-color:#1A3E32;--accent-light:#34D399;--accent-hover:#6EE7B7;--accent-mint:#4ADE80;--text-color:#F8FAFC;--text-muted:#94A3B8;--text-subtle:#64748B;--border-color:rgba(255,255,255,0.08);--border-light:rgba(255,255,255,0.14);--font-display:'Space Grotesk','Plus Jakarta Sans',system-ui,sans-serif;--font-ui:'Plus Jakarta Sans',system-ui,sans-serif;--font-mono:'IBM Plex Mono',ui-monospace,monospace;--container-max:1240px;--site-radius:2px}*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}html{font-size:16px;overflow-x:hidden;width:100%;max-width:100vw}body{background-color:var(--bg-color);color:var(--text-color);font-family:var(--font-ui);font-size:clamp(.92rem,1.05vw,1.02rem);line-height:1.6;overflow-x:hidden;width:100%;max-width:100vw}.d-none{display:none!important}.container{width:100%;max-width:var(--container-max);margin:0 auto;padding:0 24px}.btn-solid,.btn-outline{padding:10px 24px;border-radius:2px;font-size:.82rem;font-weight:600;text-transform:uppercase;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:8px;height:44px;cursor:pointer}.btn-solid{background:#fff;border:1px solid #fff;color:#070908}.btn-outline{background:transparent;border:1px solid rgba(255,255,255,.2);color:#fff}</style>
+  <link rel="preload" href="style.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <link rel="stylesheet" href="style.min.css" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="live.min.css" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="style.min.css"><link rel="stylesheet" href="live.min.css"></noscript>
+  <script src="error-reporting.min.js" defer></script>
+  <script src="js/server-api.min.js" defer></script>
   <style>
     /* Language switcher component */
     .live-lang-switch {
@@ -739,28 +743,39 @@
       const urlParams = new URLSearchParams(window.location.search);
       const queryToken = urlParams.get("t") || urlParams.get("token") || urlParams.get("pass");
 
-      // Check session storage cache
-      const cachedSession = sessionStorage.getItem("asiff_verified_token");
-      if (cachedSession) {
-        try {
-          const auth = JSON.parse(cachedSession);
-          if (auth.token && (!auth.expiresAt || new Date(auth.expiresAt).getTime() > Date.now())) {
-            validateAndMount(auth.token, true);
+      function bootLivePortal() {
+        applyTranslations();
+        bindLangButtons();
+
+        // Check session storage cache
+        const cachedSession = sessionStorage.getItem("asiff_verified_token");
+        if (cachedSession) {
+          try {
+            const auth = JSON.parse(cachedSession);
+            if (auth.token && (!auth.expiresAt || new Date(auth.expiresAt).getTime() > Date.now())) {
+              validateAndMount(auth.token, true);
+            }
+          } catch (e) {
+            sessionStorage.removeItem("asiff_verified_token");
           }
-        } catch (e) {
-          sessionStorage.removeItem("asiff_verified_token");
+        } else if (queryToken) {
+          input.value = queryToken;
+          validateAndMount(queryToken);
         }
-      } else if (queryToken) {
-        input.value = queryToken;
-        validateAndMount(queryToken);
+
+        form.addEventListener("submit", async function(e) {
+          e.preventDefault();
+          const token = input.value.trim();
+          if (!token) return;
+          await validateAndMount(token);
+        });
       }
 
-      form.addEventListener("submit", async function(e) {
-        e.preventDefault();
-        const token = input.value.trim();
-        if (!token) return;
-        await validateAndMount(token);
-      });
+      if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", bootLivePortal);
+      } else {
+        bootLivePortal();
+      }
 
       async function validateAndMount(token, isSilent = false) {
         const t = I18N[currentLang] || I18N.lt;
@@ -778,21 +793,26 @@
 
           // 1. Try local server endpoint if available
           let validation = null;
-          try {
-            const srvRes = await fetch("/api/stream/validate-token", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ token, tokenHash })
-            });
-            if (srvRes.ok) {
-              validation = await srvRes.json();
-            } else if (srvRes.status === 403 || srvRes.status === 400) {
-              const errData = await srvRes.json();
-              throw new Error(mapErrorCode(errData.error || errData.code));
-            }
-          } catch (netErr) {
-            if (netErr.message && !netErr.message.includes("Failed to fetch")) {
-              throw netErr;
+          const hasServer = window.FestivalApi && typeof window.FestivalApi.hasServer === "function"
+            ? await window.FestivalApi.hasServer().catch(() => false)
+            : false;
+          if (hasServer) {
+            try {
+              const srvRes = await fetch("/api/stream/validate-token", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ token, tokenHash })
+              });
+              if (srvRes.ok) {
+                validation = await srvRes.json();
+              } else if (srvRes.status === 403 || srvRes.status === 400) {
+                const errData = await srvRes.json();
+                throw new Error(mapErrorCode(errData.error || errData.code));
+              }
+            } catch (netErr) {
+              if (netErr.message && !netErr.message.includes("Failed to fetch")) {
+                throw netErr;
+              }
             }
           }
 
@@ -921,7 +941,8 @@
             <img 
               src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media" 
               alt="AISFF" 
-              class="live-brand-logo">
+              class="live-brand-logo"
+              width="44" height="44" decoding="async">
             <div class="live-brand-info">
               <h1 class="live-brand-title" id="stageHeaderTitle">${t.headerTitle}</h1>
               <p class="live-brand-sub" id="stageHeaderSub">${t.headerSub}</p>
@@ -1101,8 +1122,12 @@
               }
             }
           } catch (e) {
-            // Fallback: check overlay API
+            // Fallback: check overlay API only when Express server exists
             try {
+              const hasServer = window.FestivalApi && typeof window.FestivalApi.hasServer === "function"
+                ? await window.FestivalApi.hasServer().catch(() => false)
+                : false;
+              if (!hasServer) return;
               const res = await fetch("/api/broadcast/overlay");
               if (res.ok) {
                 const data = await res.json();

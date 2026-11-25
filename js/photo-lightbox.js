@@ -84,8 +84,12 @@
       this.filterByAlbum(this.currentAlbum);
       this.renderAlbumTabs();
       this.renderGalleryGrid();
-      this.setupDOM();
       this.bindGlobalKeys();
+      if (typeof requestIdleCallback === "function") {
+        requestIdleCallback(() => this.setupDOM(), { timeout: 1500 });
+      } else {
+        setTimeout(() => this.setupDOM(), 0);
+      }
     }
 
     normalizePhotos(list) {
@@ -164,6 +168,7 @@
 
     renderAlbumTabs() {
       const container = document.getElementById("photoAlbumTabs");
+      const panel = document.getElementById("archivePhotosContainer");
       if (!container) return;
 
       const t = i18n[this.lang];
@@ -174,19 +179,53 @@
         { key: "prizes", label: t.prizesAlbum, count: this.photos.filter((p) => p.album === "prizes").length }
       ].filter((tab) => tab.key === "all" || tab.count > 0);
 
-      container.innerHTML = tabs.map((tab) => `
-        <button type="button" class="album-filter-pill ${this.currentAlbum === tab.key ? 'active' : ''}" data-album="${tab.key}">
-          <span>${tab.label}</span>
-          <span class="album-pill-count">${tab.count}</span>
-        </button>
-      `).join("");
+      if (!tabs.some((tab) => tab.key === this.currentAlbum)) {
+        this.currentAlbum = "all";
+        this.filteredPhotos = [...this.photos];
+      }
 
-      container.querySelectorAll(".album-filter-pill").forEach((btn) => {
-        btn.addEventListener("click", () => {
-          container.querySelectorAll(".album-filter-pill").forEach((b) => b.classList.remove("active"));
-          btn.classList.add("active");
-          this.filterByAlbum(btn.dataset.album);
-          this.renderGalleryGrid();
+      container.innerHTML = tabs.map((tab) => {
+        const isActive = this.currentAlbum === tab.key;
+        return `
+        <button type="button" id="albumTab_${tab.key}" role="tab" aria-selected="${isActive ? "true" : "false"}" aria-controls="archivePhotosContainer" tabindex="${isActive ? "0" : "-1"}" class="album-filter-pill ${isActive ? 'active' : ''}" data-album="${tab.key}">
+          ${tab.label}
+          <span class="album-pill-count" aria-hidden="true">${tab.count}</span>
+        </button>`;
+      }).join("");
+
+      if (panel) {
+        panel.setAttribute("role", "tabpanel");
+        panel.setAttribute("aria-labelledby", `albumTab_${this.currentAlbum}`);
+      }
+
+      const tabButtons = Array.from(container.querySelectorAll('[role="tab"]'));
+      const activateTab = (btn, shouldFocus = false) => {
+        tabButtons.forEach((b) => {
+          const selected = b === btn;
+          b.classList.toggle("active", selected);
+          b.setAttribute("aria-selected", selected ? "true" : "false");
+          b.setAttribute("tabindex", selected ? "0" : "-1");
+        });
+        if (panel) {
+          panel.setAttribute("aria-labelledby", btn.id);
+        }
+        this.filterByAlbum(btn.dataset.album);
+        this.renderGalleryGrid();
+        if (shouldFocus) btn.focus();
+      };
+
+      tabButtons.forEach((btn, idx) => {
+        btn.addEventListener("click", () => activateTab(btn, false));
+        btn.addEventListener("keydown", (e) => {
+          let nextIdx = null;
+          if (e.key === "ArrowRight") nextIdx = (idx + 1) % tabButtons.length;
+          else if (e.key === "ArrowLeft") nextIdx = (idx - 1 + tabButtons.length) % tabButtons.length;
+          else if (e.key === "Home") nextIdx = 0;
+          else if (e.key === "End") nextIdx = tabButtons.length - 1;
+          if (nextIdx !== null) {
+            e.preventDefault();
+            activateTab(tabButtons[nextIdx], true);
+          }
         });
       });
     }
@@ -209,7 +248,7 @@
       container.innerHTML = this.filteredPhotos.map((p, idx) => `
         <div class="gallery-item-pro" data-idx="${idx}" role="button" tabindex="0" aria-label="${p.caption}">
           <div class="gallery-item-media-pro">
-            <img src="${p.url}" alt="${p.caption}" loading="lazy" decoding="async">
+            <img src="${p.url}" alt="${p.caption}" width="1200" height="800" loading="lazy" decoding="async">
             <div class="gallery-overlay-badge">${p.album ? p.album.toUpperCase() : "PHOTO"}</div>
             <div class="gallery-hover-actions">
               <span class="gallery-view-btn">
@@ -318,14 +357,14 @@
           <div class="pro-slideshow-progress" id="proLbProgress"><div class="pro-slideshow-bar" id="proLbProgressBar"></div></div>
 
           <!-- Main Stage Viewport -->
-          <div class="pro-lightbox-stage" id="proLbStage">
+          <div class="pro-lightbox-stage" id="proLbStage" role="tabpanel" aria-labelledby="proThumbTab_0">
             <button type="button" class="pro-nav-arrow pro-nav-prev" id="proLbPrevBtn" title="${t.prev}" aria-label="${t.prev}">
               <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
             </button>
 
             <div class="pro-viewport-canvas" id="proLbCanvas">
               <div class="pro-image-wrapper" id="proLbImageWrapper">
-                <img id="proLbMainImg" class="pro-lightbox-img" src="" alt="Festival photo preview" draggable="false">
+                <img id="proLbMainImg" class="pro-lightbox-img" src="" alt="Festival photo preview" width="1200" height="800" decoding="async" draggable="false">
                 <div class="pro-img-spinner" id="proLbSpinner"></div>
               </div>
             </div>
@@ -493,9 +532,33 @@
     }
 
     bindGlobalKeys() {
+      if (this._keysBound) return;
+      this._keysBound = true;
       document.addEventListener("keydown", (e) => {
         const modal = document.getElementById("proLightboxModal");
         if (!modal || !modal.classList.contains("active")) return;
+
+        if (e.key === "Tab") {
+          const focusables = Array.from(modal.querySelectorAll('button:not([disabled]), a[href], [tabindex]:not([tabindex="-1"])'))
+            .filter((el) => el.offsetParent !== null && !el.closest(".d-none") && getComputedStyle(el).display !== "none");
+          if (focusables.length > 0) {
+            const first = focusables[0];
+            const last = focusables[focusables.length - 1];
+            if (e.shiftKey) {
+              if (document.activeElement === first || !modal.contains(document.activeElement)) {
+                e.preventDefault();
+                last.focus();
+              }
+            } else if (document.activeElement === last || !modal.contains(document.activeElement)) {
+              e.preventDefault();
+              first.focus();
+            }
+          } else {
+            e.preventDefault();
+            modal.focus();
+          }
+          return;
+        }
 
         if (e.key === "Escape") {
           e.preventDefault();
@@ -527,15 +590,25 @@
 
     open(idx = 0) {
       if (!this.filteredPhotos || this.filteredPhotos.length === 0) return;
+      this.setupDOM();
+      this.bindGlobalKeys();
       this.currentIdx = (idx + this.filteredPhotos.length) % this.filteredPhotos.length;
 
       const modal = document.getElementById("proLightboxModal");
+      if (!modal.classList.contains("active")) {
+        this.lastFocusedElement = document.activeElement;
+      }
       modal.classList.add("active");
       document.body.style.overflow = "hidden";
 
       this.resetTransform();
       this.renderThumbnails();
       this.loadImage();
+
+      const closeBtn = document.getElementById("proLbCloseBtn");
+      if (closeBtn) {
+        requestAnimationFrame(() => closeBtn.focus({ preventScroll: true }));
+      }
     }
 
     close() {
@@ -548,6 +621,11 @@
       this.resetTransform();
       if (document.fullscreenElement) {
         document.exitFullscreen().catch(() => {});
+      }
+      const returnTarget = this.lastFocusedElement;
+      this.lastFocusedElement = null;
+      if (returnTarget && typeof returnTarget.focus === "function" && document.contains(returnTarget)) {
+        returnTarget.focus({ preventScroll: true });
       }
     }
 
@@ -611,18 +689,39 @@
 
     renderThumbnails() {
       const track = document.getElementById("proLbThumbnailTrack");
+      const stage = document.getElementById("proLbStage");
       if (!track) return;
 
-      track.innerHTML = this.filteredPhotos.map((p, idx) => `
-        <button type="button" class="pro-thumb-item ${idx === this.currentIdx ? 'active' : ''}" data-idx="${idx}" title="${p.caption}">
-          <img src="${p.url}" alt="Thumbnail #${idx + 1}" loading="lazy">
-        </button>
-      `).join("");
+      track.innerHTML = this.filteredPhotos.map((p, idx) => {
+        const isActive = idx === this.currentIdx;
+        const safeCap = String(p.caption || `Photo ${idx + 1}`).replace(/"/g, "&quot;");
+        return `
+        <button type="button" id="proThumbTab_${idx}" role="tab" aria-selected="${isActive ? "true" : "false"}" aria-controls="proLbStage" tabindex="${isActive ? "0" : "-1"}" aria-label="${safeCap}" class="pro-thumb-item ${isActive ? 'active' : ''}" data-idx="${idx}" title="${safeCap}">
+          <img src="${p.url}" alt="" width="160" height="90" loading="lazy" decoding="async" aria-hidden="true">
+        </button>`;
+      }).join("");
 
-      track.querySelectorAll(".pro-thumb-item").forEach((btn) => {
+      if (stage) {
+        stage.setAttribute("aria-labelledby", `proThumbTab_${this.currentIdx}`);
+      }
+
+      const thumbs = Array.from(track.querySelectorAll('[role="tab"]'));
+      thumbs.forEach((btn, idx) => {
         btn.addEventListener("click", () => {
-          const idx = parseInt(btn.dataset.idx, 10);
           this.goTo(idx);
+        });
+        btn.addEventListener("keydown", (e) => {
+          let nextIdx = null;
+          if (e.key === "ArrowRight") nextIdx = (idx + 1) % thumbs.length;
+          else if (e.key === "ArrowLeft") nextIdx = (idx - 1 + thumbs.length) % thumbs.length;
+          else if (e.key === "Home") nextIdx = 0;
+          else if (e.key === "End") nextIdx = thumbs.length - 1;
+          if (nextIdx !== null) {
+            e.preventDefault();
+            e.stopPropagation();
+            this.goTo(nextIdx);
+            thumbs[nextIdx]?.focus({ preventScroll: true });
+          }
         });
       });
 
@@ -631,14 +730,17 @@
 
     updateThumbnailActive() {
       const track = document.getElementById("proLbThumbnailTrack");
+      const stage = document.getElementById("proLbStage");
       if (!track) return;
-      track.querySelectorAll(".pro-thumb-item").forEach((btn, idx) => {
-        if (idx === this.currentIdx) {
-          btn.classList.add("active");
-        } else {
-          btn.classList.remove("active");
-        }
+      track.querySelectorAll('[role="tab"]').forEach((btn, idx) => {
+        const isActive = idx === this.currentIdx;
+        btn.classList.toggle("active", isActive);
+        btn.setAttribute("aria-selected", isActive ? "true" : "false");
+        btn.setAttribute("tabindex", isActive ? "0" : "-1");
       });
+      if (stage) {
+        stage.setAttribute("aria-labelledby", `proThumbTab_${this.currentIdx}`);
+      }
       this.scrollThumbIntoView();
     }
 

@@ -183,7 +183,7 @@ function renderVideosList() {
         <strong style="color:var(--text-color); font-family:var(--font-cinema); font-size:1.05rem;">${v.title}</strong>
         <div style="font-size:0.78rem; color:var(--accent-light); margin:4px 0 8px 0;">${v.label || ''}</div>
         <div class="admin-media-frame">
-          ${createMediaEmbed(v.url)}
+          ${createMediaEmbed(v.url, v.title)}
         </div>
       </div>
       <button class="btn-delete btn-full" data-delete-video="${v.id}">Pašalinti iš svetainės</button>
@@ -251,7 +251,7 @@ function renderPhotosList() {
       <div class="admin-media-card">
         <div>
           <div class="admin-media-thumb" style="position:relative; aspect-ratio:16/9; background:#000; border-radius:2px; overflow:hidden;">
-            <img src="${p.url}" alt="${p.caption || 'Foto'}" class="admin-media-img" loading="lazy" style="width:100%; height:100%; object-fit:cover;">
+            <img src="${p.url}" alt="${p.caption || 'Foto'}" class="admin-media-img" width="1200" height="800" loading="lazy" decoding="async" style="width:100%; height:100%; object-fit:cover;">
             <span style="position:absolute; top:6px; left:6px; background:rgba(7,28,24,0.9); color:var(--accent-light); font-size:0.68rem; font-weight:700; padding:2px 7px; border-radius:2px; border:1px solid rgba(111,165,138,0.35); text-transform:uppercase; letter-spacing:0.04em;">
               ${albName}
             </span>

@@ -60,17 +60,18 @@
     ]
   }
   </script>
-  <link rel="stylesheet" href="style.css">
+  <style id="criticalCss">:root{--bg-color:#070908;--surface-color:#0D1210;--surface-light:#131A17;--surface-card:#0A0F0D;--surface-elevated:#16201C;--accent-color:#1A3E32;--accent-light:#34D399;--accent-hover:#6EE7B7;--accent-mint:#4ADE80;--text-color:#F8FAFC;--text-muted:#94A3B8;--text-subtle:#64748B;--border-color:rgba(255,255,255,0.08);--border-light:rgba(255,255,255,0.14);--font-display:'Space Grotesk','Plus Jakarta Sans',system-ui,sans-serif;--font-ui:'Plus Jakarta Sans',system-ui,sans-serif;--font-mono:'IBM Plex Mono',ui-monospace,monospace;--container-max:1240px;--site-radius:2px}*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}html{font-size:16px;overflow-x:hidden;width:100%;max-width:100vw}body{background-color:var(--bg-color);color:var(--text-color);font-family:var(--font-ui);font-size:clamp(.92rem,1.05vw,1.02rem);line-height:1.6;overflow-x:hidden;width:100%;max-width:100vw}.d-none{display:none!important}.container{width:100%;max-width:var(--container-max);margin:0 auto;padding:0 24px}h1{font-family:var(--font-display);font-weight:700;text-transform:uppercase;line-height:1.05}header,.site-header{position:sticky;top:0;z-index:500;background:rgba(7,9,8,.95);border-bottom:1px solid var(--border-color);height:64px;display:flex;align-items:center}.nav-bar{display:flex;align-items:center;justify-content:space-between;width:100%;min-width:0;gap:16px}.logo-wrap{display:flex;align-items:center;gap:12px;text-decoration:none;flex-shrink:0}.logo-img{height:32px;width:32px;object-fit:contain;border-radius:2px;border:1px solid var(--border-color)}.logo-text{font-family:var(--font-display);font-size:1.2rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:#fff}.header-actions{display:flex;align-items:center;gap:10px;flex-shrink:0}.lang-switch{display:inline-flex;align-items:center;background:rgba(255,255,255,.04);border:1px solid var(--border-color);border-radius:2px;padding:2px}.lang-btn{text-decoration:none;font-family:var(--font-mono);font-size:.72rem;font-weight:600;padding:4px 10px;color:var(--text-muted)}.lang-btn.active{background:var(--surface-light);color:#fff}.burger-menu-btn{display:inline-flex;align-items:center;gap:9px;background:var(--surface-light);border:1px solid var(--border-light);border-radius:2px;color:var(--text-color);padding:8px 14px;min-height:40px;cursor:pointer}.burger-icon{display:flex;flex-direction:column;justify-content:center;width:20px;height:14px;position:relative}.burger-icon .bar{display:block;width:100%;height:2px;background:currentColor;position:absolute}.burger-icon .bar-1{top:0}.burger-icon .bar-2{top:6px}.burger-icon .bar-3{top:12px}.mobile-menu-drawer{visibility:hidden;transform:translate3d(100%,0,0);position:fixed}.mobile-menu-backdrop{visibility:hidden;opacity:0;pointer-events:none;position:fixed}.btn-solid,.btn-outline{padding:10px 24px;border-radius:2px;font-size:.82rem;font-weight:600;text-transform:uppercase;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:8px;height:44px;cursor:pointer}.btn-solid{background:#fff;border:1px solid #fff;color:#070908}.btn-outline{background:transparent;border:1px solid rgba(255,255,255,.2);color:#fff}@media(max-width:640px){.logo-text{max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.burger-label{display:none}.header-actions .btn-outline.btn-nav-cta,.header-actions .btn-solid.btn-nav-cta{display:none!important}}</style>
+  <link rel="preload" href="style.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <link rel="stylesheet" href="style.min.css" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="style.min.css"></noscript>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
   
-  <!-- Firebase Compat SDK for Static Browser Execution -->
-  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.4/dist/confetti.browser.min.js"></script>
-  <script src="config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.4/dist/confetti.browser.min.js" defer></script>
+  <script src="js/server-api.min.js" defer></script>
+  <script src="config.min.js" defer></script>
+  <script src="js/firebase-public-lazy.min.js" defer></script>
 
   <style>
     /* Custom Styling for Voting & Ceremony Reveal */
@@ -987,7 +988,7 @@
   <header class="site-header">
     <div class="container nav-bar">
       <a href="lt/index.html" class="logo-wrap" id="logoLink" title="AISFF">
-        <img src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media" alt="AISFF" class="logo-img">
+        <img src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media" alt="AISFF" class="logo-img" width="32" height="32" decoding="async">
         <span class="logo-text">AISFF</span>
       </a>
 
@@ -1026,7 +1027,7 @@
   <aside class="mobile-menu-drawer" id="mobileMenuDrawer" aria-label="Navigacijos meniu" aria-hidden="true">
     <div class="drawer-header">
       <a href="lt/index.html" class="drawer-logo-wrap" id="drawerLogoLink">
-        <img src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media" alt="AISFF" class="logo-img">
+        <img src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media" alt="AISFF" class="logo-img" width="32" height="32" decoding="async">
         <div>
           <div class="drawer-logo-title">AISFF</div>
           <div class="drawer-logo-sub" id="drawerSubtitle">Mokinių Kino Festivalis</div>
@@ -1113,14 +1114,14 @@
       <section id="liveLeaderboardWidget" class="live-leaderboard-card" aria-live="polite" style="display:none;"></section>
 
       <!-- Category Filter Pills -->
-      <div class="category-filter-bar" id="categoryFilterBar">
-        <button type="button" class="category-tab-btn active" data-cat="all" id="btnFilterAll">All Categories</button>
-        <button type="button" class="category-tab-btn" data-cat="senior" id="btnFilterSenior">Senior (14–18)</button>
-        <button type="button" class="category-tab-btn" data-cat="junior" id="btnFilterJunior">Junior (10–13)</button>
+      <div class="category-filter-bar" id="categoryFilterBar" role="tablist" aria-label="Film categories">
+        <button type="button" class="category-tab-btn active" data-cat="all" id="btnFilterAll" role="tab" aria-selected="true" aria-controls="votingFilmsContainer" tabindex="0">All Categories</button>
+        <button type="button" class="category-tab-btn" data-cat="senior" id="btnFilterSenior" role="tab" aria-selected="false" aria-controls="votingFilmsContainer" tabindex="-1">Senior (14–18)</button>
+        <button type="button" class="category-tab-btn" data-cat="junior" id="btnFilterJunior" role="tab" aria-selected="false" aria-controls="votingFilmsContainer" tabindex="-1">Junior (10–13)</button>
       </div>
 
       <!-- Voting Cards Grid -->
-      <main class="voting-grid" id="votingFilmsContainer" aria-live="polite">
+      <main class="voting-grid" id="votingFilmsContainer" role="tabpanel" aria-labelledby="btnFilterAll" aria-live="polite">
         <div style="grid-column: 1 / -1; text-align: center; padding: 60px 20px; color: #94a3b8;">
           <p id="loadingNotice">Connecting to festival database...</p>
         </div>
@@ -1164,7 +1165,7 @@
           </div>
           <div class="favorite-grid-layout">
             <div class="favorite-poster-box">
-              <img id="favPosterImg" src="" alt="Audience Choice Award Winner">
+              <img id="favPosterImg" src="" alt="Audience Choice Award Winner" width="400" height="225" loading="lazy" decoding="async">
             </div>
             <div class="favorite-content-box">
               <h2 id="favMovieTitle">Loading Winner...</h2>
@@ -1210,7 +1211,7 @@
 
   <canvas id="confettiCanvas" style="position:fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:9999; display:none;"></canvas>
 
-  <script src="js/burger-menu.js"></script>
+  <script src="js/burger-menu.min.js" defer></script>
   <script>
     (function() {
       // 1. Multi-Language Dictionary (LT & EN only - strictly no Russian)
@@ -1523,13 +1524,33 @@
         }
       }
 
-      // Filter button handlers
-      document.querySelectorAll(".category-tab-btn").forEach(btn => {
-        btn.addEventListener("click", () => {
-          document.querySelectorAll(".category-tab-btn").forEach(b => b.classList.remove("active"));
-          btn.classList.add("active");
-          selectedCategory = btn.getAttribute("data-cat");
-          renderVotingCards();
+      // Filter button handlers with ARIA tablist roving tabindex & keyboard support
+      const categoryTabs = Array.from(document.querySelectorAll(".category-tab-btn"));
+      function activateCategoryTab(btn, shouldFocus = false) {
+        categoryTabs.forEach((b) => {
+          const active = b === btn;
+          b.classList.toggle("active", active);
+          b.setAttribute("aria-selected", active ? "true" : "false");
+          b.setAttribute("tabindex", active ? "0" : "-1");
+        });
+        const panelEl = document.getElementById("votingFilmsContainer");
+        if (panelEl && btn.id) panelEl.setAttribute("aria-labelledby", btn.id);
+        selectedCategory = btn.getAttribute("data-cat");
+        renderVotingCards();
+        if (shouldFocus) btn.focus();
+      }
+      categoryTabs.forEach((btn, idx) => {
+        btn.addEventListener("click", () => activateCategoryTab(btn, false));
+        btn.addEventListener("keydown", (e) => {
+          let nextIdx = null;
+          if (e.key === "ArrowRight") nextIdx = (idx + 1) % categoryTabs.length;
+          else if (e.key === "ArrowLeft") nextIdx = (idx - 1 + categoryTabs.length) % categoryTabs.length;
+          else if (e.key === "Home") nextIdx = 0;
+          else if (e.key === "End") nextIdx = categoryTabs.length - 1;
+          if (nextIdx !== null) {
+            e.preventDefault();
+            activateCategoryTab(categoryTabs[nextIdx], true);
+          }
         });
       });
 
@@ -1842,7 +1863,7 @@
             <article class="film-vote-card ${isThisVoted ? 'has-voted-this' : ''}" data-id="${film.id}" data-collection="${film._collection || 'movies'}">
               <div class="film-poster-wrap">
                 ${poster 
-                  ? `<img src="${escapeHtml(poster)}" alt="${escapeHtml(title)}" class="film-poster-img" loading="lazy">` 
+                  ? `<img src="${escapeHtml(poster)}" alt="${escapeHtml(title)}" class="film-poster-img" width="640" height="360" loading="lazy" decoding="async">` 
                   : `<div class="film-poster-placeholder">
                       <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect><line x1="7" y1="2" x2="7" y2="22"></line><line x1="17" y1="2" x2="17" y2="22"></line><line x1="2" y1="12" x2="22" y2="12"></line></svg>
                       <span style="font-size:0.75rem; margin-top:6px; font-family:var(--font-mono);">AISFF</span>
@@ -1922,52 +1943,60 @@
           let updatedVoteCount = null;
           const catSlug = resolveMovieCategory(film) === "senior" ? "cat2" : "cat1";
 
-          try {
-            let voterUid = localStorage.getItem("asiff_voter_uid");
-            if (!voterUid) {
-              voterUid = "v_" + Math.random().toString(36).substring(2, 12) + "_" + Date.now().toString(36);
-              localStorage.setItem("asiff_voter_uid", voterUid);
-            }
-            const srvRes = await fetch("/api/vote", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                filmId: film.id,
-                category: catSlug,
-                voterUid
-              })
-            });
-            const ct = srvRes.headers.get("content-type") || "";
-            if (ct.includes("application/json")) {
-              const srvData = await srvRes.json();
-              if (srvRes.ok && srvData.success) {
-                votedViaServer = true;
-                if (typeof srvData.votesCount === "number") {
-                  updatedVoteCount = srvData.votesCount;
-                }
-              } else if (srvData.error === "already-voted") {
-                hasVoted = true;
-                localStorage.setItem("festival_voted", srvData.filmId || film.id);
-                updateThankYouBanner();
-                renderVotingCards();
-                showToast(t.btnAlreadyVoted, true);
-                return;
-              } else if (srvData.error === "voting-closed") {
-                showToast(t.statusClosed, true);
-                btnElement.disabled = false;
-                btnElement.querySelector("span").textContent = originalText;
-                return;
+          const hasServer = window.FestivalApi && typeof window.FestivalApi.hasServer === "function"
+            ? await window.FestivalApi.hasServer().catch(() => false)
+            : false;
+
+          if (hasServer) {
+            try {
+              let voterUid = localStorage.getItem("asiff_voter_uid");
+              if (!voterUid) {
+                voterUid = "v_" + Math.random().toString(36).substring(2, 12) + "_" + Date.now().toString(36);
+                localStorage.setItem("asiff_voter_uid", voterUid);
               }
+              const srvRes = await fetch("/api/vote", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  filmId: film.id,
+                  category: catSlug,
+                  voterUid
+                })
+              });
+              const ct = srvRes.headers.get("content-type") || "";
+              if (ct.includes("application/json")) {
+                const srvData = await srvRes.json();
+                if (srvRes.ok && srvData.success) {
+                  votedViaServer = true;
+                  if (typeof srvData.votesCount === "number") {
+                    updatedVoteCount = srvData.votesCount;
+                  }
+                } else if (srvData.error === "already-voted") {
+                  hasVoted = true;
+                  localStorage.setItem("festival_voted", srvData.filmId || film.id);
+                  updateThankYouBanner();
+                  renderVotingCards();
+                  showToast(t.btnAlreadyVoted, true);
+                  return;
+                } else if (srvData.error === "voting-closed") {
+                  showToast(t.statusClosed, true);
+                  btnElement.disabled = false;
+                  btnElement.querySelector("span").textContent = originalText;
+                  return;
+                }
+              }
+            } catch (srvErr) {
+              console.info("Server /api/vote fallback to Firestore:", srvErr.message);
             }
-          } catch (srvErr) {
-            console.info("Server /api/vote fallback to Firestore:", srvErr.message);
           }
 
           if (!votedViaServer) {
-            if (!window.firebase || !window.firebase.firestore) {
+            const db = (window.db && typeof window.db.collection === "function" ? window.db : null)
+              || (window.FestivalFirebasePublic ? await window.FestivalFirebasePublic.ensureDb() : null)
+              || (window.firebase && typeof window.firebase.firestore === "function" ? window.firebase.firestore() : null);
+            if (!db) {
               throw new Error("Firebase SDK is not initialized.");
             }
-            const db = window.firebase.firestore();
             const targetCollection = film._collection || "submissions";
             const countField = targetCollection === "movies" ? "votes" : "votesCount";
 
@@ -2180,6 +2209,10 @@
         // Hydrate from Express REST API when backend is available
         (async () => {
           try {
+            const hasServer = window.FestivalApi && typeof window.FestivalApi.hasServer === "function"
+              ? await window.FestivalApi.hasServer().catch(() => false)
+              : false;
+            if (!hasServer) return;
             const [settingsRes, subsRes, votesRes] = await Promise.all([
               fetch("/api/settings").catch(() => null),
               fetch("/api/submissions").catch(() => null),
@@ -2205,53 +2238,56 @@
           }
         })();
 
-        if (!window.firebase || !window.firebase.firestore) {
-          console.warn("Firebase Firestore SDK not ready.");
-          return;
-        }
+        const bindVotingSnapshots = (db) => {
+          if (!db || typeof db.collection !== "function") return;
+          try {
+            // A. Settings Listeners (settings/festival & settings/global)
+            for (const settingsDocId of ["festival", "global"]) {
+              db.collection("settings").doc(settingsDocId).onSnapshot((doc) => {
+                if (doc.exists) {
+                  applySettingsData(doc.data());
+                }
+              }, (err) => {
+                console.warn(`Settings (${settingsDocId}) snapshot listener notice:`, err.message);
+              });
+            }
 
-        try {
-          const db = window.firebase.firestore();
-
-          // A. Settings Listeners (settings/festival & settings/global)
-          for (const settingsDocId of ["festival", "global"]) {
-            db.collection("settings").doc(settingsDocId).onSnapshot((doc) => {
-              if (doc.exists) {
-                applySettingsData(doc.data());
-              }
-            }, (err) => {
-              console.warn(`Settings (${settingsDocId}) snapshot listener notice:`, err.message);
-            });
-          }
-
-          // B. Movies Listener
-          db.collection("movies").onSnapshot((snapshot) => {
-            const list = [];
-            snapshot.forEach((doc) => {
-              list.push({ id: doc.id, _collection: "movies", ...doc.data() });
-            });
-            filmsBySource.movies = list;
-            rebuildMoviesList();
-          }, (err) => {
-            console.info("Movies collection listener info:", err.message);
-          });
-
-          // C. Submissions Public Queries (strictly filtered for security rules)
-          for (const field of ["inVoting", "isWinner"]) {
-            db.collection("submissions").where(field, "==", true).onSnapshot((snapshot) => {
+            // B. Movies Listener
+            db.collection("movies").onSnapshot((snapshot) => {
               const list = [];
               snapshot.forEach((doc) => {
-                list.push({ id: doc.id, _collection: "submissions", ...doc.data() });
+                list.push({ id: doc.id, _collection: "movies", ...doc.data() });
               });
-              filmsBySource[field] = list;
+              filmsBySource.movies = list;
               rebuildMoviesList();
             }, (err) => {
-              console.info(`Submissions (${field}) listener info:`, err.message);
+              console.info("Movies collection listener info:", err.message);
             });
-          }
 
-        } catch (e) {
-          console.error("Firestore sync init error:", e);
+            // C. Submissions Public Queries (strictly filtered for security rules)
+            for (const field of ["inVoting", "isWinner"]) {
+              db.collection("submissions").where(field, "==", true).onSnapshot((snapshot) => {
+                const list = [];
+                snapshot.forEach((doc) => {
+                  list.push({ id: doc.id, _collection: "submissions", ...doc.data() });
+                });
+                filmsBySource[field] = list;
+                rebuildMoviesList();
+              }, (err) => {
+                console.info(`Submissions (${field}) listener info:`, err.message);
+              });
+            }
+          } catch (e) {
+            console.error("Firestore sync init error:", e);
+          }
+        };
+
+        if (window.db && typeof window.db.collection === "function") {
+          bindVotingSnapshots(window.db);
+        } else if (window.FestivalFirebasePublic) {
+          window.FestivalFirebasePublic.onReady(bindVotingSnapshots);
+        } else if (window.firebase && typeof window.firebase.firestore === "function") {
+          bindVotingSnapshots(window.firebase.firestore());
         }
       }
 

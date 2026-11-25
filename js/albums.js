@@ -585,6 +585,7 @@ function ensureCoreYearsExist() {
 
 function renderYearPills() {
   const container = document.getElementById("albumYearTabs");
+  const panel = document.getElementById("albumActivePanel");
   if (!container) return;
 
   const years = Object.keys(albumsCatalog).sort((a, b) => Number(a) - Number(b));
@@ -593,14 +594,41 @@ function renderYearPills() {
       const ed = albumsCatalog[yr];
       const count = Array.isArray(ed?.photos) ? ed.photos.length : 0;
       const isActive = yr === activeAlbumYear;
+      const safeYr = escapeHtml(yr);
       return `
-        <button type="button" role="tab" aria-selected="${isActive ? "true" : "false"}" class="album-year-pill ${isActive ? "active" : ""}" data-album-year="${escapeHtml(yr)}">
-          <span>${escapeHtml(yr)} m.</span>
-          <span class="album-year-count">${count} nuotr.</span>
+        <button type="button" id="albumYearTab_${safeYr}" role="tab" aria-selected="${isActive ? "true" : "false"}" aria-controls="albumActivePanel" tabindex="${isActive ? "0" : "-1"}" class="album-year-pill ${isActive ? "active" : ""}" data-album-year="${safeYr}">
+          ${safeYr} m.
+          <span class="album-year-count" aria-hidden="true">${count} nuotr.</span>
         </button>
       `;
     })
     .join("");
+
+  if (panel && typeof panel.setAttribute === "function") {
+    panel.setAttribute("role", "tabpanel");
+    panel.setAttribute("aria-labelledby", `albumYearTab_${activeAlbumYear}`);
+  }
+
+  const tabs = typeof container.querySelectorAll === "function"
+    ? Array.from(container.querySelectorAll('[role="tab"]'))
+    : [];
+  tabs.forEach((btn, idx) => {
+    btn.addEventListener("keydown", (e) => {
+      let nextIdx = null;
+      if (e.key === "ArrowRight") nextIdx = (idx + 1) % tabs.length;
+      else if (e.key === "ArrowLeft") nextIdx = (idx - 1 + tabs.length) % tabs.length;
+      else if (e.key === "Home") nextIdx = 0;
+      else if (e.key === "End") nextIdx = tabs.length - 1;
+      if (nextIdx !== null) {
+        e.preventDefault();
+        const nextBtn = tabs[nextIdx];
+        if (nextBtn) {
+          selectAlbumYear(nextBtn.dataset.albumYear);
+          document.getElementById(`albumYearTab_${nextBtn.dataset.albumYear}`)?.focus();
+        }
+      }
+    });
+  });
 }
 
 function updateOpenPageButtons() {
@@ -743,7 +771,7 @@ function renderAlbumPhotosGrid() {
       return `
         <div class="album-photo-card" data-photo-index="${idx}">
           <div class="album-photo-thumb">
-            <img src="${escapeHtml(photo.url)}" alt="${escapeHtml(photo.caption || `Foto ${idx + 1}`)}" loading="lazy">
+            <img src="${escapeHtml(photo.url)}" alt="${escapeHtml(photo.caption || `Foto ${idx + 1}`)}" width="1200" height="800" loading="lazy" decoding="async">
             ${isHero ? '<span class="album-cover-badge">Viršelis</span>' : ""}
             <span class="album-photo-index">#${idx + 1}</span>
           </div>

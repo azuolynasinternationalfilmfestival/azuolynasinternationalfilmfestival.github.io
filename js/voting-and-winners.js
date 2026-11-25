@@ -105,6 +105,36 @@
     render();
   }
 
+  function bindTablistRoving(tablistId, btnSelector, panelId, onActivate) {
+    const tablist = document.getElementById(tablistId);
+    if (!tablist || tablist.dataset.ariaBound === "1") return;
+    tablist.dataset.ariaBound = "1";
+    const tabs = Array.from(tablist.querySelectorAll(btnSelector));
+    const panel = document.getElementById(panelId);
+    tabs.forEach((btn, idx) => {
+      if (!btn.hasAttribute("role")) btn.setAttribute("role", "tab");
+      btn.setAttribute("aria-controls", panelId);
+      const isSelected = btn.getAttribute("aria-selected") === "true" || btn.classList.contains("active");
+      btn.setAttribute("tabindex", isSelected ? "0" : "-1");
+      if (isSelected && panel && btn.id) panel.setAttribute("aria-labelledby", btn.id);
+      btn.addEventListener("keydown", (e) => {
+        let nextIdx = null;
+        if (e.key === "ArrowRight") nextIdx = (idx + 1) % tabs.length;
+        else if (e.key === "ArrowLeft") nextIdx = (idx - 1 + tabs.length) % tabs.length;
+        else if (e.key === "Home") nextIdx = 0;
+        else if (e.key === "End") nextIdx = tabs.length - 1;
+        if (nextIdx !== null) {
+          e.preventDefault();
+          const target = tabs[nextIdx];
+          if (target) {
+            onActivate(target);
+            target.focus();
+          }
+        }
+      });
+    });
+  }
+
   // ==========================================
   // LAUREATES / WINNERS SYSTEM
   // ==========================================
@@ -116,16 +146,20 @@
     setCategory: function (cat, btnElem) {
       this.currentCategory = cat;
       const bar = document.getElementById("resultsFilterBar");
+      const panel = document.getElementById("winnersListContainer");
       if (bar) {
         const btns = bar.querySelectorAll(".results-filter-btn");
         btns.forEach((b) => {
           b.classList.remove("active");
           b.setAttribute("aria-selected", "false");
+          b.setAttribute("tabindex", "-1");
         });
       }
       if (btnElem) {
         btnElem.classList.add("active");
         btnElem.setAttribute("aria-selected", "true");
+        btnElem.setAttribute("tabindex", "0");
+        if (panel && btnElem.id) panel.setAttribute("aria-labelledby", btnElem.id);
       }
       this.render();
     },
@@ -133,6 +167,10 @@
     render: function (films, lang) {
       if (films) this.cachedWinners = films.filter((f) => f.isWinner === true);
       if (lang) this.currentLang = lang;
+      bindTablistRoving("resultsFilterBar", ".results-filter-btn", "winnersListContainer", (btn) => {
+        const m = (btn.getAttribute("onclick") || "").match(/setCategory\(['"]([^'"]+)['"]/);
+        this.setCategory(m ? m[1] : (btn.dataset.category || "all"), btn);
+      });
 
       const container = document.getElementById("winnersListContainer");
       if (!container) return;
@@ -278,12 +316,17 @@
     init: function (films, lang) {
       if (films) this.cachedFilms = films.filter((f) => f.inVoting === true);
       if (lang) this.currentLang = lang;
+      bindTablistRoving("votingTabsGroup", ".voting-tab-btn", "filmsGalleryContainer", (btn) => {
+        const m = (btn.getAttribute("onclick") || "").match(/setCategory\(['"]([^'"]+)['"]/);
+        this.setCategory(m ? m[1] : (btn.dataset.category || "all"), btn);
+      });
       this.render();
       this.updateStatusBanner();
 
-      // Sync server-authoritative live vote counts
-      fetch("/api/votes")
-        .then((res) => (res.ok ? res.json() : null))
+      // Sync server-authoritative live vote counts only when backend API is present
+      Promise.resolve(window.FestivalApi && typeof window.FestivalApi.hasServer === "function" ? window.FestivalApi.hasServer() : false)
+        .then((hasServer) => (hasServer ? fetch("/api/votes") : null))
+        .then((res) => (res && res.ok ? res.json() : null))
         .then((data) => {
           if (data && data.success && data.votes) {
             let changed = false;
@@ -308,11 +351,21 @@
     setCategory: function (cat, btnElem) {
       this.activeCategory = cat;
       const group = document.getElementById("votingTabsGroup");
+      const panel = document.getElementById("filmsGalleryContainer");
       if (group) {
         const btns = group.querySelectorAll(".voting-tab-btn");
-        btns.forEach((b) => b.classList.remove("active"));
+        btns.forEach((b) => {
+          b.classList.remove("active");
+          b.setAttribute("aria-selected", "false");
+          b.setAttribute("tabindex", "-1");
+        });
       }
-      if (btnElem) btnElem.classList.add("active");
+      if (btnElem) {
+        btnElem.classList.add("active");
+        btnElem.setAttribute("aria-selected", "true");
+        btnElem.setAttribute("tabindex", "0");
+        if (panel && btnElem.id) panel.setAttribute("aria-labelledby", btnElem.id);
+      }
       this.render();
     },
 
@@ -501,7 +554,7 @@
         return;
       }
 
-      container.innerHTML = list.map((film, index) => {
+      const buildCardHtml = (film, index) => {
         const votes = film.votesCount || 0;
         const pct = totalVotes > 0 ? Math.round((votes / totalVotes) * 100) : 0;
         const isThisFilmVoted = userVotedFilmId === film.id;
@@ -595,7 +648,26 @@
             </div>
           </div>
         `;
-      }).join("");
+      };
+
+      const CHUNK_SIZE = 12;
+      if (list.length <= CHUNK_SIZE || typeof setTimeout !== "function" || typeof container.insertAdjacentHTML !== "function") {
+        container.innerHTML = list.map(buildCardHtml).join("");
+      } else {
+        const renderToken = (this._renderSeq = (this._renderSeq || 0) + 1);
+        container.innerHTML = list.slice(0, CHUNK_SIZE).map(buildCardHtml).join("");
+        let offset = CHUNK_SIZE;
+        const appendNext = () => {
+          if (this._renderSeq !== renderToken) return;
+          const batchHtml = list.slice(offset, offset + CHUNK_SIZE).map((f, i) => buildCardHtml(f, offset + i)).join("");
+          container.insertAdjacentHTML("beforeend", batchHtml);
+          offset += CHUNK_SIZE;
+          if (offset < list.length) {
+            setTimeout(appendNext, 0);
+          }
+        };
+        setTimeout(appendNext, 0);
+      }
 
       this.updateStatusBanner();
     },
@@ -667,22 +739,27 @@
         let finalVotesCount = null;
 
         // 1. Primary: Server-side vote handler (guaranteed persistent commit & audit)
-        try {
-          const apiResp = await fetch("/api/vote", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ filmId: filmId, voterUid: uid })
-          });
-          const result = await apiResp.json().catch(() => null);
-          if (apiResp.ok && result && result.success) {
-            voteSucceeded = true;
-            finalVotesCount = result.votesCount;
-          } else if (result && result.error === "already-voted") {
-            throw new Error("already-voted");
+        const hasServer = window.FestivalApi && typeof window.FestivalApi.hasServer === "function"
+          ? await window.FestivalApi.hasServer().catch(() => false)
+          : false;
+        if (hasServer) {
+          try {
+            const apiResp = await fetch("/api/vote", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ filmId: filmId, voterUid: uid })
+            });
+            const result = await apiResp.json().catch(() => null);
+            if (apiResp.ok && result && result.success) {
+              voteSucceeded = true;
+              finalVotesCount = result.votesCount;
+            } else if (result && result.error === "already-voted") {
+              throw new Error("already-voted");
+            }
+          } catch (apiErr) {
+            if (apiErr.message === "already-voted") throw apiErr;
+            console.warn("API vote endpoint fallback:", apiErr);
           }
-        } catch (apiErr) {
-          if (apiErr.message === "already-voted") throw apiErr;
-          console.warn("API vote endpoint fallback:", apiErr);
         }
 
         // 2. Fallback: Client-side Firestore SDK
@@ -690,25 +767,31 @@
           const db = (typeof window !== "undefined" && window.db) || ((typeof firebase !== "undefined" && typeof firebase.firestore === "function") ? firebase.firestore() : null);
           if (db) {
             const filmRef = db.collection("submissions").doc(filmId);
+            const hasSignedInUser = typeof firebase !== "undefined" && typeof firebase.auth === "function" && Boolean(firebase.auth().currentUser);
             const voteAuditRef = db.collection("submissions").doc(filmId).collection("votes").doc(uid);
 
-            try {
-              await db.runTransaction(async (transaction) => {
-                const voteDoc = await transaction.get(voteAuditRef);
-                if (voteDoc.exists) {
-                  throw new Error("already-voted");
-                }
-                transaction.set(voteAuditRef, {
-                  votedAt: firebase.firestore.FieldValue.serverTimestamp()
+            if (hasSignedInUser && typeof db.runTransaction === "function") {
+              try {
+                await db.runTransaction(async (transaction) => {
+                  const voteDoc = await transaction.get(voteAuditRef);
+                  if (voteDoc.exists) {
+                    throw new Error("already-voted");
+                  }
+                  transaction.set(voteAuditRef, {
+                    votedAt: firebase.firestore.FieldValue.serverTimestamp()
+                  });
+                  transaction.update(filmRef, {
+                    votesCount: firebase.firestore.FieldValue.increment(1)
+                  });
                 });
-                transaction.update(filmRef, {
-                  votesCount: firebase.firestore.FieldValue.increment(1)
-                });
-              });
-              voteSucceeded = true;
-            } catch (trxErr) {
-              if (trxErr.message === "already-voted") throw trxErr;
-              console.warn("Audit vote note:", trxErr.message);
+                voteSucceeded = true;
+              } catch (trxErr) {
+                if (trxErr.message === "already-voted") throw trxErr;
+                console.warn("Audit vote note:", trxErr.message);
+              }
+            }
+
+            if (!voteSucceeded) {
               try {
                 await filmRef.update({
                   votesCount: firebase.firestore.FieldValue.increment(1)

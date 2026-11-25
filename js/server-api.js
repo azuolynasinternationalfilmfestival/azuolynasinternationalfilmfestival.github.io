@@ -5,7 +5,10 @@
   let serverCheck;
   window.FestivalApi = {
     async hasServer() {
-      if (!apiBase() && window.location.hostname.endsWith('.github.io')) return false;
+      const host = (window.location && window.location.hostname) || '';
+      if (!apiBase() && (host.endsWith('.github.io') || host === 'azuolynasfilmfestival.lt' || host === 'www.azuolynasfilmfestival.lt')) {
+        return false;
+      }
       if (!serverCheck) serverCheck = (async () => {
         const response = await nativeFetch(`${apiBase()}/health`, { cache: 'no-store' });
         if ([404, 405].includes(response.status)) return false;

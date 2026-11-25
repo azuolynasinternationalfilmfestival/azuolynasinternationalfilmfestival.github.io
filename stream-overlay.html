@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="lt">
 <head>
-  <script src="js/server-api.js"></script>
+  <script src="js/server-api.min.js" defer></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>OBS Stream Graphics Overlay | AISFF</title>
@@ -237,7 +237,7 @@
   <div class="overlay-banner-wrapper">
     <div class="overlay-top-header">
       <div class="overlay-brand">
-        <img src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media" alt="Logo">
+        <img src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media" alt="Logo" width="32" height="32" decoding="async">
         <div>
           <div class="overlay-title">AISFF &bull; Tiesioginiai Rezultatai</div>
           <div style="font-size:0.75rem; color:#94A3B8;">Žiūrovų simpatijų apdovanojimas (Live Voting)</div>
@@ -329,6 +329,10 @@
 
     async function fetchLatestVotes() {
       try {
+        const hasServer = window.FestivalApi && typeof window.FestivalApi.hasServer === "function"
+          ? await window.FestivalApi.hasServer().catch(() => false)
+          : false;
+        if (!hasServer) return;
         const res = await fetch("/api/submissions");
         if (res.ok) {
           const data = await res.json();
@@ -344,8 +348,12 @@
     }
 
     // Connect to Server-Sent Events (SSE) for Real-Time Zero Latency Updates
-    function connectSSE() {
+    async function connectSSE() {
       try {
+        const hasServer = window.FestivalApi && typeof window.FestivalApi.hasServer === "function"
+          ? await window.FestivalApi.hasServer().catch(() => false)
+          : false;
+        if (!hasServer) return;
         const evtSource = new EventSource("/api/stream/events");
 
         evtSource.onmessage = (event) => {
@@ -377,9 +385,16 @@
       }
     }
 
-    fetchLatestVotes();
-    connectSSE();
-    setInterval(fetchLatestVotes, 3000); // Polling safeguard
+    function bootStreamOverlay() {
+      fetchLatestVotes();
+      connectSSE();
+      setInterval(fetchLatestVotes, 3000); // Polling safeguard
+    }
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", bootStreamOverlay);
+    } else {
+      bootStreamOverlay();
+    }
   </script>
 </body>
 </html>
