@@ -304,6 +304,7 @@ const JS_FILES = [
   'js/voting-and-winners.js',
   'js/photo-lightbox.js',
   'js/burger-menu.js',
+  'js/content-public.js',
   'js/countdown.js',
   'js/mail-client.js'
 ];

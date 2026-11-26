@@ -1,6 +1,5 @@
 import { db, auth, DEFAULT_CONTENT, PRIMARY_SUPERADMIN_EMAIL, AUTHORIZED_ADMIN_EMAILS } from "./firebase-init.js";
 import { showToast } from "./ui-feedback.js";
-import { syncArchiveState } from "./archive.js";
 import { sendAdminInviteLink } from "./auth.js";
 
 let unsubscribeSettings = null;
@@ -329,7 +328,9 @@ function applySettingsToForm(d) {
     if (document.getElementById("cfgEmailFrom")) document.getElementById("cfgEmailFrom").value = d.smtp.from || '"Ąžuolynas Film Fest" <azuolynasfilmfestival@gmail.com>';
   }
 
-  syncArchiveState(d);
+  try {
+    window.dispatchEvent(new CustomEvent("festival-settings-updated", { detail: d }));
+  } catch (e) { /* ignore */ }
 }
 
 export async function loadSettingsFromApi() {

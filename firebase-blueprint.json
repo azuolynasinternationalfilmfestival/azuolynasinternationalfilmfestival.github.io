@@ -53,6 +53,41 @@
       },
       "required": ["year", "title"]
     },
+    "FestivalContent": {
+      "title": "FestivalContent",
+      "description": "Unified edition/home content, texts (LT/EN), media links, gallery photos, and SEO fields",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Document identifier (e.g. 'home', '2027', '2026', '2028')", "maxLength": 64, "pattern": "^[A-Za-z0-9_-]+$" },
+        "year": { "type": "string", "description": "Edition year or 'home'", "maxLength": 16 },
+        "status": { "type": "string", "enum": ["upcoming", "active", "completed", "home"], "description": "Publication status" },
+        "submissionDeadline": { "type": "string", "description": "Submission deadline YYYY-MM-DD", "maxLength": 32 },
+        "title": { "type": "string", "description": "Main title (LT)", "maxLength": 200 },
+        "titleEn": { "type": "string", "description": "Main title (EN)", "maxLength": 200 },
+        "date": { "type": "string", "description": "Event date text (LT)", "maxLength": 160 },
+        "dateEn": { "type": "string", "description": "Event date text (EN)", "maxLength": 160 },
+        "theme": { "type": "string", "description": "Festival theme (LT)", "maxLength": 200 },
+        "themeEn": { "type": "string", "description": "Festival theme (EN)", "maxLength": 200 },
+        "subtitle": { "type": "string", "description": "Subtitle / short summary (LT)", "maxLength": 500 },
+        "subtitleEn": { "type": "string", "description": "Subtitle / short summary (EN)", "maxLength": 500 },
+        "story": { "type": "string", "description": "Formatted edition story/body (LT)", "maxLength": 25000 },
+        "storyEn": { "type": "string", "description": "Formatted edition story/body (EN)", "maxLength": 25000 },
+        "heroImage": { "type": "string", "description": "Cover image URL", "maxLength": 2000 },
+        "videoUrl": { "type": "string", "description": "Primary ceremony/festival video URL", "maxLength": 2000 },
+        "prizesPhotoUrl": { "type": "string", "description": "Statuettes / prizes showcase photo URL (home)", "maxLength": 2000 },
+        "videos": { "type": "array", "description": "Archive/retrospective video entries ({title, label, url})" },
+        "photos": { "type": "array", "description": "Gallery photo objects ({id, url, caption, captionEn, album})" },
+        "seoTitle": { "type": "string", "description": "SEO page title (LT)", "maxLength": 160 },
+        "seoTitleEn": { "type": "string", "description": "SEO page title (EN)", "maxLength": 160 },
+        "seoDescription": { "type": "string", "description": "SEO meta description (LT)", "maxLength": 400 },
+        "seoDescriptionEn": { "type": "string", "description": "SEO meta description (EN)", "maxLength": 400 },
+        "pageUrl": { "type": "string", "description": "Resolved LT page URL", "maxLength": 300 },
+        "pageUrlEn": { "type": "string", "description": "Resolved EN page URL", "maxLength": 300 },
+        "updatedAt": { "type": "string", "description": "ISO timestamp of last edit", "maxLength": 64 },
+        "updatedBy": { "type": "string", "description": "Editor email", "maxLength": 200 }
+      },
+      "required": ["year"]
+    },
     "Movie": {
       "title": "Movie",
       "description": "Public showcase film entry for ceremony voting and results",
@@ -260,6 +295,10 @@
     "/editions/{editionId}": {
       "schema": "FestivalEdition",
       "description": "Annual festival edition documents"
+    },
+    "/content/{contentId}": {
+      "schema": "FestivalContent",
+      "description": "Unified festival content (editions by year and home page archive/SEO data)"
     },
     "/submissions/{submissionId}": {
       "schema": "Submission",

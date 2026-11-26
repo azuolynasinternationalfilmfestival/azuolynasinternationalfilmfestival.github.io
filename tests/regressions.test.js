@@ -667,30 +667,36 @@ test('header 2026/2027 navigation routes match active language across LT, EN, an
   assert.doesNotMatch(votingHtml, /AISFF 2027/);
 });
 
-test('admin panel exposes Albumai tab (without dates in sidebar) with year sub-tabs, file picker, and multi-photo upload route', () => {
+test('admin panel exposes unified Turinys (Content) tab with year pills, multi-photo gallery, and SEO fields', () => {
   const adminHtml = fs.readFileSync(new URL('../admin.html', import.meta.url), 'utf8');
   const adminMainJs = fs.readFileSync(new URL('../js/admin-main.js', import.meta.url), 'utf8');
-  const albumsJs = fs.readFileSync(new URL('../js/albums.js', import.meta.url), 'utf8');
-  const serverJs = fs.readFileSync(new URL('../server.js', import.meta.url), 'utf8');
+  const contentJs = fs.readFileSync(new URL('../js/content.js', import.meta.url), 'utf8');
 
-  assert.match(adminHtml, /id="tabAlbumsBtn"[\s\S]*?>\s*<span>Albumai<\/span>\s*<\/button>/);
-  for (const id of ['tabAlbumsBtn', 'albumsTab', 'albumYearTabs', 'albumNewYearInput', 'albumAddYearBtn', 'albumDeleteYearBtn', 'albumSelectFilesBtn', 'albStory', 'albStoryEn', 'albumMultiPhotoInput', 'albumPhotosGrid', 'saveAlbumBtn']) {
+  assert.match(adminHtml, /id="tabContentBtn"[\s\S]*?>[\s\S]*?<span>Turinys<\/span>[\s\S]*?<\/button>/);
+  for (const id of [
+    'tabContentBtn', 'contentTab', 'contentYearTabs', 'contentNewYearInput',
+    'contentAddYearBtn', 'contentDeleteYearBtn', 'contentSelectFilesBtn',
+    'cntStory', 'cntStoryEn', 'cntSeoTitle', 'cntSeoDescription',
+    'contentMultiPhotoInput', 'contentPhotosGrid', 'saveContentBtn', 'contentStickySaveBtn'
+  ]) {
     assert.ok(adminHtml.includes(`id="${id}"`), `Missing #${id} in admin.html`);
   }
-  assert.match(adminHtml, /id="albumMultiPhotoInput"[^>]*multiple/);
-  assert.match(adminMainJs, /from ["']\.\/albums\.js["']/);
-  assert.match(adminMainJs, /btn:\s*"tabAlbumsBtn",\s*content:\s*"albumsTab"/);
-  assert.match(albumsJs, /export function initAlbums/);
-  assert.match(albumsJs, /\/api\/admin\/albums\/upload/);
-  assert.match(serverJs, /app\.post\('\/api\/admin\/albums\/upload',\s*requireAdminAuth/);
+  assert.match(adminHtml, /id="contentMultiPhotoInput"[^>]*multiple/);
+  assert.match(adminMainJs, /from ["']\.\/content\.js["']/);
+  assert.match(adminMainJs, /showOnlyTabContent\(["']contentTab["']\)/);
+  assert.match(adminMainJs, /initContent\(\)/);
+  assert.match(contentJs, /export function initContent/);
+  assert.match(contentJs, /export function subscribeContent/);
+  assert.match(contentJs, /db\.collection\(["']content["']\)\.doc\(key\)\.set/);
 });
 
-test('albums.js saves album and uploads image cleanly via Firestore-first fallback when /api/* returns HTTP 405', async () => {
+test('content.js saves unified content/2028 + mirror editions/2028 and falls back cleanly on image upload', async () => {
   const f = fixture();
   const elements = new Map();
   function makeEl(id) {
     if (!elements.has(id)) {
       const classes = new Set();
+      const attrs = {};
       elements.set(id, {
         id,
         value: '',
@@ -701,6 +707,9 @@ test('albums.js saves album and uploads image cleanly via Firestore-first fallba
         disabled: false,
         handlers: {},
         style: {},
+        setAttribute(k, v) { attrs[k] = String(v); },
+        getAttribute(k) { return attrs[k]; },
+        dispatchEvent() {},
         classList: {
           add: c => classes.add(c),
           remove: c => classes.delete(c),
@@ -732,7 +741,7 @@ test('albums.js saves album and uploads image cleanly via Firestore-first fallba
     }
   }
 
-  const albumsSrc = fs.readFileSync(new URL('../js/albums.js', import.meta.url), 'utf8')
+  const contentSrc = fs.readFileSync(new URL('../js/content.js', import.meta.url), 'utf8')
     .replace(/^import .*;\n/gm, '')
     .replace(/^export /gm, '');
 
@@ -740,16 +749,19 @@ test('albums.js saves album and uploads image cleanly via Firestore-first fallba
     db: f.database,
     storage: null,
     auth: f.authentication,
+    DEFAULT_CONTENT: { lt: { topic: 'Mano pašaukimas', aboutText: 'Apie' }, en: { topic: 'My Purpose', aboutText: 'About' } },
     showToast: (message, type) => toasts.push({ message, type }),
     sessionStorage: { getItem: (k) => (k === 'admin_user_email' ? 'azuolynasfilmfestival@gmail.com' : 'jwt-tok') },
     Blob,
     Headers,
+    Event: class Event { constructor(name) { this.type = name; } },
     FileReader: MockFileReader,
     Image: MockImage,
     CustomEvent: class CustomEvent { constructor(name) { this.type = name; } },
     dispatchEvent: (e) => dispatched.push(e.type),
     document: {
       getElementById: makeEl,
+      querySelectorAll: () => [],
       createElement: () => ({ width: 800, height: 600, getContext: () => ({ drawImage() {} }), toDataURL: () => 'data:image/jpeg;base64,compressed' })
     },
     fetch: async (route, opts) => {
@@ -762,31 +774,35 @@ test('albums.js saves album and uploads image cleanly via Firestore-first fallba
       };
     }
   });
+  f.context.window = f.context;
 
-  vm.runInContext(albumsSrc, f.context);
-  f.context.initAlbums();
-  f.context.selectAlbumYear('2027');
+  vm.runInContext(contentSrc, f.context);
+  f.context.initContent();
+  f.context.selectContentKey('2027');
 
-  assert.match(makeEl('albumYearTabs').innerHTML, /2026 m\./);
-  assert.match(makeEl('albumYearTabs').innerHTML, /2027 m\./);
+  assert.match(makeEl('contentYearTabs').innerHTML, /Pagrindinis/);
+  assert.match(makeEl('contentYearTabs').innerHTML, /2026 m\./);
+  assert.match(makeEl('contentYearTabs').innerHTML, /2027 m\./);
 
   // Add custom year 2028 via sub-tab bar
-  makeEl('albumNewYearInput').value = '2028';
-  await makeEl('albumAddYearBtn').handlers.click();
-  makeEl('albTitle').value = 'FEST 2028';
-  makeEl('albStory').value = 'Custom 2028 album story';
+  makeEl('contentNewYearInput').value = '2028';
+  await makeEl('contentAddYearBtn').handlers.click();
+  makeEl('cntTitle').value = 'FEST 2028';
+  makeEl('cntStory').value = 'Custom 2028 festival story';
+  makeEl('cntSeoTitle').value = 'FEST 2028 SEO';
 
-  const saved = await f.context.saveCurrentAlbum(false);
+  const saved = await f.context.saveCurrentContent(false);
   assert.equal(saved, true);
-  assert.ok(apiCalls.some(c => c.route === '/api/admin/editions' && c.method === 'POST'));
+  assert.equal(apiCalls.filter(c => c.route.startsWith('/api/')).length, 0, 'Static host should not emit /api/* calls');
   assert.equal(toasts.at(-1).type, 'success');
   assert.doesNotMatch(toasts.at(-1).message, /405/);
+  assert.equal(f.store.get('content/2028')?.title, 'FEST 2028');
+  assert.equal(f.store.get('content/2028')?.story, 'Custom 2028 festival story');
+  assert.equal(f.store.get('content/2028')?.seoTitle, 'FEST 2028 SEO');
   assert.equal(f.store.get('editions/2028')?.title, 'FEST 2028');
-  assert.equal(f.store.get('editions/2028')?.story, 'Custom 2028 album story');
 
-  // Verify uploadSingleImage falls back cleanly when /api/admin/albums/upload returns HTTP 405
+  // Verify uploadSingleImage falls back cleanly to compact JPEG DataURL without Storage/Backend
   const fallbackUrl = await f.context.uploadSingleImage({ name: 'photo.jpg', size: 1000, type: 'image/jpeg' }, '2028', 0);
-  assert.ok(apiCalls.some(c => c.route === '/api/admin/albums/upload' && c.method === 'POST'));
   assert.match(fallbackUrl, /^data:image\/jpeg;base64,/);
 });
 
@@ -872,7 +888,7 @@ test('2026 edition uses 6612 cover and all 7 new ceremony/laureate photos while 
   }
 
   for (const relPath of [
-    '../js/albums.js',
+    '../js/content.js',
     '../lt/azuolynas-fest-2026.html',
     '../en/azuolynas-fest-2026.html',
     '../lt/azuolynas-festival-2026.html'
@@ -993,6 +1009,7 @@ test('Priority 5 & 6: public images include explicit dimensions, CSS/JS assets a
     '../lt/index.html', '../en/index.html',
     '../azuolynas-fest-2027.html', '../lt/azuolynas-fest-2027.html', '../en/azuolynas-fest-2027.html',
     '../lt/azuolynas-fest-2026.html', '../en/azuolynas-fest-2026.html', '../lt/azuolynas-festival-2026.html',
+    '../lt/edition.html', '../en/edition.html',
     '../voting.html', '../live.html',
     '../lt/faq.html', '../en/faq.html',
     '../lt/privatumo-politika.html', '../lt/naudojimosi-taisykles.html',
@@ -1020,6 +1037,7 @@ test('Priority 5 & 6: public images include explicit dimensions, CSS/JS assets a
     ['../live.css', '../live.min.css'],
     ['../config.js', '../config.min.js'],
     ['../js/firebase-public-lazy.js', '../js/firebase-public-lazy.min.js'],
+    ['../js/content-public.js', '../js/content-public.min.js'],
     ['../js/yt-facade.js', '../js/yt-facade.min.js'],
     ['../js/photo-lightbox.js', '../js/photo-lightbox.min.js'],
     ['../js/voting-and-winners.js', '../js/voting-and-winners.min.js'],
@@ -1156,6 +1174,53 @@ test('Real finalist films & full participant names power admin graphics, stream 
   assert.match(plainLt, /Komisijos vieta:\s*1/);
 });
 
+test('content-public.js resolves dynamic edition URLs, sanitizes story HTML, and updates header nav cleanly', () => {
+  const navEl = { innerHTML: '' };
+  const ctx = vm.createContext({
+    location: { pathname: '/lt/index.html' },
+    document: {
+      querySelector: (sel) => (sel === 'header .header-edition-nav' ? navEl : null)
+    }
+  });
+  ctx.window = ctx;
+  vm.runInContext(fs.readFileSync(new URL('../js/content-public.js', import.meta.url), 'utf8'), ctx);
+  const api = ctx.FestivalContentPublic;
 
+  assert.equal(api.resolveEditionUrl('2027', 'lt'), 'azuolynas-fest-2027.html');
+  assert.equal(api.resolveEditionUrl('2026', 'en'), 'azuolynas-fest-2026.html');
+  assert.equal(api.resolveEditionUrl('2028', 'lt'), 'edition.html?year=2028');
+  assert.equal(api.safeUrl('javascript:alert(1)', 'fallback.jpg'), 'fallback.jpg');
 
+  const safeStory = api.sanitizeEditorialStory('<b>Labas</b>\n\n<script>alert(1)</script>');
+  assert.match(safeStory, /<b>Labas<\/b>/);
+  assert.doesNotMatch(safeStory, /<script>/);
 
+  api.updateHeaderEditionNav({
+    '2028': { year: '2028', _fromContentDoc: true },
+    '2027': { year: '2027', _fromContentDoc: true },
+    '2026': { year: '2026', _fromContentDoc: true }
+  }, 'lt', '2028');
+  assert.match(navEl.innerHTML, /href="edition\.html\?year=2028" class="header-edition-link active">2028<\/a>/);
+  assert.match(navEl.innerHTML, /href="azuolynas-fest-2027\.html"/);
+  assert.match(navEl.innerHTML, /href="azuolynas-fest-2026\.html"/);
+});
+
+test('firestore.rules, storage.rules, and GitHub Actions SEO sync enforce schema & zero secrets', () => {
+  const firestoreRules = fs.readFileSync(new URL('../firestore.rules', import.meta.url), 'utf8');
+  assert.match(firestoreRules, /match \/content\/\{contentId\}/);
+  assert.match(firestoreRules, /isValidFestivalContent\(incoming\(\)\)/);
+
+  const storageRules = fs.readFileSync(new URL('../storage.rules', import.meta.url), 'utf8');
+  assert.match(storageRules, /ai-studio-azuolynasinterna-cd7ce36e-5213-4751-8aa0-a7141d397a83/);
+  assert.match(storageRules, /match \/content\/\{allPaths=\*\*\}/);
+
+  const syncSeoJs = fs.readFileSync(new URL('../scripts/sync-seo.mjs', import.meta.url), 'utf8');
+  assert.match(syncSeoJs, /PROJECT_ID\s*=\s*['"]filmfest-509606['"]/);
+  assert.match(syncSeoJs, /DATABASE_ID\s*=\s*['"]ai-studio-azuolynasinterna-cd7ce36e-5213-4751-8aa0-a7141d397a83['"]/);
+  assert.match(syncSeoJs, /firestore\.googleapis\.com\/v1\/projects\/\$\{PROJECT_ID\}\/databases\/\$\{DATABASE_ID\}\/documents\/content/);
+  assert.doesNotMatch(syncSeoJs, /AIza|BEGIN PRIVATE KEY|SERVICE_ACCOUNT/);
+
+  const workflowYml = fs.readFileSync(new URL('../.github/workflows/sync-seo.yml', import.meta.url), 'utf8');
+  assert.match(workflowYml, /node scripts\/sync-seo\.mjs/);
+  assert.doesNotMatch(workflowYml, /secrets\.[A-Z0-9_]*KEY|FIREBASE_SERVICE_ACCOUNT/);
+});

@@ -13,8 +13,8 @@ service firebase.storage {
           request.auth.token.email.lower() == 'azuolynasfilmfestival@gmail.com' ||
           request.auth.token.email.lower() == 'karina.brdar@gmail.com'
         )) ||
-        (firestore.exists(/databases/(default)/documents/users/$(request.auth.uid)) &&
-         firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.role == 'admin')
+        (firestore.exists(/databases/ai-studio-azuolynasinterna-cd7ce36e-5213-4751-8aa0-a7141d397a83/documents/users/$(request.auth.uid)) &&
+         firestore.get(/databases/ai-studio-azuolynasinterna-cd7ce36e-5213-4751-8aa0-a7141d397a83/documents/users/$(request.auth.uid)).data.role == 'admin')
       );
     }
 
@@ -26,6 +26,12 @@ service firebase.storage {
                         || request.resource.contentType.matches('image/.*')
                         || request.resource.contentType == 'application/pdf');
       allow update, delete: if isTopAdmin();
+    }
+
+    // Unified Content Media (covers & edition galleries): public read, admin/signed-in write & delete
+    match /content/{allPaths=**} {
+      allow read: if true;
+      allow write, delete: if isTopAdmin() || isSignedIn();
     }
 
     // Festival Archive, Photos & Posters: public read, admin write & delete

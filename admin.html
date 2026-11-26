@@ -1091,428 +1091,289 @@ Tomas Vaitkus, Aktų salė (Projektorius), t.vaitkus@mokykla.lt"></textarea>
           </div>
         </div>
 
-        <!-- 4A. CONTENT GROUP SUB-NAV (STAGE 1 BRIDGE -> STAGE 2 UNIFIED EDITOR) -->
-        <div id="contentSubNav" class="admin-subnav d-none" role="tablist" aria-label="Turinio skyriai">
-          <button type="button" id="tabAlbumsBtn" class="admin-subnav-btn active">
-            <span>Albumai</span>
-          </button>
-          <button type="button" id="tabEditionsBtn" class="admin-subnav-btn">
-            <span>Metų leidiniai</span>
-          </button>
-          <button type="button" id="tabArchiveBtn" class="admin-subnav-btn">
-            <span>Archyvas</span>
-          </button>
-        </div>
-
-        <!-- 4. EDITIONS & ARCHIVE TAB -->
-        <div id="editionsTab" class="d-none">
-          <div class="content-card" style="margin-bottom:24px;">
-            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:12px;">
-              <div>
-                <h3 class="content-card-title" style="margin:0;">Festivalio Metų Leidiniai</h3>
-                <p class="content-card-sub" style="margin:4px 0 0 0;">
-                  Valdykite festivalio leidinius ir archyvą su pilnu LT ir EN vertimu.
-                </p>
-              </div>
+        <!-- 4. UNIFIED CONTENT ("TURINYS") EDITOR TAB -->
+        <div id="contentTab" class="d-none">
+          <div class="content-year-bar">
+            <div class="content-year-select-group">
+              <span class="content-micro-label">Pasirinkite skyrių arba festivalio metus</span>
+              <div id="contentYearTabs" class="content-year-pills" role="tablist" aria-label="Turinio metai ir skyriai"></div>
             </div>
-            <div id="adminEditionsList" class="admin-media-grid"></div>
-          </div>
-
-          <div class="content-card" id="editionFormAnchor">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; flex-wrap:wrap; gap:10px;">
-              <h3 class="content-card-title" id="editionFormHeading" style="margin:0;">Kurti / Redaguoti Metų Leidinį</h3>
-              <button type="button" id="resetEditionFormBtn" class="btn-outline btn-xs">Išvalyti formą</button>
-            </div>
-
-            <div class="input-row">
-              <div class="input-cell">
-                <label for="edYearSelect">Metai (Identifikatorius) *</label>
-                <input type="text" id="edYearSelect" class="field" placeholder="2027" required>
+            <div class="content-year-actions">
+              <div class="content-add-year-inline">
+                <input type="text" id="contentNewYearInput" class="field" placeholder="Metai (pvz. 2028)" maxlength="4" aria-label="Pridėti naujus festivalio metus">
+                <button type="button" id="contentAddYearBtn" class="btn-outline btn-sm">+ Pridėti</button>
               </div>
-              <div class="input-cell">
-                <label for="edStatus">Leidinio statusas</label>
-                <select id="edStatus" class="field">
-                  <option value="upcoming">Planuojamas / Artėjantis (Upcoming 2027)</option>
-                  <option value="active">Aktyvus festivalis (Active)</option>
-                  <option value="completed">Užbaigtas / Archyvinis (Completed)</option>
-                </select>
-              </div>
-            </div>
-
-            <!-- Bilingual Side-by-Side Grid -->
-            <div class="two-col-grid" style="margin-top:14px;">
-              <!-- LT COLUMN -->
-              <div style="background:rgba(12,38,32,0.4); border:1px solid rgba(111,165,138,0.2); border-radius:var(--site-radius); padding:16px;">
-                <h4 style="color:var(--accent-light); margin-top:0; margin-bottom:12px;">Lietuviška versija (LT)</h4>
-
-                <div class="input-cell">
-                  <label for="edTitle">Puslapio Pavadinimas (LT) *</label>
-                  <input type="text" id="edTitle" class="field" placeholder="Festivalio Leidinys" required>
-                </div>
-
-                <div class="input-cell">
-                  <label for="edDate">Renginio Data (LT) *</label>
-                  <input type="text" id="edDate" class="field" placeholder="2027 m. balandžio 27 d.">
-                </div>
-
-                <div class="input-cell">
-                  <label for="edSubtitle">Paantraštė / Tema (LT)</label>
-                  <input type="text" id="edSubtitle" class="field" placeholder="Tema: „Mano pašaukimas“ (angl. My Purpose)">
-                </div>
-
-                <div class="input-cell">
-                  <label for="edStory">Išsamus aprašymas / Istorija (LT)</label>
-                  <textarea id="edStory" class="field" style="min-height:140px;" placeholder="Trumpametražių filmų festivalio programa, temos ir detalės..."></textarea>
-                </div>
-              </div>
-
-              <!-- EN COLUMN -->
-              <div style="background:rgba(12,38,32,0.4); border:1px solid rgba(111,165,138,0.2); border-radius:var(--site-radius); padding:16px;">
-                <h4 style="color:var(--accent-light); margin-top:0; margin-bottom:12px;">Angliška versija (EN)</h4>
-
-                <div class="input-cell">
-                  <label for="edTitleEn">Page Title (EN)</label>
-                  <input type="text" id="edTitleEn" class="field" placeholder="Festival Edition">
-                </div>
-
-                <div class="input-cell">
-                  <label for="edDateEn">Event Date (EN)</label>
-                  <input type="text" id="edDateEn" class="field" placeholder="April 27, 2027">
-                </div>
-
-                <div class="input-cell">
-                  <label for="edSubtitleEn">Subtitle / Theme (EN)</label>
-                  <input type="text" id="edSubtitleEn" class="field" placeholder="Theme: 'My Purpose' (Mano pašaukimas)">
-                </div>
-
-                <div class="input-cell">
-                  <label for="edStoryEn">Detailed Story (EN)</label>
-                  <textarea id="edStoryEn" class="field" style="min-height:140px;" placeholder="Festival edition details, categories and schedule in English..."></textarea>
-                </div>
-              </div>
-            </div>
-
-            <!-- Additional Technical & Media Fields -->
-            <div class="two-col-grid" style="margin-top:14px;">
-              <div class="input-cell">
-                <label for="edDeadline">Paraiškų priėmimo terminas</label>
-                <input type="text" id="edDeadline" class="field" placeholder="2027-04-09">
-              </div>
-              <div class="input-cell">
-                <label for="edHeroImage">Hero fono nuotraukos URL</label>
-                <input type="url" id="edHeroImage" class="field" placeholder="https://firebasestorage.googleapis.com/...">
-              </div>
-            </div>
-
-            <div class="two-col-grid">
-              <div class="input-cell">
-                <label for="edVideoUrl">Ceremonijos vaizdo įrašo URL (YouTube INGtv / MP4)</label>
-                <input type="url" id="edVideoUrl" class="field" placeholder="https://www.youtube.com/watch?v=...">
-              </div>
-              <div class="input-cell">
-                <label for="edPageUrl">Puslapio URL svetainėje</label>
-                <input type="text" id="edPageUrl" class="field" placeholder="azuolynas-fest-2027.html">
-              </div>
-            </div>
-
-            <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:18px;">
-              <button type="button" id="saveEditionBtn" class="btn-solid">Išsaugoti Leidinio Duomenis (LT & EN)</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- 3B. ALBUMS & YEAR CONTENT EDITOR TAB -->
-        <div id="albumsTab" class="d-none">
-          <div class="album-year-bar">
-            <div style="display:flex; flex-direction:column; gap:8px; min-width:0; flex:1;">
-              <span style="font-size:0.74rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.06em;">Metų albumai (2026, 2027 ir kiti)</span>
-              <div id="albumYearTabs" class="album-year-pills" role="tablist" aria-label="Albumų metai"></div>
-            </div>
-            <div class="album-add-year-wrap">
-              <input type="text" id="albumNewYearInput" class="field" placeholder="Metai (pvz. 2028)" maxlength="4" style="width:136px; padding:7px 10px;">
-              <button type="button" id="albumAddYearBtn" class="btn-outline btn-sm" style="white-space:nowrap;">+ Pridėti</button>
-              <button type="button" id="albumDeleteYearBtn" class="btn-delete btn-xs d-none" style="white-space:nowrap;" title="Pašalinti pasirinktą albumą">Ištrinti metus</button>
-              <a id="albumOpenLtBtn" href="/lt/azuolynas-fest-2027.html" target="_blank" rel="noopener" class="btn-outline btn-sm" style="white-space:nowrap;">Peržiūra LT</a>
-              <a id="albumOpenEnBtn" href="/en/azuolynas-fest-2027.html" target="_blank" rel="noopener" class="btn-outline btn-sm" style="white-space:nowrap;">Peržiūra EN</a>
+              <button type="button" id="contentDeleteYearBtn" class="btn-delete btn-xs d-none">Ištrinti metus</button>
+              <a id="contentOpenLtBtn" href="/lt/azuolynas-fest-2027.html" target="_blank" rel="noopener" class="btn-outline btn-sm">Peržiūra LT</a>
+              <a id="contentOpenEnBtn" href="/en/azuolynas-fest-2027.html" target="_blank" rel="noopener" class="btn-outline btn-sm">Peržiūra EN</a>
             </div>
           </div>
 
-          <div id="albumActivePanel" role="tabpanel" aria-labelledby="albumYearTab_2027">
-          <!-- Editorial Info & Rich Text Block -->
-          <div class="content-card" style="margin-bottom:22px;">
-            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:16px;">
-              <div>
-                <h3 class="content-card-title" id="albumActiveYearHeading" style="margin-bottom:4px;">Albumo redaktorius — 2027 m.</h3>
-                <p class="content-card-sub" style="margin:0;">Redaguokite pasirinktų metų albumo pavadinimą, aprašymą (LT ir EN), viršelį bei nuotraukų galeriją.</p>
+          <div id="contentActivePanel" role="tabpanel" aria-labelledby="contentYearTab_2027" class="content-editor-stack">
+            <!-- Header & Save -->
+            <section class="content-surface-block">
+              <div class="content-section-header">
+                <div>
+                  <h3 class="content-card-title" id="contentActiveHeading">2027 m. leidinys ir galerija</h3>
+                  <p class="content-card-sub">Redaguokite pavadinimą, datą, tekstus (LT / EN), viršelį, vaizdo įrašus, nuotraukas ir SEO vienoje vietoje.</p>
+                </div>
+                <button type="button" id="saveContentBtn" class="btn-solid">Išsaugoti ir Paskelbti</button>
               </div>
-              <button type="button" id="saveAlbumBtn" class="btn-solid" style="white-space:nowrap;">Išsaugoti ir Paskelbti Albumą</button>
-            </div>
 
-            <div class="two-col-grid" style="margin-bottom:14px;">
-              <div class="input-cell">
-                <label for="albStatus">Albumo statusas</label>
-                <select id="albStatus" class="field">
-                  <option value="upcoming">Aktyvus / Artėjantis</option>
-                  <option value="completed">Užbaigtas archyvas</option>
-                </select>
-              </div>
-              <div class="input-cell">
-                <label for="albDeadline">Paraiškų terminas (jei taikoma)</label>
-                <input type="text" id="albDeadline" class="field" placeholder="2027-04-05">
-              </div>
-            </div>
-
-            <div class="album-editor-grid">
-              <!-- LT Panel -->
-              <div class="album-lang-panel">
-                <h4 style="color:#FFFFFF; margin:0 0 12px 0; font-size:0.95rem;">Lietuviška versija (LT)</h4>
+              <!-- Edition Meta (hidden for home) -->
+              <div id="contentEditionMetaSection" class="two-col-grid" style="margin-bottom:16px;">
                 <div class="input-cell">
-                  <label for="albTitle">Pavadinimas (LT)</label>
-                  <input type="text" id="albTitle" class="field" placeholder="FEST 2027">
+                  <label for="cntStatus">Leidinio statusas</label>
+                  <select id="cntStatus" class="field">
+                    <option value="upcoming">Planuojamas / Artėjantis</option>
+                    <option value="active">Aktyvus festivalis</option>
+                    <option value="completed">Užbaigtas archyvas</option>
+                  </select>
                 </div>
                 <div class="input-cell">
-                  <label for="albDate">Data (LT)</label>
-                  <input type="text" id="albDate" class="field" placeholder="2027 m. balandžio 27 d.">
+                  <label for="cntDeadline">Paraiškų priėmimo terminas</label>
+                  <input type="text" id="cntDeadline" class="field" placeholder="2027-04-05">
+                </div>
+              </div>
+
+              <!-- Bilingual Switcher -->
+              <div class="content-lang-switch-bar" role="tablist" aria-label="Redagavimo kalba">
+                <button type="button" id="contentLangToggleLt" class="content-lang-toggle active" role="tab" aria-selected="true">Lietuvių kalba (LT)</button>
+                <button type="button" id="contentLangToggleEn" class="content-lang-toggle" role="tab" aria-selected="false">English (EN)</button>
+              </div>
+
+              <!-- LT Fields -->
+              <div id="contentLtFields" class="content-soft-subblock">
+                <div class="two-col-grid">
+                  <div class="input-cell">
+                    <label for="cntTitle">Pavadinimas (LT)</label>
+                    <input type="text" id="cntTitle" class="field" placeholder="FEST 2027">
+                  </div>
+                  <div class="input-cell">
+                    <label for="cntDate">Renginio data (LT)</label>
+                    <input type="text" id="cntDate" class="field" placeholder="2027 m. balandžio 27 d.">
+                  </div>
                 </div>
                 <div class="input-cell">
-                  <label for="albSubtitle">Paantraštė / Tema (LT)</label>
-                  <input type="text" id="albSubtitle" class="field" placeholder="Tema: „Mano pašaukimas“">
+                  <label for="cntSubtitle">Paantraštė / Tema (LT)</label>
+                  <input type="text" id="cntSubtitle" class="field" placeholder="Tema: „Mano pašaukimas“">
                 </div>
                 <div class="input-cell" style="margin-bottom:0;">
-                  <label for="albStory">Redaguojamas tekstas / Istorija (LT)</label>
-                  <div class="album-editor-toolbar">
-                    <button type="button" class="album-format-btn" data-album-format="bold" data-target="albStory"><b>B</b> Paryškinti</button>
-                    <button type="button" class="album-format-btn" data-album-format="italic" data-target="albStory"><i>I</i> Kursyvas</button>
-                    <button type="button" class="album-format-btn" data-album-format="quote" data-target="albStory">&ldquo; Citata</button>
-                    <button type="button" class="album-format-btn" data-album-format="paragraph" data-target="albStory">&para; Pastraipa</button>
-                    <button type="button" class="album-format-btn" id="albStoryPreviewToggleBtn" style="margin-left:auto;">Peržiūra</button>
+                  <label for="cntStory">Istorija / Aprašymas (LT)</label>
+                  <div class="content-editor-toolbar">
+                    <button type="button" class="content-format-btn" data-content-format="bold" data-target="cntStory"><b>B</b> Paryškinti</button>
+                    <button type="button" class="content-format-btn" data-content-format="italic" data-target="cntStory"><i>I</i> Kursyvas</button>
+                    <button type="button" class="content-format-btn" data-content-format="quote" data-target="cntStory">&ldquo; Citata</button>
+                    <button type="button" class="content-format-btn" data-content-format="paragraph" data-target="cntStory">&para; Pastraipa</button>
+                    <button type="button" class="content-format-btn" id="cntStoryPreviewToggleBtn" style="margin-left:auto;">Peržiūra</button>
                   </div>
-                  <textarea id="albStory" class="field" style="min-height:170px; border-radius:0 0 2px 2px;" placeholder="Įrašykite festivalio metų pasakojimą, nugalėtojus, temą ir detales..."></textarea>
-                  <div id="albStoryPreview" class="album-story-preview d-none"></div>
+                  <textarea id="cntStory" class="field" style="min-height:150px;" placeholder="Festivalio metų pasakojimas, temos aprašymas ir detalės..."></textarea>
+                  <div id="cntStoryPreview" class="content-story-preview d-none"></div>
                 </div>
               </div>
 
-              <!-- EN Panel -->
-              <div class="album-lang-panel">
-                <h4 style="color:#FFFFFF; margin:0 0 12px 0; font-size:0.95rem;">Angliška versija (EN)</h4>
-                <div class="input-cell">
-                  <label for="albTitleEn">Title (EN)</label>
-                  <input type="text" id="albTitleEn" class="field" placeholder="FEST 2027">
+              <!-- EN Fields -->
+              <div id="contentEnFields" class="content-soft-subblock d-none">
+                <div class="two-col-grid">
+                  <div class="input-cell">
+                    <label for="cntTitleEn">Title (EN)</label>
+                    <input type="text" id="cntTitleEn" class="field" placeholder="FEST 2027">
+                  </div>
+                  <div class="input-cell">
+                    <label for="cntDateEn">Event Date (EN)</label>
+                    <input type="text" id="cntDateEn" class="field" placeholder="April 27, 2027">
+                  </div>
                 </div>
                 <div class="input-cell">
-                  <label for="albDateEn">Event Date (EN)</label>
-                  <input type="text" id="albDateEn" class="field" placeholder="April 27, 2027">
-                </div>
-                <div class="input-cell">
-                  <label for="albSubtitleEn">Subtitle / Theme (EN)</label>
-                  <input type="text" id="albSubtitleEn" class="field" placeholder="Theme: 'My Purpose'">
+                  <label for="cntSubtitleEn">Subtitle / Theme (EN)</label>
+                  <input type="text" id="cntSubtitleEn" class="field" placeholder="Theme: 'My Purpose'">
                 </div>
                 <div class="input-cell" style="margin-bottom:0;">
-                  <label for="albStoryEn">Formatted Story / Overview (EN)</label>
-                  <div class="album-editor-toolbar">
-                    <button type="button" class="album-format-btn" data-album-format="bold" data-target="albStoryEn"><b>B</b> Bold</button>
-                    <button type="button" class="album-format-btn" data-album-format="italic" data-target="albStoryEn"><i>I</i> Italic</button>
-                    <button type="button" class="album-format-btn" data-album-format="quote" data-target="albStoryEn">&ldquo; Quote</button>
-                    <button type="button" class="album-format-btn" data-album-format="paragraph" data-target="albStoryEn">&para; Paragraph</button>
-                    <button type="button" class="album-format-btn" id="albStoryEnPreviewToggleBtn" style="margin-left:auto;">Preview</button>
+                  <label for="cntStoryEn">Story / Overview (EN)</label>
+                  <div class="content-editor-toolbar">
+                    <button type="button" class="content-format-btn" data-content-format="bold" data-target="cntStoryEn"><b>B</b> Bold</button>
+                    <button type="button" class="content-format-btn" data-content-format="italic" data-target="cntStoryEn"><i>I</i> Italic</button>
+                    <button type="button" class="content-format-btn" data-content-format="quote" data-target="cntStoryEn">&ldquo; Quote</button>
+                    <button type="button" class="content-format-btn" data-content-format="paragraph" data-target="cntStoryEn">&para; Paragraph</button>
+                    <button type="button" class="content-format-btn" id="cntStoryEnPreviewToggleBtn" style="margin-left:auto;">Preview</button>
                   </div>
-                  <textarea id="albStoryEn" class="field" style="min-height:170px; border-radius:0 0 2px 2px;" placeholder="Enter the festival edition overview, winners, and details in English..."></textarea>
-                  <div id="albStoryEnPreview" class="album-story-preview d-none"></div>
+                  <textarea id="cntStoryEn" class="field" style="min-height:150px;" placeholder="Festival overview and details in English..."></textarea>
+                  <div id="cntStoryEnPreview" class="content-story-preview d-none"></div>
                 </div>
               </div>
-            </div>
+            </section>
 
-            <!-- Hero Cover & Video -->
-            <div class="two-col-grid" style="margin-top:16px; align-items:end;">
-              <div class="input-cell">
-                <label for="albHeroImage">Pagrindinė viršelio nuotrauka (Hero URL)</label>
-                <div style="display:flex; gap:8px; align-items:center;">
-                  <img id="albHeroPreview" src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/IMG_3458.jpeg?alt=media&token=224af1bd-25ff-494e-8136-fbf330d3ad5b" alt="Hero preview" style="width:64px; height:40px; object-fit:cover; border-radius:2px; border:1px solid var(--border-color); flex-shrink:0;">
-                  <input type="url" id="albHeroImage" class="field" placeholder="https://...">
+            <!-- Cover & Video Block -->
+            <section class="content-surface-block">
+              <div class="content-section-header" style="margin-bottom:12px;">
+                <div>
+                  <h4 class="content-card-title" style="margin-bottom:2px;">Viršelis ir vaizdo įrašas</h4>
+                  <p class="content-card-sub" style="margin:0;">Pagrindinė leidinio nuotrauka ir ceremonijos YouTube / MP4 įrašas.</p>
                 </div>
               </div>
-              <div class="input-cell">
-                <label for="albHeroFile">Arba įkelkite viršelio nuotrauką iš kompiuterio</label>
-                <input type="file" id="albHeroFile" class="field" accept="image/jpeg,image/png,image/webp,image/gif" style="padding:6px;">
-              </div>
-            </div>
 
-            <div class="input-cell" style="margin-top:8px;">
-              <label for="albVideoUrl">Ceremonijos vaizdo įrašo URL (YouTube / MP4)</label>
-              <input type="url" id="albVideoUrl" class="field" placeholder="https://www.youtube.com/watch?v=...">
+              <div class="two-col-grid" style="align-items:end;">
+                <div class="input-cell">
+                  <label for="cntHeroImage">Pagrindinė viršelio nuotrauka (URL)</label>
+                  <div class="content-media-url-row">
+                    <img id="cntHeroPreview" src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/IMG_3458.jpeg?alt=media&token=224af1bd-25ff-494e-8136-fbf330d3ad5b" alt="Hero preview" class="content-thumb-preview">
+                    <input type="url" id="cntHeroImage" class="field" placeholder="https://...">
+                  </div>
+                </div>
+                <div class="input-cell">
+                  <label for="cntHeroFile">Arba įkelkite viršelį iš įrenginio</label>
+                  <input type="file" id="cntHeroFile" class="field" accept="image/jpeg,image/png,image/webp,image/gif" style="padding:6px;">
+                </div>
+              </div>
+
+              <div id="contentVideoUrlWrap" class="input-cell" style="margin-top:8px; margin-bottom:0;">
+                <label for="cntVideoUrl">Ceremonijos vaizdo įrašo URL (YouTube / MP4)</label>
+                <input type="url" id="cntVideoUrl" class="field" placeholder="https://www.youtube.com/watch?v=...">
+              </div>
+
+              <!-- Home-only Prizes Photo + Archive Retrospective Videos -->
+              <div id="contentHomeMediaSection" class="d-none" style="margin-top:16px;">
+                <div class="input-cell">
+                  <label for="cntPrizesPhotoUrl">Apdovanojimų / statulėlių nuotrauka (Pagrindinis psl.)</label>
+                  <div class="content-media-url-row">
+                    <img id="cntPrizesPreview" src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/IMG_3463.jpeg?alt=media&token=af7892ca-e78e-4198-b686-e0181472e8da" alt="Prizes preview" class="content-thumb-preview">
+                    <input type="url" id="cntPrizesPhotoUrl" class="field" placeholder="https://...">
+                  </div>
+                </div>
+
+                <div class="content-soft-subblock" style="margin-top:12px;">
+                  <div class="content-micro-label" style="margin-bottom:8px;">Retrospektyvos vaizdo įrašai (Fest 2025 – 2022)</div>
+                  <div id="contentVideosList" class="content-videos-list"></div>
+                  <div class="content-add-video-grid">
+                    <input type="text" id="cntAddVideoTitle" class="field" placeholder="Pavadinimas (pvz. Fest 2025)">
+                    <input type="text" id="cntAddVideoLabel" class="field" placeholder="Žyma (pvz. 2025 m. įrašas)">
+                    <input type="url" id="cntAddVideoUrl" class="field" placeholder="https://www.youtube.com/watch?v=...">
+                    <button type="button" id="cntAddVideoBtn" class="btn-outline btn-sm">+ Pridėti įrašą</button>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <!-- Photo Gallery & Multi-Upload Block -->
+            <section class="content-surface-block">
+              <div class="content-section-header">
+                <div>
+                  <h4 class="content-card-title" style="margin-bottom:2px;">Nuotraukų galerija</h4>
+                  <p class="content-card-sub" style="margin:0;">Įkelkite kelias nuotraukas vienu metu, priskirkite kategorijas ir aprašymus (LT / EN).</p>
+                </div>
+                <span id="contentPhotosCountBadge" class="badge badge-accepted">0 nuotr.</span>
+              </div>
+
+              <div class="content-photo-filter-row" id="contentPhotoFilterTabs" role="tablist" aria-label="Nuotraukų filtrai">
+                <button type="button" class="content-filter-pill active" data-photo-filter="all">Visos</button>
+                <button type="button" class="content-filter-pill" data-photo-filter="ceremony">Ceremonija</button>
+                <button type="button" class="content-filter-pill" data-photo-filter="laureates">Laureatai</button>
+                <button type="button" class="content-filter-pill" data-photo-filter="prizes">Prizai</button>
+              </div>
+
+              <div class="two-col-grid" style="margin-bottom:14px;">
+                <div class="input-cell">
+                  <label for="contentBatchDefaultCategory">Numatytoji kategorija įkeliamoms nuotraukoms</label>
+                  <select id="contentBatchDefaultCategory" class="field">
+                    <option value="ceremony">Ceremonija (Ceremony)</option>
+                    <option value="laureates">Laureatai ir svečiai (Laureates)</option>
+                    <option value="prizes">Statulėlės ir prizai (Prizes)</option>
+                  </select>
+                </div>
+                <div class="input-cell">
+                  <label for="contentManualUrlInput">Pridėti nuotrauką pagal URL</label>
+                  <div style="display:flex; gap:8px;">
+                    <input type="url" id="contentManualUrlInput" class="field" placeholder="https://...">
+                    <button type="button" id="contentAddUrlBtn" class="btn-outline btn-sm" style="white-space:nowrap;">Pridėti</button>
+                  </div>
+                </div>
+              </div>
+
+              <div id="contentBatchDropzone" class="content-batch-drop">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="color:var(--accent-light); margin-bottom:6px;">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                  <polyline points="17 8 12 3 7 8"></polyline>
+                  <line x1="12" y1="3" x2="12" y2="15"></line>
+                </svg>
+                <div style="font-weight:600; color:#FFFFFF; margin-bottom:2px; font-size:0.92rem;">Spustelėkite arba nutempkite kelias nuotraukas čia</div>
+                <div style="font-size:0.78rem; color:var(--text-muted); margin-bottom:10px;">JPG, PNG, WEBP arba GIF — nuotraukos automatiškai suspaudžiamos ir įkeliamos</div>
+                <button type="button" id="contentSelectFilesBtn" class="btn-outline btn-sm">Pasirinkti nuotraukas</button>
+                <input type="file" id="contentMultiPhotoInput" accept="image/jpeg,image/png,image/webp,image/gif" multiple style="display:none;">
+              </div>
+
+              <div id="contentBatchProgress" class="progress-wrap d-none" style="margin-top:12px;">
+                <div class="progress-track">
+                  <div id="contentBatchProgressFill" class="progress-fill" style="width:0%;"></div>
+                </div>
+                <div id="contentBatchProgressStatus" class="progress-label">Ruošiama...</div>
+              </div>
+
+              <div id="contentPhotosGrid" class="content-photos-grid"></div>
+            </section>
+
+            <!-- SEO Section (Synced to static HTML by GitHub Actions) -->
+            <section id="contentSeoSection" class="content-surface-block">
+              <div class="content-section-header" style="margin-bottom:12px;">
+                <div>
+                  <h4 class="content-card-title" style="margin-bottom:2px;">SEO ir paieškos rezultatai (Google / Meta)</h4>
+                  <p class="content-card-sub" style="margin:0;">GitHub Actions automatiškai perkelia šiuos SEO laukus į statinius HTML puslapius.</p>
+                </div>
+              </div>
+              <div class="two-col-grid">
+                <div class="content-soft-subblock">
+                  <div class="input-cell">
+                    <div class="content-label-row">
+                      <label for="cntSeoTitle">SEO Title (LT)</label>
+                      <span id="cntSeoTitleCount" class="content-char-counter">0 / 65</span>
+                    </div>
+                    <input type="text" id="cntSeoTitle" class="field" placeholder="FEST 2027 | Ąžuolynas Film Festival">
+                  </div>
+                  <div class="input-cell" style="margin-bottom:0;">
+                    <div class="content-label-row">
+                      <label for="cntSeoDescription">Meta Description (LT)</label>
+                      <span id="cntSeoDescCount" class="content-char-counter">0 / 160</span>
+                    </div>
+                    <textarea id="cntSeoDescription" class="field" style="min-height:84px;" placeholder="Trumpas aprašymas Google paieškai ir socialiniams tinklams..."></textarea>
+                  </div>
+                </div>
+
+                <div class="content-soft-subblock">
+                  <div class="input-cell">
+                    <div class="content-label-row">
+                      <label for="cntSeoTitleEn">SEO Title (EN)</label>
+                      <span id="cntSeoTitleEnCount" class="content-char-counter">0 / 65</span>
+                    </div>
+                    <input type="text" id="cntSeoTitleEn" class="field" placeholder="FEST 2027 | Ąžuolynas Film Festival">
+                  </div>
+                  <div class="input-cell" style="margin-bottom:0;">
+                    <div class="content-label-row">
+                      <label for="cntSeoDescriptionEn">Meta Description (EN)</label>
+                      <span id="cntSeoDescEnCount" class="content-char-counter">0 / 160</span>
+                    </div>
+                    <textarea id="cntSeoDescriptionEn" class="field" style="min-height:84px;" placeholder="Short search & OpenGraph summary in English..."></textarea>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <!-- Mobile-friendly sticky Save Bar -->
+            <div class="content-sticky-save-bar">
+              <button type="button" id="contentStickySaveBtn" class="btn-solid btn-full">Išsaugoti visus pakeitimus</button>
             </div>
           </div>
 
-          <!-- Multi-Photo Batch Upload & Gallery Organizer -->
-          <div class="content-card">
-            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:14px;">
-              <div>
-                <h3 class="content-card-title" style="margin-bottom:4px;">Albumo Nuotraukos (Masinis Įkėlimas ir Rūšiavimas)</h3>
-                <p class="content-card-sub" style="margin:0;">Pasirinkite arba nutempkite kelias nuotraukas vienu metu — jos iškart prisidės prie pasirinktų metų galerijos.</p>
-              </div>
-              <span id="albumPhotosCountBadge" class="badge badge-accepted">0 nuotr.</span>
-            </div>
-
-            <div class="two-col-grid" style="margin-bottom:14px;">
-              <div class="input-cell">
-                <label for="albumBatchDefaultCategory">Numatytoji kategorija įkeliamoms nuotraukoms</label>
-                <select id="albumBatchDefaultCategory" class="field">
-                  <option value="ceremony">Ceremonija (Ceremony)</option>
-                  <option value="laureates">Laureatai ir svečiai (Laureates)</option>
-                  <option value="prizes">Statulėlės ir prizai (Prizes)</option>
-                </select>
-              </div>
-              <div class="input-cell">
-                <label for="albumManualUrlInput">Arba pridėkite nuotrauką pagal URL nuorodą</label>
-                <div style="display:flex; gap:8px;">
-                  <input type="url" id="albumManualUrlInput" class="field" placeholder="https://...">
-                  <button type="button" id="albumAddUrlBtn" class="btn-outline btn-sm" style="white-space:nowrap;">Pridėti URL</button>
-                </div>
-              </div>
-            </div>
-
-            <div id="albumBatchDropzone" class="album-batch-drop">
-              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="color:var(--accent-light); margin-bottom:8px;">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                <polyline points="17 8 12 3 7 8"></polyline>
-                <line x1="12" y1="3" x2="12" y2="15"></line>
-              </svg>
-              <div style="font-weight:600; color:#FFFFFF; margin-bottom:4px;">Spustelėkite arba nutempkite kelias nuotraukas čia</div>
-              <div style="font-size:0.82rem; color:var(--text-muted); margin-bottom:12px;">Galite pasirinkti kelias JPG, PNG, WEBP arba GIF nuotraukas vienu metu</div>
-              <button type="button" id="albumSelectFilesBtn" class="btn-outline btn-sm">Pasirinkti nuotraukas iš įrenginio</button>
-              <input type="file" id="albumMultiPhotoInput" accept="image/jpeg,image/png,image/webp,image/gif" multiple style="display:none;">
-            </div>
-
-            <div id="albumBatchProgress" class="progress-wrap d-none" style="margin-top:12px;">
-              <div class="progress-track">
-                <div id="albumBatchProgressFill" class="progress-fill" style="width:0%;"></div>
-              </div>
-              <div id="albumBatchProgressStatus" class="progress-label">Ruošiama...</div>
-            </div>
-
-            <div id="albumPhotosGrid" class="album-photos-grid"></div>
-          </div>
-          </div>
-
-          <!-- Album Photo Lightbox Preview Modal -->
-          <div id="albumPreviewModal" class="admin-modal-overlay d-none">
-            <div class="admin-modal-card" style="max-width:760px;">
+          <!-- Photo Preview Modal -->
+          <div id="contentPreviewModal" class="admin-modal-overlay d-none">
+            <div class="admin-modal-card" style="max-width:740px;">
               <div class="admin-modal-header">
                 <h3 class="admin-modal-title">Nuotraukos Peržiūra</h3>
-                <button type="button" id="albumPreviewModalCloseBtn" style="background:transparent; border:none; color:var(--text-muted); font-size:1.5rem; cursor:pointer;">&times;</button>
+                <button type="button" id="contentPreviewModalCloseBtn" style="background:transparent; border:none; color:var(--text-muted); font-size:1.5rem; cursor:pointer;">&times;</button>
               </div>
               <div style="text-align:center;">
-                <img id="albumPreviewModalImg" src="" alt="Preview" style="max-width:100%; max-height:70vh; object-fit:contain; border-radius:2px;">
-                <div id="albumPreviewModalCaption" style="margin-top:10px; font-size:0.9rem; color:var(--text-muted);"></div>
+                <img id="contentPreviewModalImg" src="" alt="Preview" style="max-width:100%; max-height:70vh; object-fit:contain; border-radius:8px;">
+                <div id="contentPreviewModalCaption" style="margin-top:10px; font-size:0.9rem; color:var(--text-muted);"></div>
               </div>
             </div>
-          </div>
-        </div>
-
-        <!-- 4. ARCHIVE TAB -->
-        <div id="archiveTab" class="d-none">
-          <div class="content-card" style="margin-bottom:18px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
-            <div>
-              <h3 class="content-card-title" style="margin-bottom:4px;">Metų Nuotraukų Albumai (2026, 2027 ir kiti)</h3>
-              <p class="content-card-sub" style="margin:0;">Norėdami masiškai įkelti nuotraukas, redaguoti aprašymus ir valdyti atskirų metų albumus, naudokite skirtuką „Albumai“.</p>
-            </div>
-            <button type="button" onclick="document.getElementById('tabAlbumsBtn')?.click()" class="btn-solid btn-sm" style="white-space:nowrap;">Atverti „Albumai“</button>
-          </div>
-          <div class="two-col-grid">
-            <div class="content-card">
-              <h3 class="content-card-title">Pridėti Vaizdo Įrašą (Retrospektyva)</h3>
-              <p class="content-card-sub">Pridėkite ankstesnių metų festivalio vaizdo įrašus (pvz. Fest 2025, Fest 2024).</p>
-
-              <div class="input-cell">
-                <label for="arcVidTitle">Pavadinimas / Metai *</label>
-                <input type="text" id="arcVidTitle" class="field" placeholder="pvz. Fest 2025">
-              </div>
-
-              <div class="input-cell">
-                <label for="arcVidLabel">Žyma / Aprašymas</label>
-                <input type="text" id="arcVidLabel" class="field" placeholder="pvz. 2025 m. įrašas">
-              </div>
-
-              <div class="input-cell">
-                <label for="arcVidUrl">Tiesioginė URL nuoroda (MP4 arba YouTube)</label>
-                <input type="url" id="arcVidUrl" class="field" placeholder="https://firebasestorage... arba https://youtube...">
-              </div>
-
-              <div class="input-cell">
-                <label>Arba įkelkite video failą iš įrenginio</label>
-                <div class="drop-area">
-                  <div class="drop-title">Pasirinkti video failą</div>
-                  <input type="file" id="arcVidFile" accept="video/mp4,video/quicktime,video/webm">
-                </div>
-                <div id="arcVidFileStatus" class="file-status-label"></div>
-              </div>
-
-              <div class="bar-box" id="arcVidProgressContainer">
-                <div class="bar-line"><div class="bar-fill" id="arcVidProgressFill"></div></div>
-                <div id="arcVidProgressStatus" class="bar-status-text">0%</div>
-              </div>
-
-              <button id="arcVidSaveBtn" class="btn-solid btn-full">Pridėti Į Vaizdo Įrašų Archyvą</button>
-            </div>
-
-            <div class="content-card">
-              <h3 class="content-card-title">Pridėti Festivalio Nuotrauką</h3>
-              <p class="content-card-sub">Pridėkite festivalio akimirkų, dalyvių ar apdovanojimų nuotraukas į atitinkamą albumą.</p>
-
-              <div class="input-cell">
-                <label for="arcImgAlbum">Nuotraukų Albumas *</label>
-                <select id="arcImgAlbum" class="field">
-                  <option value="ceremony">Fest Ceremonija (Akimirkos, scenarijus)</option>
-                  <option value="laureates">Laureatai ir svečiai (Diplomai, dalyviai)</option>
-                  <option value="prizes">Taurės ir apdovanojimai (Prizai, statulėlės)</option>
-                </select>
-              </div>
-
-              <div class="input-cell">
-                <label for="arcImgCaption">Nuotraukos aprašymas / Paraštė *</label>
-                <input type="text" id="arcImgCaption" class="field" placeholder="pvz. Akimirkos iš 2025 m. ceremonijos">
-              </div>
-
-              <div class="input-cell">
-                <label for="arcImgUrl">Tiesioginė nuotraukos URL nuoroda</label>
-                <input type="url" id="arcImgUrl" class="field" placeholder="https://firebasestorage...">
-              </div>
-
-              <div class="input-cell">
-                <label>Arba įkelkite nuotraukos failą</label>
-                <div class="drop-area">
-                  <div class="drop-title">Pasirinkti nuotraukos failą</div>
-                  <input type="file" id="arcImgFile" accept="image/jpeg,image/png,image/webp">
-                </div>
-                <div id="arcImgFileStatus" class="file-status-label"></div>
-              </div>
-
-              <div class="bar-box" id="arcImgProgressContainer">
-                <div class="bar-line"><div class="bar-fill" id="arcImgProgressFill"></div></div>
-                <div id="arcImgProgressStatus" class="bar-status-text">0%</div>
-              </div>
-
-              <button id="arcImgSaveBtn" class="btn-solid btn-full">Pridėti Į Nuotraukų Galeriją</button>
-            </div>
-          </div>
-
-          <div class="content-card" style="margin-top:24px;">
-            <h4>Esami Archyvo Vaizdo Įrašai</h4>
-            <div id="adminArchiveVideosList" class="admin-media-grid" style="margin-top:14px;"></div>
-          </div>
-
-          <div class="content-card">
-            <h4>Esamos Archyvo Nuotraukos</h4>
-            <div class="admin-photo-toolbar">
-              <input type="text" id="adminPhotoSearch" class="field toolbar-search" placeholder="Ieškoti nuotraukų..." style="min-width:220px;">
-              <div class="admin-photo-filter-group" id="adminPhotoAlbumTabs">
-                <button type="button" class="admin-photo-pill active" data-album="all">Visi</button>
-                <button type="button" class="admin-photo-pill" data-album="ceremony">Ceremonija</button>
-                <button type="button" class="admin-photo-pill" data-album="laureates">Laureatai</button>
-                <button type="button" class="admin-photo-pill" data-album="prizes">Prizai</button>
-              </div>
-            </div>
-            <div id="adminArchivePhotosList" class="admin-media-grid" style="margin-top:14px;"></div>
           </div>
         </div>
 

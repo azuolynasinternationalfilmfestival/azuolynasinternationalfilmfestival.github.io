@@ -12,17 +12,11 @@ import {
   unsubscribeSettingsListener,
   evaluateAdminPrivileges
 } from "./settings.js";
-import { initArchive } from "./archive.js";
 import {
-  initEditions,
-  subscribeEditions,
-  unsubscribeEditionsListener
-} from "./editions.js";
-import {
-  initAlbums,
-  subscribeAlbums,
-  unsubscribeAlbumsListener
-} from "./albums.js";
+  initContent,
+  subscribeContent,
+  unsubscribeContentListener
+} from "./content.js";
 import {
   initUsers,
   subscribeUsers,
@@ -54,8 +48,7 @@ function bootAdmin() {
           console.error("evaluateUserManagementAccess error:", e);
         }
         try { subscribeSubmissions(); } catch (e) { console.error("subscribeSubmissions error:", e); }
-        try { subscribeEditions(); } catch (e) { console.error("subscribeEditions error:", e); }
-        try { subscribeAlbums(); } catch (e) { console.error("subscribeAlbums error:", e); }
+        try { subscribeContent(); } catch (e) { console.error("subscribeContent error:", e); }
         try { subscribeVotingAnalytics(); } catch (e) { console.error("subscribeVotingAnalytics error:", e); }
         try { loadVotingAnalytics(); } catch (e) { console.error("loadVotingAnalytics error:", e); }
         try { loadStreamData(); } catch (e) { console.error("loadStreamData error:", e); }
@@ -70,8 +63,7 @@ function bootAdmin() {
       onLogout: () => {
         try { evaluateUserManagementAccess(null); } catch (e) { console.error(e); }
         try { unsubscribeSubmissionsListener(); } catch (e) { console.error(e); }
-        try { unsubscribeEditionsListener(); } catch (e) { console.error(e); }
-        try { unsubscribeAlbumsListener(); } catch (e) { console.error(e); }
+        try { unsubscribeContentListener(); } catch (e) { console.error(e); }
         try { unsubscribeVotingAnalyticsListener(); } catch (e) { console.error(e); }
         try { unsubscribeUsersListener(); } catch (e) { console.error(e); }
         try { unsubscribeSettingsListener(); } catch (e) { console.error(e); }
@@ -86,9 +78,7 @@ function bootAdmin() {
   try { initVotingAnalytics(); } catch (e) { console.error("initVotingAnalytics error:", e); }
   try { initStreamAdmin(); } catch (e) { console.error("initStreamAdmin error:", e); }
   try { initGraphicsManager(); } catch (e) { console.error("initGraphicsManager error:", e); }
-  try { initEditions(); } catch (e) { console.error("initEditions error:", e); }
-  try { initAlbums(); } catch (e) { console.error("initAlbums error:", e); }
-  try { initArchive(); } catch (e) { console.error("initArchive error:", e); }
+  try { initContent(); } catch (e) { console.error("initContent error:", e); }
   try { initNotificationsLog(); } catch (e) { console.error("initNotificationsLog error:", e); }
   try { initDiagnostics(); } catch (e) { console.error("initDiagnostics error:", e); }
   try { initUsers(); } catch (e) { console.error("initUsers error:", e); }
@@ -122,19 +112,11 @@ function initTabNavigation() {
     "votingTab",
     "streamTab",
     "graphicsTab",
-    "editionsTab",
-    "albumsTab",
-    "archiveTab",
+    "contentTab",
     "usersTab",
     "notificationsTab",
     "diagnosticsTab",
     "settingsTab"
-  ];
-
-  const contentSubTabs = [
-    { btn: "tabAlbumsBtn", content: "albumsTab" },
-    { btn: "tabEditionsBtn", content: "editionsTab" },
-    { btn: "tabArchiveBtn", content: "archiveTab" }
   ];
 
   const streamSubTabs = [
@@ -142,7 +124,6 @@ function initTabNavigation() {
     { btn: "tabGraphicsBtn", content: "graphicsTab" }
   ];
 
-  let activeContentSub = "tabAlbumsBtn";
   let activeStreamSub = "tabStreamBtn";
 
   function syncNavHighlights(sectionKey) {
@@ -163,9 +144,7 @@ function initTabNavigation() {
   }
 
   function toggleSubNavGroups(sectionKey) {
-    const contentNav = document.getElementById("contentSubNav");
     const streamNav = document.getElementById("streamGraphicsSubNav");
-    if (contentNav) contentNav.classList.toggle("d-none", sectionKey !== "content");
     if (streamNav) streamNav.classList.toggle("d-none", sectionKey !== "streamGraphics");
   }
 
@@ -211,7 +190,7 @@ function initTabNavigation() {
     } else if (sectionKey === "voting") {
       showOnlyTabContent("votingTab");
     } else if (sectionKey === "content") {
-      activateSubTab(contentSubTabs, activeContentSub);
+      showOnlyTabContent("contentTab");
     } else if (sectionKey === "streamGraphics") {
       activateSubTab(streamSubTabs, activeStreamSub);
     } else if (sectionKey === "users") {
@@ -231,18 +210,6 @@ function initTabNavigation() {
     btn.addEventListener("click", () => {
       const target = btn.getAttribute("data-admin-section");
       if (target) activateSection(target);
-    });
-  });
-
-  // Bind sub-tabs inside "Turinys"
-  contentSubTabs.forEach((item) => {
-    const b = document.getElementById(item.btn);
-    if (!b) return;
-    b.addEventListener("click", () => {
-      activeContentSub = item.btn;
-      toggleSubNavGroups("content");
-      syncNavHighlights("content");
-      activateSubTab(contentSubTabs, item.btn);
     });
   });
 

@@ -45,6 +45,45 @@ service cloud.firestore {
       return val is string && val.size() >= 3 && val.size() <= 200;
     }
 
+    function isValidId(val) {
+      return val is string && val.size() >= 1 && val.size() <= 64 && val.matches('^[A-Za-z0-9_-]+$');
+    }
+
+    function isOptString(data, key, maxLen) {
+      return !(key in data) || (data[key] is string && data[key].size() <= maxLen);
+    }
+
+    function isValidFestivalContent(data) {
+      return data.keys().hasAll(['year']) &&
+        data.year is string && data.year.size() >= 1 && data.year.size() <= 16 &&
+        isOptString(data, 'id', 64) &&
+        (!('status' in data) || data.status in ['upcoming', 'active', 'completed', 'home']) &&
+        isOptString(data, 'submissionDeadline', 32) &&
+        isOptString(data, 'title', 200) &&
+        isOptString(data, 'titleEn', 200) &&
+        isOptString(data, 'date', 160) &&
+        isOptString(data, 'dateEn', 160) &&
+        isOptString(data, 'theme', 200) &&
+        isOptString(data, 'themeEn', 200) &&
+        isOptString(data, 'subtitle', 500) &&
+        isOptString(data, 'subtitleEn', 500) &&
+        isOptString(data, 'story', 25000) &&
+        isOptString(data, 'storyEn', 25000) &&
+        isOptString(data, 'heroImage', 2000) &&
+        isOptString(data, 'videoUrl', 2000) &&
+        isOptString(data, 'prizesPhotoUrl', 2000) &&
+        isOptString(data, 'seoTitle', 160) &&
+        isOptString(data, 'seoTitleEn', 160) &&
+        isOptString(data, 'seoDescription', 400) &&
+        isOptString(data, 'seoDescriptionEn', 400) &&
+        isOptString(data, 'pageUrl', 300) &&
+        isOptString(data, 'pageUrlEn', 300) &&
+        isOptString(data, 'updatedAt', 64) &&
+        isOptString(data, 'updatedBy', 200) &&
+        (!('videos' in data) || (data.videos is list && data.videos.size() <= 50)) &&
+        (!('photos' in data) || (data.photos is list && data.photos.size() <= 200));
+    }
+
     // 0. Movies Collection: Public read, atomic increment of +1 on 'votes', admin controls rest
     match /movies/{movieId} {
       allow get, list: if true;
@@ -62,10 +101,17 @@ service cloud.firestore {
       allow write: if isSuperAdmin();
     }
 
-    // 2. Festival Editions: Public read, Super Admin full write
+    // 2. Festival Editions (Legacy fallback): Public read, Super Admin full write
     match /editions/{editionId} {
       allow get, list: if true;
       allow write: if isSuperAdmin();
+    }
+
+    // 2b. Unified Festival Content: Public read, Super Admin validated write
+    match /content/{contentId} {
+      allow get, list: if true;
+      allow create, update: if isSuperAdmin() && isValidId(contentId) && isValidFestivalContent(incoming());
+      allow delete: if isSuperAdmin() && isValidId(contentId);
     }
 
     // 3. Submissions:

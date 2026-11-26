@@ -76,6 +76,22 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://www.azuolynasfilmfestival.lt/lt/edition.html</loc>
+    <xhtml:link rel="alternate" hreflang="lt" href="https://www.azuolynasfilmfestival.lt/lt/edition.html"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.azuolynasfilmfestival.lt/en/edition.html"/>
+    <lastmod>2026-11-26</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.azuolynasfilmfestival.lt/en/edition.html</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.azuolynasfilmfestival.lt/en/edition.html"/>
+    <xhtml:link rel="alternate" hreflang="lt" href="https://www.azuolynasfilmfestival.lt/lt/edition.html"/>
+    <lastmod>2026-11-26</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://www.azuolynasfilmfestival.lt/voting.html</loc>
     <lastmod>2026-11-23</lastmod>
     <changefreq>weekly</changefreq>
