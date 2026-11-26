@@ -192,109 +192,84 @@
         </div>
       </div>
 
-      <!-- SIDEBAR NAVIGATION SECTIONS -->
-      <nav class="admin-sidebar-nav">
-        <div class="admin-sidebar-section-title">Apžvalga & Statistika</div>
-        <button id="tabDashboardBtn" class="admin-sidebar-nav-item active">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
-          <span>Statistika & Suvestinė</span>
+      <!-- SIDEBAR NAVIGATION (7 CORE SECTIONS) -->
+      <nav class="admin-sidebar-nav" aria-label="Pagrindinė navigacija">
+        <button type="button" id="tabDashboardBtn" class="admin-sidebar-nav-item active" data-admin-section="dashboard">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+          <span>Apžvalga</span>
         </button>
 
-        <div class="admin-sidebar-section-title">Turinys & Filmai</div>
-        <button id="tabSubmissionsBtn" class="admin-sidebar-nav-item">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+        <button type="button" id="tabSubmissionsBtn" class="admin-sidebar-nav-item" data-admin-section="submissions">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
           <span>Paraiškos</span>
         </button>
 
-        <button id="tabVotingBtn" class="admin-sidebar-nav-item">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 20V10M12 20V4M6 20v-6"></path><polyline points="18 10 12 4 6 14"></polyline></svg>
-          <span>Balsavimas & Teisėjai</span>
+        <button type="button" id="tabVotingBtn" class="admin-sidebar-nav-item" data-admin-section="voting">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M18 20V10M12 20V4M6 20v-6"></path><polyline points="18 10 12 4 6 14"></polyline></svg>
+          <span>Balsavimas ir žiūri</span>
         </button>
 
-        <button id="tabStreamBtn" class="admin-sidebar-nav-item">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="2"></circle><path d="M16.24 7.76a6 6 0 0 1 0 8.49m-8.48-.01a6 6 0 0 1 0-8.49m11.31-2.82a10 10 0 0 1 0 14.14m-14.14 0a10 10 0 0 1 0-14.14"></path></svg>
-          <span>Transliacija & RSVP</span>
+        <button type="button" id="tabContentBtn" class="admin-sidebar-nav-item" data-admin-section="content">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+          <span>Turinys</span>
         </button>
 
-        <button id="tabGraphicsBtn" class="admin-sidebar-nav-item">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
-          <span>Grafika & H2H Eksportas</span>
+        <button type="button" id="tabStreamGraphicsBtn" class="admin-sidebar-nav-item" data-admin-section="streamGraphics">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
+          <span>Transliacija ir grafika</span>
         </button>
 
-        <button id="tabEditionsBtn" class="admin-sidebar-nav-item">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
-          <span>Metų Leidiniai & 2027</span>
+        <button type="button" id="tabUsersBtn" class="admin-sidebar-nav-item d-none" data-admin-section="users">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+          <span>Komanda</span>
         </button>
 
-        <button id="tabAlbumsBtn" class="admin-sidebar-nav-item">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
-          <span>Albumai</span>
-        </button>
-
-        <button id="tabArchiveBtn" class="admin-sidebar-nav-item">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect><line x1="7" y1="2" x2="7" y2="22"></line><line x1="17" y1="2" x2="17" y2="22"></line><line x1="2" y1="12" x2="22" y2="12"></line></svg>
-          <span>Archyvas & Medija</span>
-        </button>
-
-        <div class="admin-sidebar-section-title">Komanda & Organizavimas</div>
-        <button id="tabUsersBtn" class="admin-sidebar-nav-item d-none">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
-          <span>Vartotojai & Prieiga</span>
-        </button>
-
-        <div class="admin-sidebar-section-title">Valdymas & Sauga</div>
-        <button id="tabNotificationsBtn" class="admin-sidebar-nav-item" style="position:relative;">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
-          <span style="flex:1;">Pranešimai (Auditas)</span>
-          <span class="notifications-unread-count" style="display:none;">0</span>
-        </button>
-
-        <button id="tabDiagnosticsBtn" class="admin-sidebar-nav-item">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
-          <span>Serverio Diagnostika</span>
-        </button>
-
-        <button id="tabSettingsBtn" class="admin-sidebar-nav-item">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+        <button type="button" id="tabSettingsBtn" class="admin-sidebar-nav-item" data-admin-section="settings">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
           <span>Nustatymai</span>
         </button>
       </nav>
+
+      <div class="admin-sidebar-footer">
+        <a href="/lt/index.html" target="_blank" rel="noopener" class="admin-sidebar-footer-link">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+          <span>Atverti svetainę</span>
+        </a>
+        <button type="button" id="sidebarLogoutMirrorBtn" class="admin-sidebar-footer-link admin-logout-link">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+          <span>Atsijungti</span>
+        </button>
+      </div>
     </aside>
 
     <div id="adminSidebarBackdrop" class="admin-sidebar-backdrop d-none"></div>
 
     <!-- MAIN WORKSPACE -->
     <main class="admin-content-area">
-      <!-- Top header bar -->
+      <!-- Top header bar (Compact 52-58px) -->
       <header class="admin-header-bar">
-        <div style="display:flex; align-items:center; gap:12px;">
-          <button type="button" id="adminSidebarMobileToggle" class="admin-mobile-toggle-btn" aria-label="Meniu">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
-          </button>
+        <div class="admin-header-title-wrap">
+          <img src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media" alt="AISFF" class="admin-mobile-brand-dot">
           <div>
-            <span style="font-size:0.75rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.04em;">Administravimo Portalas /</span>
-            <h2 id="adminCurrentSectionTitle" style="font-size:1.15rem; font-weight:700; margin:0; color:var(--text-color); font-family:var(--font-cinema);">
-              Paraiškos
-            </h2>
+            <span class="admin-header-kicker">AISFF</span>
+            <h2 id="adminCurrentSectionTitle" class="admin-header-section-title">Apžvalga</h2>
           </div>
         </div>
 
-        <div style="display:flex; align-items:center; gap:10px;">
-          <div id="maintenanceHeaderIndicator" class="badge badge-rejected d-none" style="font-size:0.72rem; display:inline-flex; align-items:center; gap:4px;">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
-            <span>Profilaktika aktyvi</span>
+        <div class="admin-header-actions">
+          <div id="maintenanceHeaderIndicator" class="admin-maintenance-tag d-none">
+            <span>Profilaktika</span>
           </div>
-          <button type="button" id="btnHeaderNotifications" class="btn-outline btn-xs" style="display:inline-flex; align-items:center; gap:6px; position:relative;" title="Veiklos žurnalas">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+          <button type="button" id="btnHeaderNotifications" class="admin-header-icon-btn" title="Veiklos žurnalas" aria-label="Veiklos žurnalas">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
             <span class="notifications-unread-count" style="display:none;">0</span>
           </button>
-          <a href="/lt/index.html" target="_blank" class="btn-outline btn-xs" style="display:inline-flex; align-items:center; gap:6px;" title="Atverti viešąją svetainę">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+          <a href="/lt/index.html" target="_blank" rel="noopener" class="admin-header-link-btn admin-desktop-only-action" title="Atverti viešąją svetainę">
             <span>Svetainė</span>
           </a>
-          <button id="logoutBtn" class="btn-outline btn-xs" style="color:#f87171; border-color:rgba(239,68,68,0.3); display:inline-flex; align-items:center; gap:6px;" title="Atsijungti iš sistemos">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
-            <span>Atsijungti</span>
+          <button type="button" id="logoutBtn" class="admin-header-logout-btn" title="Atsijungti iš sistemos">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+            <span class="admin-logout-text">Atsijungti</span>
           </button>
         </div>
       </header>
@@ -692,6 +667,16 @@
 
             <div id="adminWinnersList"></div>
           </div>
+        </div>
+
+        <!-- 3A. STREAM & GRAPHICS GROUP SUB-NAV -->
+        <div id="streamGraphicsSubNav" class="admin-subnav d-none" role="tablist" aria-label="Transliacijos ir grafikos skyriai">
+          <button type="button" id="tabStreamBtn" class="admin-subnav-btn active">
+            <span>Tiesioginė transliacija</span>
+          </button>
+          <button type="button" id="tabGraphicsBtn" class="admin-subnav-btn">
+            <span>Eterio grafika & H2H</span>
+          </button>
         </div>
 
         <!-- 3. STREAM & RSVP MANAGEMENT TAB -->
@@ -1104,6 +1089,19 @@ Tomas Vaitkus, Aktų salė (Projektorius), t.vaitkus@mokykla.lt"></textarea>
               </table>
             </div>
           </div>
+        </div>
+
+        <!-- 4A. CONTENT GROUP SUB-NAV (STAGE 1 BRIDGE -> STAGE 2 UNIFIED EDITOR) -->
+        <div id="contentSubNav" class="admin-subnav d-none" role="tablist" aria-label="Turinio skyriai">
+          <button type="button" id="tabAlbumsBtn" class="admin-subnav-btn active">
+            <span>Albumai</span>
+          </button>
+          <button type="button" id="tabEditionsBtn" class="admin-subnav-btn">
+            <span>Metų leidiniai</span>
+          </button>
+          <button type="button" id="tabArchiveBtn" class="admin-subnav-btn">
+            <span>Archyvas</span>
+          </button>
         </div>
 
         <!-- 4. EDITIONS & ARCHIVE TAB -->
@@ -2768,6 +2766,67 @@ Tomas Vaitkus, Aktų salė (Projektorius), t.vaitkus@mokykla.lt"></textarea>
         </button>
         <button type="button" class="btn-outline btn-sm" id="btnCancelTokenQrModal">Uždaryti</button>
       </div>
+    </div>
+  </div>
+
+  <!-- MOBILE BOTTOM THUMB BAR (< 960px) -->
+  <nav id="adminMobileBottomNav" class="admin-mobile-bottom-nav" aria-label="Greitoji mobilioji navigacija">
+    <button type="button" class="admin-bottom-nav-btn active" data-admin-section="dashboard">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+      <span>Apžvalga</span>
+    </button>
+    <button type="button" class="admin-bottom-nav-btn" data-admin-section="submissions">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+      <span>Paraiškos</span>
+    </button>
+    <button type="button" class="admin-bottom-nav-btn" data-admin-section="voting">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M18 20V10M12 20V4M6 20v-6"></path></svg>
+      <span>Žiūri</span>
+    </button>
+    <button type="button" class="admin-bottom-nav-btn" data-admin-section="content">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+      <span>Turinys</span>
+    </button>
+    <button type="button" id="btnOpenMobileMenuSheet" class="admin-bottom-nav-btn" aria-haspopup="dialog" aria-controls="adminMobileSheet" aria-expanded="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="4" y1="7" x2="20" y2="7"></line><line x1="4" y1="12" x2="20" y2="12"></line><line x1="4" y1="17" x2="20" y2="17"></line></svg>
+      <span>Meniu</span>
+    </button>
+  </nav>
+
+  <!-- MOBILE BOTTOM SHEET DRAWER (ALL 7 SECTIONS) -->
+  <div id="adminMobileSheetBackdrop" class="admin-mobile-sheet-backdrop d-none"></div>
+  <div id="adminMobileSheet" class="admin-mobile-sheet d-none" role="dialog" aria-modal="true" aria-labelledby="adminMobileSheetTitle">
+    <div class="admin-sheet-handle" aria-hidden="true"></div>
+    <div class="admin-sheet-header">
+      <span id="adminMobileSheetTitle" class="admin-sheet-title">Visi skyriai</span>
+      <button type="button" id="btnCloseMobileMenuSheet" class="admin-sheet-close" aria-label="Uždaryti meniu">Uždaryti</button>
+    </div>
+    <div class="admin-sheet-list">
+      <button type="button" class="admin-sheet-item active" data-admin-section="dashboard">
+        <span>1. Apžvalga</span>
+      </button>
+      <button type="button" class="admin-sheet-item" data-admin-section="submissions">
+        <span>2. Paraiškos</span>
+      </button>
+      <button type="button" class="admin-sheet-item" data-admin-section="voting">
+        <span>3. Balsavimas ir žiūri</span>
+      </button>
+      <button type="button" class="admin-sheet-item" data-admin-section="content">
+        <span>4. Turinys</span>
+      </button>
+      <button type="button" class="admin-sheet-item" data-admin-section="streamGraphics">
+        <span>5. Transliacija ir grafika</span>
+      </button>
+      <button type="button" id="mobileSheetUsersBtn" class="admin-sheet-item d-none" data-admin-section="users">
+        <span>6. Komanda</span>
+      </button>
+      <button type="button" class="admin-sheet-item" data-admin-section="settings">
+        <span>7. Nustatymai</span>
+      </button>
+    </div>
+    <div class="admin-sheet-footer">
+      <a href="/lt/index.html" target="_blank" rel="noopener" class="admin-sheet-action-btn">Atverti svetainę</a>
+      <button type="button" id="mobileSheetLogoutBtn" class="admin-sheet-action-btn admin-logout-link">Atsijungti</button>
     </div>
   </div>
 

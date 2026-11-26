@@ -105,86 +105,237 @@ if (document.readyState === "loading") {
 }
 
 function initTabNavigation() {
-  const tabs = [
-    { btn: "tabDashboardBtn", content: "dashboardTab" },
-    { btn: "tabSubmissionsBtn", content: "submissionsTab" },
-    { btn: "tabVotingBtn", content: "votingTab" },
-    { btn: "tabStreamBtn", content: "streamTab" },
-    { btn: "tabGraphicsBtn", content: "graphicsTab" },
-    { btn: "tabEditionsBtn", content: "editionsTab" },
-    { btn: "tabAlbumsBtn", content: "albumsTab" },
-    { btn: "tabArchiveBtn", content: "archiveTab" },
-    { btn: "tabUsersBtn", content: "usersTab" },
-    { btn: "tabNotificationsBtn", content: "notificationsTab" },
-    { btn: "tabDiagnosticsBtn", content: "diagnosticsTab" },
-    { btn: "tabSettingsBtn", content: "settingsTab" }
+  const sectionTitles = {
+    dashboard: "Apžvalga",
+    submissions: "Paraiškos",
+    voting: "Balsavimas ir žiūri",
+    content: "Turinys",
+    streamGraphics: "Transliacija ir grafika",
+    users: "Komanda",
+    settings: "Nustatymai",
+    notifications: "Veiklos žurnalas"
+  };
+
+  const allContentIds = [
+    "dashboardTab",
+    "submissionsTab",
+    "votingTab",
+    "streamTab",
+    "graphicsTab",
+    "editionsTab",
+    "albumsTab",
+    "archiveTab",
+    "usersTab",
+    "notificationsTab",
+    "diagnosticsTab",
+    "settingsTab"
   ];
 
-  tabs.forEach((tab) => {
-    const btnElem = document.getElementById(tab.btn);
-    if (!btnElem) return;
+  const contentSubTabs = [
+    { btn: "tabAlbumsBtn", content: "albumsTab" },
+    { btn: "tabEditionsBtn", content: "editionsTab" },
+    { btn: "tabArchiveBtn", content: "archiveTab" }
+  ];
 
-    btnElem.addEventListener("click", () => {
-      if (tab.btn === "tabUsersBtn" && btnElem.classList.contains("d-none")) {
-        return;
-      }
-      tabs.forEach((t) => {
-        const isCurrent = t.btn === tab.btn;
-        const contentElem = document.getElementById(t.content);
-        if (contentElem) {
-          contentElem.classList.toggle("d-none", !isCurrent);
-        }
-        const b = document.getElementById(t.btn);
-        if (b) b.classList.toggle("active", isCurrent);
-      });
+  const streamSubTabs = [
+    { btn: "tabStreamBtn", content: "streamTab" },
+    { btn: "tabGraphicsBtn", content: "graphicsTab" }
+  ];
 
-      // Update header section title breadcrumb if present
-      const titleElem = document.getElementById("adminCurrentSectionTitle");
-      if (titleElem) {
-        const textSpan = btnElem.querySelector("span:not(.badge)");
-        titleElem.textContent = textSpan ? textSpan.textContent.trim() : "Administravimo Portalas";
-      }
+  let activeContentSub = "tabAlbumsBtn";
+  let activeStreamSub = "tabStreamBtn";
 
-      if (tab.btn === "tabDiagnosticsBtn") {
-        try { loadDiagnosticsData(); } catch (e) { console.error("loadDiagnosticsData error:", e); }
-      }
+  function syncNavHighlights(sectionKey) {
+    document.querySelectorAll("[data-admin-section]").forEach((el) => {
+      el.classList.toggle("active", el.getAttribute("data-admin-section") === sectionKey);
+    });
+    const titleElem = document.getElementById("adminCurrentSectionTitle");
+    if (titleElem) {
+      titleElem.textContent = sectionTitles[sectionKey] || "Apžvalga";
+    }
+  }
 
-      // Close mobile sidebar on selection
-      const sidebar = document.getElementById("adminSidebar");
-      if (sidebar && window.innerWidth <= 1024) {
-        sidebar.classList.remove("sidebar-open");
-      }
+  function showOnlyTabContent(targetId) {
+    allContentIds.forEach((id) => {
+      const el = document.getElementById(id);
+      if (el) el.classList.toggle("d-none", id !== targetId);
+    });
+  }
+
+  function toggleSubNavGroups(sectionKey) {
+    const contentNav = document.getElementById("contentSubNav");
+    const streamNav = document.getElementById("streamGraphicsSubNav");
+    if (contentNav) contentNav.classList.toggle("d-none", sectionKey !== "content");
+    if (streamNav) streamNav.classList.toggle("d-none", sectionKey !== "streamGraphics");
+  }
+
+  function activateSubTab(groupList, btnId) {
+    groupList.forEach((item) => {
+      const b = document.getElementById(item.btn);
+      if (b) b.classList.toggle("active", item.btn === btnId);
+    });
+    const matched = groupList.find((item) => item.btn === btnId) || groupList[0];
+    if (matched) {
+      showOnlyTabContent(matched.content);
+    }
+  }
+
+  function closeMobileSheet() {
+    const sheet = document.getElementById("adminMobileSheet");
+    const backdrop = document.getElementById("adminMobileSheetBackdrop");
+    const openBtn = document.getElementById("btnOpenMobileMenuSheet");
+    if (sheet) {
+      sheet.classList.remove("is-open");
+      sheet.classList.add("d-none");
+    }
+    if (backdrop) {
+      backdrop.classList.remove("is-open");
+      backdrop.classList.add("d-none");
+    }
+    if (openBtn) openBtn.setAttribute("aria-expanded", "false");
+  }
+
+  function activateSection(sectionKey) {
+    if (sectionKey === "users") {
+      const usersBtn = document.getElementById("tabUsersBtn");
+      if (usersBtn && usersBtn.classList.contains("d-none")) return;
+    }
+
+    toggleSubNavGroups(sectionKey);
+    syncNavHighlights(sectionKey);
+
+    if (sectionKey === "dashboard") {
+      showOnlyTabContent("dashboardTab");
+    } else if (sectionKey === "submissions") {
+      showOnlyTabContent("submissionsTab");
+    } else if (sectionKey === "voting") {
+      showOnlyTabContent("votingTab");
+    } else if (sectionKey === "content") {
+      activateSubTab(contentSubTabs, activeContentSub);
+    } else if (sectionKey === "streamGraphics") {
+      activateSubTab(streamSubTabs, activeStreamSub);
+    } else if (sectionKey === "users") {
+      showOnlyTabContent("usersTab");
+    } else if (sectionKey === "settings") {
+      showOnlyTabContent("settingsTab");
+    } else if (sectionKey === "notifications") {
+      showOnlyTabContent("notificationsTab");
+    }
+
+    closeMobileSheet();
+    window.scrollTo({ top: 0, behavior: "instant" });
+  }
+
+  // Bind all sidebar, mobile bottom nav, and mobile sheet primary section triggers
+  document.querySelectorAll("[data-admin-section]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const target = btn.getAttribute("data-admin-section");
+      if (target) activateSection(target);
     });
   });
 
-  // Top header bell button also opens notifications
+  // Bind sub-tabs inside "Turinys"
+  contentSubTabs.forEach((item) => {
+    const b = document.getElementById(item.btn);
+    if (!b) return;
+    b.addEventListener("click", () => {
+      activeContentSub = item.btn;
+      toggleSubNavGroups("content");
+      syncNavHighlights("content");
+      activateSubTab(contentSubTabs, item.btn);
+    });
+  });
+
+  // Bind sub-tabs inside "Transliacija ir grafika"
+  streamSubTabs.forEach((item) => {
+    const b = document.getElementById(item.btn);
+    if (!b) return;
+    b.addEventListener("click", () => {
+      activeStreamSub = item.btn;
+      toggleSubNavGroups("streamGraphics");
+      syncNavHighlights("streamGraphics");
+      activateSubTab(streamSubTabs, item.btn);
+    });
+  });
+
+  // Top header bell button opens activity log cleanly without taking a menu slot
   const topBellBtn = document.getElementById("btnHeaderNotifications");
   if (topBellBtn) {
-    topBellBtn.addEventListener("click", () => {
-      const notifBtn = document.getElementById("tabNotificationsBtn");
-      if (notifBtn) notifBtn.click();
-    });
+    topBellBtn.addEventListener("click", () => activateSection("notifications"));
   }
+
+  // Keep mobile sheet "Komanda" item synchronized with #tabUsersBtn visibility
+  const sidebarUsersBtn = document.getElementById("tabUsersBtn");
+  const sheetUsersBtn = document.getElementById("mobileSheetUsersBtn");
+  if (sidebarUsersBtn && sheetUsersBtn) {
+    const syncUsersVisibility = () => {
+      sheetUsersBtn.classList.toggle("d-none", sidebarUsersBtn.classList.contains("d-none"));
+    };
+    syncUsersVisibility();
+    if (typeof MutationObserver !== "undefined") {
+      const obs = new MutationObserver(syncUsersVisibility);
+      obs.observe(sidebarUsersBtn, { attributes: true, attributeFilter: ["class"] });
+    }
+  }
+
+  // Mirror logout clicks from sidebar footer and mobile sheet
+  ["sidebarLogoutMirrorBtn", "mobileSheetLogoutBtn"].forEach((mirrorId) => {
+    const mirrorBtn = document.getElementById(mirrorId);
+    if (mirrorBtn) {
+      mirrorBtn.addEventListener("click", () => {
+        closeMobileSheet();
+        document.getElementById("logoutBtn")?.click();
+      });
+    }
+  });
 }
 
 function initMobileSidebarToggle() {
-  const toggleBtn = document.getElementById("adminSidebarMobileToggle");
-  const sidebar = document.getElementById("adminSidebar");
-  const backdrop = document.getElementById("adminSidebarBackdrop");
+  const openBtn = document.getElementById("btnOpenMobileMenuSheet");
+  const closeBtn = document.getElementById("btnCloseMobileMenuSheet");
+  const sheet = document.getElementById("adminMobileSheet");
+  const backdrop = document.getElementById("adminMobileSheetBackdrop");
 
-  if (toggleBtn && sidebar) {
-    toggleBtn.addEventListener("click", () => {
-      sidebar.classList.toggle("sidebar-open");
-      if (backdrop) backdrop.classList.toggle("d-none");
+  function openSheet() {
+    if (!sheet || !backdrop) return;
+    backdrop.classList.remove("d-none");
+    sheet.classList.remove("d-none");
+    requestAnimationFrame(() => {
+      backdrop.classList.add("is-open");
+      sheet.classList.add("is-open");
     });
+    if (openBtn) openBtn.setAttribute("aria-expanded", "true");
   }
 
-  if (backdrop && sidebar) {
-    backdrop.addEventListener("click", () => {
-      sidebar.classList.remove("sidebar-open");
-      backdrop.classList.add("d-none");
+  function closeSheet() {
+    if (!sheet || !backdrop) return;
+    sheet.classList.remove("is-open");
+    backdrop.classList.remove("is-open");
+    if (openBtn) openBtn.setAttribute("aria-expanded", "false");
+    setTimeout(() => {
+      if (!sheet.classList.contains("is-open")) {
+        sheet.classList.add("d-none");
+        backdrop.classList.add("d-none");
+      }
+    }, 180);
+  }
+
+  if (openBtn) {
+    openBtn.addEventListener("click", () => {
+      if (sheet && sheet.classList.contains("is-open")) {
+        closeSheet();
+      } else {
+        openSheet();
+      }
     });
   }
+  if (closeBtn) closeBtn.addEventListener("click", closeSheet);
+  if (backdrop) backdrop.addEventListener("click", closeSheet);
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && sheet && sheet.classList.contains("is-open")) {
+      closeSheet();
+    }
+  });
 }
 
 function formatDirectorName(film) {
