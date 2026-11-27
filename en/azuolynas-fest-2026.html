@@ -63,6 +63,7 @@
           "name": "Kaunas International Gymnasium",
           "address": {
             "@type": "PostalAddress",
+            "streetAddress": "Vytauto pr. 50",
             "addressLocality": "Kaunas",
             "addressCountry": "LT"
           }
@@ -179,7 +180,7 @@
           <li><a href="faq.html" class="drawer-nav-link"><span>FAQ (Questions & Answers)</span></a></li>
           <li><a href="#wins" class="drawer-nav-link"><span>Our Victories</span></a></li>
           <li><a href="#winners" class="drawer-nav-link highlight"><span>Winners & Laureates</span></a></li>
-          <li><a href="#recording" class="drawer-nav-link"><span>Ceremony Recording</span></a></li>
+          <li id="drawerRecordingItem" class="d-none"><a href="#recording" class="drawer-nav-link"><span>Ceremony Recording</span></a></li>
           <li><a href="#gallery" class="drawer-nav-link"><span>Photo Gallery</span></a></li>
         </ul>
       </div>
@@ -297,7 +298,7 @@
       </div>
     </section>
 
-    <section id="recording" class="section-block">
+    <section id="recording" class="section-block d-none">
       <div class="container">
         <div class="section-head">
           <div class="section-tag">Official Broadcast</div>
@@ -306,14 +307,9 @@
 
         <div class="player-card">
           <p style="text-align:center; color:var(--text-muted); margin-bottom:18px; font-size:0.94rem;">
-            Watch the full gala ceremony and awards presentation on our gymnasium's news YouTube channel INGtv:
+            Official ceremony and awards presentation video recording:
           </p>
-          <div class="player-screen" id="editionPlayerWrap">
-            <button type="button" class="yt-facade-btn" data-yt-src="https://www.youtube-nocookie.com/embed?listType=search&list=Kauno%20tarptautine%20gimnazija%20INGtv&autoplay=1&rel=0" data-yt-title="FEST 2026 ceremony on INGtv channel" aria-label="Play video: FEST 2026 ceremony on INGtv channel">
-              <img class="yt-facade-img" src="https://i.postimg.cc/vmKKp6m6/ceremonija-2026-03-6612.jpg" alt="FEST 2026 ceremony on INGtv channel" width="1200" height="800" loading="lazy" decoding="async">
-              <span class="yt-facade-play" aria-hidden="true"><svg viewBox="0 0 68 48" width="68" height="48"><path d="M66.52 7.74c-.78-2.93-2.49-5.41-5.42-6.19C55.79.13 34 0 34 0S12.21.13 6.9 1.55c-2.93.78-4.63 3.26-5.42 6.19C.06 13.05 0 24 0 24s.06 10.95 1.48 16.26c.78 2.93 2.49 5.41 5.42 6.19C12.21 47.87 34 48 34 48s21.79-.13 27.1-1.55c2.93-.78 4.64-3.26 5.42-6.19C67.94 34.95 68 24 68 24s-.06-10.95-1.48-16.26z" fill="#212121" fill-opacity="0.88"/><path d="M45 24 27 14v20" fill="#fff"/></svg></span>
-            </button>
-          </div>
+          <div class="player-screen" id="editionPlayerWrap"></div>
         </div>
       </div>
     </section>
@@ -419,15 +415,14 @@
             <li><a href="#about">About FEST 2026</a></li>
             <li><a href="#wins">Our Victories</a></li>
             <li><a href="#winners">Winners & Guests</a></li>
-            <li><a href="#recording">INGtv Ceremony</a></li>
+            <li id="footerRecordingItem" class="d-none"><a href="#recording">Ceremony Recording</a></li>
           </ul>
         </div>
         <div>
           <div class="footer-col-title">Contact</div>
           <div class="footer-info-list">
-            <p>Kaunas International Gymnasium</p>
+            <p>Kaunas International Gymnasium, Vytauto pr. 50, Kaunas, Lithuania</p>
             <p>Email: <a href="mailto:azuolynasfilmfestival@gmail.com">azuolynasfilmfestival@gmail.com</a></p>
-            <p>News Channel: YouTube INGtv</p>
           </div>
         </div>
       </div>
@@ -591,7 +586,7 @@
       if (title) document.getElementById("dynTitle").textContent = title;
       document.getElementById("dynDate").textContent = isLegacy2026 ? "April 30th, 2026" : (date || "April 30th, 2026");
       if (subtitle && !isLegacy2026) document.getElementById("dynSub").textContent = subtitle;
-      if (story && !isLegacy2026) document.getElementById("dynStory").innerHTML = sanitizeEditorialStory(story);
+      if (story && String(story).trim().length >= 180 && !isLegacy2026) document.getElementById("dynStory").innerHTML = sanitizeEditorialStory(story);
       const resolvedHero = isLegacy2026 ? fest2026EnCover : (data.heroImage || fest2026EnCover);
       const resolvedPhotos = isLegacy2026
         ? fest2026EnPhotos
@@ -599,10 +594,24 @@
       if (resolvedHero) {
         document.getElementById("editionHeroSection").style.backgroundImage = `url('${resolvedHero}')`;
       }
-      if (data.videoUrl && window.FestivalYouTube) {
-        const wrap = document.getElementById("editionPlayerWrap");
-        if (wrap) {
-          wrap.innerHTML = window.FestivalYouTube.buildFacadeHTML(data.videoUrl, title || "FEST 2026 Ceremony", "en", resolvedHero);
+      const recSec = document.getElementById("recording");
+      const wrap = document.getElementById("editionPlayerWrap");
+      const drawerRec = document.getElementById("drawerRecordingItem");
+      const footerRec = document.getElementById("footerRecordingItem");
+      const embedHtml = (data.videoUrl && window.FestivalYouTube)
+        ? window.FestivalYouTube.buildFacadeHTML(data.videoUrl, title || "FEST 2026 Ceremony", "en", resolvedHero)
+        : "";
+      if (recSec && wrap) {
+        if (embedHtml) {
+          wrap.innerHTML = embedHtml;
+          recSec.classList.remove("d-none");
+          if (drawerRec) drawerRec.classList.remove("d-none");
+          if (footerRec) footerRec.classList.remove("d-none");
+        } else {
+          wrap.innerHTML = "";
+          recSec.classList.add("d-none");
+          if (drawerRec) drawerRec.classList.add("d-none");
+          if (footerRec) footerRec.classList.add("d-none");
         }
       }
       if (Array.isArray(resolvedPhotos) && resolvedPhotos.length > 0) {

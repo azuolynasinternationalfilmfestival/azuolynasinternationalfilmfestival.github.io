@@ -40,13 +40,13 @@ const EMAIL_THEME = {
   instagramUrl: "https://www.instagram.com/azuolynas.iff",
   instagramHandle: "@azuolynas.iff",
   themeLt: "Mano pašaukimas",
-  themeEn: "My Purpose",
+  themeEn: "MY PURPOSE",
   submissionPeriodLt: "2026 m. lapkričio 1 d. – 2027 m. balandžio 5 d.",
   submissionPeriodEn: "November 1st, 2026 – April 5th, 2027",
   eventDateLt: "2027 m. balandžio 27 d.",
   eventDateEn: "April 27th, 2027",
   venueLt: "Kauno tarptautinė gimnazija (Vytauto pr. 50, Kaunas)",
-  venueEn: "Kaunas International Gymnasium (Vytauto ave. 50, Kaunas, Lithuania)",
+  venueEn: "Kaunas International Gymnasium (Vytauto pr. 50, Kaunas, Lithuania)",
   contactEmail: "azuolynasfilmfestival@gmail.com"
 };
 
@@ -281,26 +281,26 @@ const emailTexts = {
     },
     submissionReceived: {
       sub: "AISFF | Film Submission Successfully Received!",
-      preheader: "Thank you for submitting for the theme “My Purpose”! Your film entry has reached the committee.",
+      preheader: "Thank you for submitting for the theme “MY PURPOSE”! Your film entry has reached the committee.",
       heading: "Hello, {{name}}!",
-      body: "Thank you sincerely for participating! Your entry for the festival theme “My Purpose” has been safely received by the organizing committee of AISFF. A full PDF copy of your submission is attached to this email. Our jury will review your entry and get back to you {{responseTime}}.",
+      body: "Thank you sincerely for participating! Your entry for the festival theme “MY PURPOSE” has been safely received by the organizing committee of AISFF. A full PDF copy of your submission is attached to this email. Our jury will review your entry and get back to you {{responseTime}}.",
       detailsTitle: "Submission Summary",
       note: "The gala screening and awards ceremony will take place at Kaunas International Gymnasium on April 27th, 2027. Watch the global live stream at https://www.azuolynasfilmfestival.lt/live.html and follow us on Instagram: @azuolynas.iff.",
       ctaText: "Visit Festival Platform"
     },
     adminNotification: {
       sub: "AISFF | New film submission received!",
-      preheader: "A new student film dossier has been registered for the theme “My Purpose”.",
+      preheader: "A new student film dossier has been registered for the theme “MY PURPOSE”.",
       heading: "New Film Submission Registered",
-      body: "A new film has just been submitted via the official platform for the theme “My Purpose”. A PDF summary is attached and all author roles, device specifications, and video verification details are listed below.",
+      body: "A new film has just been submitted via the official platform for the theme “MY PURPOSE”. A PDF summary is attached and all author roles, device specifications, and video verification details are listed below.",
       detailsTitle: "Applicant Dossier",
       ctaText: "Open Admin Dashboard"
     },
     accepted: {
       sub: "AISFF | Congratulations! Your Film is Accepted",
-      preheader: "Great news! Your work is officially in competition for the theme “My Purpose”.",
+      preheader: "Great news! Your work is officially in competition for the theme “MY PURPOSE”.",
       heading: "Congratulations, {{name}}!",
-      body: "We are thrilled to inform you that your work has met all submission criteria (max 3 minutes runtime, captured on mobile phone/tablet, student-directed) and is officially accepted into the AISFF competition program under the theme “My Purpose”!",
+      body: "We are thrilled to inform you that your work has met all submission criteria (max 3 minutes runtime, captured on mobile phone/tablet, student-directed) and is officially accepted into the AISFF competition program under the theme “MY PURPOSE”!",
       detailsTitle: "Acceptance Record",
       note: "The full event and ceremony will take place at Kaunas International Gymnasium and stream live on our platform on April 27th, 2027. Stay tuned via Instagram @azuolynas.iff.",
       ctaText: "Explore Competition Program"
@@ -309,7 +309,7 @@ const emailTexts = {
       sub: "AISFF | Your Film is a SEMI-FINALIST!",
       preheader: "Exciting news! The jury has selected your work among the official semi-finalists.",
       heading: "Exciting news, {{name}}!",
-      body: "Our jury was profoundly moved by your creative voice, camera work, and narrative approach to the theme “My Purpose”. Your work has officially advanced to the AISFF SEMI-FINALS!",
+      body: "Our jury was profoundly moved by your creative voice, camera work, and narrative approach to the theme “MY PURPOSE”. Your work has officially advanced to the AISFF SEMI-FINALS!",
       detailsTitle: "Semi-Final Status",
       note: "Semi-final selections will be highlighted in the official festival broadcast on April 27th, 2027. Watch live at live.html and follow @azuolynas.iff.",
       ctaText: "Follow Festival Updates"
@@ -318,7 +318,7 @@ const emailTexts = {
       sub: "AISFF | You have reached the FINALS!",
       preheader: "Outstanding achievement! Your film has reached the finals and is in contention for awards.",
       heading: "Tremendous achievement, {{name}}!",
-      body: "Warmest congratulations! Your film has officially reached the FINALS of AISFF (theme “My Purpose”) and is in direct contention for the Grand Prix, handmade oak statuettes, and the Audience Choice Award.",
+      body: "Warmest congratulations! Your film has officially reached the FINALS of AISFF (theme “MY PURPOSE”) and is in direct contention for the Grand Prix, handmade oak statuettes, and the Audience Choice Award.",
       detailsTitle: "Finalist Dossier",
       note: "Award winners will be officially unveiled during the ceremony at Kaunas International Gymnasium and live stream on April 27th, 2027. Follow Instagram: @azuolynas.iff.",
       ctaText: "View Finalist Showcase"
@@ -327,7 +327,7 @@ const emailTexts = {
       sub: "AISFF | CONGRATULATIONS FESTIVAL LAUREATE!",
       preheader: "Incredible victory! Your film has earned an award at AISFF.",
       heading: "Bravo, {{name}}!",
-      body: "By the decision of our international jury and audience vote, we are deeply honoured to declare your film an official WINNER of AISFF (theme “My Purpose”)! Thank you for your inspiring creativity and cinematic boldness.",
+      body: "By the decision of our international jury and audience vote, we are deeply honoured to declare your film an official WINNER of AISFF (theme “MY PURPOSE”)! Thank you for your inspiring creativity and cinematic boldness.",
       detailsTitle: "Award Record",
       note: "Our organizing team will reach out personally regarding the delivery of your diploma, medal, and festival award. Replay will be available on live.html, follow @azuolynas.iff.",
       ctaText: "View Winners Hall of Fame"
@@ -336,7 +336,7 @@ const emailTexts = {
       sub: "AISFF | Update regarding your film entry",
       preheader: "Thank you for submitting your creative work to AISFF.",
       heading: "Hello, {{name}},",
-      body: "Thank you sincerely for sharing your story with AISFF for the theme “My Purpose”. We received a record number of wonderful submissions this season. While your film was not selected for this season's shortlist, our jury was genuinely inspired by your creative passion.",
+      body: "Thank you sincerely for sharing your story with AISFF for the theme “MY PURPOSE”. We received a record number of wonderful submissions this season. While your film was not selected for this season's shortlist, our jury was genuinely inspired by your creative passion.",
       detailsTitle: "Selection Record",
       note: "Keep experimenting and filming! Join our live broadcast on April 27th, 2027, and follow our community on Instagram: @azuolynas.iff.",
       ctaText: "Visit Festival Platform"
@@ -603,7 +603,7 @@ function buildEmailDocument({ lang, preheader, statusKey, childrenHtml }) {
                     <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="font-size: 12px; line-height: 1.6; color: #BAC9C0;">
                       <tr>
                         <td style="padding: 2px 0; color: #7A9689; width: 110px;">${isLt ? "Tema:" : "Theme:"}</td>
-                        <td style="padding: 2px 0; color: #34D399; font-weight: 700;">${isLt ? "„Mano pašaukimas“" : "“My Purpose”"}</td>
+                        <td style="padding: 2px 0; color: #34D399; font-weight: 700;">${isLt ? "„Mano pašaukimas“" : "“MY PURPOSE”"}</td>
                       </tr>
                       <tr>
                         <td style="padding: 2px 0; color: #7A9689;">${isLt ? "Renginio data:" : "Date:"}</td>
@@ -611,7 +611,7 @@ function buildEmailDocument({ lang, preheader, statusKey, childrenHtml }) {
                       </tr>
                       <tr>
                         <td style="padding: 2px 0; color: #7A9689;">${isLt ? "Vieta:" : "Venue:"}</td>
-                        <td style="padding: 2px 0; color: #F8FAF7;">${isLt ? "Kauno tarptautinė gimnazija (Vytauto pr. 44, Kaunas)" : "Kaunas International Gymnasium (Vytauto ave. 44, Kaunas, Lithuania)"}</td>
+                        <td style="padding: 2px 0; color: #F8FAF7;">${isLt ? EMAIL_THEME.venueLt : EMAIL_THEME.venueEn}</td>
                       </tr>
                       <tr>
                         <td style="padding: 2px 0; color: #7A9689;">${isLt ? "Transliacija:" : "Live Stream:"}</td>

@@ -87,11 +87,11 @@ export function initSettings() {
       const enTopicDesc = document.getElementById("cfgEnTopicDesc");
 
       if (ltTopic) ltTopic.value = "Mano pašaukimas";
-      if (enTopic) enTopic.value = "My Purpose";
+      if (enTopic) enTopic.value = "MY PURPOSE";
       if (ltTopicDesc) ltTopicDesc.value = "Ką norite veikti savo gyvenime ir kaip atrasti tikrąjį pašaukimą? Ieškome istorijų apie savo kelio paieškas, karjeros pasirinkimus ir vidinių abejonių įveikimą. Papasakokite, ko reikia, kad sektumėte savo aistra, kai aplinkiniai tikisi kažko kito – ar tai būtų šeimos spaudimas rinktis „rimtą“ profesiją, pavyzdžiui, mediciną ar teisę, ar jūsų pačių baimė žengti į meną, muziką ar kūrybines sritis. Parodykite šios kelionės tikrovę, kliūtis pakeliui ir tą akimirką, kai jūs ar jūsų herojai suprato, ką iš tiesų lemta daryti.";
       if (enTopicDesc) enTopicDesc.value = "What do you want to do with your life, and how do you find your true calling? We are looking for stories about discovering your path, making career choices, and overcoming self-doubt. Tell us what it takes to follow your passion when the people around you expect something different—whether it is family pressure to pursue a \"serious\" career like medicine or law, or your own fear of stepping into the arts, music, or creative fields. Show the reality of this journey, the obstacles along the way, and the exact moment you or your characters realized what you were meant to do.";
 
-      showToast("Nustatyta tema: „Mano pašaukimas“ / My Purpose");
+      showToast("Nustatyta tema: „Mano pašaukimas“ / MY PURPOSE");
     });
   }
 
@@ -301,7 +301,7 @@ function applySettingsToForm(d) {
   if (ltRecPhElem) ltRecPhElem.value = lt.recordingPlaceholder || "Festivalio ir tiesioginės transliacijos vaizdo įrašas bus pasiekiamas 2027 m. balandžio 27 d.";
 
   const enTopicElem = document.getElementById("cfgEnTopic");
-  if (enTopicElem) enTopicElem.value = en.topic || "My Purpose";
+  if (enTopicElem) enTopicElem.value = en.topic || "MY PURPOSE";
   const enTopicDescElem = document.getElementById("cfgEnTopicDesc");
   if (enTopicDescElem) enTopicDescElem.value = en.topicDesc || "What do you want to do with your life, and how do you find your true calling? We are looking for stories about discovering your path, making career choices, and overcoming self-doubt. Tell us what it takes to follow your passion when the people around you expect something different—whether it is family pressure to pursue a \"serious\" career like medicine or law, or your own fear of stepping into the arts, music, or creative fields. Show the reality of this journey, the obstacles along the way, and the exact moment you or your characters realized what you were meant to do.";
   const enOpeningElem = document.getElementById("cfgEnOpening");
@@ -438,7 +438,7 @@ async function saveSettings() {
       recordingPlaceholder: (document.getElementById("cfgLtRecordingPh")?.value || "").trim() || "Festivalio ir tiesioginės transliacijos vaizdo įrašas bus pasiekiamas 2027 m. balandžio 27 d."
     },
     en: {
-      topic: (document.getElementById("cfgEnTopic")?.value || "").trim() || "My Purpose",
+      topic: (document.getElementById("cfgEnTopic")?.value || "").trim() || "MY PURPOSE",
       topicDesc: enTopicDesc,
       openingDate: enOpening,
       deadlineDate: enDeadline,

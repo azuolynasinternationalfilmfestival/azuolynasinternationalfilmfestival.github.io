@@ -38,6 +38,16 @@
     "@type": "Festival",
     "name": "Ąžuolynas International Students Film Festival",
     "url": "https://www.azuolynasfilmfestival.lt/lt/edition.html",
+    "location": {
+      "@type": "Place",
+      "name": "Kauno tarptautinė gimnazija",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "Vytauto pr. 50",
+        "addressLocality": "Kaunas",
+        "addressCountry": "LT"
+      }
+    },
     "organizer": {
       "@type": "Organization",
       "name": "Ąžuolynas International Students Film Festival",
@@ -102,7 +112,7 @@
           <li><a href="azuolynas-fest-2027.html" class="drawer-nav-link highlight"><span>FEST 2027</span></a></li>
           <li><a href="azuolynas-fest-2026.html" class="drawer-nav-link"><span>FEST 2026</span></a></li>
           <li><a href="#about" class="drawer-nav-link"><span>Apie festivalį</span></a></li>
-          <li><a href="#recording" class="drawer-nav-link"><span>Vaizdo įrašas</span></a></li>
+          <li id="drawerRecordingItem" class="d-none"><a href="#recording" class="drawer-nav-link"><span>Vaizdo įrašas</span></a></li>
           <li><a href="#gallery" class="drawer-nav-link"><span>Nuotraukų galerija</span></a></li>
         </ul>
       </div>
@@ -179,7 +189,7 @@
   <footer class="site-footer">
     <div class="container">
       <div class="footer-bottom-bar">
-        <span>&copy; 2027 Ąžuolynas International Students Film Festival.</span>
+        <span>&copy; 2027 Ąžuolynas International Students Film Festival. Kauno tarptautinė gimnazija, Vytauto pr. 50, Kaunas.</span>
         <a href="index.html" style="color:var(--accent-light); text-decoration:none;">Grįžti į pradžią</a>
       </div>
     </div>
@@ -269,12 +279,21 @@
           var safeHero = window.FestivalContentPublic ? window.FestivalContentPublic.safeUrl(ed.heroImage) : ed.heroImage;
           if (safeHero) document.getElementById("editionHeroSection").style.backgroundImage = "url('" + safeHero + "')";
         }
-        if (ed.videoUrl && window.FestivalYouTube) {
-          var recSec = document.getElementById("recording");
-          var wrap = document.getElementById("editionPlayerWrap");
-          if (recSec && wrap) {
+        var recSec = document.getElementById("recording");
+        var wrap = document.getElementById("editionPlayerWrap");
+        var drawerRec = document.getElementById("drawerRecordingItem");
+        var embedHtml = (ed.videoUrl && window.FestivalYouTube)
+          ? window.FestivalYouTube.buildFacadeHTML(ed.videoUrl, ed.title || ("FEST " + rawYear), "lt", ed.heroImage || "")
+          : "";
+        if (recSec && wrap) {
+          if (embedHtml) {
+            wrap.innerHTML = embedHtml;
             recSec.classList.remove("d-none");
-            wrap.innerHTML = window.FestivalYouTube.buildFacadeHTML(ed.videoUrl, ed.title || ("FEST " + rawYear), "lt", ed.heroImage || "");
+            if (drawerRec) drawerRec.classList.remove("d-none");
+          } else {
+            wrap.innerHTML = "";
+            recSec.classList.add("d-none");
+            if (drawerRec) drawerRec.classList.add("d-none");
           }
         }
         if (Array.isArray(ed.photos)) {

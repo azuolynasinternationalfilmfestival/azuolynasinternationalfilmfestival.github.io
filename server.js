@@ -427,7 +427,7 @@ const DEFAULT_SETTINGS = Object.freeze({
   },
   en: {
     heroBadge: "The 7th International Students Film Festival",
-    topic: "My Purpose",
+    topic: "MY PURPOSE",
     topicDesc: "What do you want to do with your life, and how do you find your true calling? We are looking for stories about discovering your path, making career choices, and overcoming self-doubt. Tell us what it takes to follow your passion when the people around you expect something different—whether it is family pressure to pursue a \"serious\" career like medicine or law, or your own fear of stepping into the arts, music, or creative fields. Show the reality of this journey, the obstacles along the way, and the exact moment you or your characters realized what you were meant to do.",
     openingDate: "November 1, 2026",
     deadlineDate: "April 5, 2027",
@@ -3453,7 +3453,7 @@ app.post('/api/admin/stream/viewers/create', async (req, res) => {
             <div style="font-weight:700; color:#F8FAFC; margin-bottom:8px; text-transform:uppercase; font-size:0.78rem; letter-spacing:0.05em;">Renginio ir transliacijos informacija:</div>
             <table width="100%" cellpadding="0" cellspacing="0" border="0" style="color:#BAC9C0; font-size:0.86rem; line-height:1.6;">
               <tr><td style="width:110px; color:#7A9689; padding:2px 0;">Transliacijos data:</td><td style="color:#F8FAF7; font-weight:600; padding:2px 0;">2027 m. balandžio 27 d.</td></tr>
-              <tr><td style="color:#7A9689; padding:2px 0;">Renginio vieta:</td><td style="padding:2px 0;">Kauno tarptautinė gimnazija (Vytauto pr. 44, Kaunas)</td></tr>
+              <tr><td style="color:#7A9689; padding:2px 0;">Renginio vieta:</td><td style="padding:2px 0;">Kauno tarptautinė gimnazija (Vytauto pr. 50, Kaunas)</td></tr>
               <tr><td style="color:#7A9689; padding:2px 0;">Grotuvas:</td><td style="padding:2px 0;"><a href="${liveLink}" style="color:#34D399; word-break:break-all;">${liveLink}</a></td></tr>
               <tr><td style="color:#7A9689; padding:2px 0;">Instagram:</td><td style="padding:2px 0;"><a href="https://www.instagram.com/azuolynas.iff" target="_blank" style="color:#9BC4AE; font-weight:600;">@azuolynas.iff</a> (naujienos ir užkulisiai)</td></tr>
             </table>
@@ -3632,7 +3632,7 @@ app.post('/api/admin/stream/viewers/resend', async (req, res) => {
             <div style="font-weight:700; color:#F8FAFC; margin-bottom:8px; text-transform:uppercase; font-size:0.78rem; letter-spacing:0.05em;">Renginio ir transliacijos informacija:</div>
             <table width="100%" cellpadding="0" cellspacing="0" border="0" style="color:#BAC9C0; font-size:0.86rem; line-height:1.6;">
               <tr><td style="width:110px; color:#7A9689; padding:2px 0;">Transliacijos data:</td><td style="color:#F8FAF7; font-weight:600; padding:2px 0;">2027 m. balandžio 27 d.</td></tr>
-              <tr><td style="color:#7A9689; padding:2px 0;">Renginio vieta:</td><td style="padding:2px 0;">Kauno tarptautinė gimnazija (Vytauto pr. 44, Kaunas)</td></tr>
+              <tr><td style="color:#7A9689; padding:2px 0;">Renginio vieta:</td><td style="padding:2px 0;">Kauno tarptautinė gimnazija (Vytauto pr. 50, Kaunas)</td></tr>
               <tr><td style="color:#7A9689; padding:2px 0;">Grotuvas:</td><td style="padding:2px 0;"><a href="${liveLink}" style="color:#34D399; word-break:break-all;">${liveLink}</a></td></tr>
               <tr><td style="color:#7A9689; padding:2px 0;">Instagram:</td><td style="padding:2px 0;"><a href="https://www.instagram.com/azuolynas.iff" target="_blank" style="color:#9BC4AE; font-weight:600;">@azuolynas.iff</a></td></tr>
             </table>

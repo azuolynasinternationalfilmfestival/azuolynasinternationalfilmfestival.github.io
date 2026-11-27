@@ -306,27 +306,11 @@
   }
 
   function renderErrorCard(entry) {
+    if (!isDebugOrAdmin()) return;
+
     createErrorUI();
     const container = document.getElementById("asiffErrorContainer");
     if (!container) return;
-
-    const isAdminOrDebug = isDebugOrAdmin();
-
-    if (!isAdminOrDebug) {
-      // Normal viewer: Show non-technical, friendly notice only for critical errors, or stay quiet
-      const toast = document.createElement("div");
-      toast.className = "asiff-toast-card";
-      toast.innerHTML = `
-        <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
-          <span style="font-size:0.85rem; color:#cbd5e1;">Atsiprašome, įvyko laikina sistemos klaida. Bandykite perkrauti puslapį.</span>
-          <button type="button" class="asiff-error-close" title="Užverti" style="color:#cbd5e1;">&times;</button>
-        </div>
-      `;
-      toast.querySelector(".asiff-error-close").addEventListener("click", () => toast.remove());
-      setTimeout(() => { if (toast.parentNode) toast.remove(); }, 6000);
-      container.appendChild(toast);
-      return;
-    }
 
     // Signed-in admin or ?debug=1: Show full diagnostic box with code, location, timestamp and copy button
     const card = document.createElement("div");

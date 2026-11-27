@@ -58,12 +58,22 @@
     return src + (src.indexOf("?") === -1 ? "?" : "&") + "autoplay=1&rel=0";
   }
 
+  function hasPlayableVideo(url) {
+    var clean = String(url || "").trim();
+    if (!clean) return false;
+    if (isYouTubeUrl(clean)) return !!extractYouTubeId(clean);
+    return /^(https?:\/\/|blob:|\/|\.\.?\/)/i.test(clean);
+  }
+
   function buildFacadeHTML(url, title, lang, fallbackPoster) {
     var cleanUrl = String(url || "").trim();
     if (!cleanUrl) return "";
 
     var id = extractYouTubeId(cleanUrl);
-    if (!id && !isYouTubeUrl(cleanUrl)) {
+    if (isYouTubeUrl(cleanUrl)) {
+      if (!id) return "";
+    } else {
+      if (!/^(https?:\/\/|blob:|\/|\.\.?\/)/i.test(cleanUrl)) return "";
       return '<video controls playsinline preload="metadata" src="' + escapeAttr(cleanUrl) + '" class="embed-media"></video>';
     }
 
@@ -134,6 +144,7 @@
 
   root.FestivalYouTube = {
     extractYouTubeId: extractYouTubeId,
+    hasPlayableVideo: hasPlayableVideo,
     buildFacadeHTML: buildFacadeHTML,
     activate: activateFacadeButton,
     preconnect: ensureYouTubePreconnect

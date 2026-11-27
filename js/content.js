@@ -57,7 +57,7 @@ const DEFAULT_CONTENT_MAP = {
     date: "2027 m. balandžio 27 d.",
     dateEn: "April 27, 2027",
     subtitle: (DEFAULT_CONTENT && DEFAULT_CONTENT.lt && DEFAULT_CONTENT.lt.topic) || "Mano pašaukimas",
-    subtitleEn: (DEFAULT_CONTENT && DEFAULT_CONTENT.en && DEFAULT_CONTENT.en.topic) || "My Purpose",
+    subtitleEn: (DEFAULT_CONTENT && DEFAULT_CONTENT.en && DEFAULT_CONTENT.en.topic) || "MY PURPOSE",
     story: (DEFAULT_CONTENT && DEFAULT_CONTENT.lt && DEFAULT_CONTENT.lt.aboutText) || "",
     storyEn: (DEFAULT_CONTENT && DEFAULT_CONTENT.en && DEFAULT_CONTENT.en.aboutText) || "",
     heroImage: DEFAULT_HERO_FALLBACK,
@@ -68,7 +68,7 @@ const DEFAULT_CONTENT_MAP = {
     seoTitle: "Ąžuolynas Film Fest 2027 | Tarptautinis mokinių filmų festivalis",
     seoTitleEn: "Ąžuolynas Film Festival 2027 | International Youth Film Festival",
     seoDescription: "7-asis tarptautinis mokinių trumpametražių filmų festivalis „Ąžuolynas“ Kaune. Tema: „Mano pašaukimas“. Filmų iki 3 min. priėmimas iki 2027 m. balandžio 5 d.",
-    seoDescriptionEn: "The 7th International Student Smartphone Short Film Festival in Kaunas. Theme: 'My Purpose'. Submit films up to 3 minutes by April 5, 2027."
+    seoDescriptionEn: "The 7th International Student Smartphone Short Film Festival in Kaunas. Theme: 'MY PURPOSE'. Submit films up to 3 minutes by April 5, 2027."
   },
   "2027": {
     id: "2027",
@@ -79,20 +79,20 @@ const DEFAULT_CONTENT_MAP = {
     titleEn: "FEST 2027",
     date: "2027 m. balandžio 27 d.",
     dateEn: "April 27, 2027",
-    subtitle: "Tema: „Mano pašaukimas“ (angl. My Purpose)",
-    subtitleEn: "Theme: 'My Purpose' (Mano pašaukimas)",
+    subtitle: "Tema: „Mano pašaukimas“ (angl. MY PURPOSE)",
+    subtitleEn: "Theme: 'MY PURPOSE' (Mano pašaukimas)",
     story:
-      "Pasiruoškite 7-ajam tarptautiniam mokinių trumpametražių filmų festivaliui „Ąžuolynas FEST 2027“! Kviečiame moksleivius nuo 10 iki 18 metų kurti trumpametražius filmus iki 3 minučių naudojant tik išmaniuosius telefonus.\n\nPagrindinė 2027 m. tema: „Mano pašaukimas“ (angl. My Purpose).\n\nParaiškos priimamos iki 2027 m. balandžio 5 d. Renginys vyks 2027 m. balandžio 27 d. Kauno tarptautinėje gimnazijoje.",
+      "Pasiruoškite 7-ajam tarptautiniam mokinių trumpametražių filmų festivaliui „Ąžuolynas FEST 2027“! Kviečiame moksleivius nuo 10 iki 18 metų kurti trumpametražius filmus iki 3 minučių naudojant tik išmaniuosius telefonus.\n\nPagrindinė 2027 m. tema: „Mano pašaukimas“ (angl. MY PURPOSE).\n\nParaiškos priimamos iki 2027 m. balandžio 5 d. Renginys vyks 2027 m. balandžio 27 d. Kauno tarptautinėje gimnazijoje (Vytauto pr. 50, Kaunas).",
     storyEn:
-      "Prepare for the 7th International Youth Short Film Festival 'Ąžuolynas FEST 2027'! We invite students aged 10–18 to create short films up to 3 minutes using smartphone cameras only.\n\nThe main theme for 2027 is 'My Purpose' (Mano pašaukimas).\n\nSubmissions are accepted until April 5, 2027. The festival takes place on April 27, 2027 at Kaunas International Gymnasium.",
+      "Prepare for the 7th International Youth Short Film Festival 'Ąžuolynas FEST 2027'! We invite students aged 10–18 to create short films up to 3 minutes using smartphone cameras only.\n\nThe main theme for 2027 is 'MY PURPOSE' (Mano pašaukimas).\n\nSubmissions are accepted until April 5, 2027. The festival takes place on April 27, 2027 at Kaunas International Gymnasium (Vytauto pr. 50, Kaunas, Lithuania).",
     heroImage: DEFAULT_HERO_FALLBACK,
-    videoUrl: "https://www.youtube.com/watch?v=INGtv",
+    videoUrl: "",
     pageUrl: "azuolynas-fest-2027.html",
     pageUrlEn: "../en/azuolynas-fest-2027.html",
     seoTitle: "FEST 2027 | Ąžuolynas International Film Festival",
     seoTitleEn: "FEST 2027 | Ąžuolynas International Student Film Festival",
     seoDescription: "7-asis tarptautinis mokinių filmų festivalis FEST 2027 Kaune. Tema „Mano pašaukimas“, paraiškos iki balandžio 5 d., renginys balandžio 27 d.",
-    seoDescriptionEn: "7th International Student Smartphone Short Film Festival FEST 2027 in Kaunas. Theme 'My Purpose', submissions by April 5, ceremony April 27.",
+    seoDescriptionEn: "7th International Student Smartphone Short Film Festival FEST 2027 in Kaunas. Theme 'MY PURPOSE', submissions by April 5, ceremony April 27.",
     photos: [
       {
         id: "alb_2027_1",
@@ -130,11 +130,11 @@ const DEFAULT_CONTENT_MAP = {
     subtitle: "Tema: „What If“ • Kino šventė Kauno tarptautinėje gimnazijoje: net keturi žemynai viename ekrane!",
     subtitleEn: "Theme: 'What If' • Cinema Celebration at Kaunas International Gymnasium: Four Continents on One Screen!",
     story:
-      "Jau šeštus metus iš eilės mūsų gimnazija tampa jaunimo kino meno centru. 2026 m. balandžio 30 d. mokykloje vyko tradicinis tarptautinis mokinių kino festivalis „Ąžuolynas“, kurio tema buvo „What If“. Dalyvių geografija išsiplėtė net iki 4 žemynų — varžėsi jaunieji talentai iš Europos, Azijos, Šiaurės Amerikos ir Afrikos!",
+      "Jau šeštus metus iš eilės Kauno tarptautinė gimnazija (Vytauto pr. 50, Kaunas) tapo jaunimo kino meno centru. 2026 m. balandžio 30 d. mokykloje vyko tradicinis tarptautinis mokinių kino festivalis „Ąžuolynas“ (FEST 2026), kurio pagrindinė kūrybinė tema buvo „What If“.\n\nŠių metų festivalio mastas išties įspūdingas: kaip pastebėjo direktoriaus pavaduotoja ugdymui, atliekanti direktoriaus funkcijas, Marija Daunorienė, dalyvių geografija išsiplėtė net iki 4 žemynų — konkurse varžėsi jaunieji talentai iš Europos, Azijos, Šiaurės Amerikos ir Afrikos. Darbus vertino profesionali tarptautinė komisija iš Italijos, Serbų Respublikos ir Lietuvos.\n\nMūsų gimnazijos pergalės jaunesniojoje kategorijoje:\n• Dominikas Šuškevič (8c klasė) – I VIETA.\n• „Drama club“ kolektyvas (vad. Elena Dosė-Drelingienė) – III VIETA.\n\nTarptautinė programa ir specialūs prizai:\n• Vyresniųjų kategorija: I vieta – Armėnija, II vieta – Estija ir Kanada, III vieta – Kanada.\n• Specialūs festivalio prizai įteikti Vilniaus ir Kenijos komandoms.\n\nIškilmingą vakarą vainikavo 11 klasės teatro dalyko mokinių kūrybinis pasirodymas ant scenos, kuriame kartu su mokiniais pasirodė ir festivalio vadovė Karina Brdar.",
     storyEn:
-      "For the sixth consecutive year, Kaunas International Gymnasium became a vibrant hub of youth cinema on April 30, 2026, celebrating the theme 'What If' and welcoming young filmmakers across 4 continents — Europe, Asia, North America, and Africa.",
+      "For the sixth consecutive year, Kaunas International Gymnasium (Vytauto pr. 50, Kaunas) became a vibrant hub for youth cinematic art. On April 30, 2026, the school hosted the traditional international students film festival 'Ąžuolynas' (FEST 2026) under the creative theme 'What If'.\n\nThe scale of the 2026 edition was remarkable: as noted by Marija Daunorienė, Deputy Director for Education acting as Director, participation expanded across 4 continents — bringing together young filmmakers from Europe, Asia, North America, and Africa. Entries were evaluated by an international jury of television and international relations professionals from Italy, Republika Srpska, and Lithuania.\n\nSchool Victories (Junior Category):\n• Dominikas Šuškevič (Grade 8c) – 1ST PLACE.\n• 'Drama Club' troupe (directed by Elena Dosė-Drelingienė) – 3RD PLACE.\n\nInternational Awards & Special Honors:\n• Senior Category: 1st Place – Armenia, 2nd Place – Estonia & Canada, 3rd Place – Canada.\n• Special Jury Prizes were awarded to the Vilnius and Kenya teams.\n\nA memorable highlight of the gala evening was a theatrical stage performance by 11th-grade drama students, joined on stage by festival director Karina Brdar.",
     heroImage: COVER_6612,
-    videoUrl: "https://www.youtube.com/watch?v=INGtv",
+    videoUrl: "",
     pageUrl: "azuolynas-fest-2026.html",
     pageUrlEn: "../en/azuolynas-fest-2026.html",
     seoTitle: "FEST 2026 | Ąžuolynas International Film Festival",
@@ -426,11 +426,15 @@ function normalizeEditionPayload(rawId, rawDoc) {
     photos: []
   };
 
+  const rawVideoUrl = String(rawDoc?.videoUrl ?? base.videoUrl ?? "").trim();
+  const cleanVideoUrl = /youtube\.com\/watch\?v=INGtv\b|listType=search/i.test(rawVideoUrl) ? "" : rawVideoUrl;
+
   return {
     ...base,
     ...rawDoc,
     id,
     year: id,
+    videoUrl: cleanVideoUrl,
     photos: Array.isArray(rawDoc?.photos) ? rawDoc.photos : (base.photos || []),
     archiveVideos: id === "home"
       ? (Array.isArray(rawDoc?.archiveVideos) && rawDoc.archiveVideos.length > 0 ? rawDoc.archiveVideos : DEFAULT_ARCHIVE_VIDEOS.map((v) => ({ ...v })))
