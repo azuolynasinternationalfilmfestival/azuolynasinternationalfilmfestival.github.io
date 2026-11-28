@@ -620,7 +620,6 @@ test('header 2026/2027 navigation routes match active language across LT, EN, an
     '../lt/index.html',
     '../lt/azuolynas-fest-2026.html',
     '../lt/azuolynas-fest-2027.html',
-    '../lt/azuolynas-festival-2026.html',
     '../lt/faq.html',
     '../lt/privatumo-politika.html',
     '../lt/naudojimosi-taisykles.html'
@@ -650,13 +649,6 @@ test('header 2026/2027 navigation routes match active language across LT, EN, an
     assert.match(navMatch[0], /href="azuolynas-fest-2026\.html"/, `EN 2026 link invalid in ${rel}`);
     assert.doesNotMatch(navMatch[0], /\.\.\/lt\//, `EN edition nav leaked LT path in ${rel}`);
   }
-
-  const legacy2026 = fs.readFileSync(new URL('../lt/azuolynas-festival-2026.html', import.meta.url), 'utf8');
-  assert.match(legacy2026, /href="\.\.\/en\/azuolynas-fest-2026\.html"/);
-
-  const root2027 = fs.readFileSync(new URL('../azuolynas-fest-2027.html', import.meta.url), 'utf8');
-  assert.match(root2027, /href="lt\/privatumo-politika\.html"/);
-  assert.match(root2027, /href="lt\/naudojimosi-taisykles\.html"/);
 
   const votingHtml = fs.readFileSync(new URL('../voting.html', import.meta.url), 'utf8');
   assert.match(votingHtml, /id="navFest2027"/);
@@ -801,9 +793,11 @@ test('content.js saves unified content/2028 + mirror editions/2028 and falls bac
   assert.equal(f.store.get('content/2028')?.seoTitle, 'FEST 2028 SEO');
   assert.equal(f.store.get('editions/2028')?.title, 'FEST 2028');
 
-  // Verify uploadSingleImage falls back cleanly to compact JPEG DataURL without Storage/Backend
-  const fallbackUrl = await f.context.uploadSingleImage({ name: 'photo.jpg', size: 1000, type: 'image/jpeg' }, '2028', 0);
-  assert.match(fallbackUrl, /^data:image\/jpeg;base64,/);
+  // Verify uploadSingleImage requires Storage (no base64 DataURL fallback) and throws clear error
+  await assert.rejects(
+    () => f.context.uploadSingleImage({ name: 'photo.jpg', size: 1000, type: 'image/jpeg' }, '2028', 0),
+    /Firebase Storage/i
+  );
 });
 
 test('SEO metadata, canonical, og:image, twitter cards, sitemap, and valid JSON-LD across all public pages', () => {
@@ -811,12 +805,10 @@ test('SEO metadata, canonical, og:image, twitter cards, sitemap, and valid JSON-
     '../index.html',
     '../lt/index.html',
     '../en/index.html',
-    '../azuolynas-fest-2027.html',
     '../lt/azuolynas-fest-2027.html',
     '../en/azuolynas-fest-2027.html',
     '../lt/azuolynas-fest-2026.html',
     '../en/azuolynas-fest-2026.html',
-    '../lt/azuolynas-festival-2026.html',
     '../lt/faq.html',
     '../en/faq.html',
     '../voting.html',
@@ -890,8 +882,7 @@ test('2026 edition uses 6612 cover and all 7 new ceremony/laureate photos while 
   for (const relPath of [
     '../js/content.js',
     '../lt/azuolynas-fest-2026.html',
-    '../en/azuolynas-fest-2026.html',
-    '../lt/azuolynas-festival-2026.html'
+    '../en/azuolynas-fest-2026.html'
   ]) {
     const content = fs.readFileSync(new URL(relPath, import.meta.url), 'utf8');
     assert.ok(content.includes(STATUETTE_URL), `${relPath} must preserve statuette URL`);
@@ -904,8 +895,7 @@ test('2026 edition uses 6612 cover and all 7 new ceremony/laureate photos while 
 
   for (const relPath of [
     '../lt/azuolynas-fest-2026.html',
-    '../en/azuolynas-fest-2026.html',
-    '../lt/azuolynas-festival-2026.html'
+    '../en/azuolynas-fest-2026.html'
   ]) {
     const html = fs.readFileSync(new URL(relPath, import.meta.url), 'utf8');
     assert.match(html, new RegExp(`<meta\\s+property="og:image"\\s+content="${COVER_6612.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}"`), `${relPath} og:image should be 6612`);
@@ -958,7 +948,7 @@ test('Priority 1: ARIA tablist/tab/tabpanel semantics, keyboard navigation, and 
 });
 
 test('Priority 2 & 3: YouTube embeds use click-to-load facades and static pages avoid unconditional /api/* calls', async () => {
-  for (const rel of ['../lt/index.html', '../en/index.html', '../lt/azuolynas-fest-2026.html', '../en/azuolynas-fest-2026.html', '../lt/azuolynas-festival-2026.html']) {
+  for (const rel of ['../lt/index.html', '../en/index.html', '../lt/azuolynas-fest-2026.html', '../en/azuolynas-fest-2026.html']) {
     const html = fs.readFileSync(new URL(rel, import.meta.url), 'utf8');
     assert.doesNotMatch(html, /<iframe[^>]+youtube(?:-nocookie)?\.com/i, `${rel} must not load eager YouTube iframes`);
   }
@@ -990,8 +980,8 @@ test('Priority 2 & 3: YouTube embeds use click-to-load facades and static pages 
 test('Priority 4: public pages use modular lazy Firebase v10.8.0 (no compat SDK) with transaction support', () => {
   for (const rel of [
     '../lt/index.html', '../en/index.html', '../voting.html', '../live.html',
-    '../azuolynas-fest-2027.html', '../lt/azuolynas-fest-2027.html', '../en/azuolynas-fest-2027.html',
-    '../lt/azuolynas-fest-2026.html', '../en/azuolynas-fest-2026.html', '../lt/azuolynas-festival-2026.html'
+    '../lt/azuolynas-fest-2027.html', '../en/azuolynas-fest-2027.html',
+    '../lt/azuolynas-fest-2026.html', '../en/azuolynas-fest-2026.html'
   ]) {
     const html = fs.readFileSync(new URL(rel, import.meta.url), 'utf8');
     assert.doesNotMatch(html, /firebase-app-compat\.js|firebase-auth-compat\.js|firebase-firestore-compat\.js/, `${rel} must not load compat SDK`);
@@ -1007,15 +997,22 @@ test('Priority 4: public pages use modular lazy Firebase v10.8.0 (no compat SDK)
 test('Priority 5 & 6: public images include explicit dimensions, CSS/JS assets are minified, and pages inline critical CSS with deferred scripts', () => {
   const publicHtml = [
     '../lt/index.html', '../en/index.html',
-    '../azuolynas-fest-2027.html', '../lt/azuolynas-fest-2027.html', '../en/azuolynas-fest-2027.html',
-    '../lt/azuolynas-fest-2026.html', '../en/azuolynas-fest-2026.html', '../lt/azuolynas-festival-2026.html',
+    '../lt/azuolynas-fest-2027.html', '../en/azuolynas-fest-2027.html',
+    '../lt/azuolynas-fest-2026.html', '../en/azuolynas-fest-2026.html',
     '../lt/edition.html', '../en/edition.html',
     '../voting.html', '../live.html',
     '../lt/faq.html', '../en/faq.html',
     '../lt/privatumo-politika.html', '../lt/naudojimosi-taisykles.html',
-    '../en/privacy-policy.html', '../en/terms-of-service.html',
-    '../privacy-policy.html', '../terms-of-service.html'
+    '../en/privacy-policy.html', '../en/terms-of-service.html'
   ];
+  for (const [rel, ltHref, enHref] of [
+    ['../privacy-policy.html', 'lt/privatumo-politika.html', 'en/privacy-policy.html'],
+    ['../terms-of-service.html', 'lt/naudojimosi-taisykles.html', 'en/terms-of-service.html']
+  ]) {
+    const html = fs.readFileSync(new URL(rel, import.meta.url), 'utf8');
+    assert.ok(html.length < 5000, `${rel} should be a lightweight redirect`);
+    assert.ok(html.includes(ltHref) && html.includes(enHref), `${rel} must link both LT and EN pages`);
+  }
   for (const rel of publicHtml) {
     const html = fs.readFileSync(new URL(rel, import.meta.url), 'utf8');
     assert.match(html, /<style id="criticalCss">/, `${rel} missing inline criticalCss`);
@@ -1224,3 +1221,151 @@ test('firestore.rules, storage.rules, and GitHub Actions SEO sync enforce schema
   assert.match(workflowYml, /node scripts\/sync-seo\.mjs/);
   assert.doesNotMatch(workflowYml, /secrets\.[A-Z0-9_]*KEY|FIREBASE_SERVICE_ACCOUNT/);
 });
+
+test('Batch 2 & 4: Submission success screen exposes PDF download CTA and public pages enforce FEST 2027 theme, venue Vytauto pr. 50, and SEO parity', () => {
+  for (const rel of ['../lt/index.html', '../en/index.html']) {
+    const html = fs.readFileSync(new URL(rel, import.meta.url), 'utf8');
+    assert.ok(html.includes('id="downloadSuccessPdfBtn"'), `${rel} missing #downloadSuccessPdfBtn`);
+  }
+
+  for (const rel of [
+    '../index.html',
+    '../lt/index.html',
+    '../en/index.html',
+    '../lt/azuolynas-fest-2027.html',
+    '../en/azuolynas-fest-2027.html',
+    '../lt/azuolynas-fest-2026.html',
+    '../en/azuolynas-fest-2026.html',
+    '../live.html'
+  ]) {
+    const html = fs.readFileSync(new URL(rel, import.meta.url), 'utf8');
+    assert.ok(html.includes('Vytauto pr. 50'), `${rel} must use venue Vytauto pr. 50`);
+    assert.doesNotMatch(html, /Vytauto[^0-9<]{1,12}44\b/i, `${rel} must not contain old venue number 44`);
+  }
+
+  const lt2027 = fs.readFileSync(new URL('../lt/azuolynas-fest-2027.html', import.meta.url), 'utf8');
+  const en2027 = fs.readFileSync(new URL('../en/azuolynas-fest-2027.html', import.meta.url), 'utf8');
+  assert.match(lt2027, /<title>[^<]*Mano pašaukimas[^<]*<\/title>/);
+  assert.match(en2027, /<title>[^<]*MY PURPOSE[^<]*<\/title>/);
+
+  const syncSeo = fs.readFileSync(new URL('../scripts/sync-seo.mjs', import.meta.url), 'utf8');
+  assert.match(syncSeo, /file:\s*['"]index\.html['"]/);
+  assert.match(syncSeo, /\(<title\\b\[\^>\]\*>\)/);
+});
+
+test('Batch 3A: FirebaseClient routes stream/token/resend operations directly to Firestore on static hosting with zero /api/* calls', async () => {
+  const f = fixture({
+    'settings/festival': { streamLive: false },
+    'stream_config/broadcast': { isLive: false }
+  });
+  const apiCalls = [];
+  const encoder = new TextEncoder();
+  const webCrypto = {
+    subtle: {
+      digest: async (alg, data) => {
+        const nodeAlg = String(alg).toLowerCase().replace('-', '');
+        return crypto.createHash(nodeAlg).update(Buffer.from(data)).digest().buffer;
+      }
+    }
+  };
+  Object.assign(f.context, {
+    TextEncoder,
+    crypto: webCrypto,
+    FestivalApi: { hasServer: async () => false },
+    sessionStorage: { getItem: (k) => (k === 'admin_user_email' ? 'azuolynasfilmfestival@gmail.com' : null) },
+    fetch: async (url) => { apiCalls.push(url); return { ok: false, status: 405 }; }
+  });
+  f.context.firebase = {
+    auth: () => f.authentication,
+    firestore: Object.assign(() => f.database, {
+      FieldValue: {
+        serverTimestamp: () => ({ sentinel: 'timestamp' }),
+        delete: () => ({ sentinel: 'delete' })
+      },
+      Timestamp: {
+        fromDate: (d) => ({ _seconds: Math.floor(d.getTime() / 1000) }),
+        fromMillis: (ms) => ({ toMillis: () => ms })
+      }
+    })
+  };
+  vm.runInContext(fs.readFileSync(new URL('../js/mail-client.js', import.meta.url), 'utf8'), f.context);
+  vm.runInContext(fs.readFileSync(new URL('../js/firebase-client.js', import.meta.url), 'utf8'), f.context);
+
+  const created = await f.context.FirebaseClient.request('stream.viewers.create', {
+    method: 'POST',
+    body: {
+      name: 'Jonas Kazlauskas',
+      email: 'jonas@example.lt',
+      role: 'teacher',
+      sendEmail: true,
+      expiresHours: 24
+    }
+  });
+  assert.equal(created.success, true);
+  assert.ok(created.token && created.token.length >= 12);
+  assert.equal(apiCalls.length, 0, 'Static host stream.viewers.create must not hit /api/*');
+
+  const expectedHash = crypto.createHash('sha256').update(created.token).digest('hex');
+  assert.ok(f.store.has(`live_viewers/${created.token}`), 'live_viewers/{token} must be created');
+  assert.ok(f.store.has(`stream_tokens/${expectedHash}`), 'stream_tokens/{sha256} must be mirrored');
+  assert.equal(typeof f.store.get(`stream_tokens/${expectedHash}`).expiresAt._seconds, 'number');
+  assert.equal([...f.store.keys()].filter((k) => k.startsWith('mail/')).length, 1);
+
+  const statusRes = await f.context.FirebaseClient.request('stream.status', {
+    method: 'POST',
+    body: { isLive: true }
+  });
+  assert.equal(statusRes.success, true);
+  assert.equal(f.store.get('stream_config/broadcast').isLive, true);
+  assert.equal(f.store.get('settings/festival').streamLive, true);
+
+  const resendRes = await f.context.FirebaseClient.request('resend-live-link', {
+    method: 'POST',
+    body: { email: 'jonas@example.lt', lang: 'lt' }
+  });
+  assert.equal(resendRes.success, true);
+  assert.equal([...f.store.keys()].filter((k) => k.startsWith('mail/')).length, 2);
+  assert.equal(apiCalls.length, 0, 'Static host resend-live-link must not hit /api/*');
+});
+
+test('Batch 3B: qr-code.js encodes valid ISO/IEC 18004 QR matrices and static host guards wrap remaining admin /api/* endpoints', () => {
+  const fillCalls = [];
+  const fakeCanvas = {
+    width: 0,
+    height: 0,
+    style: {},
+    setAttribute() {},
+    getContext: () => ({
+      fillStyle: '#000',
+      fillRect: (...args) => fillCalls.push(args)
+    })
+  };
+  const ctx = vm.createContext({
+    TextEncoder,
+    document: { createElement: () => fakeCanvas }
+  });
+  ctx.window = ctx;
+  vm.runInContext(fs.readFileSync(new URL('../qr-code.js', import.meta.url), 'utf8'), ctx);
+
+  const qr = ctx.FestivalQR.encodeMatrix('https://www.azuolynasfilmfestival.lt/live.html?token=cfs_test_token_123');
+  assert.ok(qr.size >= 21 && (qr.size - 21) % 4 === 0, `QR size ${qr.size} must follow 21 + 4*(v-1)`);
+  // Top-left 7x7 finder pattern outer ring is dark, inner 5x5 border is light, 3x3 center is dark
+  assert.equal(qr.matrix[0][0], 1);
+  assert.equal(qr.matrix[0][6], 1);
+  assert.equal(qr.matrix[1][1], 0);
+  assert.equal(qr.matrix[3][3], 1);
+  // Alternating dark-light timing pattern on row 6 between columns 8..size-9
+  assert.equal(qr.matrix[6][8], 1);
+  assert.equal(qr.matrix[6][9], 0);
+
+  const container = { innerHTML: '', appendChild(el) { this.child = el; } };
+  ctx.FestivalQR.render(container, 'https://www.azuolynasfilmfestival.lt/live.html?token=abc', 200);
+  assert.ok(container.child === fakeCanvas);
+  assert.ok(fillCalls.length > 50);
+
+  for (const rel of ['../js/settings.js', '../js/invite-modal.js', '../js/notifications-log.js', '../js/users.js', '../js/auth.js', '../js/diagnostics.js']) {
+    const src = fs.readFileSync(new URL(rel, import.meta.url), 'utf8');
+    assert.match(src, /hasBackendServer|FestivalApi\.hasServer/, `${rel} must guard /api/* calls for static hosting`);
+  }
+});
+

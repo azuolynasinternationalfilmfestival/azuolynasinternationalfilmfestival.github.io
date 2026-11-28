@@ -2001,71 +2001,7 @@ Tomas Vaitkus, Aktų salė (Projektorius), t.vaitkus@mokykla.lt"></textarea>
     </div>
   </div>
 
-  <!-- 2. TASK CREATION MODAL -->
-  <div id="taskModal" class="admin-modal-overlay d-none">
-    <div class="admin-modal-card" style="max-width:540px;">
-      <div class="admin-modal-header">
-        <h3 class="admin-modal-title" style="display:inline-flex; align-items:center; gap:8px;">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--accent-light);"><path d="M9 11l3 3L22 4"></path><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
-          <span>Pridėti Naują Užduotį Komandai</span>
-        </h3>
-        <button type="button" id="closeTaskModalBtn" style="background:transparent; border:none; color:var(--text-muted); font-size:1.5rem; cursor:pointer;">&times;</button>
-      </div>
-
-      <div class="input-cell" style="margin-bottom:12px;">
-        <label for="taskTitle">Užduoties pavadinimas *</label>
-        <input type="text" id="taskTitle" class="field" placeholder="pvz. Paruošti 2027 m. festivalio puslapio tekstus LT/EN" required>
-      </div>
-
-      <div class="input-cell" style="margin-bottom:12px;">
-        <label for="taskDescription">Išsamus aprašymas</label>
-        <textarea id="taskDescription" class="field" style="min-height:80px;" placeholder="Kas turi būti atlikta, nuorodos ar reikalavimai..."></textarea>
-      </div>
-
-      <div class="two-col-grid" style="margin-bottom:12px;">
-        <div class="input-cell">
-          <label for="taskAssignedRole">Priskirtas vaidmuo</label>
-          <select id="taskAssignedRole" class="field">
-            <option value="editor" selected>Redaktorius (Editor)</option>
-            <option value="judge">Teisėjas (Judge)</option>
-            <option value="admin">Administratorius</option>
-            <option value="moderator">Moderatorius</option>
-          </select>
-        </div>
-        <div class="input-cell">
-          <label for="taskPriority">Prioritetas</label>
-          <select id="taskPriority" class="field">
-            <option value="high">Aukštas (Skubu)</option>
-            <option value="medium" selected>Vidutinis</option>
-            <option value="low">Žemas</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="two-col-grid" style="margin-bottom:12px;">
-        <div class="input-cell">
-          <label for="taskAssignedName">Vykdytojo vardas</label>
-          <input type="text" id="taskAssignedName" class="field" placeholder="Vardas Pavardė">
-        </div>
-        <div class="input-cell">
-          <label for="taskAssignedEmail">Vykdytojo el. paštas</label>
-          <input type="email" id="taskAssignedEmail" class="field" placeholder="el.pastas@domenas.lt">
-        </div>
-      </div>
-
-      <div class="input-cell" style="margin-bottom:18px;">
-        <label for="taskDeadline">Terminas (Deadline)</label>
-        <input type="date" id="taskDeadline" class="field">
-      </div>
-
-      <div style="display:flex; justify-content:flex-end; gap:8px;">
-        <button type="button" class="btn-outline btn-sm" id="cancelTaskBtn">Atšaukti</button>
-        <button type="button" class="btn-solid btn-sm" id="saveTaskBtn">Sukurti Užduotį</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- 3. ENTRY REVIEW & STATUS MODAL -->
+  <!-- 2. ENTRY REVIEW & STATUS MODAL -->
   <div id="entryModal" class="modal-curtain">
     <div class="modal-dialog">
       <div class="modal-title-row">

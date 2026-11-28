@@ -5704,7 +5704,13 @@ app.get('/lt/azuolynas-fest-2026', (req, res) => {
 app.get('/en/azuolynas-fest-2026', (req, res) => {
   res.sendFile(path.join(__dirname, 'en', 'azuolynas-fest-2026.html'));
 });
+app.get('/lt/azuolynas-festival-2026.html', (req, res) => {
+  res.redirect(302, '/lt/azuolynas-fest-2026.html');
+});
 app.get('/azuolynas-fest-2027', (req, res) => {
+  res.redirect(302, '/lt/azuolynas-fest-2027.html');
+});
+app.get('/azuolynas-fest-2027.html', (req, res) => {
   res.redirect(302, '/lt/azuolynas-fest-2027.html');
 });
 app.get('/lt/azuolynas-fest-2027', (req, res) => {

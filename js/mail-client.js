@@ -5,15 +5,54 @@
   // AISFF <info@azuolynasfilmfestival.lt>
   const sender = 'azuolynasfilmfestival@gmail.com';
   const validAddress = value => typeof value === 'string' && /^[^\s@,;<>]+@[^\s@,;<>]+\.[^\s@,;<>]+$/.test(value);
-  function buildMail({ to, subject, html, text, replyTo = sender }) {
+  function normalizeAttachments(attachments) {
+    if (!Array.isArray(attachments) || !attachments.length) return undefined;
+    const valid = attachments
+      .filter(att => att && typeof att === 'object' && typeof att.filename === 'string' && att.filename.trim() && typeof att.content === 'string' && att.content.length > 0)
+      .map(att => ({
+        filename: att.filename.trim(),
+        content: att.content,
+        encoding: att.encoding || 'base64',
+        contentType: att.contentType || 'application/pdf'
+      }));
+    return valid.length ? valid : undefined;
+  }
+  function buildMail({ to, subject, html, text, replyTo = sender, attachments }) {
     const recipients = (Array.isArray(to) ? to : [to]).map(value => typeof value === 'string' ? value.trim() : value);
     if (!recipients.length || !recipients.every(validAddress) || !validAddress(replyTo)) throw new Error('Nurodykite galiojantį el. pašto adresą.');
     if (typeof subject !== 'string' || !subject.trim() || typeof html !== 'string' || !html.trim() || (text !== undefined && typeof text !== 'string')) {
       throw new Error('Laiškui reikalinga tema ir HTML turinys.');
     }
+    const message = { subject, html, text: text ?? subject };
+    const cleanAttachments = normalizeAttachments(attachments);
+    if (cleanAttachments) message.attachments = cleanAttachments;
     // No "from" field on purpose: the extension's Default FROM is used.
-    return { to: recipients, replyTo,
-      message: { subject, html, text: text ?? subject }, createdAt: new Date().toISOString() };
+    return { to: recipients, replyTo, message, createdAt: new Date().toISOString() };
+  }
+  async function tryBuildPdfAttachment(data) {
+    try {
+      if (typeof document === 'undefined' || typeof document.createElement !== 'function') return undefined;
+      let pdfApi = window.FestivalPdfClient;
+      if (!pdfApi || typeof pdfApi.generateClientSubmissionPdfBase64 !== 'function') {
+        try {
+          pdfApi = await import('./submission-pdf-client.js');
+        } catch {
+          return undefined;
+        }
+      }
+      if (!pdfApi || typeof pdfApi.generateClientSubmissionPdfBase64 !== 'function') return undefined;
+      const pdf = await pdfApi.generateClientSubmissionPdfBase64(data, 440 * 1024);
+      if (!pdf || !pdf.base64) return undefined;
+      return [{
+        filename: pdf.filename,
+        content: pdf.base64,
+        encoding: 'base64',
+        contentType: 'application/pdf'
+      }];
+    } catch (err) {
+      console.warn('Submission PDF email attachment skipped:', err?.message || err);
+      return undefined;
+    }
   }
   function viewer(data) {
     return { token: data.liveToken, email: data.email.toLowerCase(), name: data.name,
@@ -53,17 +92,26 @@
       }
       const lang = data.submissionLang === 'en' ? 'en' : 'lt';
       const template = data.attendanceType === 'remote' ? 'remoteLivePass' : 'submissionReceived';
-      const emailData = { ...data, ctaUrl: data.attendanceType === 'remote' ? data.liveStreamUrl : undefined };
+      const emailData = { ...data, id: ref.id, ctaUrl: data.attendanceType === 'remote' ? data.liveStreamUrl : undefined };
+      const attachments = await tryBuildPdfAttachment(emailData);
+      const userText = typeof window.generateSubmissionPlainText === 'function'
+        ? window.generateSubmissionPlainText(template, lang, emailData)
+        : undefined;
+      const adminText = typeof window.generateSubmissionPlainText === 'function'
+        ? window.generateSubmissionPlainText('adminNotification', lang, emailData)
+        : undefined;
       const batch = db.batch();
       batch.set(ref, data);
       batch.set(db.collection('mail').doc(`${ref.id}_receipt`), buildMail({ to: data.email,
-        subject: window.getEmailSubject(template, lang, emailData), html: window.generateEmailHtml(template, lang, emailData) }));
+        subject: window.getEmailSubject(template, lang, emailData), html: window.generateEmailHtml(template, lang, emailData),
+        text: userText, attachments }));
       batch.set(db.collection('mail').doc(`${ref.id}_organizer`), buildMail({ to: sender, replyTo: data.email,
         subject: `${lang === 'en' ? 'New Submission' : 'Nauja paraiška'}: ${data.filmTitle}`,
-        html: window.generateAdminNotificationHtml(lang, data) }));
+        html: window.generateAdminNotificationHtml(lang, emailData),
+        text: adminText, attachments }));
       if (data.attendanceType === 'remote') batch.set(db.collection('live_viewers').doc(data.liveToken), viewer(data));
       await batch.commit();
-      return { success: true, queued: true, id: ref.id };
+      return { success: true, queued: true, id: ref.id, pdfAttached: Boolean(attachments && attachments.length) };
     }
   };
 })();

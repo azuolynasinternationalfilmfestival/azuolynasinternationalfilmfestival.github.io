@@ -966,7 +966,12 @@ export function renderRsvpTable() {
         navigator.clipboard.writeText(link).then(() => {
           showToast("Nuoroda nukopijuota į iškarpinę!", "success");
         }).catch(() => {
-          prompt("Nukopijuokite tiesioginės transliacijos nuorodą:", link);
+          const rowInput = btn.parentElement?.querySelector("input");
+          if (rowInput) {
+            rowInput.focus();
+            rowInput.select();
+          }
+          showToast("Nepavyko nukopijuoti automatiškai — nuoroda pažymėta laukelyje.", "info");
         });
       }
     });

@@ -20,8 +20,8 @@
   <link rel="alternate" hreflang="x-default" href="https://www.azuolynasfilmfestival.lt/">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="AISFF - Ąžuolynas International Student Film Festival">
-  <meta property="og:title" content="AISFF | Oficiali Paraiškų Platforma">
-  <meta property="og:description" content="Tema: „Mano pašaukimas“. Paraiškos: nuo 2026 m. lapkričio 1 d. iki 2027 m. balandžio 5 d. Festivalis ir tiesioginė transliacija – 2027 m. balandžio 27 d.">
+  <meta property="og:title" content="AISFF | Ąžuolyno Tarptautinis Mokinių Filmų Festivalis | Oficiali Paraiškų Platforma">
+  <meta property="og:description" content="7-asis „Ąžuolyno“ tarptautinis mokinių filmų festivalis (AISFF). Tema: „Mano pašaukimas“. Paraiškos: 2026 m. lapkričio 1 d. – 2027 m. balandžio 5 d. Renginys & tiesioginė transliacija: 2027 m. balandžio 27 d.">
   <meta property="og:url" content="https://www.azuolynasfilmfestival.lt/lt/index.html">
   <meta property="og:image" content="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/IMG_3463.jpeg?alt=media&token=af7892ca-e78e-4198-b686-e0181472e8da">
   <meta property="og:image:width" content="1200">
@@ -30,8 +30,8 @@
   <meta property="og:locale" content="lt_LT">
   <meta property="og:locale:alternate" content="en_US">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="AISFF - Ąžuolynas International Student Film Festival">
-  <meta name="twitter:description" content="Tema: „Mano pašaukimas“. Paraiškos iki 2027 m. balandžio 5 d. Festivalis ir transliacija: 2027 m. balandžio 27 d.">
+  <meta name="twitter:title" content="AISFF | Ąžuolyno Tarptautinis Mokinių Filmų Festivalis | Oficiali Paraiškų Platforma">
+  <meta name="twitter:description" content="7-asis „Ąžuolyno“ tarptautinis mokinių filmų festivalis (AISFF). Tema: „Mano pašaukimas“. Paraiškos: 2026 m. lapkričio 1 d. – 2027 m. balandžio 5 d. Renginys & tiesioginė transliacija: 2027 m. balandžio 27 d.">
   <meta name="twitter:image" content="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/IMG_3463.jpeg?alt=media&token=af7892ca-e78e-4198-b686-e0181472e8da">
   <meta name="twitter:image:alt" content="Ąžuolynas filmų festivalio statulėlės">
   <link rel="icon" type="image/webp" href="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media">
@@ -78,8 +78,8 @@
         "alternateName": "Ąžuolyno Tarptautinis Mokinių Filmų Festivalis",
         "url": "https://www.azuolynasfilmfestival.lt/lt/index.html",
         "description": "7-asis tarptautinis mokinių trumpametražių filmų, sukurtų išmaniuoju telefonu, festivalis Kauno tarptautinėje gimnazijoje. Tema: „Mano pašaukimas“ (MY PURPOSE).",
-        "startDate": "2027-04-27T15:00:00+03:00",
-        "endDate": "2027-04-27T18:00:00+03:00",
+        "startDate": "2027-04-27",
+        "endDate": "2027-04-27",
         "eventAttendanceMode": "https://schema.org/MixedEventAttendanceMode",
         "eventStatus": "https://schema.org/EventScheduled",
         "isAccessibleForFree": true,
@@ -900,7 +900,10 @@
               <p style="color:var(--text-muted); font-size:0.92rem; max-width:480px; margin:0 auto 20px auto;">
                 Nuoširdžiai dėkojame. Jūsų filmas pasiekė festivalio organizatorių komandą. Patvirtinimo ieškokite savo el. pašte.
               </p>
-              <button type="button" class="btn-outline btn-sm" onclick="resetFormView()">Pateikti kitą paraišką</button>
+              <div style="display:flex; flex-wrap:wrap; justify-content:center; gap:12px;">
+                <button type="button" class="btn-solid btn-sm" id="downloadSuccessPdfBtn" style="min-height:44px;">Atsisiųsti PDF kopiją</button>
+                <button type="button" class="btn-outline btn-sm" style="min-height:44px;" onclick="resetFormView()">Pateikti kitą paraišką</button>
+              </div>
             </div>
 
             <div class="submit-rule-banner">
@@ -1472,7 +1475,7 @@
             <img src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media" alt="AISFF" class="footer-logo" width="38" height="38" loading="lazy" decoding="async">
             <span class="footer-name">AISFF</span>
           </div>
-          <p class="footer-tagline">Tarptautinis mokinių filmų festivalis. „Neįprastas žvilgsnis į įprastus dalykus“. Kūrybiškumas, autentiškumas ir jaunųjų režisierių balsas.</p>
+          <p class="footer-tagline">Tarptautinis mokinių filmų festivalis. „Mano pašaukimas“. Kūrybiškumas, autentiškumas ir jaunųjų režisierių balsas.</p>
         </div>
         <div>
           <div class="footer-col-title">Navigacija</div>
@@ -2982,6 +2985,34 @@
     const progressFill = document.getElementById("progressFill");
     const progressStatus = document.getElementById("progressStatus");
     const formSuccessDisplay = document.getElementById("formSuccessDisplay");
+    const downloadSuccessPdfBtn = typeof document.getElementById === "function" ? document.getElementById("downloadSuccessPdfBtn") : null;
+    let lastSubmittedRecord = null;
+
+    if (downloadSuccessPdfBtn && typeof downloadSuccessPdfBtn.addEventListener === "function") {
+      downloadSuccessPdfBtn.addEventListener("click", async () => {
+        if (!lastSubmittedRecord) return;
+        downloadSuccessPdfBtn.disabled = true;
+        try {
+          const pdfApi = (typeof window !== "undefined" && window.FestivalPdfClient)
+            ? window.FestivalPdfClient
+            : await import("../js/submission-pdf-client.js");
+          const pdf = await pdfApi.generateClientSubmissionPdf(lastSubmittedRecord);
+          const url = URL.createObjectURL(pdf.blob);
+          const link = document.createElement("a");
+          link.href = url;
+          link.download = pdf.filename || "AISFF_Paraiska.pdf";
+          if (document.body && typeof document.body.appendChild === "function") document.body.appendChild(link);
+          if (typeof link.click === "function") link.click();
+          if (link.parentNode && typeof link.parentNode.removeChild === "function") link.parentNode.removeChild(link);
+          setTimeout(() => { try { URL.revokeObjectURL(url); } catch {} }, 1500);
+        } catch (err) {
+          console.error(err);
+          showToast("Nepavyko sugeneruoti PDF kopijos: " + (err && err.message ? err.message : err), "error");
+        } finally {
+          downloadSuccessPdfBtn.disabled = false;
+        }
+      });
+    }
 
     function resetFormView() {
       if (formSuccessDisplay) formSuccessDisplay.classList.add("d-none");
@@ -2990,6 +3021,7 @@
         if (typeof form.reset === "function") form.reset();
         pendingSubmission = null;
       }
+      lastSubmittedRecord = null;
       verifiedVideoFile = null;
       verifiedVideoLink = "";
       videoValidationError = "";
@@ -3125,6 +3157,11 @@
               pendingSubmission = { ...window.MailClient.createSubmission(targetDb, submissionData), fingerprint, file: fileKey, videoUrl, storagePath };
             }
             const submitResp = await window.MailClient.submit(targetDb, pendingSubmission);
+            lastSubmittedRecord = {
+              ...submissionData,
+              id: (submitResp && submitResp.id) || (pendingSubmission && pendingSubmission.ref && pendingSubmission.ref.id) || "",
+              submittedAt: new Date().toISOString()
+            };
 
             form.classList.add("d-none");
             formSuccessDisplay.classList.remove("d-none");

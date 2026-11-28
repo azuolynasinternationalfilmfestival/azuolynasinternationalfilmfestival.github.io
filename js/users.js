@@ -46,6 +46,14 @@ let allUsersList = [];
 let pendingDeleteUserId = null;
 let pendingDeleteUserEmail = null;
 
+async function hasBackendServer() {
+  try {
+    return Boolean(typeof window !== "undefined" && window.FestivalApi && typeof window.FestivalApi.hasServer === "function" && await window.FestivalApi.hasServer());
+  } catch {
+    return false;
+  }
+}
+
 export const ROLE_LABELS = {
   admin: "Administratorius (Pilna prieiga)",
   editor: "Turinio redaktorius",
@@ -270,29 +278,51 @@ export async function evaluateUserManagementAccess(user) {
 
 export async function loadUsersFallback() {
   try {
-    const resp = await fetch("/api/admin/users");
-    if (resp.ok) {
-      const data = await resp.json();
-      if (data && Array.isArray(data.users) && data.users.length) {
-        allUsersList = data.users.map((u) => ({
-          id: u.uid || u.id || (u.email ? u.email.replace(/[^a-zA-Z0-9_-]/g, "_") : "usr_" + Math.random().toString(36).substring(2)),
-          emailVerified: u.emailVerified !== undefined ? u.emailVerified : true,
-          permissions: u.permissions || ROLE_PERMISSION_DEFAULTS[u.role] || ROLE_PERMISSION_DEFAULTS.viewer,
-          ...u,
-        }));
+    if (await hasBackendServer()) {
+      const resp = await fetch("/api/admin/users");
+      if (resp.ok) {
+        const data = await resp.json();
+        if (data && Array.isArray(data.users) && data.users.length) {
+          allUsersList = data.users.map((u) => ({
+            id: u.uid || u.id || (u.email ? u.email.replace(/[^a-zA-Z0-9_-]/g, "_") : "usr_" + Math.random().toString(36).substring(2)),
+            emailVerified: u.emailVerified !== undefined ? u.emailVerified : true,
+            permissions: u.permissions || ROLE_PERMISSION_DEFAULTS[u.role] || ROLE_PERMISSION_DEFAULTS.viewer,
+            ...u,
+          }));
 
-        allUsersList.sort((a, b) => {
-          if (a.role === "admin" && b.role !== "admin") return -1;
-          if (b.role === "admin" && a.role !== "admin") return 1;
-          const timeA = new Date(a.createdAt || 0).getTime();
-          const timeB = new Date(b.createdAt || 0).getTime();
-          return timeB - timeA;
-        });
+          allUsersList.sort((a, b) => {
+            if (a.role === "admin" && b.role !== "admin") return -1;
+            if (b.role === "admin" && a.role !== "admin") return 1;
+            const timeA = new Date(a.createdAt || 0).getTime();
+            const timeB = new Date(b.createdAt || 0).getTime();
+            return timeB - timeA;
+          });
 
-        updateUserMetrics();
-        renderUsersTable();
+          updateUserMetrics();
+          renderUsersTable();
+        }
       }
+      return;
     }
+
+    if (!db) return;
+    const snap = await db.collection("users").get();
+    allUsersList = snap.docs.map((doc) => {
+      const d = doc.data() || {};
+      return {
+        id: doc.id,
+        emailVerified: d.emailVerified !== undefined ? d.emailVerified : true,
+        permissions: d.permissions || ROLE_PERMISSION_DEFAULTS[d.role] || ROLE_PERMISSION_DEFAULTS.viewer,
+        ...d
+      };
+    });
+    allUsersList.sort((a, b) => {
+      if (a.role === "admin" && b.role !== "admin") return -1;
+      if (b.role === "admin" && a.role !== "admin") return 1;
+      return new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime();
+    });
+    updateUserMetrics();
+    renderUsersTable();
   } catch (err) {
     console.warn("Fallback load users notice:", err);
   }
@@ -530,26 +560,34 @@ function attachTableEventHandlers() {
       input.disabled = true;
 
       try {
-        const resp = await fetch("/api/admin/users/status", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            email: userEmail,
-            status: newStatus,
-            adminEmail: (auth && auth.currentUser) ? auth.currentUser.email : PRIMARY_SUPERADMIN_EMAIL
-          })
-        });
+        if (await hasBackendServer()) {
+          const resp = await fetch("/api/admin/users/status", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              email: userEmail,
+              status: newStatus,
+              adminEmail: (auth && auth.currentUser) ? auth.currentUser.email : PRIMARY_SUPERADMIN_EMAIL
+            })
+          });
 
-        if (resp.ok) {
-          const u = allUsersList.find((x) => x.id === userId || (userEmail && (x.email || "").toLowerCase() === userEmail.toLowerCase()));
-          if (u) u.status = newStatus;
-          updateUserMetrics();
-          renderUsersTable();
-          showToast(`Vartotojas ${userEmail} ${newActive ? 'atblokuotas' : 'užblokuotas'}.`, "success");
-        } else {
-          input.checked = !newActive;
-          showToast(await parseApiError(resp, "Nepavyko pakeisti prieigos būsenos"), "error");
+          if (!resp.ok) {
+            input.checked = !newActive;
+            showToast(await parseApiError(resp, "Nepavyko pakeisti prieigos būsenos"), "error");
+            return;
+          }
+        } else if (db) {
+          await db.collection("users").doc(userId).set({
+            status: newStatus,
+            updatedAt: new Date().toISOString()
+          }, { merge: true });
         }
+
+        const u = allUsersList.find((x) => x.id === userId || (userEmail && (x.email || "").toLowerCase() === userEmail.toLowerCase()));
+        if (u) u.status = newStatus;
+        updateUserMetrics();
+        renderUsersTable();
+        showToast(`Vartotojas ${userEmail} ${newActive ? 'atblokuotas' : 'užblokuotas'}.`, "success");
       } catch (err) {
         input.checked = !newActive;
         showToast(`Klaida keičiant prieigos būseną: ${err?.message || "Serveris nepasiekiamas"}`, "error");
@@ -577,7 +615,7 @@ function attachTableEventHandlers() {
     };
   });
 
-  // Resend email verification
+  // Resend email verification / account confirmation email
   document.querySelectorAll(".btn-resend-verify").forEach((btn) => {
     btn.onclick = async () => {
       const email = btn.dataset.userEmail;
@@ -585,15 +623,29 @@ function attachTableEventHandlers() {
       btn.disabled = true;
       try {
         showToast("Siunčiamas el. pašto patvirtinimo laiškas...");
-        const res = await fetch("/api/admin/users/resend-verification", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email })
-        });
-        if (res.ok) {
+        if (await hasBackendServer()) {
+          const res = await fetch("/api/admin/users/resend-verification", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email })
+          });
+          if (!res.ok) {
+            showToast(await parseApiError(res, "Nepavyko išsiųsti patvirtinimo laiško"), "error");
+            return;
+          }
           showToast(`Patvirtinimo laiškas sėkmingai išsiųstas į ${email}!`, "success");
         } else {
-          showToast(await parseApiError(res, "Nepavyko išsiųsti patvirtinimo laiško"), "error");
+          if (auth && typeof auth.sendPasswordResetEmail === "function") {
+            await auth.sendPasswordResetEmail(email).catch(() => {});
+          }
+          if (db && window.MailClient) {
+            await window.MailClient.send(db, {
+              to: email,
+              subject: "AISFF | Paskyros prieigos priminimas (FEST 2027)",
+              html: `<div style="font-family:sans-serif;background:#081B17;color:#F8FAF7;padding:24px;"><h2 style="color:#34D399;">Ąžuolynas Film Festival — Komandos Prieiga</h2><p>Jūsų komandos paskyra (${escapeHtml(email)}) yra paruošta darbui administravimo skydelyje.</p><p><a href="${window.location.origin}/admin.html" style="color:#34D399;">Atidaryti administravimo panelę &rarr;</a></p></div>`
+            });
+          }
+          showToast(`Patvirtinimo ir prieigos laiškas išsiųstas į ${email}!`, "success");
         }
       } catch (err) {
         showToast(`Klaida siunčiant patvirtinimo laišką: ${err?.message || "Serveris nepasiekiamas"}`, "error");
@@ -646,23 +698,34 @@ function promptDeleteUser(userId, email) {
 
 async function executeDeleteUser(userId, email) {
   try {
-    const resp = await fetch("/api/admin/users/delete", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        userId,
-        email,
-        adminEmail: (auth && auth.currentUser) ? auth.currentUser.email : PRIMARY_SUPERADMIN_EMAIL
-      })
-    });
-    if (resp.ok) {
-      allUsersList = allUsersList.filter((u) => u.id !== userId && (!email || (u.email || "").toLowerCase() !== email.toLowerCase()));
-      updateUserMetrics();
-      renderUsersTable();
-      showToast(`Vartotojas ${email || userId} sėkmingai pašalintas iš sistemos.`, "success");
-    } else {
-      showToast(await parseApiError(resp, "Nepavyko pašalinti vartotojo."), "error");
+    if (await hasBackendServer()) {
+      const resp = await fetch("/api/admin/users/delete", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId,
+          email,
+          adminEmail: (auth && auth.currentUser) ? auth.currentUser.email : PRIMARY_SUPERADMIN_EMAIL
+        })
+      });
+      if (!resp.ok) {
+        showToast(await parseApiError(resp, "Nepavyko pašalinti vartotojo."), "error");
+        return;
+      }
+    } else if (db) {
+      if (userId) await db.collection("users").doc(userId).delete().catch(() => {});
+      if (email) {
+        const sanitizedId = email.trim().toLowerCase().replace(/[^a-zA-Z0-9_-]/g, "_");
+        if (sanitizedId && sanitizedId !== userId) {
+          await db.collection("users").doc(sanitizedId).delete().catch(() => {});
+        }
+      }
     }
+
+    allUsersList = allUsersList.filter((u) => u.id !== userId && (!email || (u.email || "").toLowerCase() !== email.toLowerCase()));
+    updateUserMetrics();
+    renderUsersTable();
+    showToast(`Vartotojas ${email || userId} sėkmingai pašalintas iš sistemos.`, "success");
   } catch (apiErr) {
     showToast(`Klaida šalinant vartotoją: ${apiErr?.message || "Serveris nepasiekiamas"}`, "error");
   }
@@ -717,31 +780,46 @@ function initUserEditModal() {
 
         const permissions = extractPermissionsFromCheckboxes();
 
-        const res = await fetch("/api/admin/users/update-profile", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            uid,
-            oldEmail,
-            email,
+        if (await hasBackendServer()) {
+          const res = await fetch("/api/admin/users/update-profile", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              uid,
+              oldEmail,
+              email,
+              name,
+              surname,
+              phone,
+              role,
+              permissions,
+              emailVerified,
+              adminEmail: (auth && auth.currentUser) ? auth.currentUser.email : PRIMARY_SUPERADMIN_EMAIL
+            })
+          });
+
+          if (!res.ok) {
+            showToast(await parseApiError(res, "Nepavyko išsaugoti profilio"), "error");
+            return;
+          }
+        } else if (db) {
+          const targetId = uid || (oldEmail || email || "").toLowerCase().replace(/[^a-zA-Z0-9_-]/g, "_");
+          await db.collection("users").doc(targetId).set({
+            email: (email || "").toLowerCase(),
             name,
             surname,
             phone,
             role,
             permissions,
             emailVerified,
-            adminEmail: (auth && auth.currentUser) ? auth.currentUser.email : PRIMARY_SUPERADMIN_EMAIL
-          })
-        });
-
-        if (res.ok) {
-          const data = await res.json();
-          showToast("Vartotojo profilis ir teisės sėkmingai atnaujinti!", "success");
-          hideModal();
-          await loadUsersFallback();
-        } else {
-          showToast(await parseApiError(res, "Nepavyko išsaugoti profilio"), "error");
+            canManageUsers: Boolean(permissions.manageUsers),
+            updatedAt: new Date().toISOString()
+          }, { merge: true });
         }
+
+        showToast("Vartotojo profilis ir teisės sėkmingai atnaujinti!", "success");
+        hideModal();
+        await loadUsersFallback();
       } catch (err) {
         showToast(`Klaida išsaugant profilį: ${err?.message || "Serveris nepasiekiamas"}`, "error");
       } finally {
@@ -887,27 +965,35 @@ function initPasswordResetModal() {
       btnSendEmail.textContent = "Siunčiama...";
 
       try {
-        const res = await fetch("/api/admin/users/send-password-reset", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            email,
-            adminEmail: (auth && auth.currentUser) ? auth.currentUser.email : PRIMARY_SUPERADMIN_EMAIL
-          })
-        });
-        if (res.ok) {
-          const data = await res.json();
-          showToast(`Slaptažodžio atstatymo nuoroda sėkmingai išsiųsta į ${email}!`, "success");
-          if (data.resetUrl) {
-            const container = document.getElementById("pwdResetDirectLinkContainer");
-            const input = document.getElementById("pwdResetDirectLinkInput");
-            if (container && input) {
-              input.value = data.resetUrl;
-              container.classList.remove("d-none");
+        if (await hasBackendServer()) {
+          const res = await fetch("/api/admin/users/send-password-reset", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              email,
+              adminEmail: (auth && auth.currentUser) ? auth.currentUser.email : PRIMARY_SUPERADMIN_EMAIL
+            })
+          });
+          if (res.ok) {
+            const data = await res.json();
+            showToast(`Slaptažodžio atstatymo nuoroda sėkmingai išsiųsta į ${email}!`, "success");
+            if (data.resetUrl) {
+              const container = document.getElementById("pwdResetDirectLinkContainer");
+              const input = document.getElementById("pwdResetDirectLinkInput");
+              if (container && input) {
+                input.value = data.resetUrl;
+                container.classList.remove("d-none");
+              }
             }
+          } else {
+            showToast(await parseApiError(res, "Nepavyko išsiųsti nuorodos"), "error");
           }
         } else {
-          showToast(await parseApiError(res, "Nepavyko išsiųsti nuorodos"), "error");
+          if (!auth || typeof auth.sendPasswordResetEmail !== "function") {
+            throw new Error("Firebase Auth nepasiekiama");
+          }
+          await auth.sendPasswordResetEmail(email);
+          showToast(`Slaptažodžio atstatymo nuoroda išsiųsta į ${email}!`, "success");
         }
       } catch (err) {
         showToast(`Klaida siunčiant nuorodą: ${err?.message || "Serveris nepasiekiamas"}`, "error");
@@ -927,6 +1013,10 @@ function initPasswordResetModal() {
       btnGenerateDirect.textContent = "Generuojama...";
 
       try {
+        if (!(await hasBackendServer())) {
+          showToast("Statinėje svetainėje naudokite „Atsiųsti slaptažodžio atstatymo nuorodą į el. paštą“ viršuje.", "info");
+          return;
+        }
         const res = await fetch("/api/admin/users/generate-reset-link", {
           method: "POST",
           headers: { "Content-Type": "application/json" },

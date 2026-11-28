@@ -166,37 +166,37 @@ async function handleInviteSubmit(e) {
   let activeToken = token;
 
   try {
-    // 1. Call backend /api/admin/invite endpoint
-    // This creates the invitation and user in server data, syncs to Firestore via admin credentials,
-    // and records administrative activity log
-    try {
-      const jwtToken = sessionStorage.getItem("admin_jwt_token");
-      const headers = { "Content-Type": "application/json" };
-      if (jwtToken) headers["Authorization"] = `Bearer ${jwtToken}`;
+    // 1. Call backend /api/admin/invite endpoint only when a Node backend server is active
+    if (typeof window !== "undefined" && window.FestivalApi && typeof window.FestivalApi.hasServer === "function" && await window.FestivalApi.hasServer().catch(() => false)) {
+      try {
+        const jwtToken = sessionStorage.getItem("admin_jwt_token");
+        const headers = { "Content-Type": "application/json" };
+        if (jwtToken) headers["Authorization"] = `Bearer ${jwtToken}`;
 
-      const resp = await fetch("/api/admin/invite", {
-        method: "POST",
-        headers,
-        body: JSON.stringify({
-          name,
-          surname,
-          email,
-          role,
-          canManageUsers,
-          lang: emailLang,
-          adminEmail: currentAdminEmail
-        })
-      });
-      if (resp.ok) {
-        const apiData = await resp.json();
-        if (apiData && apiData.invitation) {
-          activeVerificationCode = apiData.invitation.code || activeVerificationCode;
-          activeToken = apiData.invitation.token || activeToken;
+        const resp = await fetch("/api/admin/invite", {
+          method: "POST",
+          headers,
+          body: JSON.stringify({
+            name,
+            surname,
+            email,
+            role,
+            canManageUsers,
+            lang: emailLang,
+            adminEmail: currentAdminEmail
+          })
+        });
+        if (resp.ok) {
+          const apiData = await resp.json();
+          if (apiData && apiData.invitation) {
+            activeVerificationCode = apiData.invitation.code || activeVerificationCode;
+            activeToken = apiData.invitation.token || activeToken;
+          }
+          createdSuccessfully = true;
         }
-        createdSuccessfully = true;
+      } catch (apiErr) {
+        console.warn("Backend API invite notice:", apiErr.message);
       }
-    } catch (apiErr) {
-      console.warn("Backend API invite notice:", apiErr.message);
     }
 
     // 2. Also write directly to Firestore collections 'users' and 'invitations' via client SDK

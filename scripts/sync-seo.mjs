@@ -54,7 +54,7 @@ function applySeoToHtmlFile(relPath, seoTitle, seoDesc) {
 
   if (seoTitle && seoTitle.trim()) {
     const safeTitle = escapeAttr(seoTitle.trim());
-    html = html.replace(/<title>[^<]*<\/title>/i, `<title>${safeTitle}</title>`);
+    html = html.replace(/(<title\b[^>]*>)[^<]*(<\/title>)/i, `$1${safeTitle}$2`);
     html = html.replace(
       /(<meta\s+property="og:title"\s+content=")[^"]*(")/i,
       `$1${safeTitle}$2`
@@ -68,7 +68,7 @@ function applySeoToHtmlFile(relPath, seoTitle, seoDesc) {
   if (seoDesc && seoDesc.trim()) {
     const safeDesc = escapeAttr(seoDesc.trim());
     html = html.replace(
-      /(<meta\s+name="description"\s+content=")[^"]*(")/i,
+      /(<meta\s+name="description"[^>]*\s+content=")[^"]*(")/i,
       `$1${safeDesc}$2`
     );
     html = html.replace(
@@ -104,13 +104,12 @@ async function main() {
 
   const byId = new Map(docs.map((d) => [d.id, d]));
   const targets = [
+    { docId: 'home', file: 'index.html', lang: 'lt' },
     { docId: 'home', file: 'lt/index.html', lang: 'lt' },
     { docId: 'home', file: 'en/index.html', lang: 'en' },
     { docId: '2027', file: 'lt/azuolynas-fest-2027.html', lang: 'lt' },
-    { docId: '2027', file: 'azuolynas-fest-2027.html', lang: 'lt' },
     { docId: '2027', file: 'en/azuolynas-fest-2027.html', lang: 'en' },
     { docId: '2026', file: 'lt/azuolynas-fest-2026.html', lang: 'lt' },
-    { docId: '2026', file: 'lt/azuolynas-festival-2026.html', lang: 'lt' },
     { docId: '2026', file: 'en/azuolynas-fest-2026.html', lang: 'en' }
   ];
 

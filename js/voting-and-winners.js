@@ -886,14 +886,28 @@
       } else if (platform === "facebook") {
         window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}&quote=${encodeURIComponent(text)}`, "_blank");
       } else {
+        const copyFallback = () => {
+          try {
+            const ta = document.createElement("textarea");
+            ta.value = text;
+            ta.setAttribute("readonly", "");
+            ta.style.position = "fixed";
+            ta.style.opacity = "0";
+            document.body.appendChild(ta);
+            ta.select();
+            document.execCommand("copy");
+            document.body.removeChild(ta);
+            showToast(isLt ? "Kvietimas balsuoti nukopijuotas į iškarpinę!" : "Campaign link copied to clipboard!");
+          } catch (_) {
+            showToast(isLt ? "Nuoroda paruošta bendrinimui: " + shareUrl : "Share link ready: " + shareUrl);
+          }
+        };
         if (navigator.clipboard && navigator.clipboard.writeText) {
           navigator.clipboard.writeText(text).then(() => {
             showToast(isLt ? "Kvietimas balsuoti nukopijuotas į iškarpinę!" : "Campaign link copied to clipboard!");
-          }).catch(() => {
-            prompt(isLt ? "Nukopijuokite nuorodą:" : "Copy link:", text);
-          });
+          }).catch(copyFallback);
         } else {
-          prompt(isLt ? "Nukopijuokite nuorodą:" : "Copy link:", text);
+          copyFallback();
         }
       }
     },

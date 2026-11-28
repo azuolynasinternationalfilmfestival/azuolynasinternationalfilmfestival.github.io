@@ -20,8 +20,8 @@
   <link rel="alternate" hreflang="x-default" href="https://www.azuolynasfilmfestival.lt/">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="AISFF - Ąžuolynas International Student Film Festival">
-  <meta property="og:title" content="AISFF | Official Submissions Platform">
-  <meta property="og:description" content="Theme: “MY PURPOSE”. Submissions: November 1, 2026 – April 5, 2027. Film Festival & Live Stream: April 27, 2027.">
+  <meta property="og:title" content="AISFF | Ąžuolynas International Student Film Festival | Official Submissions">
+  <meta property="og:description" content="The 7th «Ąžuolynas» International Student Film Festival (AISFF). Theme: “MY PURPOSE”. Submissions: November 1, 2026 – April 5, 2027. Festival & Live Stream: April 27, 2027.">
   <meta property="og:url" content="https://www.azuolynasfilmfestival.lt/en/index.html">
   <meta property="og:image" content="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/IMG_3463.jpeg?alt=media&token=af7892ca-e78e-4198-b686-e0181472e8da">
   <meta property="og:image:width" content="1200">
@@ -30,8 +30,8 @@
   <meta property="og:locale" content="en_US">
   <meta property="og:locale:alternate" content="lt_LT">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="AISFF - Ąžuolynas International Student Film Festival">
-  <meta name="twitter:description" content="Theme: “MY PURPOSE”. Submissions open until April 5, 2027. Gala & Live Stream: April 27, 2027.">
+  <meta name="twitter:title" content="AISFF | Ąžuolynas International Student Film Festival | Official Submissions">
+  <meta name="twitter:description" content="The 7th «Ąžuolynas» International Student Film Festival (AISFF). Theme: “MY PURPOSE”. Submissions: November 1, 2026 – April 5, 2027. Festival & Live Stream: April 27, 2027.">
   <meta name="twitter:image" content="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/IMG_3463.jpeg?alt=media&token=af7892ca-e78e-4198-b686-e0181472e8da">
   <meta name="twitter:image:alt" content="Ąžuolynas Film Festival handcrafted oak statuettes">
   <link rel="icon" type="image/webp" href="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media">
@@ -77,8 +77,8 @@
         "name": "Ąžuolynas International Students Film Festival (AISFF 2027)",
         "url": "https://www.azuolynasfilmfestival.lt/en/index.html",
         "description": "The 7th International Student Smartphone Short Film Festival at Kaunas International Gymnasium. Theme: 'MY PURPOSE' (Mano pašaukimas).",
-        "startDate": "2027-04-27T15:00:00+03:00",
-        "endDate": "2027-04-27T18:00:00+03:00",
+        "startDate": "2027-04-27",
+        "endDate": "2027-04-27",
         "eventAttendanceMode": "https://schema.org/MixedEventAttendanceMode",
         "eventStatus": "https://schema.org/EventScheduled",
         "isAccessibleForFree": true,
@@ -901,7 +901,10 @@
               <p style="color:var(--text-muted); font-size:0.92rem; max-width:480px; margin:0 auto 20px auto;">
                 Thank you sincerely. Your film has reached our festival organizing committee. Please check your email for confirmation.
               </p>
-              <button type="button" class="btn-outline btn-sm" onclick="resetFormView()">Submit Another Film</button>
+              <div style="display:flex; flex-wrap:wrap; justify-content:center; gap:12px;">
+                <button type="button" class="btn-solid btn-sm" id="downloadSuccessPdfBtn" style="min-height:44px;">Download PDF copy</button>
+                <button type="button" class="btn-outline btn-sm" style="min-height:44px;" onclick="resetFormView()">Submit Another Film</button>
+              </div>
             </div>
             <div class="submit-rule-banner">
               <span style="font-size: 0.88rem; color: var(--text-color); display: flex; align-items: center; gap: 8px;">
@@ -1468,7 +1471,7 @@
             <img src="https://firebasestorage.googleapis.com/v0/b/azuolynas-film-fest.firebasestorage.app/o/azuolynasfilmfest.webp?alt=media" alt="AISFF" class="footer-logo" width="38" height="38" loading="lazy" decoding="async">
             <span class="footer-name">AISFF</span>
           </div>
-          <p class="footer-tagline">International Students Film Festival. “An unusual view of ordinary things”. Cultivating bold youth perspectives and visual storytelling.</p>
+          <p class="footer-tagline">International Students Film Festival. “MY PURPOSE”. Cultivating bold youth perspectives and visual storytelling.</p>
         </div>
         <div>
           <div class="footer-col-title">Navigation</div>
@@ -2981,6 +2984,34 @@
     const progressFill = document.getElementById("progressFill");
     const progressStatus = document.getElementById("progressStatus");
     const formSuccessDisplay = document.getElementById("formSuccessDisplay");
+    const downloadSuccessPdfBtn = typeof document.getElementById === "function" ? document.getElementById("downloadSuccessPdfBtn") : null;
+    let lastSubmittedRecord = null;
+
+    if (downloadSuccessPdfBtn && typeof downloadSuccessPdfBtn.addEventListener === "function") {
+      downloadSuccessPdfBtn.addEventListener("click", async () => {
+        if (!lastSubmittedRecord) return;
+        downloadSuccessPdfBtn.disabled = true;
+        try {
+          const pdfApi = (typeof window !== "undefined" && window.FestivalPdfClient)
+            ? window.FestivalPdfClient
+            : await import("../js/submission-pdf-client.js");
+          const pdf = await pdfApi.generateClientSubmissionPdf(lastSubmittedRecord);
+          const url = URL.createObjectURL(pdf.blob);
+          const link = document.createElement("a");
+          link.href = url;
+          link.download = pdf.filename || "AISFF_Submission.pdf";
+          if (document.body && typeof document.body.appendChild === "function") document.body.appendChild(link);
+          if (typeof link.click === "function") link.click();
+          if (link.parentNode && typeof link.parentNode.removeChild === "function") link.parentNode.removeChild(link);
+          setTimeout(() => { try { URL.revokeObjectURL(url); } catch {} }, 1500);
+        } catch (err) {
+          console.error(err);
+          showToast("Could not generate the PDF copy: " + (err && err.message ? err.message : err), "error");
+        } finally {
+          downloadSuccessPdfBtn.disabled = false;
+        }
+      });
+    }
 
     function resetFormView() {
       if (formSuccessDisplay) formSuccessDisplay.classList.add("d-none");
@@ -2989,6 +3020,7 @@
         if (typeof form.reset === "function") form.reset();
         pendingSubmission = null;
       }
+      lastSubmittedRecord = null;
       verifiedVideoFile = null;
       verifiedVideoLink = "";
       videoValidationError = "";
@@ -3124,6 +3156,11 @@
               pendingSubmission = { ...window.MailClient.createSubmission(targetDb, submissionData), fingerprint, file: fileKey, videoUrl, storagePath };
             }
             const submitResp = await window.MailClient.submit(targetDb, pendingSubmission);
+            lastSubmittedRecord = {
+              ...submissionData,
+              id: (submitResp && submitResp.id) || (pendingSubmission && pendingSubmission.ref && pendingSubmission.ref.id) || "",
+              submittedAt: new Date().toISOString()
+            };
 
             form.classList.add("d-none");
             formSuccessDisplay.classList.remove("d-none");

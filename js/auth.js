@@ -1,6 +1,14 @@
 import { auth as defaultAuth, getFirebaseAuth, db, AUTHORIZED_ADMIN_EMAILS, PRIMARY_SUPERADMIN_EMAIL } from "./firebase-init.js";
 import { showToast } from "./ui-feedback.js";
 
+async function hasBackendServer() {
+  try {
+    return Boolean(typeof window !== "undefined" && window.FestivalApi && typeof window.FestivalApi.hasServer === "function" && await window.FestivalApi.hasServer());
+  } catch {
+    return false;
+  }
+}
+
 function escapeHtml(str) {
   if (str === null || str === undefined) return "";
   return String(str)
@@ -154,10 +162,32 @@ export function initAuth(options = {}) {
       if (prefillCode && actCodeInput) actCodeInput.value = prefillCode;
 
       try {
-        const resp = await fetch(`/api/admin/invite-info?token=${encodeURIComponent(inviteToken)}`);
-        const data = await resp.json();
-        if (resp.ok && data.success && data.invitation) {
-          const inv = data.invitation;
+        let inv = null;
+        if (await hasBackendServer()) {
+          const resp = await fetch(`/api/admin/invite-info?token=${encodeURIComponent(inviteToken)}`);
+          const data = await resp.json();
+          if (resp.ok && data.success && data.invitation) {
+            inv = data.invitation;
+          } else if (data && data.error) {
+            displayAuthError(actErrMsg, data.error);
+          }
+        } else if (db) {
+          const snap = await db.collection("invitations").doc(inviteToken).get();
+          if (snap.exists) {
+            const docData = snap.data() || {};
+            if (docData.status === "accepted") {
+              displayAuthError(actErrMsg, "Šis pakvietimas jau panaudotas.");
+            } else if (docData.expiresAt && Date.parse(docData.expiresAt) < Date.now()) {
+              displayAuthError(actErrMsg, "Šio pakvietimo galiojimas pasibaigė.");
+            } else {
+              inv = docData;
+            }
+          } else {
+            displayAuthError(actErrMsg, "Pakvietimas nerastas arba nebegalioja.");
+          }
+        }
+
+        if (inv) {
           if (actEmailInput) actEmailInput.value = inv.email || "";
           if (actNameInput && inv.name) actNameInput.value = inv.name;
           if (actSurnameInput && inv.surname) actSurnameInput.value = inv.surname;
@@ -172,8 +202,6 @@ export function initAuth(options = {}) {
             };
             actRoleLabel.textContent = `Priskirta rolė: ${roleLabels[inv.role] || inv.role}`;
           }
-        } else if (data && data.error) {
-          displayAuthError(actErrMsg, data.error);
         }
       } catch (err) {
         console.warn("Could not retrieve invite info:", err);
@@ -219,36 +247,73 @@ export function initAuth(options = {}) {
     }
 
     try {
-      const resp = await fetch("/api/admin/activate-invite", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ token, code, password, name, surname })
-      });
-      const data = await resp.json();
-      if (!resp.ok || !data.success) {
-        throw new Error(data.error || "Nepavyko aktyvuoti paskyros.");
-      }
+      const activeAuth = getFirebaseAuth() || auth;
+      if (await hasBackendServer()) {
+        const resp = await fetch("/api/admin/activate-invite", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ token, code, password, name, surname })
+        });
+        const data = await resp.json();
+        if (!resp.ok || !data.success) {
+          throw new Error(data.error || "Nepavyko aktyvuoti paskyros.");
+        }
+        if (data.token) {
+          sessionStorage.setItem("admin_jwt_token", data.token);
+        }
+        if (activeAuth && email) {
+          try {
+            await activeAuth.signInWithEmailAndPassword(email, password);
+            return;
+          } catch (authErr) {
+            console.info("Direct Firebase signin note after activation:", authErr.message);
+          }
+        }
+      } else {
+        if (!db || !activeAuth) {
+          throw new Error("Autentifikacijos arba duomenų bazės tarnyba dar kraunasi.");
+        }
+        const invRef = db.collection("invitations").doc(token);
+        const invSnap = await invRef.get();
+        if (!invSnap.exists) {
+          throw new Error("Pakvietimas nerastas arba jau nebegalioja.");
+        }
+        const inv = invSnap.data() || {};
+        if (inv.status === "accepted") {
+          throw new Error("Šis pakvietimas jau buvo aktyvuotas.");
+        }
+        if (String(inv.code || "").trim() !== code) {
+          throw new Error("Neteisingas 6 skaitmenų patvirtinimo kodas.");
+        }
+        const targetEmail = (inv.email || email || "").trim().toLowerCase();
+        if (!targetEmail) {
+          throw new Error("Pakvietime nenurodytas el. pašto adresas.");
+        }
 
-      if (data.token) {
-        sessionStorage.setItem("admin_jwt_token", data.token);
+        let userCred = null;
+        try {
+          userCred = await activeAuth.createUserWithEmailAndPassword(targetEmail, password);
+        } catch (createErr) {
+          if (createErr && createErr.code === "auth/email-already-in-use") {
+            userCred = await activeAuth.signInWithEmailAndPassword(targetEmail, password);
+          } else {
+            throw createErr;
+          }
+        }
+        const signedUid = userCred?.user?.uid || activeAuth.currentUser?.uid || "";
+        await invRef.update({
+          status: "accepted",
+          acceptedAt: new Date().toISOString(),
+          uid: signedUid
+        });
+        showToast("Paskyra sėkmingai aktyvuota!", "success");
+        return;
       }
 
       showToast("Paskyra sėkmingai aktyvuota!", "success");
       if (actSuccessMsg) {
         actSuccessMsg.classList.remove("d-none");
         actSuccessMsg.textContent = "Paskyra sėkmingai aktyvuota! Jungiamasi prie sistemos...";
-      }
-
-      // Try logging in via Firebase Auth if client account exists or prompt login
-      const activeAuth = getFirebaseAuth() || auth;
-      if (activeAuth && email) {
-        try {
-          await activeAuth.signInWithEmailAndPassword(email, password);
-          return;
-        } catch (authErr) {
-          // If Firebase Auth user was just provisioned on backend
-          console.info("Direct Firebase signin note after activation:", authErr.message);
-        }
       }
 
       // Switch back to login form with prefilled email
@@ -576,25 +641,27 @@ export function initAuth(options = {}) {
           sessionStorage.setItem("admin_user_email", emailLower);
           sessionStorage.setItem("admin_user_role", activeRole);
 
-          // Ensure session token integrity for server API requests
-          try {
-            const idToken = await user.getIdToken();
-            const tokenRes = await fetch("/api/admin/token", {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${idToken}`
-              },
-              body: JSON.stringify({ email: emailLower })
-            });
-            if (tokenRes.ok) {
-              const tokenData = await tokenRes.json();
-              if (tokenData && tokenData.token) {
-                sessionStorage.setItem("admin_jwt_token", tokenData.token);
+          // Only exchange session JWT when Node backend server is active; static pages use Firebase ID token directly
+          if (await hasBackendServer()) {
+            try {
+              const idToken = await user.getIdToken();
+              const tokenRes = await fetch("/api/admin/token", {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  "Authorization": `Bearer ${idToken}`
+                },
+                body: JSON.stringify({ email: emailLower })
+              });
+              if (tokenRes.ok) {
+                const tokenData = await tokenRes.json();
+                if (tokenData && tokenData.token) {
+                  sessionStorage.setItem("admin_jwt_token", tokenData.token);
+                }
               }
+            } catch (tErr) {
+              console.warn("JWT exchange notice:", tErr.message);
             }
-          } catch (tErr) {
-            console.warn("JWT exchange notice:", tErr.message);
           }
 
           // Update user identity pill in sidebar/topbar
@@ -682,33 +749,97 @@ export async function sendAdminInviteLink(targetEmail) {
     throw new Error("Nurodykite el. pašto adresą.");
   }
 
-  const jwtToken = sessionStorage.getItem("admin_jwt_token");
-  const headers = {
-    "Content-Type": "application/json",
-    "x-admin-email": currentUser.email
-  };
-  if (jwtToken) {
-    headers["Authorization"] = `Bearer ${jwtToken}`;
+  if (await hasBackendServer()) {
+    const jwtToken = sessionStorage.getItem("admin_jwt_token");
+    const headers = {
+      "Content-Type": "application/json",
+      "x-admin-email": currentUser.email
+    };
+    if (jwtToken) {
+      headers["Authorization"] = `Bearer ${jwtToken}`;
+    }
+
+    const res = await fetch("/api/admin/send-access-link", {
+      method: "POST",
+      headers,
+      body: JSON.stringify({
+        email: cleanEmail,
+        role: "admin",
+        adminEmail: currentUser.email
+      })
+    });
+
+    const data = await res.json();
+    if (!res.ok || !data.success) {
+      throw new Error(data.error || "Nepavyko išsiųsti prieigos nuorodos.");
+    }
+
+    if (!AUTHORIZED_ADMIN_EMAILS.includes(cleanEmail)) {
+      AUTHORIZED_ADMIN_EMAILS.push(cleanEmail);
+    }
+
+    return data;
   }
 
-  const res = await fetch("/api/admin/send-access-link", {
-    method: "POST",
-    headers,
-    body: JSON.stringify({
-      email: cleanEmail,
-      role: "admin",
-      adminEmail: currentUser.email
-    })
-  });
+  if (!db) {
+    throw new Error("Firestore šiuo metu nepasiekiamas.");
+  }
 
-  const data = await res.json();
-  if (!res.ok || !data.success) {
-    throw new Error(data.error || "Nepavyko išsiųsti prieigos nuorodos.");
+  const nowIso = new Date().toISOString();
+  const docId = cleanEmail.replace(/[^a-zA-Z0-9_-]/g, "_");
+  const token = "inv_" + Array.from(crypto.getRandomValues(new Uint8Array(12))).map(b => b.toString(16).padStart(2, "0")).join("");
+  const code = String(Math.floor(100000 + Math.random() * 900000));
+  const origin = (typeof window !== "undefined" && window.location && window.location.origin)
+    ? window.location.origin
+    : "https://www.azuolynasfilmfestival.lt";
+  const inviteUrl = `${origin}/admin.html?invite=${encodeURIComponent(token)}`;
+
+  const batch = db.batch();
+  batch.set(db.collection("users").doc(docId), {
+    uid: docId,
+    email: cleanEmail,
+    role: "admin",
+    status: "active",
+    canManageUsers: true,
+    createdAt: nowIso,
+    updatedAt: nowIso,
+    invitedBy: currentUser.email
+  }, { merge: true });
+  batch.set(db.collection("invitations").doc(token), {
+    token,
+    code,
+    email: cleanEmail,
+    role: "admin",
+    status: "pending",
+    canManageUsers: true,
+    createdAt: nowIso,
+    expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+    invitedBy: currentUser.email
+  });
+  await batch.commit();
+
+  if (window.MailClient && typeof window.MailClient.send === "function") {
+    const html = typeof window.generateInviteEmailHtml === "function"
+      ? window.generateInviteEmailHtml("lt", {
+          name: cleanEmail.split("@")[0],
+          email: cleanEmail,
+          role: "admin",
+          code,
+          token,
+          inviteUrl,
+          invitedBy: currentUser.email
+        })
+      : `<p>Kvietimas į AISFF administravimo panelę. Aktyvavimo kodas: <b>${code}</b></p><p><a href="${inviteUrl}">${inviteUrl}</a></p>`;
+    await window.MailClient.send(db, {
+      to: cleanEmail,
+      subject: "AISFF | Kvietimas į administravimo panelę",
+      html
+    });
   }
 
   if (!AUTHORIZED_ADMIN_EMAILS.includes(cleanEmail)) {
     AUTHORIZED_ADMIN_EMAILS.push(cleanEmail);
   }
 
-  return data;
+  return { success: true, queued: true, token };
 }

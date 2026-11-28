@@ -344,33 +344,41 @@
   <script>
     // Live updater script: checks for live /api/broadcast/overlay updates if hosted on a web server
     (function() {
+      if (!/^https?:/.test(window.location.protocol)) return;
+      var pollTimer = null;
       async function pollOverlay() {
         try {
           const res = await fetch('/api/broadcast/overlay');
-          if (res.ok) {
-            const data = await res.json();
-            if (data.nowPlaying && data.nowPlaying.title) {
-              const t = document.getElementById('dispTitle');
-              const d = document.getElementById('dispDirector');
-              const c = document.getElementById('dispCategory');
-              const k = document.getElementById('dispCountry');
-              if (t) t.textContent = data.nowPlaying.title;
-              if (d) d.textContent = 'Režisierius: ' + (data.nowPlaying.director || 'Mokinys');
-              if (c) c.textContent = data.nowPlaying.category || 'Filmas';
-              if (k) k.textContent = data.nowPlaying.country || 'Lietuva';
+          const ct = (res.headers.get('content-type') || '').toLowerCase();
+          if (!res.ok || !ct.includes('application/json')) {
+            if ((res.status === 404 || res.status === 405 || !ct.includes('application/json')) && pollTimer) {
+              clearInterval(pollTimer);
+              pollTimer = null;
             }
-            if (data.nextFilm && data.nextFilm.title) {
-              const nt = document.getElementById('dispNextTitle');
-              const nd = document.getElementById('dispNextDir');
-              if (nt) nt.textContent = data.nextFilm.title;
-              if (nd) nd.textContent = '(' + (data.nextFilm.director || '') + ')';
-            }
+            return;
+          }
+          const data = await res.json();
+          if (data.nowPlaying && data.nowPlaying.title) {
+            const t = document.getElementById('dispTitle');
+            const d = document.getElementById('dispDirector');
+            const c = document.getElementById('dispCategory');
+            const k = document.getElementById('dispCountry');
+            if (t) t.textContent = data.nowPlaying.title;
+            if (d) d.textContent = 'Režisierius: ' + (data.nowPlaying.director || 'Mokinys');
+            if (c) c.textContent = data.nowPlaying.category || 'Filmas';
+            if (k) k.textContent = data.nowPlaying.country || 'Lietuva';
+          }
+          if (data.nextFilm && data.nextFilm.title) {
+            const nt = document.getElementById('dispNextTitle');
+            const nd = document.getElementById('dispNextDir');
+            if (nt) nt.textContent = data.nextFilm.title;
+            if (nd) nd.textContent = '(' + (data.nextFilm.director || '') + ')';
           }
         } catch (e) {
           // Offline fallback mode
         }
       }
-      setInterval(pollOverlay, 5000);
+      pollTimer = setInterval(pollOverlay, 5000);
     })();
   </script>
 </body>

@@ -5,6 +5,14 @@ import { sendAdminInviteLink } from "./auth.js";
 let unsubscribeSettings = null;
 let unsubscribeMail = null;
 
+async function hasBackendServer() {
+  try {
+    return Boolean(typeof window !== "undefined" && window.FestivalApi && typeof window.FestivalApi.hasServer === "function" && await window.FestivalApi.hasServer());
+  } catch {
+    return false;
+  }
+}
+
 export function initSettings() {
   const saveBtn = document.getElementById("saveSettingsBtn");
   if (saveBtn) {
@@ -150,15 +158,17 @@ async function updateGlobalTumbler(patchData, successMsg, toggleInput) {
       await db.collection("settings").doc("global").set(payload, { merge: true });
     }
 
-    // 2. Secondary: Mirror to local Node backend API if available (silent fallback)
-    try {
-      await fetch("/api/admin/settings", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
-      });
-    } catch (apiErr) {
-      // Benign on static hosting (GitHub Pages)
+    // 2. Secondary: Mirror to local Node backend API only when backend server exists
+    if (await hasBackendServer()) {
+      try {
+        await fetch("/api/admin/settings", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+      } catch (apiErr) {
+        // Benign if backend restarts
+      }
     }
 
     showToast(successMsg, "success");
@@ -334,6 +344,7 @@ function applySettingsToForm(d) {
 }
 
 export async function loadSettingsFromApi() {
+  if (!(await hasBackendServer())) return;
   try {
     const res = await fetch("/api/admin/settings");
     if (res.ok) {
@@ -476,15 +487,17 @@ async function saveSettings() {
       await db.collection("settings").doc("global").set(payload, { merge: true });
     }
 
-    // 2. Secondary: Mirror to local Node backend API if available
-    try {
-      await fetch("/api/admin/settings", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
-      });
-    } catch (apiErr) {
-      // Benign on static hosting
+    // 2. Secondary: Mirror to local Node backend API only when backend server exists
+    if (await hasBackendServer()) {
+      try {
+        await fetch("/api/admin/settings", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+      } catch (apiErr) {
+        // Benign
+      }
     }
 
     showToast("Nustatymai sėkmingai išsaugoti!", "success");

@@ -1228,40 +1228,39 @@ export async function uploadSingleImage(file, key, idx = 0) {
     .replace(/[^a-zA-Z0-9._-]/g, "_")
     .slice(0, 80);
 
-  // 1. Primary path on static hosting: Firebase Storage
-  if (storage && typeof storage.ref === "function") {
-    try {
-      const path = `content/${safeKey}/${Date.now()}_${idx}_${cleanName}`;
-      const snap = await storage.ref(path).put(file, {
-        contentType: file?.type || "image/jpeg"
-      });
-      const url = await snap.ref.getDownloadURL();
-      if (url) return url;
-    } catch (storageErr) {
-      console.warn("[Content] Storage upload fallback:", storageErr?.message || storageErr);
+  // 1. Express backend server if running locally
+  if (await hasBackendServer()) {
+    const b64 = await compressFileToJpegDataUrl(file, 1600, 0.82);
+    const res = await fetch("/api/admin/albums/upload", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ year: safeKey, fileName: cleanName, dataUrl: b64 })
+    });
+    if (res && res.ok) {
+      const json = await res.json();
+      if (json?.url) return json.url;
     }
   }
 
-  // 2. Express backend server if running locally
-  if (await hasBackendServer()) {
-    try {
-      const b64 = await compressFileToJpegDataUrl(file, 1600, 0.82);
-      const res = await fetch("/api/admin/albums/upload", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ year: safeKey, fileName: cleanName, dataUrl: b64 })
-      });
-      if (res && res.ok) {
-        const json = await res.json();
-        if (json?.url) return json.url;
-      }
-    } catch { /* fall through to compact dataUrl */ }
+  // 2. Static GitHub Pages path: Firebase Storage only (no base64 database fallback)
+  if (!storage || typeof storage.ref !== "function") {
+    throw new Error("Firebase Storage šiuo metu nepasiekiama. Perkraukite puslapį arba įklijuokite HTTPS nuotraukos nuorodą.");
   }
 
-  // 3. Offline / VM fallback: compact resized JPEG DataURL (under Firestore 1MB safety threshold)
-  const dataUrl = await compressFileToJpegDataUrl(file, 1100, 0.72);
-  if (!dataUrl) throw new Error("Nepavyko paruošti nuotraukos");
-  return dataUrl;
+  try {
+    const path = `content/${safeKey}/${Date.now()}_${idx}_${cleanName}`;
+    const snap = await storage.ref(path).put(file, {
+      contentType: file?.type || "image/jpeg"
+    });
+    const url = await snap.ref.getDownloadURL();
+    if (!url) throw new Error("Negautas atsisiuntimo adresas iš saugyklos.");
+    return url;
+  } catch (storageErr) {
+    const reason = storageErr?.code === "storage/unauthorized"
+      ? "Nepakanka teisių įkelti į Firebase Storage. Patikrinkite prisijungimą."
+      : (storageErr?.message || "Nepavyko įkelti nuotraukos į Firebase Storage.");
+    throw new Error(reason);
+  }
 }
 
 async function handleBatchUploadFiles(files) {

@@ -4,10 +4,19 @@
  * Ąžuolynas International Film Festival
  */
 
+import { db } from "./firebase-init.js";
 import { showToast } from "./ui-feedback.js";
 
 let allLogs = [];
 let currentCategoryFilter = "all";
+
+async function hasBackendServer() {
+  try {
+    return Boolean(typeof window !== "undefined" && window.FestivalApi && typeof window.FestivalApi.hasServer === "function" && await window.FestivalApi.hasServer());
+  } catch {
+    return false;
+  }
+}
 
 export function initNotificationsLog() {
   const refreshBtn = document.getElementById("btnRefreshLogs");
@@ -42,15 +51,22 @@ export function initNotificationsLog() {
       if (!confirm("Ar tikrai norite išvalyti visus pranešimus ir audito žurnalo įrašus?")) return;
       clearBtn.disabled = true;
       try {
-        const res = await fetch("/api/admin/logs", { method: "DELETE" });
-        if (res.ok) {
-          allLogs = [];
-          renderLogsFeed();
-          updateNotificationsBadge();
-          showToast("Visi pranešimai sėkmingai ištrinti!", "success");
-        } else {
-          showToast("Nepavyko ištrinti pranešimų", "error");
+        if (await hasBackendServer()) {
+          const res = await fetch("/api/admin/logs", { method: "DELETE" });
+          if (!res.ok) throw new Error("Nepavyko ištrinti pranešimų");
+        } else if (db) {
+          const snap = await db.collection("logs").get();
+          const docs = snap.docs;
+          for (let i = 0; i < docs.length; i += 400) {
+            const batch = db.batch();
+            docs.slice(i, i + 400).forEach(d => batch.delete(d.ref));
+            await batch.commit();
+          }
         }
+        allLogs = [];
+        renderLogsFeed();
+        updateNotificationsBadge();
+        showToast("Visi pranešimai sėkmingai ištrinti!", "success");
       } catch (err) {
         showToast("Klaida trinant pranešimus: " + err.message, "error");
       } finally {
@@ -69,13 +85,40 @@ export function initNotificationsLog() {
 
 export async function loadActivityLogs() {
   try {
-    const res = await fetch("/api/admin/logs");
-    if (res.ok) {
-      const data = await res.json();
-      allLogs = data.logs || [];
-      renderLogsFeed();
-      updateNotificationsBadge();
+    if (await hasBackendServer()) {
+      const res = await fetch("/api/admin/logs");
+      if (res.ok) {
+        const data = await res.json();
+        allLogs = data.logs || [];
+        renderLogsFeed();
+        updateNotificationsBadge();
+      }
+      return;
     }
+
+    if (!db) return;
+    const snap = await db.collection("logs").get();
+    allLogs = snap.docs
+      .map(d => {
+        const raw = d.data() || {};
+        const ts = typeof raw.timestamp?.toDate === "function"
+          ? raw.timestamp.toDate().toISOString()
+          : (raw.timestamp || raw.createdAt || "");
+        return {
+          id: d.id,
+          category: raw.category || (String(raw.action || "").includes("stream") ? "stream" : "settings"),
+          adminEmail: raw.adminEmail || raw.actor || "admin",
+          adminName: raw.adminName || raw.actor || "",
+          action: raw.action || "Veiksmas",
+          details: typeof raw.details === "string" ? raw.details : (raw.details ? JSON.stringify(raw.details) : raw.action || ""),
+          target: raw.target || "",
+          timestamp: ts
+        };
+      })
+      .sort((a, b) => Date.parse(b.timestamp || 0) - Date.parse(a.timestamp || 0));
+
+    renderLogsFeed();
+    updateNotificationsBadge();
   } catch (err) {
     console.warn("Failed to load activity logs:", err);
   }
